@@ -1,0 +1,111 @@
+@import "tailwindcss";
+
+:root {
+  --canvas: #f7f2e9;
+  --canvas-deep: #eee5d8;
+  --ink: #292820;
+  --ink-soft: #666256;
+  --wine: #6f2839;
+  --wine-dark: #4d1726;
+  --sage: #6f7861;
+  --gold: #ae8a4e;
+  --line: #d8cdbb;
+  --paper: #fffdf8;
+  --paper-muted: #f1eadf;
+  --success: #386044;
+  --warning: #9b6328;
+  --danger: #a34242;
+  --shadow: 0 18px 50px rgb(77 52 33 / 10%);
+  --radius-sm: 0.55rem;
+  --radius-md: 0.9rem;
+  --radius-lg: 1.35rem;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-canvas-deep: var(--canvas-deep);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-wine: var(--wine);
+  --color-wine-dark: var(--wine-dark);
+  --color-sage: var(--sage);
+  --color-gold: var(--gold);
+  --color-line: var(--line);
+  --color-paper: var(--paper);
+  --color-paper-muted: var(--paper-muted);
+  --font-sans: "Aptos", "Segoe UI", Arial, sans-serif;
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+}
+
+* {
+  border-color: var(--line);
+}
+
+html {
+  min-width: 320px;
+  background: var(--canvas);
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgb(111 40 57 / 18%);
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  outline-color: var(--wine);
+  outline-offset: 3px;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.font-display {
+  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+}
+
+.eyebrow {
+  color: var(--wine);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.paper-panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  box-shadow: var(--shadow);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .gentle-reveal {
+    animation: gentle-reveal 650ms ease-out both;
+  }
+
+  @keyframes gentle-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}

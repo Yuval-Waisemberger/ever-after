@@ -1,0 +1,38 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+
+# Next.js output
+/.next/
+/out/
+/build/
+
+# Testing
+/coverage/
+/playwright-report/
+/test-results/
+
+# Local tooling and temporary extraction/rendering files
+/.codex-tmp/
+
+# Environment files and secrets
+.env*
+!.env.example
+
+# Vercel
+.vercel/
+
+# TypeScript and logs
+*.tsbuildinfo
+next-env.d.ts
+npm-debug.log*
+pnpm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.pem
+
+# Persistent local Codex guidance: never commit unless explicitly requested
+/AGENTS.md
