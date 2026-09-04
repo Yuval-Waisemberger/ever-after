@@ -6,6 +6,7 @@ import { signIn, signUpCouple, signUpVendor } from "@/lib/actions/auth";
 import { initialAuthState } from "@/lib/actions/auth-state";
 import { FormField } from "@/components/ui/form-field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { VerificationPanel } from "./verification-panel";
 
 type AuthPanelProps = {
   audience: "couple" | "vendor";
@@ -17,10 +18,10 @@ function ActionMessage({ state }: { state: typeof initialAuthState }) {
   if (!state.message) return null;
   return (
     <p
-      className={`rounded-xl border px-4 py-3 text-sm leading-6 ${
+      className={`ea-feedback ${
         state.status === "success"
-          ? "border-green-800/20 bg-green-800/5 text-green-900"
-          : "border-red-800/20 bg-red-800/5 text-red-900"
+          ? "ea-feedback--success"
+          : "ea-feedback--error"
       }`}
       role={state.status === "error" ? "alert" : "status"}
     >
@@ -35,8 +36,12 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
   const [state, formAction] = useActionState(action, initialAuthState);
   const error = (name: string) => state.errors?.[name]?.[0];
 
+  if (mode === "signup" && state.verificationEmail) {
+    return <VerificationPanel audience={audience} email={state.verificationEmail} />;
+  }
+
   return (
-    <div className="paper-panel w-full max-w-xl p-6 sm:p-9">
+    <div className="auth-panel">
       <p className="eyebrow">{audience === "couple" ? "For couples" : "For vendors"}</p>
       <h1 className="font-display mt-3 text-4xl tracking-tight">
         {mode === "login" ? "Welcome back" : audience === "couple" ? "Create your shared space" : "Create your business account"}
@@ -45,24 +50,24 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
         {mode === "login"
           ? "Sign in to continue where you left off."
           : audience === "couple"
-            ? "Registration comes first. Your optional wedding setup follows in a few short steps."
+            ? "Start planning together. Make it yours now, or settle into the details later."
             : "Start with your account, then shape the public profile couples will discover."}
       </p>
 
-      {message ? <p className="mt-5 rounded-xl bg-paper-muted px-4 py-3 text-sm">{message}</p> : null}
+      {message ? <p className="ea-feedback mt-5" role="status">{message}</p> : null}
       <form action={formAction} className="mt-7 grid gap-5">
         <ActionMessage state={state} />
 
         {mode === "signup" && audience === "couple" ? (
           <>
             <div className="grid gap-5 sm:grid-cols-2">
-              <FormField name="partnerOneName" label="Partner 1 name" autoComplete="given-name" error={error("partnerOneName")} required />
-              <FormField name="partnerTwoName" label="Partner 2 name" autoComplete="given-name" error={error("partnerTwoName")} required />
+              <FormField name="partnerOneName" label="First Partner's Name" autoComplete="given-name" error={error("partnerOneName")} required />
+              <FormField name="partnerTwoName" label="Second Partner's Name" autoComplete="given-name" error={error("partnerTwoName")} required />
             </div>
             <FormField name="displayName" label="Couple display name" placeholder="Noa & Omer" error={error("displayName")} required />
             <div className="grid gap-5 sm:grid-cols-2">
-              <FormField name="partnerOnePhone" type="tel" label="Partner 1 phone (optional)" autoComplete="tel" error={error("partnerOnePhone")} />
-              <FormField name="partnerTwoPhone" type="tel" label="Partner 2 phone (optional)" autoComplete="tel" error={error("partnerTwoPhone")} />
+              <FormField name="partnerOnePhone" type="tel" label="First Partner's Phone (optional)" autoComplete="tel" error={error("partnerOnePhone")} />
+              <FormField name="partnerTwoPhone" type="tel" label="Second Partner's Phone (optional)" autoComplete="tel" error={error("partnerTwoPhone")} />
             </div>
           </>
         ) : null}

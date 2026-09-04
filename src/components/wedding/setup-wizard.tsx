@@ -26,7 +26,7 @@ export function SetupWizard({ values }: { values: WeddingFieldValues }) {
   const [state, action] = useActionState(completeWeddingSetup, initialActionState);
 
   return (
-    <form action={action} className="paper-panel mt-8 overflow-hidden">
+    <form action={action} className="setup-wizard paper-panel mt-8 overflow-hidden">
       <div className="border-b bg-paper-muted px-5 py-4 sm:px-8">
         <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-ink-soft">
           <span>Step {step + 1} of {steps.length}</span>

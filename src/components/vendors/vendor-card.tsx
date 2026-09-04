@@ -10,16 +10,16 @@ function humanize(value: string) {
 
 export function VendorCard({ vendor }: { vendor: MarketplaceVendor }) {
   return (
-    <article className="group overflow-hidden rounded-2xl border bg-paper shadow-[0_8px_30px_rgb(77_52_33_/_6%)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_38px_rgb(77_52_33_/_11%)]">
+    <article className="vendor-card group overflow-hidden rounded-2xl border bg-paper">
       <Link href={`/vendors/${vendor.slug}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-paper-muted">
           {vendor.imageUrl ? (
-            <Image src={vendor.imageUrl} alt={vendor.imageAlt} fill unoptimized={vendor.imageUrl.endsWith(".svg")} sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
+            <Image src={vendor.imageUrl} alt={vendor.imageAlt} fill sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-[1.025]" />
           ) : (
             <div className="grid h-full place-items-center font-display text-2xl text-ink-soft">{vendor.businessName}</div>
           )}
           {vendor.recommendation?.isRecommended ? (
-            <span className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-wine px-3 py-1.5 text-xs font-bold text-white shadow-sm">
+            <span className="recommendation-badge absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs">
               <Sparkles className="size-3" /> Recommended for you
             </span>
           ) : null}

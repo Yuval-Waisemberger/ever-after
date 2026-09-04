@@ -8,6 +8,7 @@ import {
   Heart,
   LayoutDashboard,
   ListChecks,
+  Menu,
   Search,
   Settings,
   Store,
@@ -75,8 +76,8 @@ export function AppShell({
   const mobileNavigation = navigation.slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-canvas lg:grid lg:grid-cols-[280px_1fr]">
-      <aside className="sticky top-0 hidden h-screen border-r bg-paper px-5 py-6 lg:flex lg:flex-col">
+    <div className="workspace-shell min-h-screen bg-canvas lg:grid lg:grid-cols-[260px_1fr]">
+      <aside className="workspace-sidebar sticky top-0 hidden h-screen border-r bg-paper px-5 py-6 lg:flex lg:flex-col">
         <Wordmark href={role === "couple" ? "/wedding" : "/vendor"} />
         <nav className="mt-10 flex-1 space-y-2" aria-label={`${role} navigation`}>
           {navigation.map((item) => {
@@ -126,14 +127,26 @@ export function AppShell({
       </aside>
 
       <div className="min-w-0">
-        <header className="flex items-center justify-between border-b bg-paper/90 px-5 py-4 backdrop-blur lg:hidden">
+        <header className="workspace-mobile-header flex items-center justify-between gap-3 border-b px-5 py-3 lg:hidden">
           <Wordmark href={role === "couple" ? "/wedding" : "/vendor"} />
-          <span className="max-w-32 truncate text-xs font-semibold text-ink-soft">{displayName}</span>
+          <details className="workspace-menu">
+            <summary aria-label="Workspace menu"><Menu size={22} strokeWidth={1.4} /></summary>
+            <div>
+              <p className="mb-4 border-b pb-4 text-sm text-ink-soft">{displayName}</p>
+              <nav aria-label={`${role} full mobile navigation`}>
+                {navigation.map((item) => <div key={item.href}>
+                  <a href={item.href}>{item.label}</a>
+                  {item.children ? <div>{item.children.map((child) => <a key={child.href} href={child.href}>{child.label}</a>)}</div> : null}
+                </div>)}
+              </nav>
+              <form action={signOut} className="mt-4 border-t pt-4"><button className="text-sm text-wine">Sign out</button></form>
+            </div>
+          </details>
         </header>
         <div className="min-h-screen pb-24 lg:pb-0">{children}</div>
       </div>
 
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t bg-paper/95 px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 backdrop-blur lg:hidden" aria-label="Mobile navigation">
+      <nav className={`workspace-bottom-nav fixed inset-x-0 bottom-0 z-40 grid ${role === "couple" ? "grid-cols-5" : "grid-cols-4"} border-t px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 lg:hidden`} aria-label="Mobile navigation">
         {mobileNavigation.map((item) => {
           const Icon = item.icon;
           return (

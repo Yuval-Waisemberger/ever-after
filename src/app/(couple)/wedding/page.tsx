@@ -26,7 +26,7 @@ export default async function WeddingDashboardPage() {
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       {weddingWeek ? (
-        <div className="mb-7 rounded-2xl border border-wine/20 bg-wine px-5 py-4 text-white">
+        <div className="wedding-week-banner mb-7 px-5 py-4">
           <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">Wedding Week</p>
           <p className="font-display mt-1 text-2xl">The final details, kept close.</p>
         </div>
@@ -57,7 +57,7 @@ export default async function WeddingDashboardPage() {
         </Link>
       ) : null}
 
-      <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+      <div className="wedding-overview mt-8">
         <DashboardCard title="Tasks" eyebrow="At a glance" footer={summaryLink("/tasks", "Manage tasks")}>
           <div className="grid grid-cols-3 gap-3 text-center">
             <div><ListChecks className="mx-auto size-5 text-wine" /><strong className="mt-2 block text-2xl">{taskSummary.open}</strong><span className="text-xs text-ink-soft">open</span></div>
@@ -97,7 +97,7 @@ export default async function WeddingDashboardPage() {
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between"><dt className="text-ink-soft">Committed</dt><dd className="font-semibold">{formatIls(budget.committedMinor)}</dd></div>
               <div className="flex justify-between"><dt className="text-ink-soft">Paid</dt><dd className="font-semibold">{formatIls(budget.paidMinor)}</dd></div>
-              <div className="flex justify-between border-t pt-3"><dt className="font-semibold">Available</dt><dd className="font-display text-xl text-wine">{formatIls(budget.availableMinor)}</dd></div>
+              <div className="flex justify-between border-t pt-3"><dt className="font-semibold">Available</dt><dd className="ea-money text-xl text-wine">{formatIls(budget.availableMinor)}</dd></div>
             </dl>
           )}
         </DashboardCard>

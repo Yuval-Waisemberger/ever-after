@@ -49,3 +49,8 @@ export const vendorSignUpSchema = z
   });
 
 export type AuthFieldErrors = Record<string, string[] | undefined>;
+
+export const resendVerificationSchema = z.object({
+  email,
+  audience: z.enum(["couple", "vendor"]),
+});

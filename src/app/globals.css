@@ -1,24 +1,25 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #f7f2e9;
-  --canvas-deep: #eee5d8;
-  --ink: #292820;
-  --ink-soft: #666256;
-  --wine: #6f2839;
-  --wine-dark: #4d1726;
-  --sage: #6f7861;
-  --gold: #ae8a4e;
-  --line: #d8cdbb;
-  --paper: #fffdf8;
+  --canvas: #f8f5ef;
+  --canvas-deep: #efe7da;
+  --ink: #50463d;
+  --ink-soft: #6b6056;
+  /* Existing semantic aliases now use the approved warm-taupe palette. */
+  --wine: #75604b;
+  --wine-dark: #594634;
+  --sage: #786c5a;
+  --gold: #9a754e;
+  --line: #dfd5c7;
+  --paper: #fcfaf5;
   --paper-muted: #f1eadf;
-  --success: #386044;
-  --warning: #9b6328;
-  --danger: #a34242;
-  --shadow: 0 18px 50px rgb(77 52 33 / 10%);
-  --radius-sm: 0.55rem;
-  --radius-md: 0.9rem;
-  --radius-lg: 1.35rem;
+  --success: #655b43;
+  --warning: #826037;
+  --danger: #963f47;
+  --shadow: none;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.625rem;
 }
 
 @theme inline {
@@ -35,6 +36,14 @@
   --color-paper-muted: var(--paper-muted);
   --font-sans: "Aptos", "Segoe UI", Arial, sans-serif;
   --font-serif: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --radius-xl: 0.375rem;
+  --radius-2xl: 0.625rem;
+  --radius-3xl: 0.75rem;
+  --color-green-800: #70664c;
+  --color-green-900: var(--success);
+  --color-red-700: var(--danger);
+  --color-red-800: #873e45;
+  --color-red-900: #76373e;
 }
 
 * {
@@ -57,7 +66,7 @@ body {
 }
 
 ::selection {
-  background: rgb(111 40 57 / 18%);
+  background: rgb(154 117 78 / 20%);
 }
 
 a,

@@ -17,6 +17,12 @@ One shared Couple login represents both partners, as required by the product spe
 numbers are profile data, not credentials. The database signup trigger creates the matching profile
 and wedding/vendor row; only `couple` and `vendor` roles are accepted.
 
+The local Auth readiness changes are described in [AUTH_SECURITY_READINESS.md](AUTH_SECURITY_READINESS.md).
+Migration `202609040001_profile_role_permissions.sql` restricts authenticated profile updates to
+`display_name` and `phone`, in addition to existing own-row RLS. It must be applied before relying
+on immutable account roles. Callback redirects are strictly application-relative; signup and resend
+use the configured site origin and Supabase's existing PKCE/token/email infrastructure.
+
 ## Authorization and RLS matrix
 
 | Resource | Guest | Couple | Vendor |
@@ -54,8 +60,8 @@ IDs therefore cannot grant access.
 
 The `vendor-media` bucket accepts only the owning Vendor's `{vendor_id}/...` path. The browser checks
 JPG/PNG/WebP and 5 MB maximum size before upload; database metadata and RLS verify ownership again.
-Only an image owned by the signed-in Vendor can be removed. Demo rows use external URLs and cannot be
-mutated by ordinary users.
+Only an image owned by the signed-in Vendor can be removed. Seeded demo rows use checked-in local WebP
+paths and cannot be mutated by ordinary users.
 
 The current bucket is public because published marketplace images must render without privileged
 tokens. This means an uploaded object's URL can be public before the Vendor publishes the profile if

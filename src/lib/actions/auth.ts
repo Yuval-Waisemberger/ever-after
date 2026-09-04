@@ -7,7 +7,9 @@ import {
   coupleSignUpSchema,
   signInSchema,
   vendorSignUpSchema,
+  resendVerificationSchema,
 } from "@/lib/validation/auth";
+import { signupCallbackUrl } from "@/lib/auth/redirect";
 import type { AuthActionState } from "./auth-state";
 
 function formValues(formData: FormData) {
@@ -21,6 +23,15 @@ function missingConfig(): AuthActionState {
       "Supabase is not connected yet. Add the public project URL and publishable key to .env.local.",
   };
 }
+
+function callbackFor(audience: "couple" | "vendor") {
+  try { return signupCallbackUrl(audience); } catch { return null; }
+}
+
+const callbackConfigError: AuthActionState = {
+  status: "error",
+  message: "Account email delivery is not ready yet. Please try again later.",
+};
 
 export async function signIn(
   _previous: AuthActionState,
@@ -51,11 +62,14 @@ export async function signUpCouple(
   }
 
   const { secondEmail, ...values } = parsed.data;
+  const emailRedirectTo = callbackFor("couple");
+  if (!emailRedirectTo) return callbackConfigError;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email: values.email,
     password: values.password,
     options: {
+      emailRedirectTo,
       data: {
         role: "couple",
         display_name: values.displayName,
@@ -71,7 +85,8 @@ export async function signUpCouple(
   if (data.session) redirect("/wedding/setup");
   return {
     status: "success",
-    message: "Check your email to confirm your account, then sign in to continue.",
+    verificationEmail: values.email,
+    message: "We sent a verification link to your email address. Verify your email to finish creating your Ever After account.",
   };
 }
 
@@ -86,11 +101,14 @@ export async function signUpVendor(
   }
 
   const values = parsed.data;
+  const emailRedirectTo = callbackFor("vendor");
+  if (!emailRedirectTo) return callbackConfigError;
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signUp({
     email: values.email,
     password: values.password,
     options: {
+      emailRedirectTo,
       data: {
         role: "vendor",
         business_name: values.businessName,
@@ -104,8 +122,34 @@ export async function signUpVendor(
   if (data.session) redirect("/vendor");
   return {
     status: "success",
-    message: "Check your email to confirm your account, then sign in to continue.",
+    verificationEmail: values.email,
+    message: "We sent a verification link to your email address. Verify your email to finish creating your Ever After account.",
   };
+}
+
+export async function resendVerification(
+  _previous: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const parsed = resendVerificationSchema.safeParse(formValues(formData));
+  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
+  if (!isSupabaseConfigured()) return missingConfig();
+  const emailRedirectTo = callbackFor(parsed.data.audience);
+  if (!emailRedirectTo) return callbackConfigError;
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: parsed.data.email,
+      options: { emailRedirectTo },
+    });
+    if (error?.status === 429) return { status: "error", message: "Please wait a little before requesting another verification email." };
+    // Do not relay account-specific provider errors or disclose account existence.
+    if (error && (!error.status || error.status >= 500)) return { status: "error", message: "We could not request an email right now. Please try again later." };
+    return { status: "success", message: "If this address has an account awaiting verification, a new link will arrive shortly. Check your inbox and spam folder." };
+  } catch {
+    return { status: "error", message: "We could not request an email right now. Please try again later." };
+  }
 }
 
 export async function signOut() {

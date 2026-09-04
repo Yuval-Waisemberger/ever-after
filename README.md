@@ -55,7 +55,7 @@ pnpm lint        ESLint
 pnpm typecheck   TypeScript without emitting files
 pnpm test        Vitest unit/provider suite
 pnpm test:e2e    Playwright browser tests
-pnpm seed:generate regenerate SQL, fallback JSON, statistics, and demo SVGs
+pnpm seed:generate regenerate SQL/fallback JSON and validate the local WebP pool
 pnpm seed:check    verify all generated marketplace artifacts are current
 pnpm build       production build
 pnpm check       seed verification + lint + typecheck + unit tests + production build
@@ -69,8 +69,8 @@ project state; they must not be pointed at production data casually.
 
 All schema changes are reproducible SQL migrations. Monetary values use integer agorot. The seed is
 generated deterministically from `scripts/generate-marketplace-seed.mjs` and contains 432 fictional
-vendors across the specification's 19 subcategories, 2,380 fictional reviews, and local SVG demo
-images. It contains no accounts, passwords, private credentials, external image dependency, or real
+vendors across the specification's 19 subcategories, 2,383 fictional reviews, and 198 pooled local
+WebP demo images. It contains no accounts, passwords, private credentials, external image dependency, or real
 vendor claims. See `docs/MARKETPLACE_DATASET.md` for the exact distribution and research basis.
 
 ## Deployment

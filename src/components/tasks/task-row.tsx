@@ -16,7 +16,7 @@ type TaskRowProps = {
 
 export function TaskRow({ task }: TaskRowProps) {
   return (
-    <article className="rounded-2xl border bg-paper px-4 py-4 sm:px-5">
+    <article data-status={task.status} className="task-row rounded-2xl border bg-paper px-4 py-4 sm:px-5">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">

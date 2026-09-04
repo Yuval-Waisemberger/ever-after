@@ -16,7 +16,7 @@ const dimensions = [
 export function ReviewForm({ vendorId, vendorSlug, displayName }: { vendorId: string; vendorSlug: string; displayName: string }) {
   const [state, action] = useActionState(submitReview, initialActionState);
   return (
-    <form action={action} className="grid gap-5">
+    <form action={action} className="review-form grid gap-5">
       <input type="hidden" name="vendorId" value={vendorId} />
       <input type="hidden" name="vendorSlug" value={vendorSlug} />
       {state.message ? <p className={`rounded-xl px-4 py-3 text-sm ${state.status === "success" ? "bg-green-900/5 text-green-900" : "bg-red-900/5 text-red-800"}`} role="status">{state.message}</p> : null}

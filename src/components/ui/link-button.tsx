@@ -20,7 +20,7 @@ export function LinkButton({
 }: LinkButtonProps) {
   return (
     <Link
-      className={`inline-flex min-h-11 items-center justify-center rounded-full border px-5 py-2.5 text-sm font-semibold no-underline transition-colors focus-visible:outline-2 ${toneClasses[tone]} ${className}`}
+      className={`ea-button no-underline ${toneClasses[tone]} ${className}`}
       {...props}
     />
   );

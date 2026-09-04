@@ -24,8 +24,10 @@ second runner. The current suite has 26 tests across nine files.
 
 ## Browser tests
 
-`e2e/public.spec.ts` verifies the logged-out entry paths, seeded guest marketplace/profile flow, and
-the private Couple-route redirect without configuration. Additional connected-environment Playwright
+`e2e/public.spec.ts` verifies the logged-out entry paths, seeded guest marketplace/profile flow,
+pagination/filtering, successful browser decoding for all 162 unique pooled WebPs (including named
+representatives from 15 requested subcategories), and the private Couple-route redirect without configuration.
+Additional connected-environment Playwright
 cases should cover:
 
 1. Couple registers, confirms email if enabled, completes or skips setup, and lands on My Wedding.
@@ -85,11 +87,11 @@ after credentials and migrations are configured; it is not claimed as executed l
 |---|---|---|
 | TypeScript | `pnpm typecheck` | passed |
 | ESLint | `pnpm lint` | passed with zero warnings |
-| Seed artifacts | `pnpm seed:check` | passed: 432 vendors, 2,380 reviews, 432 SVGs |
+| Seed artifacts | `pnpm seed:check` | passed: 432 vendors, 2,380 reviews, 162 referenced WebPs |
 | Unit/provider | `pnpm test` | passed, 26/26 across nine files |
 | Production build | `pnpm build` | passed |
-| Public Playwright | `pnpm test:e2e` | passed, 4/4, including pagination/filter and SVG decode |
-| Manual local browser | `http://localhost:3000/vendors?subcategory=videographers` | passed: 22 results, 12-card first page, local covers visibly rendered |
+| Public Playwright | `pnpm test:e2e` | passed, 6/6; all 162 unique WebPs decoded and visible covers checked in 15 subcategories |
+| Manual local browser | local marketplace, filtered results, page 2, and vendor profile | passed: preview banner; daytime/evening venue photos and profile decoded; Drone + South returned 9; videographer page 2 returned 10 |
 | RLS integration | Supabase local test command | not run; project not connected/migrated |
 
 Before submission, rerun every command in a clean checkout with configured test environment, run the

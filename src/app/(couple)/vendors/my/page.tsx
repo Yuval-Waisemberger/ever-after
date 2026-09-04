@@ -19,7 +19,7 @@ export default async function MyVendorsPage({ searchParams }: PageProps<"/vendor
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Vendors" title="My Vendors" description="One place for every vendor you saved, contacted, considered, booked, or rejected." action={<LinkButton href="/vendors" tone="secondary">Explore vendors</LinkButton>} />
-      <nav className="mt-7 flex gap-2 overflow-x-auto pb-2" aria-label="Filter vendor status">
+      <nav className="status-tabs mt-7 flex gap-2 overflow-x-auto pb-2" aria-label="Filter vendor status">
         {statuses.map((status) => <Link key={status} href={status === "all" ? "/vendors/my" : `/vendors/my?status=${status}`} className={`shrink-0 rounded-full border px-3.5 py-2 text-sm font-semibold capitalize ${selected === status ? "border-wine bg-wine text-white" : "bg-paper text-ink-soft hover:border-wine hover:text-wine"}`}>{status}</Link>)}
       </nav>
       <div className="mt-6 space-y-4">
@@ -36,7 +36,7 @@ export default async function MyVendorsPage({ searchParams }: PageProps<"/vendor
                   <Link href={`/vendors/${vendor.slug}`} className="font-display mt-1 block text-3xl hover:text-wine">{vendor.business_name}</Link>
                   <p className="mt-2 text-sm capitalize text-ink-soft">Status: {relationship.status}</p>
                 </div>
-                {relationship.agreed_price_minor != null ? <p className="font-display text-2xl text-wine">{formatIls(Number(relationship.agreed_price_minor))}</p> : null}
+                {relationship.agreed_price_minor != null ? <p className="ea-money text-2xl text-wine">{formatIls(Number(relationship.agreed_price_minor))}</p> : null}
               </div>
               <details className="mt-5 border-t pt-4">
                 <summary className="cursor-pointer text-sm font-semibold text-wine">Edit status and booking details</summary>

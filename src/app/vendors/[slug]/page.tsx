@@ -32,15 +32,15 @@ export default async function VendorProfilePage({ params }: PageProps<"/vendors/
   const area = vendor.serviceAreas.map((value) => value.replaceAll("_", " ")).join(" · ");
 
   return (
-    <div className="min-h-screen bg-canvas">
+    <div className="vendor-profile-page min-h-screen bg-canvas">
       <PublicHeader />
-      <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+      <main id="main-content" className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
         <Link href="/vendors" className="inline-flex items-center gap-2 text-sm font-semibold text-wine hover:underline"><ArrowLeft className="size-4" />Back to vendors</Link>
-        <div className="mt-6 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl border bg-paper-muted">
-            {vendor.imageUrl ? <Image src={vendor.imageUrl} alt={vendor.imageAlt} fill priority unoptimized={vendor.imageUrl.endsWith(".svg")} sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover" /> : <div className="grid h-full place-items-center font-display text-4xl">{vendor.businessName}</div>}
+        <div className="vendor-profile-hero mt-6 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
+          <div className="vendor-profile-image relative aspect-[4/3] overflow-hidden border bg-paper-muted">
+            {vendor.imageUrl ? <Image src={vendor.imageUrl} alt={vendor.imageAlt} fill priority sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover" /> : <div className="grid h-full place-items-center font-display text-4xl">{vendor.businessName}</div>}
           </div>
-          <section className="self-center">
+          <section className="vendor-profile-intro self-center">
             <p className="eyebrow">{vendor.subcategoryName ?? vendor.categoryName}</p>
             <h1 className="font-display mt-3 text-5xl leading-[0.98] tracking-tight sm:text-6xl">{vendor.businessName}</h1>
             <div className="mt-5 flex flex-wrap gap-3 text-sm text-ink-soft">
@@ -48,12 +48,12 @@ export default async function VendorProfilePage({ params }: PageProps<"/vendors/
               {vendor.ratingAverage != null ? <span className="inline-flex items-center gap-1.5"><Star className="size-4 fill-gold text-gold" />{vendor.ratingAverage.toFixed(1)} · {vendor.reviewCount} reviews</span> : <span>No reviews yet</span>}
             </div>
             <p className="mt-6 text-lg leading-8 text-ink-soft">{vendor.description}</p>
-            <p className="font-display mt-6 text-3xl text-wine">{vendor.minPriceMinor == null ? "Price on request" : `${formatIls(vendor.minPriceMinor)}${vendor.maxPriceMinor ? `–${formatIls(vendor.maxPriceMinor)}` : ""}${vendor.categorySlug === "venues" ? " per guest" : ""}`}</p>
+            <p className="ea-money mt-6 text-3xl text-wine">{vendor.minPriceMinor == null ? "Price on request" : `${formatIls(vendor.minPriceMinor)}${vendor.maxPriceMinor ? `–${formatIls(vendor.maxPriceMinor)}` : ""}${vendor.categorySlug === "venues" ? " per guest" : ""}`}</p>
             {profile?.role === "couple" ? <div className="mt-7 border-t pt-6"><VendorStatusActions vendorId={vendor.id} currentStatus={relationship?.status} /></div> : <div className="mt-7"><Link href="/auth/couple" className="inline-flex min-h-11 items-center rounded-full bg-wine px-5 text-sm font-semibold text-white">Sign in to save this vendor</Link></div>}
           </section>
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-3">
+        <div className="vendor-profile-details mt-10 grid gap-6 lg:grid-cols-3">
           <section className="rounded-2xl border bg-paper p-6 lg:col-span-2">
             <h2 className="font-display text-3xl">Services & style</h2>
             <div className="mt-5 flex flex-wrap gap-2">{vendor.services.map((service) => <span key={service} className="rounded-full border bg-paper-muted px-3 py-1.5 text-sm">{service}</span>)}</div>
@@ -72,7 +72,7 @@ export default async function VendorProfilePage({ params }: PageProps<"/vendors/
           </aside>
         </div>
 
-        <section className="mt-10 rounded-2xl border bg-paper p-6 sm:p-8">
+        <section className="vendor-reviews mt-10 border p-6 sm:p-8">
           <h2 className="font-display text-4xl">Ratings & reviews</h2>
           {vendor.reviews.length ? <div className="mt-6 grid gap-4 md:grid-cols-2">{vendor.reviews.map((review) => <article key={review.id} className="rounded-xl border bg-canvas/50 p-5"><div className="flex items-center justify-between gap-3"><h3 className="font-semibold">{review.reviewerDisplayName}</h3><span className="inline-flex items-center gap-1 text-sm font-bold"><Star className="size-3.5 fill-gold text-gold" />{((review.professionalism + review.punctuality + review.serviceAttitude + review.valueForMoney) / 4).toFixed(1)}</span></div>{review.reviewText ? <p className="mt-3 text-sm leading-6 text-ink-soft">{review.reviewText}</p> : null}<p className="mt-4 text-xs text-ink-soft">{review.wouldChooseAgain ? "Would choose again" : "Would not choose again"}</p></article>)}</div> : <p className="mt-4 text-sm text-ink-soft">No public reviews yet.</p>}
           {profile?.role === "couple" ? <details className="mt-8 border-t pt-5"><summary className="cursor-pointer font-semibold text-wine">Write or update your review</summary><div className="mt-5 max-w-2xl"><ReviewForm vendorId={vendor.id} vendorSlug={vendor.slug} displayName={profile.displayName} /></div></details> : null}

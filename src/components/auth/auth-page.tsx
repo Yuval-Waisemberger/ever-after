@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Wordmark } from "@/components/brand/wordmark";
 import { AuthPanel } from "./auth-panel";
 
@@ -12,22 +13,31 @@ export function AuthPage({
   message?: string;
 }) {
   return (
-    <main className="min-h-screen bg-canvas px-5 py-6 sm:px-8">
-      <div className="mx-auto flex max-w-6xl items-center justify-between">
+    <main className={`auth-page min-h-screen bg-canvas ${audience === "couple" ? "auth-page--couple" : ""}`}>
+      <div className="auth-brand-bar">
         <Wordmark />
         <Link href="/vendors" className="text-sm font-semibold text-wine hover:underline">
           Explore vendors
         </Link>
       </div>
-      <div className="mx-auto grid max-w-6xl items-start gap-10 py-12 lg:grid-cols-[0.75fr_1.25fr] lg:py-20">
-        <div className="max-w-md pt-5">
-          <p className="eyebrow">One thoughtful beginning</p>
-          <h2 className="font-display mt-4 text-5xl leading-[1.02] tracking-tight">
-            {audience === "couple" ? "Keep the beautiful parts. Organize the rest." : "Let the right couples find your work."}
+      <div className="auth-layout">
+        <div className="auth-introduction">
+          <p className="eyebrow">{audience === "couple" ? "Everything before your happily ever after" : "Everything before your ever after"}</p>
+          <h2 className="font-display auth-editorial-title">
+            {audience === "couple" ? "Your Next Chapter Starts Here." : "Your Work. Their Perfect Day."}
           </h2>
           <p className="mt-5 leading-7 text-ink-soft">
-            {audience === "couple" ? "Setup is optional, every detail stays editable, and your workspace grows with your plans." : "Manage your public profile, services, images, and reviews from one calm dashboard."}
+            {audience === "couple" ? "A space for the two of you, bringing every part of your wedding together, beautifully." : "Manage your public profile, services, images, and reviews from one calm dashboard."}
           </p>
+          <div className="auth-image">
+            <Image
+              src={audience === "couple" ? "/images/auth/couple-petals.webp" : "/demo-marketplace/event-managers/event-managers-01.webp"}
+              alt={audience === "couple" ? "Newlyweds sharing a kiss beneath falling ivory petals" : "Wedding planner reviewing reception preparations"}
+              fill
+              sizes="(max-width: 640px) calc(100vw - 40px), (max-width: 900px) 592px, 440px"
+              className="object-cover"
+            />
+          </div>
         </div>
         <AuthPanel audience={audience} initialMode={mode} message={message} />
       </div>

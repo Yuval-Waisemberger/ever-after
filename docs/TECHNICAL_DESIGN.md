@@ -74,7 +74,7 @@ sets the optional budget link to null to retain financial history.
 - Ratings are 1–5; money and guest counts are non-negative/positive as appropriate.
 - Price/capacity lower bounds cannot exceed upper bounds.
 - Venue name is allowed only for a booked venue state.
-- An image has exactly one source: Storage path or a URL. Seeded URLs point to checked-in local SVGs;
+- An image has exactly one source: Storage path or a URL. Seeded URLs point to checked-in local WebPs;
   Vendor-account uploads continue to use Supabase Storage.
 
 Money is stored as integer agorot (`*_minor`). Dates that are calendar facts use PostgreSQL `date`;

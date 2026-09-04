@@ -1,0 +1,198 @@
+/* The approved public palette, extended to existing product surfaces. */
+:root { --control-radius: 5px; --surface-radius: 8px; }
+:where(a, button, summary, input, select, textarea):focus-visible { outline: 2px solid var(--wine); outline-offset: 4px; }
+:where(button, input, select, textarea) { font-family: "Aptos", "Segoe UI", Arial, sans-serif; }
+:where(button, summary) { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+.ea-wordmark { width: 196px; min-width: 178px; }
+.ea-button { display: inline-flex; min-height: 46px; align-items: center; justify-content: center; gap: 8px; padding: 12px 22px; border: 1px solid; border-radius: var(--control-radius); font-size: 13px; font-weight: 500; letter-spacing: .055em; line-height: 1.5; transition: background-color 160ms, border-color 160ms; }
+.ea-button--primary { color: #fffaf3; border-color: var(--wine); background: var(--wine); }
+.ea-button--primary:hover { background: var(--wine-dark); border-color: var(--wine-dark); }
+.ea-input, :where(.workspace-shell, .vendor-profile-page) :is(select, textarea, input:not([type=hidden],[type=checkbox],[type=radio],[type=file])) { min-width: 0; width: 100%; min-height: 46px; border: 1px solid var(--line); border-radius: var(--control-radius); background: var(--paper); padding: 11px 13px; font-size: 16px; font-weight: 400; line-height: 1.5; color: var(--ink); box-shadow: none; }
+:where(.workspace-shell, .auth-page, .vendor-profile-page) :is(input, textarea, select):focus { border-color: var(--wine); }
+.ea-input[aria-invalid=true] { border-color: var(--danger); background: #fbf4f2; }
+.ea-field-error { color: var(--danger); }
+:where(input, textarea)::placeholder { color: #786f65; opacity: 1; }
+:where(.workspace-shell, .vendor-profile-page) :is(input[type=checkbox], input[type=radio]) { width: 17px; height: 17px; flex-shrink: 0; accent-color: var(--wine); }
+:where(.workspace-shell, .vendor-profile-page) input[type=file] { max-width: 100%; font-size: 14px; }
+input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; border-radius: 3px; background: var(--paper-muted); color: var(--ink); font: inherit; cursor: pointer; }
+.ea-choice { min-height: 47px; font-weight: 400; line-height: 1.5; }
+.ea-choice:focus-within { outline: 2px solid var(--wine); outline-offset: 2px; }
+.ea-feedback { padding: 13px 16px; border: 1px solid var(--line); border-left: 3px solid var(--gold); border-radius: var(--control-radius); background: var(--paper-muted); font-size: 14px; line-height: 1.7; overflow-wrap: anywhere; }
+.ea-feedback--success { color: var(--success); background: #f0ede3; border-color: #c9c0a9; }
+.ea-feedback--error { color: var(--danger); background: #f9eeeb; border-color: #dcb9b8; }
+.ea-empty-state { padding-block: 44px; border-color: var(--line); background: transparent; }
+.ea-page-header { padding-bottom: 24px; border-bottom: 1px solid var(--line); }
+.ea-page-header h1 { font-weight: 400; font-size: clamp(34px, 3.5vw, 52px); line-height: 1.12; letter-spacing: -.035em; overflow-wrap: anywhere; }
+.ea-page-header p:not(.eyebrow) { max-width: 660px; font-size: 15px; line-height: 1.8; }
+.eyebrow { color: #8b6846; font-weight: 500; letter-spacing: .15em; }
+.ea-money, .ea-number { font-family: "Aptos", "Segoe UI", Arial, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.015em; }
+
+/* Auth retains every field and action; long registration forms remain one readable column. */
+.auth-brand-bar { max-width: 1440px; height: 90px; margin: auto; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; gap: 24px; border-bottom: 1px solid var(--line); }
+.auth-brand-bar > a:last-child { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; font-weight: 500; }
+.auth-layout { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); align-items: start; gap: clamp(50px, 7vw, 112px); max-width: 1200px; margin: auto; padding: 66px 32px 88px; }
+.auth-introduction { padding-top: 22px; }
+.auth-editorial-title { margin-top: 20px; max-width: 420px; font-size: clamp(42px, 4.2vw, 62px); line-height: 1.08; letter-spacing: -.045em; font-weight: 400; }
+.auth-introduction > p:not(.eyebrow) { max-width: 390px; font-size: 15px; line-height: 1.9; }
+.auth-image { position: relative; margin-top: 34px; aspect-ratio: 1 / .9; overflow: hidden; border-radius: 3px; }
+.auth-image img { object-position: 55% 44%; filter: saturate(.65); }
+.auth-page--couple .auth-image { aspect-ratio: 4 / 5; border-radius: 0; }
+.auth-page--couple .auth-image img { object-position: 50% 50%; filter: none; }
+.auth-panel { min-width: 0; background: var(--paper); border: 1px solid var(--line); border-radius: var(--surface-radius); padding: 34px 38px; }
+.auth-panel h1 { font-size: clamp(30px, 3vw, 40px); line-height: 1.15; font-weight: 400; }
+.auth-panel > p:not(.eyebrow) { font-size: 14px; line-height: 1.8; }
+.auth-panel .ea-button { margin-top: 5px; min-height: 49px; text-transform: uppercase; letter-spacing: .13em; }
+.auth-panel form { gap: 20px; }
+.auth-panel button[type=button] { min-height: 44px; text-align: left; font-weight: 500; }
+
+/* Functional workspace: quiet surfaces, generous main column, compact navigation. */
+.workspace-shell { background: var(--canvas); color: var(--ink); }
+.workspace-sidebar { background: var(--paper); padding: 18px 20px; }
+.workspace-sidebar > nav { min-height: 0; overflow-y: auto; margin-top: 24px; scrollbar-width: thin; }
+.workspace-sidebar > nav > div { margin-bottom: 7px; }
+.workspace-sidebar > nav a { border-radius: 4px; font-weight: 500; }
+.workspace-sidebar > nav > div > a { min-height: 42px; }
+.workspace-sidebar > nav > div > div { margin-left: 23px; padding-left: 14px; }
+.workspace-sidebar > nav > div > div a { font-size: 12px; padding-block: 6px; font-weight: 400; }
+.workspace-sidebar svg { stroke-width: 1.4; }
+.workspace-shell main { padding-top: 42px; padding-bottom: 60px; }
+.workspace-shell :is(section, article, form, label, div).border { border-color: var(--line); }
+.workspace-shell :is(button, a).rounded-full, .vendor-profile-page :is(button, a).rounded-full { border-radius: var(--control-radius); }
+.workspace-shell button:not([type=hidden]), .vendor-profile-page button { min-height: 44px; }
+.workspace-shell button[aria-label], .vendor-profile-page button[aria-label] { min-width: 44px; }
+.workspace-shell summary, .vendor-profile-page summary { min-height: 40px; line-height: 1.6; }
+.workspace-shell :is(p, h2, h3, dd, li), .vendor-profile-page :is(p, h1, h2, h3, a) { overflow-wrap: anywhere; }
+.workspace-shell :is(label, legend) { font-weight: 500; }
+.workspace-shell table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
+.workspace-shell :is(th, td) { padding: 14px; border-bottom: 1px solid var(--line); text-align: left; }
+.workspace-mobile-header { position: relative; z-index: 30; background: var(--canvas); }
+.workspace-menu summary { list-style: none; display: grid; place-items: center; width: 44px; border: 1px solid var(--line); border-radius: 4px; }
+.workspace-menu summary::-webkit-details-marker { display: none; }
+.workspace-menu[open] > div { position: absolute; top: 100%; inset-inline: 0; max-height: calc(100dvh - 150px); overflow-y: auto; padding: 20px; background: var(--paper); border-bottom: 1px solid var(--line); }
+.workspace-menu nav { display: grid; gap: 12px; }
+.workspace-menu nav a { display: flex; min-height: 44px; align-items: center; font-size: 14px; }
+.workspace-menu nav div div { padding-left: 18px; border-left: 1px solid var(--line); }
+.workspace-menu nav div div a { font-size: 13px; color: var(--ink-soft); }
+.workspace-bottom-nav { background: var(--paper); }
+/* Allow real content to shrink/wrap inside grids instead of widening the page. */
+:where(.workspace-shell, .auth-layout) :is(form, fieldset, label, section, article) { min-width: 0; }
+.workspace-shell fieldset { max-width: 100%; }
+.workspace-shell .status-tabs a { flex-shrink: 0; }
+.workspace-shell :is(span, strong) { overflow-wrap: anywhere; }
+.auth-brand-bar > a:last-child { min-height: 44px; display: inline-flex; align-items: center; }
+
+/* Varied summary hierarchy, without changing the data or its order. */
+.wedding-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.ea-dashboard-card { min-width: 0; padding: 25px; border-radius: var(--surface-radius); }
+.wedding-overview .ea-dashboard-card:first-child { background: var(--paper-muted); }
+.wedding-overview .ea-dashboard-card:nth-child(n+5) { border-width: 1px 0 0; border-radius: 0; background: transparent; }
+.ea-dashboard-card strong { font-variant-numeric: tabular-nums; font-weight: 500; }
+.wedding-week-banner { background: var(--paper-muted); color: var(--ink); border: 1px solid var(--gold); border-left-width: 3px; border-radius: var(--surface-radius); }
+.wedding-week-banner > p:first-child { color: var(--gold); }
+.budget-metrics { background: var(--paper-muted); border: 1px solid var(--line); border-radius: var(--surface-radius); gap: 0; }
+.budget-metrics > div { background: transparent; border: 0; border-radius: 0; padding: 22px 18px; }
+.budget-metrics > div + div { border-left: 1px solid var(--line); }
+.budget-metrics p:last-child { font-family: "Aptos", "Segoe UI", Arial, sans-serif; font-variant-numeric: tabular-nums; font-weight: 500; }
+.budget-expenses > div:first-child { gap: 18px; flex-wrap: wrap; }
+.task-row { border-left: 3px solid var(--gold); }
+.task-row[data-status=completed] { border-left-color: var(--line); background: #f3efe7; }
+.task-row h2 { font-size: 16px; line-height: 1.5; }
+.setup-wizard > div:first-child { background: transparent; }
+.setup-wizard .h-1\.5 { height: 3px; }
+.setup-wizard button { border-radius: var(--control-radius); }
+.timeline-entry { min-height: 54px; }
+.status-tabs a { min-height: 44px; display: inline-flex; align-items: center; border-radius: 4px; font-weight: 500; }
+
+/* The public directory's approved introduction remains unchanged. */
+.vendor-card { border-radius: var(--surface-radius); box-shadow: none; transition: border-color 160ms; }
+.vendor-card:hover { border-color: var(--gold); }
+.vendor-card .recommendation-badge { background: #f8f1e6; color: #69513c; border: 1px solid #bda386; box-shadow: none; font-weight: 500; }
+.vendor-card p.text-xs { font-weight: 500; letter-spacing: .1em; }
+.vendor-profile-page { background: var(--canvas); }
+.vendor-profile-hero { align-items: start; gap: 42px; }
+.vendor-profile-image { border-radius: 4px; }
+.vendor-profile-intro { padding: 12px 0; }
+.vendor-profile-intro h1 { font-weight: 400; font-size: clamp(38px, 4.2vw, 64px); line-height: 1.05; }
+.vendor-profile-intro > p.text-lg { font-size: 16px; line-height: 1.85; }
+.vendor-profile-details { border-top: 1px solid var(--line); padding-top: 32px; }
+.vendor-profile-details > section { border: 0; padding-left: 0; background: transparent; }
+.vendor-profile-details > aside { background: var(--paper-muted); border-radius: 6px; }
+.vendor-profile-details a { min-height: 40px; }
+.vendor-reviews { border-width: 1px 0 0; border-radius: 0; background: transparent; padding-inline: 0; padding-top: 32px; }
+.vendor-reviews article { background: var(--paper); border-radius: 6px; }
+.review-form { padding: 24px; border: 1px solid var(--line); border-radius: var(--surface-radius); background: var(--paper); }
+.vendor-status-actions button { font-weight: 500; }
+
+/* Assistant presentation only: existing messages, providers and actions are untouched. */
+.assistant-surface { border-radius: var(--surface-radius); box-shadow: none; min-height: 620px; }
+.assistant-prompts { background: var(--paper-muted); }
+.assistant-prompts button { border-radius: 4px; }
+.assistant-conversation { min-width: 0; }
+.assistant-conversation article p { white-space: pre-wrap; overflow-wrap: anywhere; }
+.assistant-conversation article > div { border-radius: 6px; }
+.assistant-conversation article.justify-end > div { background: #ebe2d4; color: var(--ink); }
+.assistant-conversation form > div { border-radius: 6px; background: var(--paper); }
+.assistant-conversation textarea { width: auto; min-width: 0; border: 0; background: transparent; box-shadow: none; }
+
+@media (min-width: 1280px) {
+  .wedding-overview { grid-template-columns: 1.2fr 1fr 1fr; }
+  .wedding-overview .ea-dashboard-card:first-child { grid-column: span 2; }
+  .wedding-overview .ea-dashboard-card:nth-child(4) { grid-column: span 2; }
+}
+@media (max-width: 900px) {
+  .auth-layout { display: block; max-width: 640px; padding: 32px 24px 60px; }
+  .auth-introduction { padding-top: 0; margin-bottom: 28px; }
+  .auth-editorial-title { max-width: 500px; font-size: 40px; margin-top: 12px; }
+  .auth-introduction > p:not(.eyebrow) { max-width: 500px; }
+  .auth-image { display: block; aspect-ratio: 16 / 9; margin-top: 24px; }
+  .auth-page--couple .auth-image { display: block; aspect-ratio: 16 / 9; margin-top: 24px; }
+  .auth-page--couple .auth-image img { object-position: 50% 31%; }
+  .auth-panel { padding: 28px; }
+  .budget-metrics > div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .assistant-surface { min-height: 0; }
+  .assistant-prompts > div { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .assistant-prompts > div > button { margin: 0; }
+  .assistant-prompts > p:last-child { margin-top: 16px; padding-top: 16px; }
+}
+@media (max-width: 640px) {
+  .auth-brand-bar { height: 76px; padding: 0 20px; gap: 12px; }
+  .auth-brand-bar > a:last-child { font-size: 10px; letter-spacing: .07em; text-align: right; }
+  .auth-layout { padding: 28px 20px 44px; }
+  .auth-editorial-title { font-size: 34px; }
+  .auth-introduction > p:not(.eyebrow) { font-size: 14px; margin-top: 14px; }
+  .auth-panel { padding: 24px 18px; }
+  .auth-panel h1 { font-size: 30px; }
+  .auth-panel .ea-field { gap: 7px; }
+  .marketplace-results > form :is(input:not([type=checkbox]), select) { min-width: 0; width: 100%; font-size: 16px; }
+  .auth-panel form > .grid { grid-template-columns: minmax(0, 1fr); }
+  .auth-page--couple .auth-image { aspect-ratio: 4 / 3; }
+  .workspace-shell main { padding-top: 28px; padding-inline: 20px; }
+  .workspace-shell > div > .min-h-screen { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
+  .workspace-mobile-header { padding-top: max(12px, env(safe-area-inset-top)); }
+  .wedding-overview .grid-cols-3 { grid-template-columns: minmax(0, 1fr); text-align: left; }
+  .budget-metrics > div { flex-wrap: wrap; }
+  .ea-page-header h1 { font-size: 36px; }
+  .ea-page-header { padding-bottom: 20px; }
+  .ea-page-header > a { align-self: start; }
+  .wedding-overview { grid-template-columns: 1fr; gap: 16px; }
+  .ea-dashboard-card { padding: 22px; }
+  .setup-wizard button { padding-inline: 12px; }
+  .timeline-entry { flex-wrap: wrap; }
+  .timeline-entry time { width: 100%; margin-left: 28px; }
+  .budget-metrics > div { display: flex; align-items: center; justify-content: space-between; gap: 18px; padding: 17px; }
+  .budget-metrics p:last-child { margin-top: 0; font-size: 23px; }
+  .budget-expenses > div:first-child > p { text-align: left; }
+  .vendor-profile-hero { gap: 24px; }
+  .vendor-profile-intro h1 { font-size: 40px; }
+  .vendor-profile-intro .ea-money { font-size: 24px; }
+  .vendor-profile-details { gap: 24px; }
+  .vendor-reviews > h2 { font-size: 32px; }
+  .review-form { padding: 18px; }
+  .assistant-prompts { padding: 18px; }
+  .assistant-prompts > div { grid-template-columns: 1fr; }
+  .assistant-conversation { min-height: 480px; }
+  .assistant-conversation article { gap: 8px; }
+  .assistant-conversation article > div { max-width: calc(100% - 40px); padding: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .ea-button, .vendor-card, .setup-wizard * { transition: none; } }

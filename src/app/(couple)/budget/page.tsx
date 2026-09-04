@@ -20,12 +20,12 @@ export default async function BudgetPage() {
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="One financial picture" title="Budget & Payments" description="Estimated, committed, paid, and upcoming amounts all live here—never in separate top-level areas." />
-      <section className="mt-8 grid gap-3 sm:grid-cols-2 xl:grid-cols-5">{metrics.map(([label, value]) => <div key={label} className="rounded-2xl border bg-paper p-4"><p className="text-xs font-bold uppercase tracking-wide text-ink-soft">{label}</p><p className={`font-display mt-2 text-2xl ${label === "Available" && value != null && value < 0 ? "text-red-700" : "text-wine"}`}>{formatIls(value)}</p></div>)}</section>
+      <section className="budget-metrics mt-8 grid sm:grid-cols-2 xl:grid-cols-5">{metrics.map(([label, value]) => <div key={label} className="rounded-2xl border bg-paper p-4"><p className="text-xs font-bold uppercase tracking-wide text-ink-soft">{label}</p><p className={`font-display mt-2 text-2xl ${label === "Available" && value != null && value < 0 ? "text-red-700" : "text-wine"}`}>{formatIls(value)}</p></div>)}</section>
       <div className="mt-7 grid gap-5 lg:grid-cols-2">
         <section className="rounded-2xl border bg-paper p-5 sm:p-6"><h2 className="font-display text-2xl">Total budget</h2><div className="mt-4"><TotalBudgetForm totalMinor={wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor)} /></div></section>
         <section className="rounded-2xl border bg-paper p-5 sm:p-6"><h2 className="font-display text-2xl">Add vendor expense</h2><p className="mt-2 text-sm text-ink-soft">Booking does not change your budget silently. Add the cost here when you confirm it.</p><div className="mt-4"><BudgetItemForm booked={booked} /></div></section>
       </div>
-      <section className="mt-8">
+      <section className="budget-expenses mt-8">
         <div className="flex items-end justify-between"><div><p className="eyebrow">Vendor expenses</p><h2 className="font-display mt-1 text-3xl">Commitments and payments</h2></div><p className="text-sm text-ink-soft">{formatIls(summary.remainingCommittedMinor)} remaining</p></div>
         <div className="mt-5 space-y-4">
           {items.map((item) => (

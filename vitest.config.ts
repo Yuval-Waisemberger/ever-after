@@ -10,7 +10,6 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
     environment: "jsdom",
-    setupFiles: ["./tests/setup.ts"],
     coverage: {
       reporter: ["text", "html"],
       include: ["src/lib/domain/**/*.ts", "src/lib/validation/**/*.ts"],

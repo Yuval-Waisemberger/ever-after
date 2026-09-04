@@ -8,11 +8,12 @@ const nextConfig: NextConfig = {
   // Keep the project's original local AGENTS.md immutable.
   agentRules: false,
   images: {
+    localPatterns: [
+      // Content-versioned demo covers; other local assets retain query-free access.
+      { pathname: "/demo-marketplace/**" },
+      { pathname: "/**", search: "" },
+    ],
     remotePatterns: [
-      {
-        protocol: "https",
-        hostname: "images.unsplash.com",
-      },
       ...(supabaseHostname
         ? [
             {

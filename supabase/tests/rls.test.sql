@@ -2,10 +2,12 @@ begin;
 
 create extension if not exists pgtap with schema extensions;
 
-select plan(29);
+select plan(45);
 
 select has_table('public', 'profiles', 'profiles exists');
 select has_table('public', 'weddings', 'weddings exists');
+select has_table('public', 'vendor_categories', 'vendor categories exist');
+select has_table('public', 'vendor_subcategories', 'vendor subcategories exist');
 select has_table('public', 'vendor_profiles', 'vendor profiles exist');
 select has_table('public', 'vendor_images', 'vendor images exist');
 select has_table('public', 'couple_vendors', 'couple-vendor relations exist');
@@ -22,6 +24,8 @@ select is(
   'profiles has RLS enabled'
 );
 select is((select relrowsecurity from pg_class where oid = 'public.weddings'::regclass), true, 'weddings has RLS enabled');
+select is((select relrowsecurity from pg_class where oid = 'public.vendor_categories'::regclass), true, 'vendor categories have RLS enabled');
+select is((select relrowsecurity from pg_class where oid = 'public.vendor_subcategories'::regclass), true, 'vendor subcategories have RLS enabled');
 select is((select relrowsecurity from pg_class where oid = 'public.vendor_profiles'::regclass), true, 'vendor profiles have RLS enabled');
 select is((select relrowsecurity from pg_class where oid = 'public.vendor_images'::regclass), true, 'vendor images have RLS enabled');
 select is((select relrowsecurity from pg_class where oid = 'public.couple_vendors'::regclass), true, 'couple-vendor relations have RLS enabled');
@@ -34,8 +38,37 @@ select is((select relrowsecurity from pg_class where oid = 'public.assistant_mes
 
 select has_function('public', 'owns_wedding', array['uuid'], 'wedding ownership helper exists');
 select has_function('public', 'owns_vendor', array['uuid'], 'vendor ownership helper exists');
-select has_function('public', 'is_couple', array[]::text[], 'couple role helper exists');
-select has_function('public', 'is_vendor', array[]::text[], 'vendor role helper exists');
+select has_function('public', 'owns_budget_item', array['uuid'], 'budget item ownership helper exists');
+select has_function('public', 'owns_assistant_thread', array['uuid'], 'assistant thread ownership helper exists');
+select has_function('public', 'can_manage_vendor_media', array['text'], 'vendor media ownership helper exists');
+
+select policies_are(
+  'public',
+  'profiles',
+  array['profiles_select_own', 'profiles_update_own'],
+  'profiles expose only own-row policies'
+);
+
+select policies_are(
+  'public',
+  'weddings',
+  array['weddings_delete_own', 'weddings_insert_own', 'weddings_select_own', 'weddings_update_own'],
+  'weddings expose only owner policies'
+);
+
+select policies_are(
+  'public',
+  'vendor_categories',
+  array['categories_public_read'],
+  'vendor categories expose only public read'
+);
+
+select policies_are(
+  'public',
+  'vendor_subcategories',
+  array['subcategories_public_read'],
+  'vendor subcategories expose only public read'
+);
 
 select policies_are(
   'public',
@@ -56,6 +89,55 @@ select policies_are(
   'vendor_profiles',
   array['vendors_owner_delete', 'vendors_owner_insert', 'vendors_owner_read', 'vendors_owner_update', 'vendors_public_read'],
   'vendor owner/public policies are present'
+);
+
+select policies_are(
+  'public',
+  'vendor_images',
+  array['vendor_images_owner_delete', 'vendor_images_owner_insert', 'vendor_images_owner_read', 'vendor_images_owner_update', 'vendor_images_public_read'],
+  'vendor image owner/public policies are present'
+);
+
+select policies_are(
+  'public',
+  'couple_vendors',
+  array['couple_vendors_owner_all'],
+  'couple-vendor relationships expose only the wedding owner policy'
+);
+
+select policies_are(
+  'public',
+  'budget_items',
+  array['budget_items_owner_all'],
+  'budget items expose only the wedding owner policy'
+);
+
+select policies_are(
+  'public',
+  'payments',
+  array['payments_owner_all'],
+  'payments expose only the budget owner policy'
+);
+
+select policies_are(
+  'public',
+  'assistant_threads',
+  array['assistant_threads_owner_all'],
+  'assistant threads expose only the wedding owner policy'
+);
+
+select policies_are(
+  'public',
+  'assistant_messages',
+  array['assistant_messages_owner_all'],
+  'assistant messages expose only the thread owner policy'
+);
+
+select policies_are(
+  'storage',
+  'objects',
+  array['vendor_media_owner_delete', 'vendor_media_owner_insert', 'vendor_media_owner_update', 'vendor_media_public_read'],
+  'vendor media exposes only public read and owner-write policies'
 );
 
 select * from finish();

@@ -26,7 +26,7 @@ export default async function TimelinePage() {
                 <h2 className="font-display text-3xl text-wine">{group.label}</h2>
                 <div className="mt-4 space-y-2">
                   {group.tasks.map((task) => (
-                    <Link key={task.id} href="/tasks" className="flex items-center gap-3 rounded-xl border bg-paper px-4 py-3 text-sm font-semibold hover:border-gold">
+                    <Link key={task.id} href="/tasks" className="timeline-entry flex items-center gap-3 rounded-xl border bg-paper px-4 py-3 text-sm font-semibold hover:border-gold">
                       {task.status === "completed" ? <CircleCheck className="size-4 text-sage" /> : <Circle className="size-4 text-gold" />}
                       <span className={task.status === "completed" ? "text-ink-soft line-through" : ""}>{task.title}</span>
                       <time className="ml-auto text-xs font-normal text-ink-soft">{task.dueDate}</time>

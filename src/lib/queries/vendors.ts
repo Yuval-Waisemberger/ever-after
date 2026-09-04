@@ -119,7 +119,7 @@ function filterDemoVendors(filters: VendorFilters): MarketplaceVendor[] {
     if (filters.minRating != null && (vendor.ratingAverage ?? 0) < filters.minRating) return false;
     if (filters.guestCount != null && ((vendor.minGuestCapacity ?? 0) > filters.guestCount || (vendor.maxGuestCapacity ?? Number.POSITIVE_INFINITY) < filters.guestCount)) return false;
     if (filters.friday && vendor.fridayAvailable !== true) return false;
-    if (filters.service && !vendor.services.some((service) => service.toLocaleLowerCase().includes(filters.service!.toLocaleLowerCase()))) return false;
+    if (filters.service && !vendor.services.includes(filters.service)) return false;
     return true;
   });
 }

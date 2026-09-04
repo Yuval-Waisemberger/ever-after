@@ -1,4 +1,5 @@
 import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import process from "node:process";
 
@@ -36,6 +37,109 @@ const types = [
   { slug: "preparation-hotels", name: "Hotels & Preparation Locations", category: "event-services", count: 22, price: [[1200, 2500], [2300, 4000], [3800, 6200], [5800, 9000]], services: ["Bridal preparation suite", "Overnight stay", "Late checkout", "Breakfast", "Natural-light room", "Photo-friendly spaces", "Family rooms", "Parking", "Terrace", "Vendor access", "Champagne package", "Post-wedding brunch"], styles: ["Luxury", "Classic", "Modern", "Urban", "Romantic", "Nature", "Intimate", "Vintage"], suffix: "House", noun: "preparation location" },
 ];
 
+const imagePoolCounts = {
+  "wedding-venues": 36,
+  "wedding-photographers": 12,
+  videographers: 22,
+  "magnet-photographers": 22,
+  "social-content": 10,
+  djs: 12,
+  attractions: 7,
+  "photo-booths": 8,
+  "wedding-dresses": 12,
+  suits: 9,
+  "makeup-hair": 12,
+  "event-design": 8,
+  flowers: 10,
+  invitations: 12,
+  "guest-gifts": 7,
+  transportation: 5,
+  officiants: 5,
+  "event-managers": 6,
+  "preparation-hotels": 12,
+};
+
+// A deterministic permutation keeps all 36 venue photographs in use. The specifically
+// curated Israeli location images are assigned to compatible venue rows rather than randomly.
+const venueImageNumberByLocalIndex = [
+  36, 3, 1, 22, 32, 24, 9, // Central Israel: urban/intimate, stone, garden, and modern halls.
+  34, 35, 13, 27, 33, 30, // Sharon: coastal anchors, glass gardens, and warm evening settings.
+  6, 25, 28, 17, 18, 11, // North: modern Haifa, Acre stone, Zichron glass, and hillside settings.
+  31, 26, 4, 12, 2, // Jerusalem: stone/mountain anchors plus indoor and courtyard options.
+  8, 29, 19, 20, 14, 21, // South: desert, Israeli evening hall, coast, and indoor/outdoor space.
+  16, 7, 5, 10, 15, 23, // Additional Central venues: rooftop, courtyard, garden, urban, and citrus.
+];
+
+// Jerusalem-stone rooms stay with Jerusalem-area vendors; the hillside sea view stays in Haifa.
+const hotelImageNumberByLocalIndex = [6, 4, 2, 5, 1, 7, 8, 9, 10, 11, 12, 3, 4, 2, 1, 5, 6, 7, 9, 10, 11, 8];
+
+// Unique primary covers within each priority subcategory. Cross-category reuse of
+// suitable editorial/detail shots keeps the physical pool controlled.
+const photographyCovers = [
+  ["wedding-photographers", 1], ["wedding-photographers", 2], ["wedding-photographers", 3],
+  ["wedding-photographers", 4], ["wedding-photographers", 5], ["wedding-photographers", 6],
+  ["wedding-photographers", 7], ["wedding-photographers", 8], ["suits", 4],
+  ["wedding-photographers", 9], ["transportation", 1], ["flowers", 3],
+  ["videographers", 4], ["wedding-dresses", 10], ["wedding-photographers", 10],
+  ["invitations", 1], ["suits", 9], ["wedding-photographers", 11],
+  ["makeup-hair", 9], ["videographers", 7], ["wedding-photographers", 12], ["suits", 8],
+];
+const videoCovers = [
+  ["videographers", 1], ["videographers", 2], ["videographers", 3],
+  ["videographers", 8], ["videographers", 5], ["videographers", 6],
+  ["videographers", 9], ["videographers", 10], ["videographers", 11],
+  ["videographers", 12], ["videographers", 13], ["videographers", 14],
+  ["videographers", 15], ["videographers", 16], ["videographers", 17],
+  ["videographers", 18], ["videographers", 19], ["videographers", 20],
+  ["videographers", 21], ["videographers", 22], ["social-content", 2], ["social-content", 4],
+];
+
+// Curated category-appropriate supplements, not new copies of the same files.
+// Twelve-cover cycles prevent exact repeats in ordinary 12-card browsing pages;
+// intentional reuse on later pages keeps this a controlled demo asset pool.
+const curatedCovers = {
+  // The grooming cover belongs to a vendor that actually offers groom grooming.
+  "makeup-hair": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 11].map((number) => ["makeup-hair", number]),
+  "social-content": [...Array.from({ length: 10 }, (_, i) => ["social-content", i + 1]), ["videographers", 21], ["videographers", 10]],
+  "photo-booths": [...Array.from({ length: 8 }, (_, i) => ["photo-booths", i + 1]), ["magnet-photographers", 10], ["magnet-photographers", 19], ["magnet-photographers", 20], ["magnet-photographers", 14]],
+  "event-design": [...Array.from({ length: 8 }, (_, i) => ["event-design", i + 1]), ["flowers", 5], ["flowers", 6], ["flowers", 8], ["event-managers", 4]],
+  flowers: [...Array.from({ length: 8 }, (_, i) => ["flowers", i + 1]), ["event-design", 4], ["flowers", 9], ["event-design", 2], ["flowers", 10]],
+};
+
+// Display names only: legacy slugs and all IDs deliberately remain stable.
+const venueDisplayNames = [
+  "Alma", "Beit Erez", "Luna Courtyard", "Noya", "Zayit", "Shahar", "Orna",
+  "Yamim", "Keshet Caesarea", "Rimonim", "Citrus", "Mosaic", "Gan Rimon",
+  "Carmel View", "Akko Arches", "Zichron Glasshouse", "Mitzpe Rosh Pina", "Nof Kinneret",
+  "Tivon Grove", "Oren Jerusalem", "Ein Kerem Terrace", "Mevaseret", "Hemed Courtyard",
+  "Shoresh", "Arava Light", "Laila", "Ashkelon Blue", "Mitzpe Horizon", "Dekel Eilat",
+  "Tamarind", "Canvas Rooftop", "Rimon", "Sol", "Tamar", "Indigo", "Hulda Orchard",
+];
+
+// Explicit browser feedback only; keys are stable one-based vendor sequences.
+const portfolioCorrections = {
+  37: { reviewScores: [[4, 4, 4, 4]] },
+  40: { city: "Tel Aviv", area: "central_israel", serviceAreas: ["central_israel", "north", "sharon"], reviewScores: [[5, 5, 5, 4]] },
+  41: { price: [12500, 16500], reviewScores: [[5, 4, 4, 4], [4, 4, 4, 4]] },
+  44: { price: [8000, 11000], reviewScores: [[4, 4, 4, 4], [4, 4, 4, 3]] },
+  50: { reviewScores: [[4, 4, 4, 4]] },
+  51: { city: "Central District", area: "central_israel", serviceAreas: ["central_israel", "north"], extraReviews: 1, reviewScores: [[5, 5, 5, 4]] },
+  60: { city: "Ramat Gan", area: "central_israel", serviceAreas: ["central_israel", "jerusalem", "south"], reviewScores: [[5, 5, 5, 4], [5, 5, 4, 4], [5, 4, 5, 4], [5, 5, 5, 4], [4, 5, 4, 5], [5, 4, 4, 5], [5, 5, 5, 4], [5, 4, 5, 4]] },
+  61: { reviewScores: [[5, 5, 4, 4]] },
+};
+
+// Revised covers must not reuse an optimized/browser-cached previous photograph.
+// The content hash changes only when that local asset changes; no extra files are needed.
+const revisedVenueImages = new Map(await Promise.all([2, 4, 7, 10, 14, 19, 21, 22, 28, 30, 33].map(async (number) => {
+  const file = `wedding-venues-${String(number).padStart(2, "0")}.webp`;
+  const bytes = await readFile(path.join(root, "public", "demo-marketplace", "wedding-venues", file));
+  return [number, createHash("sha256").update(bytes).digest("hex").slice(0, 12)];
+})));
+const revisedMagnetImages = new Map(await Promise.all([4, 8].map(async (number) => {
+  const file = `magnet-photographers-${String(number).padStart(2, "0")}.webp`;
+  return [number, createHash("sha256").update(await readFile(path.join(root, "public/demo-marketplace/magnet-photographers", file))).digest("hex").slice(0, 12)];
+})));
+
 const regions = ["central_israel", "sharon", "north", "jerusalem", "south", "central_israel", "sharon", "north", "south", "jerusalem", "central_israel"];
 const cities = {
   central_israel: ["Tel Aviv", "Jaffa", "Ramat Gan", "Holon", "Petah Tikva", "Rishon LeZion", "Rehovot"],
@@ -45,15 +149,30 @@ const cities = {
   south: ["Beersheba", "Ashdod", "Ashkelon", "Mitzpe Ramon", "Eilat", "Sderot"],
 };
 const venueLocations = Object.entries(cities).flatMap(([area, areaCities]) => areaCities.map((city) => ({ area, city })));
+// Targeted owner-reviewed demo corrections. Keys are stable venue-local indexes;
+// keep the original identity/slug generation and all other vendors unchanged.
+const venueCorrections = {
+  2: { city: "Jaffa, Tel Aviv" },
+  4: { city: "Kibbutz Ga'ash", area: "sharon", price: [340, 440] },
+  7: { price: [350, 450] },
+  8: { city: "Caesarea", price: [380, 480], reviewScores: [[4, 4, 4, 4], [5, 4, 4, 3], [4, 5, 3, 4]] },
+  9: { reviewScores: [[4, 4, 4, 4], [4, 5, 4, 3], [5, 4, 3, 4]] },
+  10: { businessName: "Citrus" },
+  11: { reviewScores: [[4, 4, 4, 4], [4, 4, 4, 3], [5, 4, 4, 3], [4, 4, 3, 4], [4, 4, 4, 4]] },
+  14: { reviewScores: [[4, 4, 4, 4], [5, 4, 4, 3], [4, 5, 3, 4]] },
+  19: { reviewScores: [[5, 5, 4, 4], [5, 4, 5, 4], [4, 5, 4, 5]] },
+  20: { price: [380, 480], extraReviews: 2, reviewScores: [[5, 4, 4, 4], [4, 5, 4, 4], [4, 4, 4, 4]] },
+  22: { city: "Ein Hemed" },
+  23: { city: "Shoresh" },
+  24: { city: "Masada", price: [550, 700] },
+  29: { city: "Rishon LeZion", area: "central_israel" },
+  32: { city: "Tel Aviv" },
+  34: { city: "Hadera", area: "sharon" },
+  35: { city: "Kibbutz Hulda" },
+};
 const brandWords = ["Alma", "Cedar", "Luna", "Noya", "Olive", "Dawn", "Carmel", "Arava", "Lark", "Pomegranate", "Velvet", "Mosaic", "Golden", "Quiet", "Wild", "Moon", "Sage", "Fig", "Terra", "North", "South", "Harbor", "Juniper", "Linen", "Orchid", "Amber", "Silver", "Aster", "Cypress", "Honey", "Canvas", "Rimon", "Sol", "Tamar", "Indigo", "Willow", "Kinneret", "Jasmine", "Dune", "Grove"];
 const brandForms = ["& Co.", "Collective", "Studio", "Workshop", "House", "Works", "Atelier", "Project"];
 const eventTypes = ["evening", "friday_afternoon", "daytime"];
-const palettes = [
-  ["#6f263d", "#d6aa63", "#f6eee5"], ["#1f4b45", "#c79a61", "#edf1e8"], ["#313b5a", "#cf9c9c", "#f5eee8"],
-  ["#805b35", "#a7b18b", "#f5ead9"], ["#51344d", "#d3ae7f", "#eee5ec"], ["#1f5363", "#d6b172", "#e7f0ef"],
-  ["#7b3f2d", "#d8a86e", "#f4e8dc"], ["#37482d", "#c9a45c", "#eef0e5"], ["#563848", "#c7868f", "#f7ecea"],
-  ["#25435b", "#c8ad83", "#eaf0f2"], ["#684d2e", "#bba56c", "#f2ecdc"], ["#4a385f", "#d1a86d", "#f1eaf5"],
-];
 const couples = ["Dana & Amit", "Noa & Gil", "Shira & Tom", "Yael & Ori", "Maya & Ron", "Lihi & Ben", "Tamar & Dan", "Neta & Gal", "Roni & Tal", "Adi & Yonatan", "Hila & Eyal", "Bar & Lior", "Eden & Omer", "Yuval & Niv", "Ella & Nadav", "Rotem & Ariel", "Shani & Itai", "Gaya & Alon"];
 
 const categoryBySlug = Object.fromEntries(categories.map((value, index) => [value[0], { id: uuid("10000000", index + 1), name: value[1] }]));
@@ -86,11 +205,29 @@ function reviewCount(index) {
   return 3 + (index % 5);
 }
 
+function imageNumberFor(subcategorySlug, localIndex) {
+  if (subcategorySlug === "wedding-venues") return venueImageNumberByLocalIndex[localIndex];
+  if (subcategorySlug === "preparation-hotels") return hotelImageNumberByLocalIndex[localIndex];
+  return (localIndex % imagePoolCounts[subcategorySlug]) + 1;
+}
+
+function imageUrlFor(subcategorySlug, localIndex) {
+  const cover = subcategorySlug === "wedding-photographers" ? photographyCovers[localIndex]
+    : subcategorySlug === "videographers" ? videoCovers[localIndex]
+    : curatedCovers[subcategorySlug]?.[localIndex % curatedCovers[subcategorySlug].length];
+  const imageNumber = cover?.[1] ?? imageNumberFor(subcategorySlug, localIndex);
+  subcategorySlug = cover?.[0] ?? subcategorySlug;
+  const version = subcategorySlug === "wedding-venues" ? revisedVenueImages.get(imageNumber)
+    : subcategorySlug === "magnet-photographers" ? revisedMagnetImages.get(imageNumber) : undefined;
+  return `/demo-marketplace/${subcategorySlug}/${subcategorySlug}-${String(imageNumber).padStart(2, "0")}.webp${version ? `?v=${version}` : ""}`;
+}
+
 function makeReview(vendor, reviewIndex, globalIndex) {
   const scorePatterns = [[4, 4, 3, 3], [4, 4, 4, 3], [4, 4, 4, 4], [5, 4, 4, 4], [5, 5, 4, 4], [5, 5, 5, 4], [5, 5, 5, 5]];
   const basePattern = pick([0, 1, 2, 3, 4, 5, 3, 4, 2, 3], vendor.sequence);
   const variation = reviewIndex > 0 && reviewIndex % 7 === 0 ? 1 : reviewIndex > 0 && reviewIndex % 5 === 0 ? -1 : 0;
-  const scores = scorePatterns[Math.max(0, Math.min(scorePatterns.length - 1, basePattern + variation))];
+  const reviewedScores = vendor.subcategorySlug === "wedding-venues" ? venueCorrections[vendor.sequence - 1]?.reviewScores : portfolioCorrections[vendor.sequence]?.reviewScores;
+  const scores = reviewedScores ? pick(reviewedScores, reviewIndex) : scorePatterns[Math.max(0, Math.min(scorePatterns.length - 1, basePattern + variation))];
   const data = { professionalism: scores[0], punctuality: scores[1], serviceAttitude: scores[2], valueForMoney: scores[3] };
   const avg = average(data);
   const strength = pick(vendor.services, reviewIndex);
@@ -119,22 +256,23 @@ function makeReview(vendor, reviewIndex, globalIndex) {
 
 function makeVendor(config, typeIndex, localIndex, sequence) {
   const venue = config.slug === "wedding-venues";
+  const correction = venue ? venueCorrections[localIndex] : portfolioCorrections[sequence];
   const fixedLocation = venue ? pick(venueLocations, localIndex) : null;
-  const primaryArea = fixedLocation?.area ?? pick(regions, sequence + typeIndex * 2);
-  const city = fixedLocation?.city ?? pick(cities[primaryArea], sequence + localIndex * 2);
+  const primaryArea = correction?.area ?? fixedLocation?.area ?? pick(regions, sequence + typeIndex * 2);
+  const city = correction?.city ?? fixedLocation?.city ?? pick(cities[primaryArea], sequence + localIndex * 2);
   const mobile = !["wedding-venues", "preparation-hotels"].includes(config.slug);
-  const serviceAreas = mobile
+  const serviceAreas = correction?.serviceAreas ?? (mobile
     ? (localIndex % 10 === 9 ? ["flexible"] : [...new Set([primaryArea, ...rotate(regions, sequence, 3)])].slice(0, 2 + (localIndex % 2)))
-    : [primaryArea];
+    : [primaryArea]);
   const tier = localIndex % 4;
   const [bandMin, bandMax] = config.price[tier];
-  const minPrice = bandMin + (localIndex % 3) * Math.max(1, Math.round((bandMax - bandMin) * 0.04));
-  const maxPrice = bandMax - ((localIndex + 1) % 3) * Math.max(1, Math.round((bandMax - bandMin) * 0.03));
+  const minPrice = correction?.price?.[0] ?? bandMin + (localIndex % 3) * Math.max(1, Math.round((bandMax - bandMin) * 0.04));
+  const maxPrice = correction?.price?.[1] ?? bandMax - ((localIndex + 1) % 3) * Math.max(1, Math.round((bandMax - bandMin) * 0.03));
   const first = pick(brandWords, localIndex + typeIndex * 5);
   const form = pick(brandForms, localIndex * 3 + typeIndex);
   const slug = `${slugify(`${first} ${config.suffix} ${form}`)}-${String(localIndex + 1).padStart(2, "0")}`;
   const displayForm = form.toLowerCase() === config.suffix.toLowerCase() ? "Retreat" : form;
-  const businessName = `${first} ${config.suffix} ${displayForm}`;
+  const businessName = venue ? venueDisplayNames[localIndex] : `${first} ${config.suffix} ${displayForm}`;
   const services = rotate(config.services, localIndex + typeIndex, 4 + (localIndex % 3));
   const styles = rotate(config.styles, localIndex * 2 + typeIndex, 2 + (localIndex % 3));
   const locationBased = ["wedding-venues", "preparation-hotels"].includes(config.slug);
@@ -176,7 +314,9 @@ function makeVendor(config, typeIndex, localIndex, sequence) {
     outdoorAvailable,
     phone: null, email: `${slug}@demo-vendor.test`,
     websiteUrl: `https://example.com/demo-vendors/${slug}`, instagramUrl: `https://example.com/demo-instagram/${slug}`,
-    isPublic: true, imageUrl: `/demo-vendors/${slug}.svg`, imageAlt: `Illustrated demo cover for ${businessName}`,
+    isPublic: true,
+    imageUrl: imageUrlFor(config.slug, localIndex),
+    imageAlt: `Demo ${config.noun} portfolio image for ${businessName}`,
   };
 }
 
@@ -184,22 +324,6 @@ function vendorSetting(indoor, outdoor) {
   if (indoor && outdoor) return "indoor and open-air options";
   if (indoor) return "a dedicated indoor setting";
   return "an open-air setting";
-}
-
-function svgFor(vendor, index) {
-  const [dark, accent, light] = pick(palettes, index);
-  const categoryIndex = categories.findIndex(([slug]) => slug === vendor.categorySlug);
-  const motif = [
-    `<path d="M110 440V220c0-120 80-180 190-180s190 60 190 180v220" fill="none" stroke="${accent}" stroke-width="18"/><circle cx="300" cy="190" r="70" fill="none" stroke="${light}" stroke-width="3"/>`,
-    `<rect x="95" y="75" width="410" height="300" rx="18" fill="none" stroke="${accent}" stroke-width="16"/><circle cx="300" cy="225" r="92" fill="none" stroke="${light}" stroke-width="4"/><circle cx="300" cy="225" r="28" fill="${accent}"/>`,
-    `<path d="M65 245c70-130 115 130 190 0s120 130 190 0 75 55 90 0" fill="none" stroke="${accent}" stroke-width="18" stroke-linecap="round"/><circle cx="300" cy="210" r="125" fill="none" stroke="${light}" stroke-width="3"/>`,
-    `<path d="M300 60c80 65 145 130 145 220a145 145 0 01-290 0c0-90 65-155 145-220z" fill="none" stroke="${accent}" stroke-width="15"/><path d="M210 285c55-70 125-70 180 0" fill="none" stroke="${light}" stroke-width="4"/>`,
-    `<g fill="none" stroke="${accent}" stroke-width="12"><circle cx="300" cy="205" r="50"/><circle cx="300" cy="125" r="50"/><circle cx="380" cy="205" r="50"/><circle cx="300" cy="285" r="50"/><circle cx="220" cy="205" r="50"/></g>`,
-    `<path d="M90 320h420M130 280l100-110 70 70 85-120 85 160" fill="none" stroke="${accent}" stroke-width="16" stroke-linecap="round" stroke-linejoin="round"/><circle cx="430" cy="105" r="35" fill="${light}"/>`,
-  ][categoryIndex];
-  const safeName = vendor.businessName.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;");
-  const safeType = vendor.subcategoryName.replaceAll("&", "&amp;");
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc"><title id="title">${safeName}</title><desc id="desc">Original abstract demo artwork for a fictional ${safeType.toLowerCase()} vendor.</desc><rect width="1200" height="900" fill="${dark}"/><circle cx="1030" cy="130" r="230" fill="${accent}" opacity=".14"/><circle cx="130" cy="800" r="310" fill="${light}" opacity=".08"/><g transform="translate(${60 + (index % 5) * 120} 85) rotate(${(index % 7) - 3} 300 220)">${motif}</g><path d="M0 ${520 + (index % 7) * 17}C260 ${430 + (index % 5) * 25} 620 ${700 - (index % 4) * 30} 1200 ${500 + (index % 6) * 24}V900H0z" fill="${light}" opacity=".96"/><text x="70" y="690" fill="${dark}" font-family="Georgia,serif" font-size="62" font-weight="700">${safeName}</text><text x="72" y="755" fill="${dark}" opacity=".72" font-family="Arial,sans-serif" font-size="25" letter-spacing="5">${safeType.toUpperCase()}</text><text x="72" y="812" fill="${dark}" opacity=".68" font-family="Arial,sans-serif" font-size="22">${vendor.locationCity} · FICTIONAL DEMO VENDOR</text></svg>\n`;
 }
 
 let sequence = 1;
@@ -212,6 +336,12 @@ let reviewSequence = 1;
 const reviews = [];
 for (const vendor of vendors) {
   vendor.reviews = Array.from({ length: reviewCount(vendor.sequence) }, (_, index) => makeReview(vendor, index, reviewSequence++));
+  // Approved additional demo reviews use a separate deterministic ID range, so no
+  // previously generated review IDs or subsequent vendors' review text shift.
+  const extraReviews = (vendor.subcategorySlug === "wedding-venues" ? venueCorrections[vendor.sequence - 1]?.extraReviews : portfolioCorrections[vendor.sequence]?.extraReviews) ?? 0;
+  for (let index = 0; index < extraReviews; index += 1) {
+    vendor.reviews.push(makeReview(vendor, vendor.reviews.length, 200000 + vendor.sequence * 10 + index));
+  }
   reviews.push(...vendor.reviews);
   vendor.ratingAverage = vendor.reviews.length ? vendor.reviews.reduce((sum, review) => sum + average(review), 0) / vendor.reviews.length : null;
   vendor.reviewCount = vendor.reviews.length;
@@ -233,27 +363,7 @@ function fallbackVendor(vendor) {
   return Object.fromEntries(Object.entries(vendor).filter(([key]) => !fallbackOmissions.has(key)));
 }
 
-const categoryCounts = Object.fromEntries(categories.map(([slug]) => [slug, vendors.filter((vendor) => vendor.categorySlug === slug).length]));
 const subcategoryCounts = Object.fromEntries(types.map((type) => [type.slug, vendors.filter((vendor) => vendor.subcategorySlug === type.slug).length]));
-const geography = Object.fromEntries([...new Set(regions)].map((area) => [area, vendors.filter((vendor) => vendor.serviceAreas.includes(area)).length]));
-geography.flexible = vendors.filter((vendor) => vendor.serviceAreas.includes("flexible")).length;
-const homeBaseGeography = Object.fromEntries([...new Set(regions)].map((area) => [area, vendors.filter((vendor) => vendor.homeArea === area).length]));
-const styles = Object.fromEntries([...new Set(vendors.flatMap((vendor) => vendor.styles))].sort().map((style) => [style, vendors.filter((vendor) => vendor.styles.includes(style)).length]));
-const reviewDistribution = {
-  none: vendors.filter((vendor) => vendor.reviewCount === 0).length,
-  few_1_2: vendors.filter((vendor) => vendor.reviewCount >= 1 && vendor.reviewCount <= 2).length,
-  several_3_7: vendors.filter((vendor) => vendor.reviewCount >= 3 && vendor.reviewCount <= 7).length,
-  established_8_12: vendors.filter((vendor) => vendor.reviewCount >= 8 && vendor.reviewCount <= 12).length,
-  high_13_plus: vendors.filter((vendor) => vendor.reviewCount >= 13).length,
-};
-const ratingDistribution = {
-  unrated: vendors.filter((vendor) => vendor.ratingAverage == null).length,
-  mixed_3_0_to_3_99: vendors.filter((vendor) => vendor.ratingAverage != null && vendor.ratingAverage < 4).length,
-  positive_4_0_to_4_49: vendors.filter((vendor) => vendor.ratingAverage != null && vendor.ratingAverage >= 4 && vendor.ratingAverage < 4.5).length,
-  highly_rated_4_5_to_5_0: vendors.filter((vendor) => vendor.ratingAverage != null && vendor.ratingAverage >= 4.5).length,
-};
-const priceRanges = Object.fromEntries(types.map((type) => { const rows = vendors.filter((vendor) => vendor.subcategorySlug === type.slug); return [type.slug, { minimumShekels: Math.min(...rows.map((row) => row.minPriceMinor)) / 100, maximumShekels: Math.max(...rows.map((row) => row.maxPriceMinor)) / 100, unit: type.slug === "wedding-venues" ? "per guest" : "package or service" }]; }));
-const stats = { generatedAt: "deterministic-build", totalVendors: vendors.length, totalReviews: reviews.length, categoryCounts, subcategoryCounts, homeBaseGeography, serviceCoverage: geography, styles, reviewDistribution, ratingDistribution, priceRanges };
 
 function validate() {
   if (vendors.length !== 432) throw new Error(`Expected 432 vendors, received ${vendors.length}.`);
@@ -264,7 +374,7 @@ function validate() {
     if (!type || type.category !== vendor.categorySlug) throw new Error(`Category mismatch for ${vendor.slug}.`);
     if (vendor.minPriceMinor < 0 || vendor.minPriceMinor > vendor.maxPriceMinor) throw new Error(`Invalid price range for ${vendor.slug}.`);
     if (vendor.minGuestCapacity != null && vendor.minGuestCapacity > vendor.maxGuestCapacity) throw new Error(`Invalid capacity for ${vendor.slug}.`);
-    if (!vendor.imageUrl.startsWith("/demo-vendors/") || !vendor.imageUrl.endsWith(".svg")) throw new Error(`Invalid image URL for ${vendor.slug}.`);
+    if (!/^\/demo-marketplace\/[a-z0-9-]+\/[a-z0-9-]+-\d{2}\.webp(?:\?v=[a-f0-9]{12})?$/.test(vendor.imageUrl)) throw new Error(`Invalid image URL for ${vendor.slug}.`);
     for (const review of vendor.reviews) {
       const scores = [review.professionalism, review.punctuality, review.serviceAttitude, review.valueForMoney];
       if (scores.some((score) => score < 1 || score > 5) || review.wouldChooseAgain !== (average(review) >= 3.75)) throw new Error(`Inconsistent review ${review.id}.`);
@@ -277,7 +387,6 @@ validate();
 const outputs = new Map([
   [path.join(root, "supabase", "seed.sql"), sql()],
   [path.join(root, "src", "generated", "marketplace-demo.json"), `${JSON.stringify(vendors.map(fallbackVendor), null, 2)}\n`],
-  [path.join(root, "src", "generated", "marketplace-stats.json"), `${JSON.stringify(stats, null, 2)}\n`],
 ]);
 for (const [file, content] of outputs) {
   if (checkOnly) {
@@ -289,21 +398,19 @@ for (const [file, content] of outputs) {
   }
 }
 
-const assetDirectory = path.join(root, "public", "demo-vendors");
-if (!checkOnly) await mkdir(assetDirectory, { recursive: true });
-for (const [index, vendor] of vendors.entries()) {
-  const file = path.join(assetDirectory, `${vendor.slug}.svg`);
-  const content = svgFor(vendor, index);
-  if (checkOnly) {
-    const current = await readFile(file, "utf8").catch(() => "");
-    if (current !== content) throw new Error(`${path.relative(root, file)} is missing or stale.`);
-  } else {
-    await writeFile(file, content, "utf8");
+const assetDirectory = path.join(root, "public", "demo-marketplace");
+const referencedImageUrls = new Set(vendors.map((vendor) => vendor.imageUrl));
+const expectedAssetCount = Object.values(imagePoolCounts).reduce((sum, count) => sum + count, 0);
+if (referencedImageUrls.size !== expectedAssetCount) throw new Error(`Expected all ${expectedAssetCount} pooled images to be used, found ${referencedImageUrls.size}.`);
+for (const imageUrl of referencedImageUrls) {
+  const data = await readFile(path.join(root, "public", imageUrl.split("?")[0]));
+  if (data.length < 12 || data.toString("ascii", 0, 4) !== "RIFF" || data.toString("ascii", 8, 12) !== "WEBP") {
+    throw new Error(`${imageUrl} is not a valid WebP container.`);
   }
 }
-if (checkOnly) {
-  const assets = (await readdir(assetDirectory)).filter((name) => name.endsWith(".svg"));
-  if (assets.length !== vendors.length) throw new Error(`Expected ${vendors.length} SVG assets, found ${assets.length}.`);
+for (const [subcategorySlug, expectedCount] of Object.entries(imagePoolCounts)) {
+  const names = (await readdir(path.join(assetDirectory, subcategorySlug))).filter((name) => name.endsWith(".webp"));
+  if (names.length !== expectedCount) throw new Error(`Expected ${expectedCount} ${subcategorySlug} assets, found ${names.length}.`);
 }
 
-console.log(`${checkOnly ? "Validated" : "Generated"} ${vendors.length} fictional vendors, ${reviews.length} fictional reviews, and ${vendors.length} local SVG assets.`);
+console.log(`${checkOnly ? "Validated" : "Generated"} ${vendors.length} fictional vendors, ${reviews.length} fictional reviews, and ${expectedAssetCount} pooled local WebP assets.`);

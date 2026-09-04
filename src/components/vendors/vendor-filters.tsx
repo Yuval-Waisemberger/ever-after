@@ -43,7 +43,7 @@ export function VendorFiltersForm({ filters }: { filters: VendorFilters }) {
         </div>
       ) : filters.category === "photography-content" ? (
         <div className="grid gap-3 border-t pt-4 sm:grid-cols-2 lg:col-span-12">
-          <input name="service" defaultValue={filters.service} placeholder="Included service, e.g. Drone" aria-label="Included service" className={inputClass} />
+          <input name="service" defaultValue={filters.service} placeholder="Exact included service, e.g. Drone" aria-label="Included service" className={inputClass} />
           <input name="maxPrice" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Maximum package price (₪)" aria-label="Maximum package price" className={inputClass} />
         </div>
       ) : null}

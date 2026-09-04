@@ -11,7 +11,7 @@ const actions = [
 
 export function VendorStatusActions({ vendorId, currentStatus }: { vendorId: string; currentStatus?: string | null }) {
   return (
-    <div>
+    <div className="vendor-status-actions">
       <p className="text-xs font-bold uppercase tracking-[0.12em] text-ink-soft">Your status</p>
       <div className="mt-3 flex flex-wrap gap-2">
         {actions.map(([status, label, Icon]) => (

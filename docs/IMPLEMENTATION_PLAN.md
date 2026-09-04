@@ -179,7 +179,7 @@ Migrations are reproducible SQL under `supabase/migrations/`:
 4. later, helper and confirmed assistant-action tables if second-priority work begins.
 
 `supabase/seed.sql` is generated from `scripts/generate-marketplace-seed.mjs` together with the local
-fallback JSON, statistics, and one checked-in SVG per fictional vendor. It contains 432 vendors
+fallback JSON; both reference a checked-in pool of 162 subcategory-specific WebP images. It contains 432 vendors
 (36 venues and 22 in each other detailed subcategory) plus 2,380 marked seed reviews. IDs, review
 dates, profiles, and images are deterministic; five `ON CONFLICT` upserts make identical repeated
 execution non-duplicating without deleting user-owned data. It contains no real vendor identities,
