@@ -5,7 +5,7 @@ import { VendorCard } from "@/components/vendors/vendor-card";
 import { VendorFiltersForm } from "@/components/vendors/vendor-filters";
 import { EmptyState } from "@/components/ui/empty-state";
 import { parseVendorFilters } from "@/lib/vendors/filters";
-import { getMarketplace } from "@/lib/queries/vendors";
+import { getMarketplace, getMarketplaceSubcategories } from "@/lib/queries/vendors";
 import { CategoryNavigation } from "@/components/vendors/category-navigation";
 import { Sprout } from "lucide-react";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 export default async function VendorsPage({ searchParams }: PageProps<"/vendors">) {
   const params = await searchParams;
   const filters = parseVendorFilters(params);
-  const result = await getMarketplace(filters);
+  const [result, subcategories] = await Promise.all([getMarketplace(filters), getMarketplaceSubcategories()]);
   const pageCount = Math.max(1, Math.ceil(result.total / result.pageSize));
   const pageHref = (page: number) => {
     const next = new URLSearchParams();
@@ -45,7 +45,7 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
           <p className="shrink-0 text-sm font-semibold text-ink-soft">{result.total} {result.total === 1 ? "vendor" : "vendors"}</p>
         </div>
         {result.isPreview ? <p className="marketplace-preview">You&apos;re browsing our local demo catalog. All vendor profiles and reviews are fictional.</p> : null}
-        <VendorFiltersForm key={JSON.stringify(filters)} filters={filters} />
+        <VendorFiltersForm key={JSON.stringify(filters)} filters={filters} subcategories={subcategories} />
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
           {result.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
         </div>

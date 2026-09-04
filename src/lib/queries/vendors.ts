@@ -4,7 +4,7 @@ import { calculateRecommendation } from "@/lib/domain/recommendation";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { demoVendors } from "@/lib/vendors/demo";
-import type { MarketplaceVendor, VendorFilters, VendorReview } from "@/lib/vendors/types";
+import type { MarketplaceSubcategory, MarketplaceVendor, VendorFilters, VendorReview } from "@/lib/vendors/types";
 
 const PAGE_SIZE = 12;
 
@@ -141,6 +141,22 @@ async function getWeddingRecommendationContext() {
   };
 }
 
+export async function getMarketplaceSubcategories(): Promise<MarketplaceSubcategory[]> {
+  if (!isSupabaseConfigured()) {
+    return [...new Map(demoVendors.flatMap((vendor) => vendor.subcategorySlug && vendor.subcategoryName
+      ? [[vendor.subcategorySlug, { slug: vendor.subcategorySlug, name: vendor.subcategoryName, categorySlug: vendor.categorySlug }] as const]
+      : [])).values()];
+  }
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("vendor_subcategories")
+    .select("slug, name, vendor_categories!inner(slug)").order("sort_order");
+  if (error) throw new Error("Vendor subcategories could not be loaded.");
+  return (data ?? []).map((row) => ({
+    slug: row.slug, name: row.name,
+    categorySlug: relationship(row.vendor_categories)?.slug ?? "",
+  }));
+}
+
 export async function getMarketplace(filters: VendorFilters) {
   if (!isSupabaseConfigured()) {
     const all = filterDemoVendors(filters);
@@ -149,9 +165,14 @@ export async function getMarketplace(filters: VendorFilters) {
   }
 
   const supabase = await createClient();
+  // A left-joined filter only filters the embedded record, not its parent vendor.
+  // Keep vendors without a subcategory visible unless a subcategory is requested.
+  const subcategoryJoin = filters.subcategory
+    ? "vendor_subcategories!inner(slug, name)"
+    : "vendor_subcategories(slug, name)";
   let query = supabase
     .from("vendor_profiles")
-    .select("*, vendor_categories!inner(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)", { count: "exact" })
+    .select(`*, vendor_categories!inner(slug, name), ${subcategoryJoin}, vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)`, { count: "exact" })
     .eq("is_public", true);
   if (filters.search) query = query.or(`business_name.ilike.%${filters.search.replaceAll(",", "")}%,location_city.ilike.%${filters.search.replaceAll(",", "")}%,description.ilike.%${filters.search.replaceAll(",", "")}%`);
   if (filters.category) query = query.eq("vendor_categories.slug", filters.category);

@@ -57,3 +57,4 @@ export type VendorFilters = {
   service?: string;
   page: number;
 };
+export type MarketplaceSubcategory = { slug: string; name: string; categorySlug: string };
