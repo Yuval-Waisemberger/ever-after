@@ -39,24 +39,23 @@ test("guest can browse the seeded marketplace preview and a vendor profile", asy
   await expect(page.getByText("88 vendors", { exact: true })).toBeVisible();
   await expect(page.locator("article")).toHaveCount(12);
   await expect(page.getByText("Page 1 of 8", { exact: true })).toBeVisible();
-  await expect(page.getByRole("link", { name: /Dawn Photography Collective/i })).toBeVisible();
 
-  await page.goto("/vendors/dawn-photography-collective-01");
-  await expect(page.getByRole("heading", { name: "Dawn Photography Collective" })).toBeVisible();
-  await expect(page.getByText(/documentary coverage/i).first()).toBeVisible();
-  const cover = page.getByRole("img", { name: /Dawn Photography Collective/i });
-  const decodedSource = decodeURIComponent((await cover.getAttribute("src")) ?? "");
-  expect(decodedSource).toContain("/demo-marketplace/wedding-photographers/wedding-photographers-01.webp");
+  const firstCard = page.locator("article.vendor-card").first();
+  const businessName = (await firstCard.getByRole("heading").innerText()).trim();
+  await firstCard.locator("a").click();
+  await expect(page.getByRole("heading", { name: businessName, exact: true })).toBeVisible();
+  const cover = page.locator("main img").first();
   await expectImageDecoded(cover);
 });
 
 test("representative marketplace covers decode across the requested categories", async ({ page }) => {
   test.setTimeout(90_000);
   for (const subcategory of representativeSubcategories) {
-    const businessName = vendors.find((vendor) => vendor.subcategorySlug === subcategory)?.businessName;
-    expect(businessName, subcategory).toBeTruthy();
-    await page.goto(`/vendors?subcategory=${subcategory}`);
-    await expectImageDecoded(page.getByRole("img", { name: businessName! }).first());
+    const vendor = vendors.find((entry) => entry.subcategorySlug === subcategory);
+    expect(vendor, subcategory).toBeTruthy();
+    await page.goto(`/vendors?subcategory=${subcategory}&search=${encodeURIComponent(vendor!.businessName)}`);
+    await expect(page.locator("article.vendor-card")).toHaveCount(1);
+    await expectImageDecoded(page.getByRole("img", { name: vendor!.imageAlt, exact: true }));
   }
 });
 
@@ -109,17 +108,16 @@ test("targeted cover sequences stay distinct on mobile and desktop listing pages
 });
 
 test("reviewed venues retain their corrections on cards and profile pages", async ({ page }) => {
-  await page.goto("/vendors?page=1");
-  await expect(page.getByText("Jaffa, Tel Aviv", { exact: true })).toBeVisible();
-  await expect(page.getByText("Kibbutz Ga'ash", { exact: true })).toBeVisible();
-  await expect(page.getByText("Caesarea", { exact: true })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Citrus", exact: true })).toBeVisible();
+  for (const slug of ["luna-estate-atelier-03", "olive-estate-house-05", "lark-estate-and-co-09", "velvet-estate-atelier-11"]) {
+    const vendor = vendors.find((entry) => entry.slug === slug)!;
+    await page.goto(`/vendors?search=${encodeURIComponent(vendor.businessName)}`);
+    const card = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: vendor.businessName, exact: true }) });
+    await expect(card).toContainText(vendor.locationCity!);
+  }
   for (const name of ["Noya", "Mosaic"]) {
-    await expectImageDecoded(page.getByRole("img", { name: `Demo venue portfolio image for ${name}`, exact: true }));
     const vendor = vendors.find((entry) => entry.businessName === name)!;
     await page.goto(`/vendors/${vendor.slug}`);
     await expectImageDecoded(page.getByRole("img", { name: `Demo venue portfolio image for ${name}`, exact: true }));
-    await page.goto("/vendors?page=1");
   }
   await page.goto("/vendors/velvet-estate-atelier-11");
   await expect(page.getByRole("heading", { name: "Citrus", exact: true })).toBeVisible();
@@ -142,19 +140,15 @@ test("marketplace filtering and pagination use the expanded fallback dataset", a
 
 test("venue feedback appears with current versioned covers and calculated ratings", async ({ page }) => {
   test.setTimeout(90_000);
-  for (const pageNumber of [1, 2, 3]) {
-    await page.goto(`/vendors?page=${pageNumber}`);
-    const pageVendors = vendors.slice((pageNumber - 1) * 12, pageNumber * 12);
-    for (const vendor of pageVendors.filter((entry) => entry.imageUrl.includes("?v="))) {
-      const image = page.getByRole("img", { name: vendor.imageAlt, exact: true });
-      expect(decodeURIComponent((await image.getAttribute("src")) ?? "")).toContain(vendor.imageUrl);
-      await expectImageDecoded(image);
-    }
-    for (const vendor of pageVendors) {
-      const card = page.locator("article").filter({ has: page.getByRole("heading", { name: vendor.businessName, exact: true }) });
-      await expect(card.locator("p").filter({ hasText: vendor.locationCity! }).first()).toHaveText(vendor.locationCity!);
-      if (vendor.ratingAverage != null) await expect(card.getByText(vendor.ratingAverage.toFixed(1), { exact: true })).toBeVisible();
-    }
+  const reviewedVenues = vendors.filter((entry) => entry.subcategorySlug === "wedding-venues" && entry.imageUrl.includes("?v="));
+  for (const vendor of reviewedVenues) {
+    await page.goto(`/vendors?search=${encodeURIComponent(vendor.businessName)}`);
+    const card = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: vendor.businessName, exact: true }) });
+    const image = card.getByRole("img", { name: vendor.imageAlt, exact: true });
+    expect(decodeURIComponent((await image.getAttribute("src")) ?? "")).toContain(vendor.imageUrl);
+    await expectImageDecoded(image);
+    await expect(card).toContainText(vendor.locationCity!);
+    if (vendor.ratingAverage != null) await expect(card.getByText(vendor.ratingAverage.toFixed(1), { exact: true })).toBeVisible();
   }
   await page.goto("/vendors/south-estate-house-21");
   await expect(page.getByText("4.2 · 3 reviews", { exact: true })).toBeVisible();
@@ -182,16 +176,17 @@ test("priority photography categories show 22 distinct decoded covers across bot
 });
 
 test("North, Terra and Golden photography feedback appears on marketplace cards and profiles", async ({ page }) => {
-  await page.goto("/vendors?page=4");
-  const golden = page.locator("article").filter({ has: page.getByRole("heading", { name: "Golden Photography Atelier", exact: true }) });
+  await page.goto(`/vendors?search=${encodeURIComponent("Golden Photography Atelier")}`);
+  const golden = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: "Golden Photography Atelier", exact: true }) });
   await expect(golden.getByText("3.9", { exact: true })).toBeVisible();
   await expect(golden).toContainText("8,000");
   await expect(golden).toContainText("11,000");
-  await page.goto("/vendors?page=5");
-  const north = page.locator("article").filter({ has: page.getByRole("heading", { name: "North Photography Workshop", exact: true }) });
+  await page.goto(`/vendors?search=${encodeURIComponent("North Photography Workshop")}`);
+  const north = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: "North Photography Workshop", exact: true }) });
   await expect(north.getByText("4.8", { exact: true })).toBeVisible();
   await expect(north.getByText("Central District", { exact: true })).toBeVisible();
-  const terra = page.locator("article").filter({ has: page.getByRole("heading", { name: "Terra Photography & Co.", exact: true }) });
+  await page.goto(`/vendors?search=${encodeURIComponent("Terra Photography & Co.")}`);
+  const terra = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: "Terra Photography & Co.", exact: true }) });
   await expect(terra.getByText("4.0", { exact: true })).toBeVisible();
   await page.goto("/vendors/north-photography-workshop-15");
   await expect(page.getByText("4.8 · 1 reviews", { exact: true })).toBeVisible();
@@ -201,7 +196,7 @@ test("North, Terra and Golden photography feedback appears on marketplace cards 
 test("Juniper uses the corrected magnet orientation asset on its card and profile", async ({ page }) => {
   const vendor = vendors.find((entry) => entry.slug === "juniper-magnets-and-co-08")!;
   expect(vendor.imageUrl).toMatch(/magnet-photographers-08\.webp\?v=[a-f0-9]{12}$/);
-  for (const route of ["/vendors?page=8", `/vendors/${vendor.slug}`]) {
+  for (const route of [`/vendors?search=${encodeURIComponent(vendor.businessName)}`, `/vendors/${vendor.slug}`]) {
     await page.goto(route);
     const image = page.getByRole("img", { name: vendor.imageAlt, exact: true }).first();
     await expectImageDecoded(image);

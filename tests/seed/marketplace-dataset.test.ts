@@ -53,6 +53,17 @@ const allowedStyles = new Set([
   "Romantic", "Modern", "Luxury", "Nature", "Intimate", "Minimalist", "Party / Festival",
 ]);
 
+const genericBusinessWords = new Set([
+  "acts", "and", "atelier", "bar", "beats", "beauty", "behind", "bespoke", "booth", "botanical", "bridal", "by", "celebration", "ceremonies", "ceremony",
+  "chuppah", "cinema", "co", "content", "coordination", "corner", "couture", "dancefloor", "design", "dress", "dresses", "editorial", "event",
+  "entertainment", "experiences", "favor", "favors", "film", "films", "floral", "florals", "flower", "flowers", "formalwear", "gift", "gifts", "goods", "guidance",
+  "guest", "guests", "hair", "hotel", "house", "images", "instant", "invitation", "journal", "keepsakes", "lab", "live", "magnet", "magnets",
+  "makeup", "management", "memory", "menswear", "moments", "motion", "music", "officiant", "paper", "photo", "photography", "pictures", "planning",
+  "party", "performers", "portrait", "portraits", "preparation", "print", "prints", "producers", "reception", "reel", "reels", "retreat", "rides", "room", "rooms", "routes", "salon",
+  "scenes", "services", "shuttle", "shuttles", "social", "sound", "stationery", "stay", "stories", "story", "studio", "suit", "suites", "suits",
+  "styling", "tailor", "tailoring", "the", "transit", "transport", "tuxedo", "visual", "vow", "wedding", "welcome", "works",
+]);
+
 describe("generated marketplace dataset", () => {
   it("preserves the reviewed venue corrections without renaming stable slugs", () => {
     const find = (slug: string) => vendors.find((vendor) => vendor.slug === slug)!;
@@ -80,6 +91,20 @@ describe("generated marketplace dataset", () => {
       expect(new Set(matches.map((vendor) => vendor.services.toSorted().join("|"))).size).toBeGreaterThanOrEqual(10);
       expect(new Set(matches.map((vendor) => `${vendor.minPriceMinor}-${vendor.maxPriceMinor}`)).size).toBeGreaterThanOrEqual(10);
     }
+  });
+
+  it("uses a distinct brand vocabulary instead of recycling generator stems", () => {
+    const meaningfulWordFrequency = new Map<string, number>();
+    for (const vendor of vendors) {
+      const words = new Set(vendor.businessName.toLowerCase().match(/[a-z]+/g) ?? []);
+      for (const word of words) {
+        if (word.length <= 2 || genericBusinessWords.has(word)) continue;
+        meaningfulWordFrequency.set(word, (meaningfulWordFrequency.get(word) ?? 0) + 1);
+      }
+    }
+    const unusuallyRepeated = [...meaningfulWordFrequency].filter(([, count]) => count > 2);
+    expect(unusuallyRepeated).toEqual([]);
+    expect([...meaningfulWordFrequency].filter(([, count]) => count === 2).map(([word]) => word).sort()).toEqual(["courtyard", "mitzpe", "rimon"]);
   });
 
   it("derives the requested venue ratings from real demo review scores", () => {

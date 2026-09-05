@@ -116,6 +116,128 @@ const venueDisplayNames = [
   "Tamarind", "Canvas Rooftop", "Rimon", "Sol", "Tamar", "Indigo", "Hulda Orchard",
 ];
 
+// Fictional display-name roots are deliberately unique across the non-venue
+// marketplace. Category language may repeat naturally; the distinctive brand
+// identity may not. Stable vendor IDs and legacy slugs remain unchanged.
+const businessNameRoots = {
+  "wedding-photographers": [
+    "Dawn", "Adera", "Kesem", "Lark", "Pomegranate", "Levaya", "Marom", "Golden", "Orli", "Sorek", "Navon",
+    "Reeva", "Fig", "Terra", "North", "Tavor", "Ziva", "Ayalet", "Sela", "Nahar", "Ronen", "Avital",
+  ],
+  videographers: [
+    "Kinema", "Vistara", "Aviram", "Zemer", "Rekan", "Talor", "Cineva", "Halom", "Mareh", "Nivra", "Zohari",
+    "Pazel", "Arbel", "Tzura", "Rakia", "Ofek", "Shavit", "Raviv", "Dafna", "Nesher", "Emek", "Sipur",
+  ],
+  "magnet-photographers": [
+    "Snapra", "Printel", "Mementa", "Klicka", "Polaroa", "Framely", "Memora", "Picaro", "Zikaro", "Momenta", "Keepla",
+    "Instara", "Smilab", "Miniprinta", "Blinka", "Cheriva", "Printsy", "Focali", "Magneva", "Souvenira", "Klikon", "Keepsia",
+  ],
+  "social-content": [
+    "Reelora", "Vowly", "Dayclip", "Storya", "Mingleon", "Candidra", "Scrolla", "Vistelle", "Keepscene", "Wedline", "Pulseframe",
+    "Vowcast", "Marrymotion", "Scenelet", "Guestory", "Veilview", "Momentia", "Daystory", "Socialle", "Ceremonycut", "Toastly", "Revela",
+  ],
+  djs: [
+    "Reson", "Beatline", "Tempero", "Basson", "Ritmika", "Vinylit", "Groovem", "Pulseway", "Cadentra", "Deckora", "Nightset",
+    "Danceva", "Soundary", "Mixelle", "Echobeat", "Turntide", "Melodix", "Rhythmon", "Partyson", "Sonique", "Beatara", "Harmona",
+  ],
+  attractions: [
+    "Bravura", "Sparkline", "Circella", "Flaria", "Wonderlane", "Festivo", "Marquea", "Kinetica", "Amazeo", "Encorra", "Jubilo",
+    "Roamance", "Glowmere", "Revelrya", "Firelume", "Lumessa", "Playora", "Wondria", "Paradeo", "Vivent", "Merriva", "Joyelle",
+  ],
+  "photo-booths": [
+    "Pictura", "Snapbox", "Boothique", "Flashlet", "Posea", "Clickery", "Portraita", "Keepsnap", "Smilebox", "Framepod", "Shuttery",
+    "Guestpix", "Printpop", "Focalla", "Cheersa", "Photocabin", "Momentbox", "Snapscene", "Picovia", "Flashframe", "Boothbird", "Clickcorner",
+  ],
+  "wedding-dresses": [
+    "Mireva", "Eliora", "Nerelle", "Taline", "Shiraya", "Avielle", "Noelia", "Ravella", "Zohara", "Kirelle", "Maelle",
+    "Rinaya", "Odelia", "Shavielle", "Lielle", "Merona", "Avenna", "Yafelle", "Seraya", "Nitzana", "Galora", "Adariel",
+  ],
+  suits: [
+    "Gavron", "Dariel", "Ronavi", "Talmon", "Benori", "Adivan", "Nivaro", "Leron", "Shalem", "Oziel", "Yarom",
+    "Eliran", "Givon", "Avneri", "Doram", "Idoan", "Saharon", "Meiron", "Aloni", "Kfiron", "Eitanor", "Ravidan",
+  ],
+  "makeup-hair": [
+    "Lumea", "Nerita", "Oraya", "Shirli", "Taliah", "Varda", "Amitelle", "Galiana", "Romyel", "Elinor", "Meyara",
+    "Hodaya", "Lirit", "Noyelle", "Sapira", "Tehila", "Zivelle", "Moriah", "Renana", "Ayelet", "Dorit", "Naomia",
+  ],
+  "event-design": [
+    "Chuppara", "Aisella", "Tableau", "Draperia", "Ceremia", "Forma", "Candela", "Vignetta", "Archiva", "Gathera", "Settinga",
+    "Symmetra", "Occasia", "Layora", "Sceneform", "Eventura", "Aislera", "Fabria", "Structa", "Stylera", "Nuptia", "Celenza",
+  ],
+  flowers: [
+    "Petalia", "Anemora", "Ranuncula", "Bloomery", "Stemora", "Botanira", "Florelle", "Petalune", "Herbelle", "Rosetta", "Dahliana",
+    "Meadowa", "Garlanda", "Bouqueta", "Verdelle", "Gardenelle", "Spriggle", "Posyana", "Blossara", "Leafora", "Wildstem", "Floravia",
+  ],
+  invitations: [
+    "Scriptura", "Velluma", "Papiera", "Inkora", "Sealine", "Letterra", "Ribbona", "Decklea", "Typoria", "Envelopa", "Presselle",
+    "Quillia", "Ivoryink", "Foldelle", "Proofa", "Monograma", "Papyria", "Writtena", "Linenote", "Cartevia", "Stampora", "Calligra",
+  ],
+  "guest-gifts": [
+    "Tokena", "Favoria", "Keepsella", "Giftora", "Mazelbox", "Thankfula", "Remembra", "Welcomea", "Littlejoy", "Trinketa", "Handmadea",
+    "Kindrella", "Mementelle", "Treatory", "Plantlet", "Sweetmark", "Guestkeep", "Tovah", "Neshama", "Delighta", "Presentia", "Partinga",
+  ],
+  transportation: [
+    "Nesiya", "Routiva", "Shuttleon", "Viaora", "Moventa", "Ridewell", "Transitara", "Roadly", "Guestway", "Fleeton", "Safara",
+    "Wayline", "Journeya", "Caravelle", "Arrivon", "Navetta", "Pathera", "Wheela", "Tripora", "Coachly", "Vanhaven", "Routewise",
+  ],
+  officiants: [
+    "Brita", "Vowen", "Ketuvah", "Chuppan", "Ceremiel", "Promisea", "Blessora", "Kiddusha", "Vowline", "Togethera", "Covenanta",
+    "Rituala", "Neder", "Avoda", "Simchara", "Kavanah", "Bondelle", "Sacredly", "Uniona", "Pledgera", "Heartword", "Mazala",
+  ],
+  "event-managers": [
+    "Planora", "Coordina", "Runbooka", "Timelina", "Flowstate", "Logistica", "Producerly", "Wedwise", "Daylead", "Organiza", "Seamlessa",
+    "Milestona", "Checklista", "Leadwell", "Calendra", "Briefa", "Vendorly", "Ordera", "Steadia", "Eventiva", "Handleda", "Clockworka",
+  ],
+  "preparation-hotels": [
+    "Suitea", "Stayora", "Restelle", "Roomance", "Havera", "Morninga", "Bridalia", "Retreata", "Nestora", "Villae", "Loftia",
+    "Sojourna", "Comfora", "Sanctua", "Hostelle", "Daybreaka", "Preparia", "Sleepwell", "Boudoira", "Innara", "Wakefula", "Chambera",
+  ],
+};
+
+const businessNameDescriptors = {
+  "wedding-photographers": ["Photography", "Photo Journal", "Wedding Stories", "Portraits", "Wedding Images", "Editorial Photography", "Photo Atelier", "Visual Stories"],
+  videographers: ["Films", "Wedding Cinema", "Motion Pictures", "Story Films", "Wedding Film", "Cinema Studio", "Motion", "Film Journal"],
+  "magnet-photographers": ["Magnets", "Print Lab", "Instant Prints", "Magnet Photography", "Celebration Prints", "Wedding Magnets", "Print Bar", "Memory Magnets"],
+  "social-content": ["Social Content", "Wedding Content", "Reel Studio", "Social Stories", "Content House", "Wedding Reels", "Behind the Scenes", "Content Atelier"],
+  djs: ["DJ", "Sound", "Music", "Dancefloor Sound", "Wedding Beats", "DJ Studio", "Music Room", "Event Sound"],
+  attractions: ["Live Experiences", "Celebration Acts", "Wedding Entertainment", "Guest Experiences", "Event Performers", "Reception Acts", "Party Experiences", "Live Moments"],
+  "photo-booths": ["Photo Booth", "Portrait Booth", "Wedding Booth", "Print Booth", "Guest Booth", "Photo Corner", "Booth Studio", "Celebration Booth"],
+  "wedding-dresses": ["Bridal", "Bridal Atelier", "Wedding Dresses", "Bridal Salon", "Dress Studio", "Couture Bridal", "Bridal House", "Wedding Atelier"],
+  suits: ["Tailoring", "Suit Studio", "Menswear", "Wedding Suits", "Bespoke Tailoring", "Tuxedo Atelier", "Formalwear", "Tailor Room"],
+  "makeup-hair": ["Bridal Beauty", "Makeup & Hair", "Beauty Studio", "Bridal Styling", "Makeup Atelier", "Hair & Makeup", "Beauty Room", "Wedding Beauty"],
+  "event-design": ["Event Design", "Chuppah Design", "Wedding Styling", "Design Studio", "Ceremony Design", "Event Atelier", "Wedding Design", "Celebration Styling"],
+  flowers: ["Florals", "Flower Studio", "Wedding Flowers", "Botanical Design", "Floral Atelier", "Flower House", "Event Florals", "Floral Design"],
+  invitations: ["Paper", "Invitation Studio", "Wedding Stationery", "Paper Atelier", "Invitation Design", "Stationery House", "Paper Goods", "Wedding Paper"],
+  "guest-gifts": ["Guest Gifts", "Wedding Favors", "Gift Studio", "Celebration Gifts", "Favor Atelier", "Welcome Gifts", "Keepsakes", "Gift House"],
+  transportation: ["Wedding Transport", "Guest Shuttles", "Event Transit", "Wedding Rides", "Transport Services", "Shuttle Co.", "Celebration Transport", "Event Routes"],
+  officiants: ["Ceremonies", "Wedding Officiant", "Ceremony Studio", "Chuppah Ceremonies", "Officiant Services", "Wedding Ceremonies", "Ceremony Guidance", "Vow Ceremonies"],
+  "event-managers": ["Event Planning", "Wedding Management", "Event Coordination", "Wedding Planning", "Planning Studio", "Celebration Management", "Event Producers", "Wedding Coordination"],
+  "preparation-hotels": ["Preparation Suites", "Bridal Stay", "Wedding Hotel", "Preparation House", "Wedding Suites", "Bridal Rooms", "Preparation Retreat", "Wedding Stay"],
+};
+
+const approvedBusinessNameOverrides = {
+  "dawn-photography-collective-01": "Dawn Photography Collective",
+  "lark-photography-studio-04": "Lark Photography Studio",
+  "pomegranate-photography-works-05": "Pomegranate Photography Works",
+  "golden-photography-atelier-08": "Golden Photography Atelier",
+  "fig-photography-works-13": "Fig Photography Works",
+  "terra-photography-and-co-14": "Terra Photography & Co.",
+  "north-photography-workshop-15": "North Photography Workshop",
+};
+
+function marketplaceBusinessName(subcategorySlug, localIndex, legacySlug) {
+  const root = businessNameRoots[subcategorySlug]?.[localIndex];
+  const descriptors = businessNameDescriptors[subcategorySlug];
+  if (!root || !descriptors) throw new Error(`Missing business-name catalog entry for ${subcategorySlug} #${localIndex + 1}.`);
+  if (approvedBusinessNameOverrides[legacySlug]) return approvedBusinessNameOverrides[legacySlug];
+  const descriptor = pick(descriptors, localIndex * 3 + subcategorySlug.length);
+  switch (localIndex % 7) {
+    case 1: return `${descriptor} by ${root}`;
+    case 2: return root;
+    default: return `${root} ${descriptor}`;
+  }
+}
+
 // Explicit browser feedback only; keys are stable one-based vendor sequences.
 const portfolioCorrections = {
   37: { reviewScores: [[4, 4, 4, 4]] },
@@ -271,8 +393,7 @@ function makeVendor(config, typeIndex, localIndex, sequence) {
   const first = pick(brandWords, localIndex + typeIndex * 5);
   const form = pick(brandForms, localIndex * 3 + typeIndex);
   const slug = `${slugify(`${first} ${config.suffix} ${form}`)}-${String(localIndex + 1).padStart(2, "0")}`;
-  const displayForm = form.toLowerCase() === config.suffix.toLowerCase() ? "Retreat" : form;
-  const businessName = venue ? venueDisplayNames[localIndex] : `${first} ${config.suffix} ${displayForm}`;
+  const businessName = venue ? venueDisplayNames[localIndex] : marketplaceBusinessName(config.slug, localIndex, slug);
   const services = rotate(config.services, localIndex + typeIndex, 4 + (localIndex % 3));
   const styles = rotate(config.styles, localIndex * 2 + typeIndex, 2 + (localIndex % 3));
   const locationBased = ["wedding-venues", "preparation-hotels"].includes(config.slug);
@@ -368,6 +489,9 @@ const subcategoryCounts = Object.fromEntries(types.map((type) => [type.slug, ven
 function validate() {
   if (vendors.length !== 432) throw new Error(`Expected 432 vendors, received ${vendors.length}.`);
   if (new Set(vendors.map((vendor) => vendor.id)).size !== vendors.length || new Set(vendors.map((vendor) => vendor.slug)).size !== vendors.length || new Set(vendors.map((vendor) => vendor.businessName)).size !== vendors.length) throw new Error("Vendor identifiers, slugs, and names must be unique.");
+  const catalogRoots = Object.values(businessNameRoots).flat();
+  if (catalogRoots.length !== 396 || new Set(catalogRoots.map((root) => root.toLowerCase())).size !== catalogRoots.length) throw new Error("Every non-venue vendor must have one unique fictional brand root.");
+  if (Object.entries(businessNameRoots).some(([slug, roots]) => typeBySlug[slug]?.count !== roots.length)) throw new Error("A business-name root catalog does not match its subcategory count.");
   if (types.some((type) => subcategoryCounts[type.slug] !== type.count || (type.slug === "wedding-venues" ? type.count < 30 : type.count < 20))) throw new Error("A subcategory vendor count is below its target.");
   for (const vendor of vendors) {
     const type = typeBySlug[vendor.subcategorySlug];
