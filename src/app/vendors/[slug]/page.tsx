@@ -23,8 +23,9 @@ export async function generateMetadata({ params }: PageProps<"/vendors/[slug]">)
   };
 }
 
-export default async function VendorProfilePage({ params }: PageProps<"/vendors/[slug]">) {
+export default async function VendorProfilePage({ params, searchParams }: PageProps<"/vendors/[slug]">) {
   const { slug } = await params;
+  const query = await searchParams;
   const vendor = await getVendorBySlug(slug);
   if (!vendor) notFound();
   const profile = await getCurrentProfile();
@@ -35,6 +36,7 @@ export default async function VendorProfilePage({ params }: PageProps<"/vendors/
     <div className="vendor-profile-page min-h-screen bg-canvas">
       <PublicHeader />
       <main id="main-content" className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
+        {query.relationship === "updated" ? <p role="status" className="mb-5 rounded-xl border border-wine/20 bg-wine/5 px-4 py-3 text-sm text-wine">Your vendor list has been updated.</p> : null}
         <Link href="/vendors" className="inline-flex items-center gap-2 text-sm font-semibold text-wine hover:underline"><ArrowLeft className="size-4" />Back to vendors</Link>
         <div className="vendor-profile-hero mt-6 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="vendor-profile-image relative aspect-[4/3] overflow-hidden border bg-paper-muted">
@@ -49,7 +51,7 @@ export default async function VendorProfilePage({ params }: PageProps<"/vendors/
             </div>
             <p className="mt-6 text-lg leading-8 text-ink-soft">{vendor.description}</p>
             <p className="ea-money mt-6 text-3xl text-wine">{vendor.minPriceMinor == null ? "Price on request" : `${formatIls(vendor.minPriceMinor)}${vendor.maxPriceMinor ? `–${formatIls(vendor.maxPriceMinor)}` : ""}${vendor.categorySlug === "venues" ? " per guest" : ""}`}</p>
-            {profile?.role === "couple" ? <div className="mt-7 border-t pt-6"><VendorStatusActions vendorId={vendor.id} currentStatus={relationship?.status} /></div> : <div className="mt-7"><Link href="/auth/couple" className="inline-flex min-h-11 items-center rounded-full bg-wine px-5 text-sm font-semibold text-white">Sign in to save this vendor</Link></div>}
+            {profile?.role === "couple" ? <div className="mt-7 border-t pt-6"><VendorStatusActions vendorId={vendor.id} currentStatus={relationship?.status} returnTo={`/vendors/${vendor.slug}`} /></div> : <div className="mt-7"><Link href="/auth/couple" className="inline-flex min-h-11 items-center rounded-full bg-wine px-5 text-sm font-semibold text-white">Sign in to save this vendor</Link></div>}
           </section>
         </div>
 

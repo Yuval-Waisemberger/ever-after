@@ -19,8 +19,8 @@ export const signInSchema = z.object({
 
 export const coupleSignUpSchema = z
   .object({
-    partnerOneName: z.string().trim().min(1, "Enter Partner 1's name").max(80),
-    partnerTwoName: z.string().trim().min(1, "Enter Partner 2's name").max(80),
+    partnerOneName: z.string().trim().min(1, "Enter the First Partner's name").max(80),
+    partnerTwoName: z.string().trim().min(1, "Enter the Second Partner's name").max(80),
     displayName: z.string().trim().min(1, "Enter a display name").max(100),
     partnerOnePhone: phone,
     partnerTwoPhone: phone,
@@ -53,4 +53,12 @@ export type AuthFieldErrors = Record<string, string[] | undefined>;
 export const resendVerificationSchema = z.object({
   email,
   audience: z.enum(["couple", "vendor"]),
+});
+
+export const changePasswordSchema = z.object({
+  password: z.string().min(8, "Use at least 8 characters").max(128),
+  confirmPassword: z.string(),
+}).refine((value) => value.password === value.confirmPassword, {
+  path: ["confirmPassword"],
+  message: "Passwords do not match",
 });

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Circle, CircleCheck } from "lucide-react";
+import { CalendarHeart, Circle, CircleCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
@@ -16,9 +16,9 @@ export default async function TimelinePage() {
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
-      <PageHeader eyebrow="My Wedding" title="Wedding Timeline" description={wedding.wedding_date ? "The same dated tasks, arranged relative to your wedding day." : "Your dated tasks by calendar month. Set a wedding date to see relative time-to-go groups."} action={<LinkButton href="/tasks" tone="secondary">Manage tasks</LinkButton>} />
+      <PageHeader eyebrow="Our Wedding" title="Wedding Timeline" description={wedding.wedding_date ? "Follow each dated task as it leads toward your wedding day." : "Your dated tasks are arranged by calendar month until you choose a wedding date."} action={<LinkButton href="/tasks" tone="secondary">Manage tasks</LinkButton>} />
       <div className="mt-10">
-        {groups.length ? (
+        {groups.length || wedding.wedding_date ? (
           <ol className="relative space-y-10 before:absolute before:bottom-3 before:left-[0.7rem] before:top-3 before:w-px before:bg-line">
             {groups.map((group) => (
               <li key={group.key} className="relative pl-10">
@@ -35,6 +35,19 @@ export default async function TimelinePage() {
                 </div>
               </li>
             ))}
+            {wedding.wedding_date ? (
+              <li className="timeline-destination relative pl-10">
+                <span className="absolute left-0 top-1 grid size-6 place-items-center rounded-full border border-wine bg-wine text-white">
+                  <CalendarHeart className="size-3.5" aria-hidden="true" />
+                </span>
+                <p className="eyebrow">The destination</p>
+                <h2 className="font-display mt-1 text-3xl text-wine">Your Wedding Day</h2>
+                <time className="mt-2 block text-sm text-ink-soft" dateTime={wedding.wedding_date}>
+                  {new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${wedding.wedding_date}T00:00:00Z`))}
+                </time>
+                {!groups.length ? <p className="mt-4 max-w-xl text-sm leading-6 text-ink-soft">No dated tasks yet. Add a due date to any task and it will join the path above your wedding day.</p> : null}
+              </li>
+            ) : null}
           </ol>
         ) : (
           <EmptyState title="No dated tasks yet" description="Add a due date to any task and it will appear here automatically." action={<LinkButton href="/tasks">Add a task</LinkButton>} />

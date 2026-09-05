@@ -1,4 +1,8 @@
+"use client";
+
 import type { ComponentProps, ReactNode } from "react";
+import { useState } from "react";
+import { Eye, EyeOff } from "lucide-react";
 
 type FormFieldProps = ComponentProps<"input"> & {
   label: string;
@@ -10,16 +14,32 @@ export function FormField({ label, error, hint, id, className = "", ...props }: 
   const inputId = id ?? props.name;
   const errorId = error ? `${inputId}-error` : undefined;
   const hintId = hint ? `${inputId}-hint` : undefined;
+  const isPassword = props.type === "password";
+  const [passwordVisible, setPasswordVisible] = useState(false);
   return (
-    <label className="ea-field grid gap-2 text-sm font-medium text-ink" htmlFor={inputId}>
-      {label}
-      <input
-        id={inputId}
-        aria-invalid={Boolean(error)}
-        aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
-        className={`ea-input min-h-11 rounded-xl border bg-paper px-3.5 py-2.5 text-base font-normal text-ink transition disabled:opacity-60 ${className}`}
-        {...props}
-      />
+    <div className="ea-field grid gap-2 text-sm font-medium text-ink">
+      <label htmlFor={inputId}>{label}</label>
+      <span className="relative block">
+        <input
+          id={inputId}
+          aria-invalid={Boolean(error)}
+          aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
+          className={`ea-input min-h-11 rounded-xl border bg-paper px-3.5 py-2.5 text-base font-normal text-ink transition disabled:opacity-60 ${isPassword ? "pr-12" : ""} ${className}`}
+          {...props}
+          type={isPassword && passwordVisible ? "text" : props.type}
+        />
+        {isPassword ? (
+          <button
+            type="button"
+            className="absolute inset-y-0 right-1 grid min-h-11 min-w-11 place-items-center text-ink-soft transition hover:text-wine"
+            onClick={() => setPasswordVisible((visible) => !visible)}
+            aria-label={passwordVisible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
+            aria-pressed={passwordVisible}
+          >
+            {passwordVisible ? <EyeOff className="size-4.5" aria-hidden="true" /> : <Eye className="size-4.5" aria-hidden="true" />}
+          </button>
+        ) : null}
+      </span>
       {hint ? (
         <span id={hintId} className="text-xs font-normal leading-5 text-ink-soft">
           {hint}
@@ -30,6 +50,6 @@ export function FormField({ label, error, hint, id, className = "", ...props }: 
           {error}
         </span>
       ) : null}
-    </label>
+    </div>
   );
 }

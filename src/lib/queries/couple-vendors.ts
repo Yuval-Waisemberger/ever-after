@@ -30,6 +30,19 @@ export async function getMyVendors(status?: string) {
     query = query.eq("status", status!);
   }
   const { data, error } = await query;
-  if (error) throw new Error("My Vendors could not be loaded.");
+  if (error) throw new Error("Our Vendors could not be loaded.");
+  return data ?? [];
+}
+
+export async function getMyReviews() {
+  const wedding = await getOwnedWedding();
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("reviews")
+    .select("id, vendor_id, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, updated_at, vendor_profiles(slug, business_name, vendor_images(external_url, storage_path, alt_text, is_primary, sort_order))")
+    .eq("wedding_id", wedding.id)
+    .eq("is_seeded", false)
+    .order("updated_at", { ascending: false });
+  if (error) throw new Error("Your reviews could not be loaded.");
   return data ?? [];
 }

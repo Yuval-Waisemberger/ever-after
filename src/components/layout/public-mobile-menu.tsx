@@ -3,7 +3,7 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef } from "react";
 
-export function PublicMobileMenu({ workspaceHref }: { workspaceHref?: string }) {
+export function PublicMobileMenu({ links, authenticated }: { links: Array<{ href: string; label: string }>; authenticated: boolean }) {
   const disclosure = useRef<HTMLDetailsElement>(null);
   const summary = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -24,15 +24,12 @@ export function PublicMobileMenu({ workspaceHref }: { workspaceHref?: string }) 
         if (disclosure.current) disclosure.current.open = false;
       }}>
         {/* Native navigation intentionally survives closing this disclosure before routing. */}
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a href="/#how-it-works">How it works</a>
-        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
-        <a href="/vendors">Vendors</a>
-        {workspaceHref ? <a href={workspaceHref}>Open workspace</a> : <>
+        {links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+        {!authenticated ? <>
           <a href="/auth/couple?mode=login">Log in</a>
           <a href="/auth/couple">Sign up</a>
           <a href="/auth/vendor">Are you a vendor? Join Ever After →</a>
-        </>}
+        </> : null}
       </nav>
     </details>
   );

@@ -128,9 +128,11 @@ async function getWeddingRecommendationContext() {
   const profile = await getCurrentProfile();
   if (!profile || profile.role !== "couple") return null;
   const supabase = await createClient();
-  const { data: wedding } = await supabase.from("weddings").select("id, preferred_area, total_budget_minor, styles, guest_count, event_type").single();
+  const [{ data: wedding }, { data: items }] = await Promise.all([
+    supabase.from("weddings").select("id, preferred_area, total_budget_minor, styles, guest_count, event_type").single(),
+    supabase.from("budget_items").select("committed_amount_minor"),
+  ]);
   if (!wedding) return null;
-  const { data: items } = await supabase.from("budget_items").select("committed_amount_minor").eq("wedding_id", wedding.id);
   const committed = (items ?? []).reduce((sum, item) => sum + Number(item.committed_amount_minor ?? 0), 0);
   return {
     preferredArea: wedding.preferred_area,
@@ -184,9 +186,12 @@ export async function getMarketplace(filters: VendorFilters) {
   if (filters.friday) query = query.eq("friday_available", true);
   if (filters.service) query = query.contains("services", [filters.service]);
   const from = (filters.page - 1) * PAGE_SIZE;
-  const { data, error, count } = await query.order("business_name").range(from, from + PAGE_SIZE - 1);
+  const [marketplaceResult, context] = await Promise.all([
+    query.order("business_name").range(from, from + PAGE_SIZE - 1),
+    getWeddingRecommendationContext(),
+  ]);
+  const { data, error, count } = marketplaceResult;
   if (error) throw new Error("The vendor marketplace could not be loaded.");
-  const context = await getWeddingRecommendationContext();
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   let vendors = (data ?? []).map((row) => mapVendor(row as VendorRow, url));
   if (filters.minRating != null) vendors = vendors.filter((vendor) => (vendor.ratingAverage ?? 0) >= filters.minRating!);

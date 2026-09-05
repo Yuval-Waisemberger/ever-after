@@ -17,17 +17,30 @@ function utcDate(value: string): Date {
   return new Date(`${value.slice(0, 10)}T00:00:00Z`);
 }
 
-function relativeLabel(dueDate: string, weddingDate: string): { key: string; label: string } {
+export function relativeTimelineLabel(dueDate: string, weddingDate: string): { key: string; label: string } {
   const due = utcDate(dueDate);
   const wedding = utcDate(weddingDate);
   const daysBefore = Math.round((wedding.getTime() - due.getTime()) / 86_400_000);
 
   if (daysBefore < 0) return { key: "after", label: "After the Wedding" };
   if (daysBefore <= 7) return { key: "week", label: "Wedding Week" };
-  if (daysBefore <= 31) return { key: "month-1", label: "1 Month to Go" };
+  if (daysBefore < 28) {
+    const weeks = Math.max(2, Math.round(daysBefore / 7));
+    return { key: `week-${weeks}`, label: `${weeks} Weeks Before` };
+  }
 
-  const months = Math.max(2, Math.ceil(daysBefore / 30.4375));
-  return { key: `month-${months}`, label: `${months} Months to Go` };
+  const calendarMonths =
+    (wedding.getUTCFullYear() - due.getUTCFullYear()) * 12 +
+    wedding.getUTCMonth() -
+    due.getUTCMonth();
+  const completeMonths = Math.max(
+    1,
+    calendarMonths - (wedding.getUTCDate() < due.getUTCDate() ? 1 : 0),
+  );
+  return {
+    key: `month-${completeMonths}`,
+    label: completeMonths === 1 ? "1 Month Before" : `${completeMonths} Months Before`,
+  };
 }
 
 function absoluteLabel(dueDate: string): { key: string; label: string } {
@@ -49,7 +62,7 @@ export function buildTimeline(
   const groups = new Map<string, TimelineGroup>();
   for (const task of datedTasks) {
     const descriptor = weddingDate
-      ? relativeLabel(task.dueDate, weddingDate)
+      ? relativeTimelineLabel(task.dueDate, weddingDate)
       : absoluteLabel(task.dueDate);
     const existing = groups.get(descriptor.key);
     if (existing) existing.tasks.push(task);

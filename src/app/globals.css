@@ -1,20 +1,20 @@
 @import "tailwindcss";
 
 :root {
-  --canvas: #f8f5ef;
-  --canvas-deep: #efe7da;
-  --ink: #50463d;
-  --ink-soft: #6b6056;
-  /* Existing semantic aliases now use the approved warm-taupe palette. */
-  --wine: #75604b;
-  --wine-dark: #594634;
-  --sage: #786c5a;
-  --gold: #9a754e;
-  --line: #dfd5c7;
-  --paper: #fcfaf5;
-  --paper-muted: #f1eadf;
-  --success: #655b43;
-  --warning: #826037;
+  --canvas: #fcf9f6;
+  --canvas-deep: #f5ede9;
+  --ink: #493e38;
+  --ink-soft: #6d605a;
+  /* Approved Couple QA palette: warm ivory, blush and restrained burgundy. */
+  --wine: #7a2b3f;
+  --wine-dark: #5f1f30;
+  --sage: #63705f;
+  --gold: #a67d50;
+  --line: #e7dad5;
+  --paper: #ffffff;
+  --paper-muted: #f5ede9;
+  --success: #536551;
+  --warning: #8a6339;
   --danger: #963f47;
   --shadow: none;
   --radius-sm: 0.25rem;
@@ -39,7 +39,7 @@
   --radius-xl: 0.375rem;
   --radius-2xl: 0.625rem;
   --radius-3xl: 0.75rem;
-  --color-green-800: #70664c;
+  --color-green-800: #5d6b59;
   --color-green-900: var(--success);
   --color-red-700: var(--danger);
   --color-red-800: #873e45;

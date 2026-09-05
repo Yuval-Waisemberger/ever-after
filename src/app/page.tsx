@@ -22,7 +22,7 @@ export default async function HomePage() {
         <section className="landing-hero" aria-labelledby="hero-title">
           {/* Keep a future approved video swap confined to this media layer. */}
           <div className="hero-media" aria-hidden="true">
-            <Image src="/demo-marketplace/wedding-photographers/wedding-photographers-06.webp" alt="" fill sizes="100vw" priority className="hero-photo" />
+            <Image src="/images/landing/ever-after-hero-approved.png" alt="" fill sizes="100vw" priority className="hero-photo" />
           </div>
           <div className="hero-content">
             <h1 id="hero-title">EVER AFTER</h1>

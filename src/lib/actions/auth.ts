@@ -8,6 +8,7 @@ import {
   signInSchema,
   vendorSignUpSchema,
   resendVerificationSchema,
+  changePasswordSchema,
 } from "@/lib/validation/auth";
 import { signupCallbackUrl } from "@/lib/auth/redirect";
 import type { AuthActionState } from "./auth-state";
@@ -158,4 +159,17 @@ export async function signOut() {
     await supabase.auth.signOut();
   }
   redirect("/");
+}
+
+export async function changePassword(
+  _previous: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  if (!isSupabaseConfigured()) return missingConfig();
+  const parsed = changePasswordSchema.safeParse(formValues(formData));
+  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return { status: "error", message: "Your password could not be changed. Please sign in again and retry." };
+  return { status: "success", message: "Your password has been changed." };
 }

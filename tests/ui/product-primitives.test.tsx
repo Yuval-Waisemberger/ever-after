@@ -21,6 +21,14 @@ describe("Ever After shared presentation contracts", () => {
     expect(document.querySelector('[role="alert"]')?.textContent).toBe("Enter a valid email");
   });
 
+  it("adds an accessible password visibility control only to password fields", () => {
+    const password = parse(renderToStaticMarkup(<FormField name="password" type="password" label="Password" />));
+    expect(password.querySelector('button[aria-label="Show password"]')).not.toBeNull();
+    expect(password.querySelector("input")?.type).toBe("password");
+    const email = parse(renderToStaticMarkup(<FormField name="email" type="email" label="Email" />));
+    expect(email.querySelector("button")).toBeNull();
+  });
+
   it("preserves multi-select values and the existing checked selections", () => {
     const document = parse(renderToStaticMarkup(<ChoiceGrid name="styles" choices={["Elegant", "Urban", "Nature"]} selected={["Urban"]} />));
     const inputs = [...document.querySelectorAll("input")];

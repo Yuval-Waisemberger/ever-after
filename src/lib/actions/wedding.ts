@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedWedding } from "@/lib/queries/wedding";
 import { weddingDetailsSchema, weddingSetupSchema } from "@/lib/validation/wedding";
+import { isWeddingSetupComplete } from "@/lib/domain/wedding-setup";
 import type { ActionState } from "./state";
 
 function rawWeddingValues(formData: FormData) {
@@ -46,11 +47,13 @@ export async function completeWeddingSetup(
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const { error } = await supabase
+  const { data: saved, error } = await supabase
     .from("weddings")
     .update({ ...weddingUpdate(parsed.data), setup_status: "completed" })
-    .eq("id", wedding.id);
-  if (error) return { status: "error", message: "Wedding Setup could not be saved." };
+    .eq("id", wedding.id)
+    .select("id")
+    .single();
+  if (error || !saved) return { status: "error", message: "Wedding Setup could not be saved." };
   revalidatePath("/wedding");
   revalidatePath("/wedding/details");
   redirect("/wedding?setup=complete");
@@ -76,18 +79,28 @@ export async function saveWeddingDetails(
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const { error } = await supabase
+  const setupComplete = isWeddingSetupComplete(parsed.data);
+  const setupStatus = setupComplete
+    ? "completed"
+    : wedding.setup_status === "completed"
+      ? "skipped"
+      : wedding.setup_status;
+  const { data: saved, error } = await supabase
     .from("weddings")
     .update({
       ...weddingUpdate(parsed.data),
       partner_one_name: parsed.data.partnerOneName,
       partner_two_name: parsed.data.partnerTwoName,
+      setup_status: setupStatus,
     })
-    .eq("id", wedding.id);
-  if (error) return { status: "error", message: "Wedding Details could not be saved." };
+    .eq("id", wedding.id)
+    .select("id")
+    .single();
+  if (error || !saved) return { status: "error", message: "Wedding Details could not be saved." };
   revalidatePath("/wedding");
   revalidatePath("/wedding/details");
   revalidatePath("/wedding/timeline");
   revalidatePath("/vendors");
-  return { status: "success", message: "Wedding Details updated." };
+  revalidatePath("/assistant");
+  redirect("/wedding?details=updated");
 }

@@ -14,7 +14,7 @@ import {
 } from "./wedding-fields";
 
 const steps = [
-  { title: "Where are you right now?", subtitle: "Start with what is already decided." },
+  { title: "Let’s begin with your plans", subtitle: "Share what you know so far. Every detail can change with you." },
   { title: "Wedding characteristics", subtitle: "A few practical details help everything fit." },
   { title: "Your wedding style", subtitle: "Choose every style that feels like you." },
   { title: "What matters most?", subtitle: "Choose up to four priorities." },

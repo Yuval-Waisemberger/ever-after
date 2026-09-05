@@ -1,5 +1,19 @@
 import { z } from "zod";
 
+export const TASK_CATEGORIES = [
+  "Planning & Admin",
+  "Venue",
+  "Photography & Video",
+  "Music & Entertainment",
+  "Beauty & Attire",
+  "Design & Flowers",
+  "Guests & Invitations",
+  "Ceremony",
+  "Transportation",
+  "Budget & Payments",
+  "Other",
+] as const;
+
 const optionalText = (max: number) =>
   z.union([z.literal(""), z.string().trim().max(max)]).transform((value) => value || null);
 

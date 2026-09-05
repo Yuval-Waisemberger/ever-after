@@ -28,3 +28,5 @@ export const reviewSchema = z.object({
     z.string().max(3000).nullable(),
   ),
 });
+
+export const reviewIdSchema = z.object({ id: z.string().uuid() });

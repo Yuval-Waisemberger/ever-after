@@ -1,4 +1,4 @@
-import { Check, Pencil, Trash2 } from "lucide-react";
+import { Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { changeTaskStatus, deleteTask } from "@/lib/actions/tasks";
 import { TaskForm } from "./task-form";
 
@@ -16,7 +16,7 @@ type TaskRowProps = {
 
 export function TaskRow({ task }: TaskRowProps) {
   return (
-    <article data-status={task.status} className="task-row rounded-2xl border bg-paper px-4 py-4 sm:px-5">
+    <article data-status={task.status} data-priority={task.priority} className="task-row rounded-2xl border bg-paper px-4 py-4 sm:px-5">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
@@ -33,7 +33,7 @@ export function TaskRow({ task }: TaskRowProps) {
             <input type="hidden" name="id" value={task.id} />
             <input type="hidden" name="status" value={task.status === "completed" ? "open" : "completed"} />
             <button className="grid size-10 place-items-center rounded-full border bg-paper text-sage hover:border-sage" aria-label={task.status === "completed" ? `Reopen ${task.title}` : `Complete ${task.title}`}>
-              <Check className="size-4" />
+              {task.status === "completed" ? <RotateCcw className="size-4" /> : <Check className="size-4" />}
             </button>
           </form>
           <form action={deleteTask}>
@@ -49,7 +49,10 @@ export function TaskRow({ task }: TaskRowProps) {
           <Pencil className="size-3.5" /> Edit task
         </summary>
         <div className="mt-4">
-          <TaskForm initial={{ id: task.id, title: task.title, notes: task.notes, category: task.category, dueDate: task.due_date, priority: task.priority, status: task.status }} />
+          <TaskForm
+            key={[task.title, task.notes, task.category, task.due_date, task.priority, task.status].join("|")}
+            initial={{ id: task.id, title: task.title, notes: task.notes, category: task.category, dueDate: task.due_date, priority: task.priority, status: task.status }}
+          />
         </div>
       </details>
     </article>

@@ -1,5 +1,15 @@
 import { z } from "zod";
 
+export const BUDGET_CATEGORIES = [
+  "Wedding Venues & Gardens",
+  "Photography & Content",
+  "Music & Entertainment",
+  "Beauty & Attire",
+  "Design & Flowers",
+  "Event Services",
+  "Other",
+] as const;
+
 const money = (required = false) =>
   z.preprocess(
     (value) => (value === "" || value == null ? null : Number(value)),

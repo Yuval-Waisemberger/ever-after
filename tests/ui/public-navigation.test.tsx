@@ -15,11 +15,12 @@ describe("public navigation", () => {
     expect(document.querySelector('[aria-current="page"]')?.textContent).toBe("Photography & Content");
   });
 
-  it("keeps the mobile disclosure closed and gives signed-in users their real workspace", () => {
-    const document = new DOMParser().parseFromString(renderToStaticMarkup(<PublicMobileMenu workspaceHref="/vendor" />), "text/html");
+  it("keeps the mobile disclosure closed and exposes signed-in product navigation", () => {
+    const document = new DOMParser().parseFromString(renderToStaticMarkup(<PublicMobileMenu authenticated links={[{ href: "/wedding", label: "Our Wedding" }, { href: "/tasks", label: "Our Tasks" }]} />), "text/html");
     expect(document.querySelector("details")?.hasAttribute("open")).toBe(false);
     expect(document.querySelector("summary")?.getAttribute("aria-controls")).toBe("public-mobile-navigation");
-    expect(document.querySelector('a[href="/vendor"]')?.textContent).toBe("Open workspace");
+    expect(document.querySelector('a[href="/wedding"]')?.textContent).toBe("Our Wedding");
+    expect(document.querySelector('a[href="/tasks"]')?.textContent).toBe("Our Tasks");
     expect(document.querySelector('a[href="/auth/couple"]')).toBeNull();
   });
 });

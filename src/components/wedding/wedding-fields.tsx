@@ -21,12 +21,12 @@ export type WeddingFieldValues = {
   totalBudgetMinor?: number | null;
 };
 
-function SelectField({ label, name, value, children }: { label: string; name: string; value?: string | null; children: React.ReactNode }) {
+function SelectField({ label, name, value, children, emptyLabel = "Not set yet", includeEmpty = true }: { label: string; name: string; value?: string | null; children: React.ReactNode; emptyLabel?: string; includeEmpty?: boolean }) {
   return (
     <label className="grid gap-2 text-sm font-semibold">
       {label}
-      <select name={name} defaultValue={value ?? ""} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal">
-        <option value="">Not set</option>
+      <select name={name} defaultValue={value ?? (includeEmpty ? "" : "not_yet")} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal">
+        {includeEmpty ? <option value="">{emptyLabel}</option> : null}
         {children}
       </select>
     </label>
@@ -37,11 +37,11 @@ export function WeddingBasicsFields({ values = {} }: { values?: WeddingFieldValu
   return (
     <div className="grid gap-5">
       <div className="grid gap-5 sm:grid-cols-2">
-        <FormField name="weddingDate" type="date" label="Wedding date" defaultValue={values.weddingDate ?? ""} />
-        <SelectField name="venueStatus" label="Venue status" value={values.venueStatus}>
+        <FormField name="weddingDate" type="date" lang="en-GB" label="Wedding date" defaultValue={values.weddingDate ?? ""} hint="Day / month / year. Leave blank if the date is not set yet." />
+        <SelectField name="venueStatus" label="Venue status" value={values.venueStatus} includeEmpty={false}>
           <option value="booked">Booked</option>
           <option value="looking">Currently looking</option>
-          <option value="not_yet">Not yet</option>
+          <option value="not_yet">Not booked yet</option>
         </SelectField>
       </div>
       <FormField name="venueName" label="Venue name (if booked)" defaultValue={values.venueName ?? ""} />

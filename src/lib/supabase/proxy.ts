@@ -20,7 +20,8 @@ export async function updateSession(request: NextRequest) {
     },
   });
 
-  // Refresh an expired session if needed. Authorization remains in layouts and RLS.
-  await supabase.auth.getUser();
+  // Keep this call immediately after client creation: it refreshes expired
+  // cookies and verifies the JWT before Server Components read the request.
+  await supabase.auth.getClaims();
   return response;
 }

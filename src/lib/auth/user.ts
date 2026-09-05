@@ -1,5 +1,6 @@
 import { cache } from "react";
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 
@@ -13,16 +14,22 @@ export type CurrentProfile = {
 
 export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> => {
   if (!isSupabaseConfigured()) return null;
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore
+    .getAll()
+    .some((cookie) => cookie.name.startsWith("sb-") && cookie.name.includes("-auth-token"));
+  // Public pages should not make a Frankfurt round trip for visitors who have
+  // no Supabase session at all.
+  if (!hasAuthCookie) return null;
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return null;
+  const { data: authData } = await supabase.auth.getClaims();
+  const userId = authData?.claims?.sub;
+  if (typeof userId !== "string" || !userId) return null;
 
   const { data } = await supabase
     .from("profiles")
     .select("id, role, display_name")
-    .eq("id", user.id)
+    .eq("id", userId)
     .maybeSingle();
 
   if (!data || (data.role !== "couple" && data.role !== "vendor")) return null;

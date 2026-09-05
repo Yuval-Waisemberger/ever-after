@@ -30,8 +30,8 @@ export function WeddingDetailsForm({
       <section className="rounded-2xl border bg-paper p-5 sm:p-7">
         <h2 className="font-display text-2xl">Your names</h2>
         <div className="mt-5 grid gap-5 sm:grid-cols-2">
-          <FormField name="partnerOneName" label="Partner 1" defaultValue={partnerOneName} required />
-          <FormField name="partnerTwoName" label="Partner 2" defaultValue={partnerTwoName} required />
+          <FormField name="partnerOneName" label="First Partner" defaultValue={partnerOneName} required />
+          <FormField name="partnerTwoName" label="Second Partner" defaultValue={partnerTwoName} required />
         </div>
       </section>
       <section className="rounded-2xl border bg-paper p-5 sm:p-7"><h2 className="font-display text-2xl">Where things stand</h2><div className="mt-5"><WeddingBasicsFields values={values} /></div></section>
