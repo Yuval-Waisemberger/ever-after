@@ -9,8 +9,11 @@ import {
   vendorSignUpSchema,
   resendVerificationSchema,
   changePasswordSchema,
+  requestPasswordResetSchema,
+  resetPasswordSchema,
 } from "@/lib/validation/auth";
-import { signupCallbackUrl } from "@/lib/auth/redirect";
+import { passwordRecoveryCallbackUrl, signupCallbackUrl } from "@/lib/auth/redirect";
+import { getCurrentProfile, type AppRole } from "@/lib/auth/user";
 import type { AuthActionState } from "./auth-state";
 
 function formValues(formData: FormData) {
@@ -33,6 +36,18 @@ const callbackConfigError: AuthActionState = {
   status: "error",
   message: "Account email delivery is not ready yet. Please try again later.",
 };
+
+const resetRequestConfirmation = "If an account exists for this email, we’ve sent a password reset link.";
+
+function loginAfterPasswordUpdate(role: AppRole, message: string) {
+  const params = new URLSearchParams({ mode: "login", message });
+  return `/auth/${role}?${params.toString()}`;
+}
+
+async function signOutAfterPasswordUpdate(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const { error } = await supabase.auth.signOut({ scope: "global" });
+  if (error) await supabase.auth.signOut({ scope: "local" });
+}
 
 export async function signIn(
   _previous: AuthActionState,
@@ -169,7 +184,51 @@ export async function changePassword(
   const parsed = changePasswordSchema.safeParse(formValues(formData));
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
   const supabase = await createClient();
+  const profile = await getCurrentProfile();
+  if (!profile) return { status: "error", message: "Please sign in again before changing your password." };
   const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
   if (error) return { status: "error", message: "Your password could not be changed. Please sign in again and retry." };
-  return { status: "success", message: "Your password has been changed." };
+  await signOutAfterPasswordUpdate(supabase);
+  redirect(loginAfterPasswordUpdate(profile.role, "Your password has been updated. Please sign in again."));
+}
+
+export async function requestPasswordReset(
+  _previous: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  const parsed = requestPasswordResetSchema.safeParse(formValues(formData));
+  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
+  if (!isSupabaseConfigured()) return missingConfig();
+  let redirectTo: string;
+  try {
+    redirectTo = passwordRecoveryCallbackUrl(parsed.data.audience || undefined);
+  } catch {
+    return callbackConfigError;
+  }
+  try {
+    const supabase = await createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(parsed.data.email, { redirectTo });
+    if (error?.status === 429) return { status: "error", message: "Please wait a little before requesting another reset email." };
+    if (error && (!error.status || error.status >= 500)) return { status: "error", message: "We could not request an email right now. Please try again later." };
+    // Deliberately return the same response for an existing or unknown account.
+    return { status: "success", message: resetRequestConfirmation };
+  } catch {
+    return { status: "error", message: "We could not request an email right now. Please try again later." };
+  }
+}
+
+export async function resetPassword(
+  _previous: AuthActionState,
+  formData: FormData,
+): Promise<AuthActionState> {
+  if (!isSupabaseConfigured()) return missingConfig();
+  const parsed = resetPasswordSchema.safeParse(formValues(formData));
+  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
+  const profile = await getCurrentProfile();
+  if (!profile) return { status: "error", message: "This reset link is invalid or has expired. Request a new reset link." };
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+  if (error) return { status: "error", message: "Your password could not be reset. Request a new reset link and try again." };
+  await signOutAfterPasswordUpdate(supabase);
+  redirect(loginAfterPasswordUpdate(profile.role, "Your password has been reset. Please sign in with your new password."));
 }

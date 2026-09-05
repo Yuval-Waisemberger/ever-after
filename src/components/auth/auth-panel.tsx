@@ -85,6 +85,11 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
           <FormField name="secondEmail" type="email" label="Second email (optional)" autoComplete="email" error={error("secondEmail")} />
         ) : null}
         <FormField name="password" type="password" label="Password" autoComplete={mode === "login" ? "current-password" : "new-password"} error={error("password")} hint={mode === "signup" ? "At least 8 characters" : undefined} required />
+        {mode === "login" ? (
+          <Link className="-mt-3 justify-self-end text-sm text-wine underline-offset-4 hover:underline" href={`/auth/forgot-password?audience=${audience}`}>
+            Forgot password?
+          </Link>
+        ) : null}
         {mode === "signup" ? (
           <FormField name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
         ) : null}

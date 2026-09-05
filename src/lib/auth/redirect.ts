@@ -22,14 +22,25 @@ export function safeInternalPath(value: unknown, fallback = "/"): string {
 }
 
 /** Trusted deployment configuration, never a user-supplied Host/Origin header. */
-export function signupCallbackUrl(audience: "couple" | "vendor"): string {
+function configuredSiteOrigin(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (!configured) throw new Error("App origin is not configured.");
   const origin = new URL(configured);
   if (!["http:", "https:"].includes(origin.protocol) || origin.username || origin.password || origin.pathname !== "/" || origin.search || origin.hash) {
     throw new Error("App origin must be an HTTP(S) origin.");
   }
-  const callback = new URL("/auth/callback", origin.origin);
+  return origin.origin;
+}
+
+export function signupCallbackUrl(audience: "couple" | "vendor"): string {
+  const callback = new URL("/auth/callback", configuredSiteOrigin());
   callback.searchParams.set("audience", audience);
+  return callback.toString();
+}
+
+export function passwordRecoveryCallbackUrl(audience?: "couple" | "vendor"): string {
+  const callback = new URL("/auth/callback", configuredSiteOrigin());
+  callback.searchParams.set("flow", "recovery");
+  if (audience) callback.searchParams.set("audience", audience);
   return callback.toString();
 }

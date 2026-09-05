@@ -84,6 +84,15 @@ describe("PKCE callback", () => {
     expect(mocks.wedding).not.toHaveBeenCalled();
   });
   it("allows a safe explicit next path", async () => { expect(await callback("code=ok&next=%2Fvendors")).toBe("https://app.example/vendors"); });
+  it("keeps password recovery separate from profile and role routing", async () => {
+    expect(await callback("code=recovery-code&flow=recovery&audience=vendor")).toBe("https://app.example/auth/reset-password?audience=vendor");
+    expect(mocks.exchange).toHaveBeenCalledWith("recovery-code");
+    expect(mocks.profile).not.toHaveBeenCalled();
+  });
+  it("sends expired password recovery links to the reset recovery state", async () => {
+    expect(await callback("error=access_denied&error_code=otp_expired&flow=recovery&audience=couple")).toBe("https://app.example/auth/reset-password?issue=expired&audience=couple");
+    expect(mocks.exchange).not.toHaveBeenCalled();
+  });
   it.each(["//example.com", "/\\example.com", "https://example.com", "/%2fexample.com"])("rejects external next %s after exchange", async next => {
     expect(await callback(`code=ok&next=${encodeURIComponent(next)}`)).toBe("https://app.example/wedding/setup");
   });

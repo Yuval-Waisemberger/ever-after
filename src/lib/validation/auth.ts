@@ -62,3 +62,16 @@ export const changePasswordSchema = z.object({
   path: ["confirmPassword"],
   message: "Passwords do not match",
 });
+
+export const requestPasswordResetSchema = z.object({
+  email,
+  audience: z.union([z.literal(""), z.enum(["couple", "vendor"])]).optional(),
+});
+
+export const resetPasswordSchema = z.object({
+  password: z.string().min(8, "Use at least 8 characters").max(128),
+  confirmPassword: z.string(),
+}).refine((value) => value.password === value.confirmPassword, {
+  path: ["confirmPassword"],
+  message: "Passwords do not match",
+});

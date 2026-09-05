@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { safeInternalPath, signupCallbackUrl } from "@/lib/auth/redirect";
+import { passwordRecoveryCallbackUrl, safeInternalPath, signupCallbackUrl } from "@/lib/auth/redirect";
 
 afterEach(() => vi.unstubAllEnvs());
 describe("internal Auth redirects", () => {
@@ -14,9 +14,12 @@ describe("internal Auth redirects", () => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", origin);
     expect(signupCallbackUrl("couple")).toBe(`${origin}/auth/callback?audience=couple`);
     expect(signupCallbackUrl("vendor")).toBe(`${origin}/auth/callback?audience=vendor`);
+    expect(passwordRecoveryCallbackUrl()).toBe(`${origin}/auth/callback?flow=recovery`);
+    expect(passwordRecoveryCallbackUrl("vendor")).toBe(`${origin}/auth/callback?flow=recovery&audience=vendor`);
   });
   it.each(["", "not a URL", "//example.com", "javascript:alert(1)", "https://user:password@example.com", "https://example.com/path", "https://example.com/?next=bad", "https://example.com/#fragment"])("rejects invalid origin configuration %s", origin => {
     vi.stubEnv("NEXT_PUBLIC_SITE_URL", origin);
     expect(() => signupCallbackUrl("couple")).toThrow();
+    expect(() => passwordRecoveryCallbackUrl()).toThrow();
   });
 });
