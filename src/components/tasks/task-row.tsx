@@ -1,6 +1,8 @@
 import { Check, Pencil, RotateCcw, Trash2 } from "lucide-react";
 import { changeTaskStatus, deleteTask } from "@/lib/actions/tasks";
 import { TaskForm } from "./task-form";
+import { TaskStatusPill } from "./task-status-pill";
+import { formatCalendarDate } from "@/lib/domain/date-status";
 
 type TaskRowProps = {
   task: {
@@ -14,7 +16,7 @@ type TaskRowProps = {
   };
 };
 
-export function TaskRow({ task }: TaskRowProps) {
+export function TaskRow({ task, defaultOpen = false }: TaskRowProps & { defaultOpen?: boolean }) {
   return (
     <article data-status={task.status} data-priority={task.priority} className="task-row rounded-2xl border bg-paper px-4 py-4 sm:px-5">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
@@ -22,9 +24,10 @@ export function TaskRow({ task }: TaskRowProps) {
           <div className="flex flex-wrap items-center gap-2">
             <h2 className={`font-semibold ${task.status === "completed" ? "text-ink-soft line-through" : "text-ink"}`}>{task.title}</h2>
             <span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-bold uppercase tracking-wide ${task.priority === "high" ? "bg-red-900/8 text-red-800" : task.priority === "low" ? "bg-sage/10 text-sage" : "bg-gold/12 text-[#77571f]"}`}>{task.priority}</span>
+            <TaskStatusPill status={task.status} dueDate={task.due_date} />
           </div>
           <p className="mt-1 text-xs text-ink-soft">
-            {[task.category, task.due_date ? `Due ${task.due_date}` : null, task.status.replace("_", " ")].filter(Boolean).join(" · ")}
+            {[task.category, task.due_date ? formatCalendarDate(task.due_date) : "No due date"].filter(Boolean).join(" · ")}
           </p>
           {task.notes ? <p className="mt-3 text-sm leading-6 text-ink-soft">{task.notes}</p> : null}
         </div>
@@ -44,7 +47,7 @@ export function TaskRow({ task }: TaskRowProps) {
           </form>
         </div>
       </div>
-      <details className="mt-4 border-t pt-3">
+      <details className="mt-4 border-t pt-3" open={defaultOpen}>
         <summary className="inline-flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-wine">
           <Pencil className="size-3.5" /> Edit task
         </summary>

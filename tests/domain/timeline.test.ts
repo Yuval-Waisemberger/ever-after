@@ -26,4 +26,10 @@ describe("buildTimeline", () => {
       "June 2027",
     ]);
   });
+
+  it("keeps undated tasks out of fake chronological groups", () => {
+    const result = buildTimeline(tasks, "2027-06-14");
+    expect(result.flatMap((group) => group.tasks).some((task) => task.id === "3")).toBe(false);
+    expect(tasks.filter((task) => !task.dueDate).map((task) => task.id)).toEqual(["3"]);
+  });
 });

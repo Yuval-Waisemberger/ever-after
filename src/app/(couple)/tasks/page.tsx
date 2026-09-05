@@ -13,6 +13,7 @@ export const metadata: Metadata = { title: "Our Tasks" };
 export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
   const params = await searchParams;
   const selectedCategory = typeof params.category === "string" ? params.category : "";
+  const editTaskId = typeof params.edit === "string" ? params.edit : "";
   const tasks = await getTasks();
   const visibleTasks = selectedCategory ? tasks.filter((task) => task.category === selectedCategory) : tasks;
   return (
@@ -27,7 +28,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
         <div className="mt-5"><TaskForm /></div>
       </section>
       <div className="mt-8 space-y-3">
-        {visibleTasks.length ? visibleTasks.map((task) => <TaskRow key={task.id} task={task} />) : <EmptyState title={selectedCategory ? `No ${selectedCategory} tasks yet` : "No tasks yet"} description="Add anything you want to remember. Your dated tasks will also join the Wedding Timeline." />}
+        {visibleTasks.length ? visibleTasks.map((task) => <div id={`task-${task.id}`} key={task.id} className="scroll-mt-6"><TaskRow task={task} defaultOpen={task.id === editTaskId} /></div>) : <EmptyState title={selectedCategory ? `No ${selectedCategory} tasks yet` : "No tasks yet"} description="Add anything you want to remember. Your dated tasks will also join the Wedding Timeline." />}
       </div>
     </main>
   );

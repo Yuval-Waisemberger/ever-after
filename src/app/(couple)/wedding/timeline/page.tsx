@@ -1,18 +1,21 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { CalendarHeart, Circle, CircleCheck } from "lucide-react";
+import { CalendarHeart, CalendarPlus, Circle, CircleCheck } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
 import { LinkButton } from "@/components/ui/link-button";
 import { buildTimeline } from "@/lib/domain/timeline";
 import { getOwnedWedding } from "@/lib/queries/wedding";
 import { getTasks } from "@/lib/queries/tasks";
+import { TaskStatusPill } from "@/components/tasks/task-status-pill";
+import { formatCalendarDate } from "@/lib/domain/date-status";
 
 export const metadata: Metadata = { title: "Wedding Timeline" };
 
 export default async function TimelinePage() {
   const [wedding, tasks] = await Promise.all([getOwnedWedding(), getTasks()]);
   const groups = buildTimeline(tasks.map((task) => ({ id: task.id, title: task.title, dueDate: task.due_date, status: task.status })), wedding.wedding_date);
+  const unscheduledTasks = tasks.filter((task) => !task.due_date);
 
   return (
     <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
@@ -26,10 +29,11 @@ export default async function TimelinePage() {
                 <h2 className="font-display text-3xl text-wine">{group.label}</h2>
                 <div className="mt-4 space-y-2">
                   {group.tasks.map((task) => (
-                    <Link key={task.id} href="/tasks" className="timeline-entry flex items-center gap-3 rounded-xl border bg-paper px-4 py-3 text-sm font-semibold hover:border-gold">
+                    <Link key={task.id} href={`/tasks?edit=${task.id}#task-${task.id}`} className="timeline-entry flex items-center gap-3 rounded-xl border bg-paper px-4 py-3 text-sm font-semibold hover:border-gold">
                       {task.status === "completed" ? <CircleCheck className="size-4 text-sage" /> : <Circle className="size-4 text-gold" />}
                       <span className={task.status === "completed" ? "text-ink-soft line-through" : ""}>{task.title}</span>
-                      <time className="ml-auto text-xs font-normal text-ink-soft">{task.dueDate}</time>
+                      <span className="ml-auto"><TaskStatusPill status={task.status} dueDate={task.dueDate} /></span>
+                      <time className="text-xs font-normal text-ink-soft">{formatCalendarDate(task.dueDate!)}</time>
                     </Link>
                   ))}
                 </div>
@@ -53,6 +57,29 @@ export default async function TimelinePage() {
           <EmptyState title="No dated tasks yet" description="Add a due date to any task and it will appear here automatically." action={<LinkButton href="/tasks">Add a task</LinkButton>} />
         )}
       </div>
+      {unscheduledTasks.length ? (
+        <section className="timeline-unscheduled mt-12 border-t pt-8" aria-labelledby="unscheduled-tasks-title">
+          <div className="flex items-start gap-3">
+            <span className="grid size-10 shrink-0 place-items-center rounded-full bg-[#EEE7DD] text-[#625B54]"><CalendarPlus className="size-4.5" aria-hidden="true" /></span>
+            <div>
+              <p className="eyebrow">Not on the calendar yet</p>
+              <h2 id="unscheduled-tasks-title" className="font-display mt-1 text-3xl">Unscheduled Tasks</h2>
+              <p className="mt-2 max-w-2xl text-sm leading-6 text-ink-soft">These tasks are still part of your plan. Add a due date and each one will move into its correct place on the Timeline automatically.</p>
+            </div>
+          </div>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2">
+            {unscheduledTasks.map((task) => (
+              <li key={task.id} className="flex min-w-0 items-center gap-3 rounded-xl border bg-paper p-4">
+                <div className="min-w-0 flex-1">
+                  <p className={`font-semibold ${task.status === "completed" ? "text-ink-soft line-through" : ""}`}>{task.title}</p>
+                  <div className="mt-2"><TaskStatusPill status={task.status} dueDate={null} /></div>
+                </div>
+                <Link href={`/tasks?edit=${task.id}#task-${task.id}`} className="ea-button shrink-0 border-line bg-paper px-3 text-wine hover:border-wine">Add date</Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
     </main>
   );
 }

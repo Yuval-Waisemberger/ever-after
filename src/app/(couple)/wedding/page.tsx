@@ -2,7 +2,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Bot, CalendarClock, CalendarHeart, CheckCircle2, Heart, ListChecks } from "lucide-react";
 import { DashboardCard } from "@/components/wedding/dashboard-card";
-import { formatIls } from "@/lib/domain/budget";
+import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
+import { TaskStatusPill } from "@/components/tasks/task-status-pill";
+import { deriveBudgetItemStatus, derivePaymentStatus, formatIls } from "@/lib/domain/budget";
+import { formatCalendarDate } from "@/lib/domain/date-status";
+import { selectUpcomingTasks } from "@/lib/domain/tasks";
 import { daysUntilWedding, isWeddingWeek } from "@/lib/domain/wedding-week";
 import { getWeddingDashboard } from "@/lib/queries/wedding";
 
@@ -14,13 +18,28 @@ function summaryLink(href: string, label: string) {
   );
 }
 
+const budgetStatusTone = {
+  estimated: "neutral",
+  committed: "progress",
+  partially_paid: "warning",
+  paid: "success",
+} satisfies Record<ReturnType<typeof deriveBudgetItemStatus>["kind"], StatusTone>;
+
+const paymentStatusTone = {
+  paid: "success",
+  overdue: "danger",
+  due_soon: "warning",
+  scheduled: "neutral",
+} satisfies Record<ReturnType<typeof derivePaymentStatus>["kind"], StatusTone>;
+
 export default async function WeddingDashboardPage({ searchParams }: PageProps<"/wedding">) {
   const params = await searchParams;
-  const { wedding, taskSummary, tasks, relationships, budget } = await getWeddingDashboard();
+  const { wedding, taskSummary, tasks, relationships, budget, budgetItems } = await getWeddingDashboard();
   const days = daysUntilWedding(wedding.wedding_date);
   const weddingWeek = isWeddingWeek(wedding.wedding_date);
   const names = `${wedding.partner_one_name} & ${wedding.partner_two_name}`;
-  const upcomingTasks = tasks.filter((task) => task.dueDate && task.status !== "completed").slice(0, 3);
+  const today = new Date();
+  const upcomingTasks = selectUpcomingTasks(tasks, today, 5);
   const booked = relationships.filter((relationship) => relationship.status === "booked");
   const savedCount = relationships.filter((relationship) => relationship.status === "saved").length;
 
@@ -59,42 +78,45 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
       ) : null}
 
       <div className="wedding-overview mt-8">
-        <DashboardCard title="Our Tasks" eyebrow="At a glance" footer={summaryLink("/tasks", "Manage tasks")}>
-          <div className="grid grid-cols-3 gap-3 text-center">
-            <div><ListChecks className="mx-auto size-5 text-wine" /><strong className="mt-2 block text-2xl">{taskSummary.open}</strong><span className="text-xs text-ink-soft">open</span></div>
-            <div><CalendarClock className="mx-auto size-5 text-gold" /><strong className="mt-2 block text-2xl">{taskSummary.dueThisWeek}</strong><span className="text-xs text-ink-soft">this week</span></div>
-            <div><CheckCircle2 className="mx-auto size-5 text-sage" /><strong className="mt-2 block text-2xl">{taskSummary.completion}%</strong><span className="text-xs text-ink-soft">completed</span></div>
+        <DashboardCard title="Our Tasks" eyebrow="At a glance" className="dashboard-tasks-card" footer={summaryLink("/tasks", "Manage tasks")}>
+          <div className="task-summary-grid grid grid-cols-3 gap-3 text-center">
+            <div><ListChecks className="mx-auto size-5 text-wine" /><strong className="mt-2 block text-2xl">{taskSummary.open}</strong><span className="text-xs text-ink-soft">Open</span></div>
+            <div><CalendarClock className="mx-auto size-5 text-[#9A611C]" /><strong className="mt-2 block text-2xl">{taskSummary.dueThisWeek}</strong><span className="text-xs text-ink-soft">Due this week</span></div>
+            <div><CheckCircle2 className="mx-auto size-5 text-[#3F604E]" /><strong className="mt-2 block text-2xl">{taskSummary.completed} of {taskSummary.total}</strong><span className="text-xs text-ink-soft">Completed</span></div>
           </div>
+          {taskSummary.total ? <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-[#EEE7DD]" aria-label={`${taskSummary.completion}% task completion`}><div className="h-full rounded-full bg-[#7A2B3F]" style={{ width: `${taskSummary.completion}%` }} /></div> : null}
         </DashboardCard>
 
-        <DashboardCard title="Upcoming" eyebrow="Next dates" footer={summaryLink("/wedding/timeline", "Open timeline")}>
+        <DashboardCard title="Upcoming" eyebrow="What needs attention" className="dashboard-upcoming-card" footer={summaryLink("/tasks", "View all tasks")}>
           {upcomingTasks.length ? (
-            <ul className="space-y-3">
+            <ul className="dashboard-upcoming-list divide-y">
               {upcomingTasks.map((task) => (
-                <li key={task.id} className="flex items-start justify-between gap-3 text-sm">
-                  <span className="font-semibold">{task.title}</span>
-                  <time className="shrink-0 text-xs text-ink-soft">{task.dueDate}</time>
+                <li key={task.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 py-3 first:pt-0 last:pb-0 text-sm">
+                  <span className="min-w-0 flex-1 font-semibold">{task.title}</span>
+                  <TaskStatusPill status={task.status} dueDate={task.dueDate} today={today} />
+                  <time className="w-full text-xs text-ink-soft sm:w-auto" dateTime={task.dueDate!}>{formatCalendarDate(task.dueDate!)}</time>
                 </li>
               ))}
             </ul>
-          ) : <p className="text-sm leading-6 text-ink-soft">No upcoming dated tasks yet.</p>}
+          ) : <p className="text-sm leading-6 text-ink-soft">No overdue tasks or deadlines in the next seven days.</p>}
         </DashboardCard>
 
-        <DashboardCard title="Our Vendors" eyebrow="People you chose" footer={summaryLink("/vendors/my", "Open Our Vendors")}>
+        <DashboardCard title="Our Vendors" eyebrow="People you chose" className="dashboard-vendors-card" footer={summaryLink("/vendors/my", "Open Our Vendors")}>
           {booked.length ? (
-            <ul className="space-y-3 text-sm">
+            <ul className="grid gap-3 xl:grid-cols-2">
               {booked.slice(0, 3).map((relationship) => {
                 const vendor = Array.isArray(relationship.vendor_profiles) ? relationship.vendor_profiles[0] : relationship.vendor_profiles;
                 const images = vendor?.vendor_images ?? [];
                 const primary = images.find((image) => image.is_primary) ?? images[0];
                 const imageUrl = primary?.external_url ?? (primary?.storage_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/vendor-media/${primary.storage_path}` : null);
-                return <li key={relationship.id} className="flex items-center gap-3">{imageUrl ? <span className="relative size-10 shrink-0 overflow-hidden rounded-md bg-paper-muted"><Image src={imageUrl} alt={primary?.alt_text ?? vendor?.business_name ?? "Booked vendor"} fill sizes="40px" className="object-cover" /></span> : <span className="grid size-10 shrink-0 place-items-center rounded-md bg-paper-muted font-display text-wine">{vendor?.business_name?.slice(0, 1) ?? "V"}</span>}<span className="font-semibold">{vendor?.business_name ?? "Booked vendor"}</span></li>;
+                const subcategory = Array.isArray(vendor?.vendor_subcategories) ? vendor.vendor_subcategories[0] : vendor?.vendor_subcategories;
+                return <li key={relationship.id} className="dashboard-vendor-row grid min-w-0 items-center gap-4 rounded-xl border bg-[#FCF9F6] p-3">{imageUrl ? <span className="dashboard-vendor-image relative size-20 overflow-hidden rounded-md bg-paper-muted"><Image src={imageUrl} alt={primary?.alt_text ?? vendor?.business_name ?? "Booked vendor"} fill sizes="80px" className="object-cover" /></span> : <span className="dashboard-vendor-image grid size-20 place-items-center rounded-md bg-paper-muted font-display text-2xl text-wine">{vendor?.business_name?.slice(0, 1) ?? "V"}</span>}<span className="dashboard-vendor-info min-w-0"><span className="dashboard-vendor-name block font-semibold">{vendor?.business_name ?? "Booked vendor"}</span><span className="dashboard-vendor-category mt-1 block text-xs text-ink-soft">{subcategory?.name ?? "Wedding vendor"}</span><StatusPill tone="success" className="mt-2">Booked</StatusPill></span></li>;
               })}
             </ul>
           ) : <p className="text-sm leading-6 text-ink-soft">Booked vendors will appear here automatically.</p>}
         </DashboardCard>
 
-        <DashboardCard title="Budget" eyebrow="Current picture" footer={summaryLink("/budget", "Open Budget")}>
+        <DashboardCard title="Budget" eyebrow="Current picture" className="dashboard-budget-card" footer={summaryLink("/budget", "Open Budget")}>
           {budget.totalBudgetMinor == null ? (
             <p className="text-sm leading-6 text-ink-soft">Set a total budget when you&apos;re ready.</p>
           ) : (
@@ -104,6 +126,8 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
               <div className="flex justify-between border-t pt-3"><dt className="font-semibold">Available</dt><dd className="ea-money text-xl text-wine">{formatIls(budget.availableMinor)}</dd></div>
             </dl>
           )}
+          {budgetItems.length ? <ul className="mt-5 space-y-2 border-t pt-4">{budgetItems.slice(0, 2).map((item) => { const status = deriveBudgetItemStatus(item); return <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 text-sm"><span className="font-semibold">{item.label}</span><StatusPill tone={budgetStatusTone[status.kind]}>{status.label}</StatusPill></li>; })}</ul> : null}
+          {budget.upcomingPayments.length ? <div className="mt-4 rounded-md bg-[#FCF9F6] p-3"><p className="text-xs font-semibold text-ink-soft">Next payment</p>{budget.upcomingPayments.slice(0, 1).map((payment, index) => { const status = derivePaymentStatus(payment, today); return <div key={`${payment.itemLabel}-${payment.label}-${index}`} className="mt-2 flex flex-wrap items-center gap-2 text-sm"><span className="min-w-0 flex-1 font-semibold">{payment.itemLabel}: {payment.label}</span><StatusPill tone={paymentStatusTone[status.kind]}>{status.label}</StatusPill></div>; })}</div> : null}
         </DashboardCard>
 
         <DashboardCard title="Saved Vendors" eyebrow="Your shortlist" footer={summaryLink("/vendors/my?status=saved", "See saved vendors")}>

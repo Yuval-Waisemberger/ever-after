@@ -4,6 +4,8 @@ import { FormField } from "@/components/ui/form-field";
 import { ChoiceGrid } from "@/components/ui/choice-grid";
 import { LinkButton } from "@/components/ui/link-button";
 import { DashboardCard } from "@/components/wedding/dashboard-card";
+import { StatusPill } from "@/components/ui/status-pill";
+import { TaskStatusPill } from "@/components/tasks/task-status-pill";
 
 const parse = (markup: string) => new DOMParser().parseFromString(markup, "text/html");
 
@@ -44,5 +46,18 @@ describe("Ever After shared presentation contracts", () => {
     expect(document.querySelector("p")?.textContent).toBe("Not set");
     expect(document.querySelector("a")?.getAttribute("href")).toBe("/budget");
     expect(document.querySelector("button")).toBeNull();
+  });
+
+  it("renders readable semantic task states instead of relying on color alone", () => {
+    const document = parse(renderToStaticMarkup(
+      <div>
+        <TaskStatusPill status="open" dueDate="2026-09-04" today={new Date("2026-09-05T12:00:00Z")} />
+        <StatusPill tone="success">Paid</StatusPill>
+      </div>,
+    ));
+    const pills = [...document.querySelectorAll(".ea-status-pill")];
+    expect(pills.map((pill) => pill.textContent)).toEqual(["Overdue 1 day", "Paid"]);
+    expect(pills[0]?.classList.contains("ea-status-pill--danger")).toBe(true);
+    expect(pills[1]?.classList.contains("ea-status-pill--success")).toBe(true);
   });
 });

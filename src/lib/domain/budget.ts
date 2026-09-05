@@ -1,4 +1,8 @@
+import { deadlineLabel } from "./date-status";
+
 export type PaymentForBudget = {
+  label?: string;
+  itemLabel?: string;
   amountMinor: number;
   isPaid: boolean;
   dueDate?: string | null;
@@ -19,6 +23,40 @@ export type BudgetSummary = {
   remainingCommittedMinor: number;
   upcomingPayments: PaymentForBudget[];
 };
+
+export type BudgetItemStatus = "estimated" | "committed" | "partially_paid" | "paid";
+
+export function deriveBudgetItemStatus(item: BudgetItemForSummary): {
+  kind: BudgetItemStatus;
+  label: string;
+  paidMinor: number;
+} {
+  const paidMinor = (item.payments ?? []).reduce(
+    (total, payment) => total + (payment.isPaid ? asMoney(payment.amountMinor) : 0),
+    0,
+  );
+  const committedMinor = item.committedAmountMinor == null
+    ? null
+    : asMoney(item.committedAmountMinor);
+  if (committedMinor == null) return { kind: "estimated", label: "Estimated", paidMinor };
+  if (committedMinor > 0 && paidMinor >= committedMinor) {
+    return { kind: "paid", label: "Paid", paidMinor };
+  }
+  if (paidMinor > 0) return { kind: "partially_paid", label: "Partially paid", paidMinor };
+  return { kind: "committed", label: "Committed", paidMinor };
+}
+
+export function derivePaymentStatus(
+  payment: PaymentForBudget,
+  today = new Date(),
+): { kind: "paid" | "overdue" | "due_soon" | "scheduled"; label: string } {
+  if (payment.isPaid) return { kind: "paid", label: "Paid" };
+  if (!payment.dueDate) return { kind: "scheduled", label: "Scheduled" };
+  const deadline = deadlineLabel(payment.dueDate, today);
+  if (deadline.kind === "overdue") return { kind: "overdue", label: deadline.label };
+  if (deadline.kind === "due_soon") return { kind: "due_soon", label: deadline.label };
+  return { kind: "scheduled", label: "Scheduled" };
+}
 
 function asMoney(value: number | null | undefined): number {
   if (value == null || !Number.isFinite(value)) return 0;

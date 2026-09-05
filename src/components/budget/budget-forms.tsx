@@ -54,12 +54,13 @@ type PaymentInitial = { id?: string; label?: string; amountMinor?: number; dueDa
 
 export function PaymentForm({ budgetItemId, initial = {} }: { budgetItemId: string; initial?: PaymentInitial }) {
   const [state, action] = useActionState(savePayment, initialActionState);
+  const fieldSuffix = initial.id ?? `${budgetItemId}-new`;
   return (
     <form action={action} className="grid gap-3 rounded-xl bg-paper-muted p-4">
       <input type="hidden" name="budgetItemId" value={budgetItemId} />
       {initial.id ? <input type="hidden" name="id" value={initial.id} /> : null}
       <Feedback state={state} />
-      <div className="grid gap-3 sm:grid-cols-3"><FormField name="label" label="Payment" placeholder="Deposit" defaultValue={initial.label ?? ""} required /><FormField name="amountShekels" type="number" min={1} label="Amount (₪)" defaultValue={initial.amountMinor == null ? "" : initial.amountMinor / 100} required /><FormField name="dueDate" type="date" lang="en-GB" label="Due date" defaultValue={initial.dueDate ?? ""} /></div>
+      <div className="grid gap-3 sm:grid-cols-3"><FormField id={`payment-name-${fieldSuffix}`} name="label" label="Payment name" placeholder="Deposit" hint="For example: Deposit, second payment, or final balance." defaultValue={initial.label ?? ""} required /><FormField id={`payment-amount-${fieldSuffix}`} name="amountShekels" type="number" min={1} label="Amount (₪)" defaultValue={initial.amountMinor == null ? "" : initial.amountMinor / 100} required /><FormField id={`payment-date-${fieldSuffix}`} name="dueDate" type="date" lang="en-GB" label="Due date" defaultValue={initial.dueDate ?? ""} /></div>
       <label className="flex items-center gap-2 text-sm font-semibold"><input type="checkbox" name="isPaid" defaultChecked={initial.isPaid} className="accent-wine" />Already paid</label>
       <label className="grid gap-2 text-sm font-semibold">Notes (optional)<textarea name="notes" rows={2} defaultValue={initial.notes ?? ""} className="rounded-xl border bg-paper px-3.5 py-3 text-base font-normal" /></label>
       <SubmitButton className="justify-self-start" pendingLabel="Saving payment…">{initial.id ? "Save payment" : "Add payment"}</SubmitButton>

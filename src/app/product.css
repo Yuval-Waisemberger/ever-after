@@ -27,6 +27,13 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
 .ea-page-header p:not(.eyebrow) { max-width: 660px; font-size: 15px; line-height: 1.8; }
 .eyebrow { color: #8b6846; font-weight: 500; letter-spacing: .15em; }
 .ea-money, .ea-number { font-family: "Aptos", "Segoe UI", Arial, sans-serif; font-variant-numeric: tabular-nums; letter-spacing: -.015em; }
+.ea-status-pill { display: inline-flex; min-height: 26px; max-width: 100%; align-items: center; justify-content: center; padding: 4px 9px; border: 1px solid transparent; border-radius: 999px; font-size: 11px; font-weight: 600; line-height: 1.25; text-align: center; white-space: normal; }
+.ea-status-pill--success { color: #3f604e; background: #e7edea; border-color: #ccd9d2; }
+.ea-status-pill--warning { color: #9a611c; background: #f6ebd8; border-color: #ead7b8; }
+.ea-status-pill--danger { color: #a13b3b; background: #f7e3df; border-color: #e9c5bf; }
+.ea-status-pill--waiting { color: #496579; background: #e5edf3; border-color: #ccdae4; }
+.ea-status-pill--neutral { color: #625b54; background: #eee7dd; border-color: #ddd2c4; }
+.ea-status-pill--progress { color: #7a2b3f; background: #f3e2e5; border-color: #e5c9cf; }
 
 /* Auth retains every field and action; long registration forms remain one readable column. */
 .auth-brand-bar { max-width: 1440px; height: 90px; margin: auto; padding: 0 5%; display: flex; justify-content: space-between; align-items: center; gap: 24px; border-bottom: 1px solid var(--line); }
@@ -101,8 +108,17 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
 /* Varied summary hierarchy, without changing the data or its order. */
 .wedding-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
 .ea-dashboard-card { min-width: 0; padding: 25px; border-radius: var(--surface-radius); }
-.wedding-overview .ea-dashboard-card:first-child { background: var(--paper-muted); }
-.wedding-overview .ea-dashboard-card:nth-child(n+5) { border-width: 1px 0 0; border-radius: 0; background: transparent; }
+.dashboard-tasks-card { background: #f5ede9; }
+.dashboard-upcoming-card { background: var(--paper); border-color: #ddb3ae; }
+.dashboard-vendors-card { background: var(--paper); }
+.dashboard-budget-card { background: #faf4f1; border-color: #e3cec8; }
+.dashboard-upcoming-list > li { border-color: var(--line); }
+.dashboard-vendor-row { grid-template-columns: 80px minmax(0, 1fr); transition: border-color 160ms ease, background-color 160ms ease; }
+.dashboard-vendor-row:hover { border-color: #ddb3ae; background: #fff; }
+.dashboard-vendor-image { min-width: 80px; }
+.dashboard-vendor-info { min-width: 0; }
+.dashboard-vendor-row .dashboard-vendor-name, .dashboard-vendor-row .dashboard-vendor-category { word-break: normal; overflow-wrap: break-word; hyphens: none; }
+.task-summary-grid > div { min-width: 0; padding: 7px 5px; }
 .ea-dashboard-card strong { font-variant-numeric: tabular-nums; font-weight: 500; }
 .wedding-week-banner { background: var(--paper-muted); color: var(--ink); border: 1px solid var(--gold); border-left-width: 3px; border-radius: var(--surface-radius); }
 .wedding-week-banner > p:first-child { color: var(--gold); }
@@ -159,8 +175,8 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
 
 @media (min-width: 1280px) {
   .wedding-overview { grid-template-columns: 1.2fr 1fr 1fr; }
-  .wedding-overview .ea-dashboard-card:first-child { grid-column: span 2; }
-  .wedding-overview .ea-dashboard-card:nth-child(4) { grid-column: span 2; }
+  .dashboard-upcoming-card { grid-column: span 2; min-height: 350px; }
+  .dashboard-vendors-card { grid-column: span 2; }
 }
 @media (max-width: 900px) {
   .auth-layout { display: block; max-width: 640px; padding: 32px 24px 60px; }
@@ -192,7 +208,7 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
   .workspace-shell main { padding-top: 28px; padding-inline: 20px; }
   .workspace-shell > div > .min-h-screen { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
   .workspace-mobile-header { padding-top: max(12px, env(safe-area-inset-top)); }
-  .wedding-overview .grid-cols-3 { grid-template-columns: minmax(0, 1fr); text-align: left; }
+  .task-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .budget-metrics > div { flex-wrap: wrap; }
   .ea-page-header h1 { font-size: 36px; }
   .ea-page-header { padding-bottom: 20px; }
@@ -203,6 +219,11 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
   .setup-wizard button { padding-inline: 12px; }
   .timeline-entry { flex-wrap: wrap; }
   .timeline-entry time { width: 100%; margin-left: 28px; }
+  .timeline-entry .ea-status-pill { margin-left: 28px; }
+  .timeline-unscheduled li { align-items: flex-start; }
+  .timeline-unscheduled .ea-button { min-height: 44px; padding-inline: 12px; }
+  .dashboard-vendor-row { grid-template-columns: 72px minmax(0, 1fr); }
+  .dashboard-vendor-image { width: 72px; height: 72px; min-width: 72px; }
   .budget-metrics > div { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: baseline; column-gap: 16px; row-gap: 6px; padding: 17px; }
   .budget-metrics > div > p:nth-child(2) { margin-top: 0; white-space: nowrap; }
   .budget-metrics > div > p:last-child { grid-column: 1 / -1; margin-top: 0; font-size: 12px; font-weight: 400; line-height: 1.45; }
