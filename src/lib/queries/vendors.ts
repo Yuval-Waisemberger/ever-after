@@ -5,6 +5,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { demoVendors } from "@/lib/vendors/demo";
 import type { MarketplaceSubcategory, MarketplaceVendor, VendorFilters, VendorReview } from "@/lib/vendors/types";
+import { lifecycleFromStoredStatus } from "@/lib/domain/couple-vendors";
 
 const PAGE_SIZE = 12;
 
@@ -104,6 +105,8 @@ function mapVendor(row: VendorRow, supabaseUrl: string): MarketplaceVendor {
     reviewCount: reviews.length,
     reviews,
     recommendation: null,
+    isSaved: false,
+    lifecycleStatus: null,
   };
 }
 
@@ -128,11 +131,14 @@ async function getWeddingRecommendationContext() {
   const profile = await getCurrentProfile();
   if (!profile || profile.role !== "couple") return null;
   const supabase = await createClient();
-  const [{ data: wedding }, { data: items }] = await Promise.all([
-    supabase.from("weddings").select("id, preferred_area, total_budget_minor, styles, guest_count, event_type").single(),
-    supabase.from("budget_items").select("committed_amount_minor"),
-  ]);
+  const { data: wedding } = await supabase.from("weddings")
+    .select("id, preferred_area, total_budget_minor, styles, guest_count, event_type")
+    .single();
   if (!wedding) return null;
+  const [{ data: items }, { data: relationships }] = await Promise.all([
+    supabase.from("budget_items").select("committed_amount_minor").eq("wedding_id", wedding.id),
+    supabase.from("couple_vendors").select("vendor_id, status, is_saved").eq("wedding_id", wedding.id).not("vendor_id", "is", null),
+  ]);
   const committed = (items ?? []).reduce((sum, item) => sum + Number(item.committed_amount_minor ?? 0), 0);
   return {
     preferredArea: wedding.preferred_area,
@@ -140,6 +146,7 @@ async function getWeddingRecommendationContext() {
     styles: wedding.styles,
     guestCount: wedding.guest_count,
     eventType: wedding.event_type,
+    relationships: new Map((relationships ?? []).flatMap((item) => item.vendor_id ? [[item.vendor_id, item] as const] : [])),
   };
 }
 
@@ -187,17 +194,26 @@ export async function getMarketplace(filters: VendorFilters) {
   if (filters.service) query = query.contains("services", [filters.service]);
   const from = (filters.page - 1) * PAGE_SIZE;
   const [marketplaceResult, context] = await Promise.all([
-    query.order("business_name").range(from, from + PAGE_SIZE - 1),
+    filters.minRating == null
+      ? query.order("business_name").range(from, from + PAGE_SIZE - 1)
+      : query.order("business_name"),
     getWeddingRecommendationContext(),
   ]);
   const { data, error, count } = marketplaceResult;
   if (error) throw new Error("The vendor marketplace could not be loaded.");
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
   let vendors = (data ?? []).map((row) => mapVendor(row as VendorRow, url));
-  if (filters.minRating != null) vendors = vendors.filter((vendor) => (vendor.ratingAverage ?? 0) >= filters.minRating!);
+  let total = count ?? vendors.length;
+  if (filters.minRating != null) {
+    vendors = vendors.filter((vendor) => (vendor.ratingAverage ?? 0) >= filters.minRating!);
+    total = vendors.length;
+    vendors = vendors.slice(from, from + PAGE_SIZE);
+  }
   if (context) {
     vendors = vendors.map((vendor) => ({
       ...vendor,
+      isSaved: context.relationships.get(vendor.id)?.is_saved === true,
+      lifecycleStatus: lifecycleFromStoredStatus(context.relationships.get(vendor.id)?.status),
       recommendation: calculateRecommendation(context, {
         serviceAreas: vendor.serviceAreas,
         minPriceMinor: vendor.minPriceMinor,
@@ -210,7 +226,7 @@ export async function getMarketplace(filters: VendorFilters) {
       }),
     }));
   }
-  return { vendors, total: count ?? vendors.length, pageSize: PAGE_SIZE, isPreview: false };
+  return { vendors, total, pageSize: PAGE_SIZE, isPreview: false };
 }
 
 export const getVendorBySlug = cache(async (slug: string): Promise<MarketplaceVendor | null> => {

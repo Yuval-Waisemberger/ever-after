@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeAvatarChoice, type CoupleAvatarChoice } from "@/lib/domain/couple-identity";
 
 export type AppRole = "couple" | "vendor";
 
@@ -10,6 +11,8 @@ export type CurrentProfile = {
   id: string;
   role: AppRole;
   displayName: string;
+  avatarChoice: CoupleAvatarChoice;
+  avatarStoragePath: string | null;
 };
 
 export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> => {
@@ -28,12 +31,18 @@ export const getCurrentProfile = cache(async (): Promise<CurrentProfile | null> 
 
   const { data } = await supabase
     .from("profiles")
-    .select("id, role, display_name")
+    .select("id, role, display_name, avatar_choice, avatar_storage_path")
     .eq("id", userId)
     .maybeSingle();
 
   if (!data || (data.role !== "couple" && data.role !== "vendor")) return null;
-  return { id: data.id, role: data.role, displayName: data.display_name };
+  return {
+    id: data.id,
+    role: data.role,
+    displayName: data.display_name,
+    avatarChoice: normalizeAvatarChoice(data.avatar_choice),
+    avatarStoragePath: data.avatar_storage_path,
+  };
 });
 
 export async function requireRole(role: AppRole): Promise<CurrentProfile> {

@@ -84,7 +84,7 @@ test("all pooled marketplace images decode successfully", async ({ page }) => {
   }
 });
 
-test("targeted cover sequences stay distinct on mobile and desktop listing pages", async ({ page }) => {
+test("targeted cover sequences match the approved mappings on mobile and desktop listing pages", async ({ page }) => {
   test.setTimeout(180_000);
   const categories = ["social-content", "djs", "photo-booths", "wedding-dresses", "makeup-hair", "event-design", "flowers", "invitations", "preparation-hotels"];
   for (const width of [1440, 390]) {
@@ -95,7 +95,12 @@ test("targeted cover sequences stay distinct on mobile and desktop listing pages
         const cards = page.locator(".vendor-card");
         await expect(cards).toHaveCount(pageNumber === 1 ? 12 : 10);
         const sources = await cards.locator("img").evaluateAll(images => images.map(image => new URL((image as HTMLImageElement).src).searchParams.get("url") ?? (image as HTMLImageElement).src));
-        expect(new Set(sources).size).toBe(sources.length);
+        const expectedSources = vendors
+          .filter(vendor => vendor.subcategorySlug === subcategory)
+          .sort((left, right) => left.businessName.localeCompare(right.businessName))
+          .slice((pageNumber - 1) * 12, pageNumber * 12)
+          .map(vendor => vendor.imageUrl);
+        expect(sources).toEqual(expectedSources);
         for (const image of await cards.locator("img").all()) await expectImageDecoded(image);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
         if (pageNumber === 1) {

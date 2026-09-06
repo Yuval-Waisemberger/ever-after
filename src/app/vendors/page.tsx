@@ -8,6 +8,7 @@ import { parseVendorFilters } from "@/lib/vendors/filters";
 import { getMarketplace, getMarketplaceSubcategories } from "@/lib/queries/vendors";
 import { CategoryNavigation } from "@/components/vendors/category-navigation";
 import { Sprout } from "lucide-react";
+import { getCurrentProfile } from "@/lib/auth/user";
 
 export const metadata: Metadata = {
   title: "Explore Vendors",
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
 export default async function VendorsPage({ searchParams }: PageProps<"/vendors">) {
   const params = await searchParams;
   const filters = parseVendorFilters(params);
-  const [result, subcategories] = await Promise.all([getMarketplace(filters), getMarketplaceSubcategories()]);
+  const [result, subcategories, profile] = await Promise.all([getMarketplace(filters), getMarketplaceSubcategories(), getCurrentProfile()]);
   const pageCount = Math.max(1, Math.ceil(result.total / result.pageSize));
   const pageHref = (page: number) => {
     const next = new URLSearchParams();
@@ -27,6 +28,11 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
     next.set("page", String(page));
     return `/vendors?${next}`;
   };
+  const currentQuery = new URLSearchParams();
+  Object.entries(params).forEach(([key, value]) => {
+    if (typeof value === "string" && value) currentQuery.set(key, value);
+  });
+  const currentHref = `/vendors${currentQuery.size ? `?${currentQuery}` : ""}`;
 
   return (
     <div className="public-theme directory-page min-h-screen">
@@ -47,7 +53,7 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
         {result.isPreview ? <p className="marketplace-preview">You&apos;re browsing our local demo catalog. All vendor profiles and reviews are fictional.</p> : null}
         <VendorFiltersForm key={JSON.stringify(filters)} filters={filters} subcategories={subcategories} />
         <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {result.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} />)}
+          {result.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} canSave={profile?.role === "couple"} returnTo={currentHref} />)}
         </div>
         {!result.vendors.length ? <div className="mt-8"><EmptyState title="No vendors match those filters" description="Try a broader area, category, service, or price range. No vendor is hidden because of your bookings." /></div> : null}
         {pageCount > 1 ? (

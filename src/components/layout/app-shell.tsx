@@ -8,7 +8,6 @@ import {
   BriefcaseBusiness,
   Building2,
   ChevronDown,
-  CircleUserRound,
   Heart,
   LayoutDashboard,
   ListChecks,
@@ -22,7 +21,9 @@ import {
   WalletCards,
 } from "lucide-react";
 import { Wordmark } from "@/components/brand/wordmark";
+import { CoupleAvatar } from "@/components/couple/couple-avatar";
 import { signOut } from "@/lib/actions/auth";
+import type { CoupleAvatarChoice } from "@/lib/domain/couple-identity";
 
 type NavigationItem = {
   label: string;
@@ -71,10 +72,12 @@ const vendorNavigation: NavigationItem[] = [
   { label: "Settings", href: "/vendor/settings", icon: Settings },
 ];
 
-export function AppShell({ role, displayName, showSetup = false, children }: {
+export function AppShell({ role, displayName, showSetup = false, avatarChoice, avatarPhotoUrl, children }: {
   role: "couple" | "vendor";
   displayName: string;
   showSetup?: boolean;
+  avatarChoice?: CoupleAvatarChoice;
+  avatarPhotoUrl?: string | null;
   children: ReactNode;
 }) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -126,7 +129,7 @@ export function AppShell({ role, displayName, showSetup = false, children }: {
 
         <div className="mt-6 border-t pt-5">
           <div className="flex items-center gap-3">
-            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wine/10 text-wine">{role === "couple" ? <CircleUserRound className="size-4" /> : <Building2 className="size-4" />}</span>
+            {role === "couple" ? <CoupleAvatar choice={avatarChoice ?? "heart"} photoUrl={avatarPhotoUrl} className="size-10" sizes="40px" /> : <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wine/10 text-wine"><Building2 className="size-4" /></span>}
             {!sidebarCollapsed ? <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{displayName}</p><p className="text-xs capitalize text-ink-soft">{role} account</p></div> : null}
           </div>
           <form action={signOut} className="mt-3"><button className="min-h-9 w-full rounded-lg text-left text-xs font-semibold text-ink-soft hover:text-wine" aria-label={sidebarCollapsed ? "Sign out" : undefined}>{sidebarCollapsed ? "↪" : "Sign out"}</button></form>
@@ -139,7 +142,7 @@ export function AppShell({ role, displayName, showSetup = false, children }: {
           <details className="workspace-menu">
             <summary aria-label="Workspace menu"><Menu size={22} strokeWidth={1.4} /></summary>
             <div>
-              <p className="mb-4 border-b pb-4 text-sm text-ink-soft">{displayName}</p>
+              <div className="mb-4 flex items-center gap-3 border-b pb-4">{role === "couple" ? <CoupleAvatar choice={avatarChoice ?? "heart"} photoUrl={avatarPhotoUrl} className="size-10" sizes="40px" /> : null}<p className="text-sm text-ink-soft">{displayName}</p></div>
               <nav aria-label={`${role} full mobile navigation`}>
                 {navigation.map((item) => <div key={item.href} className="workspace-mobile-nav-item"><a href={item.href}>{item.label}</a>{item.children?.length ? <details className="workspace-mobile-subnav"><summary aria-label={`Show ${item.label} links`}><ChevronDown className="size-4" /></summary><div>{item.children.map((child) => <a key={child.href} href={child.href}>{child.label}</a>)}</div></details> : null}</div>)}
               </nav>

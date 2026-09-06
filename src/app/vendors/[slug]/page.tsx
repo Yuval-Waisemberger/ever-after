@@ -51,7 +51,7 @@ export default async function VendorProfilePage({ params, searchParams }: PagePr
             </div>
             <p className="mt-6 text-lg leading-8 text-ink-soft">{vendor.description}</p>
             <p className="ea-money mt-6 text-3xl text-wine">{vendor.minPriceMinor == null ? "Price on request" : `${formatIls(vendor.minPriceMinor)}${vendor.maxPriceMinor ? `–${formatIls(vendor.maxPriceMinor)}` : ""}${vendor.categorySlug === "venues" ? " per guest" : ""}`}</p>
-            {profile?.role === "couple" ? <div className="mt-7 border-t pt-6"><VendorStatusActions vendorId={vendor.id} currentStatus={relationship?.status} returnTo={`/vendors/${vendor.slug}`} /></div> : <div className="mt-7"><Link href="/auth/couple" className="inline-flex min-h-11 items-center rounded-full bg-wine px-5 text-sm font-semibold text-white">Sign in to save this vendor</Link></div>}
+            {profile?.role === "couple" ? <div className="mt-7 border-t pt-6"><VendorStatusActions vendorId={vendor.id} currentStatus={relationship?.status} isSaved={relationship?.is_saved === true} returnTo={`/vendors/${vendor.slug}`} /></div> : <div className="mt-7"><Link href="/auth/couple" className="inline-flex min-h-11 items-center rounded-full bg-wine px-5 text-sm font-semibold text-white">Sign in to save this vendor</Link></div>}
           </section>
         </div>
 

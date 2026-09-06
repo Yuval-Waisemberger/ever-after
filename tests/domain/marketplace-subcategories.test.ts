@@ -54,6 +54,22 @@ describe("connected marketplace subcategory query", () => {
     expect(params.get("max_guest_capacity")).toBe("gte.100");
   });
 
+  it("filters calculated ratings before pagination and reports the filtered total", async () => {
+    const rows = [
+      { id: "high", slug: "high-rated", business_name: "High Rated", is_public: true, vendor_categories: { slug: "photography-content", name: "Photography & Content" }, vendor_subcategories: { slug: "wedding-photographers", name: "Wedding Photographers" }, vendor_images: [], reviews: [{ id: "review-high", reviewer_display_name: "Couple", professionalism: 5, punctuality: 5, service_attitude: 5, value_for_money: 5, would_choose_again: true, review_text: null, created_at: "2026-01-01" }] },
+      { id: "low", slug: "low-rated", business_name: "Low Rated", is_public: true, vendor_categories: { slug: "photography-content", name: "Photography & Content" }, vendor_subcategories: { slug: "wedding-photographers", name: "Wedding Photographers" }, vendor_images: [], reviews: [{ id: "review-low", reviewer_display_name: "Couple", professionalism: 3, punctuality: 3, service_attitude: 3, value_for_money: 3, would_choose_again: false, review_text: null, created_at: "2026-01-01" }] },
+    ];
+    mocks.fetch.mockResolvedValue(new Response(JSON.stringify(rows), {
+      status: 200, headers: { "content-type": "application/json", "content-range": "0-1/22" },
+    }));
+
+    const result = await getMarketplace({ subcategory: "wedding-photographers", minRating: 4.5, page: 1 });
+
+    expect(request().searchParams.has("limit")).toBe(false);
+    expect(result.total).toBe(1);
+    expect(result.vendors.map((vendor) => vendor.slug)).toEqual(["high-rated"]);
+  });
+
   it("surfaces database errors rather than falling back to demo data", async () => {
     mocks.fetch.mockResolvedValue(new Response(JSON.stringify({ message: "query failed", code: "XX000" }), { status: 400 }));
     await expect(getMarketplace({ subcategory: "flowers", page: 1 })).rejects.toThrow("marketplace could not be loaded");

@@ -102,6 +102,29 @@ a {
   box-shadow: var(--shadow);
 }
 
+.couple-avatar-art {
+  width: 82%;
+  height: 82%;
+  overflow: visible;
+}
+
+.couple-avatar-art--heart {
+  width: 56%;
+  height: 56%;
+}
+
+.our-vendor-card,
+.external-vendor-form {
+  min-width: 0;
+}
+
+.external-vendor-form input,
+.external-vendor-form select,
+.external-vendor-form textarea {
+  min-width: 0;
+  max-width: 100%;
+}
+
 @media (prefers-reduced-motion: no-preference) {
   .gentle-reveal {
     animation: gentle-reveal 650ms ease-out both;

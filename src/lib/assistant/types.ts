@@ -1,4 +1,5 @@
 import type { MarketplaceVendor } from "@/lib/vendors/types";
+import type { VendorLifecycleStatus } from "@/lib/domain/couple-vendors";
 
 export type AssistantTask = {
   id: string;
@@ -8,8 +9,10 @@ export type AssistantTask = {
   priority: "low" | "medium" | "high";
 };
 
-export type AssistantVendor = MarketplaceVendor & {
-  status: "saved" | "contacted" | "considering" | "booked" | "rejected";
+export type AssistantVendor = Omit<MarketplaceVendor, "isSaved" | "lifecycleStatus"> & {
+  source: "marketplace" | "external";
+  isSaved: boolean;
+  lifecycleStatus: VendorLifecycleStatus | null;
   agreedPriceMinor: number | null;
   privateNotes: string | null;
 };

@@ -1,4 +1,5 @@
 import type { RecommendationResult } from "@/lib/domain/recommendation";
+import type { VendorLifecycleStatus } from "@/lib/domain/couple-vendors";
 
 export type VendorReview = {
   id: string;
@@ -42,6 +43,8 @@ export type MarketplaceVendor = {
   reviewCount: number;
   reviews: VendorReview[];
   recommendation?: RecommendationResult | null;
+  isSaved?: boolean;
+  lifecycleStatus?: VendorLifecycleStatus | null;
 };
 
 export type VendorFilters = {

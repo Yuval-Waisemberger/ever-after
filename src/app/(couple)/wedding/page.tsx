@@ -1,7 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bot, CalendarClock, CalendarHeart, CheckCircle2, Heart, ListChecks } from "lucide-react";
+import { ArrowRight, Bot, CalendarClock, CalendarHeart, CheckCircle2, ListChecks } from "lucide-react";
 import { DashboardCard } from "@/components/wedding/dashboard-card";
+import { CoupleProfileMenu } from "@/components/couple/couple-profile-menu";
 import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
 import { TaskStatusPill } from "@/components/tasks/task-status-pill";
 import { deriveBudgetItemStatus, derivePaymentStatus, formatIls } from "@/lib/domain/budget";
@@ -9,6 +10,8 @@ import { formatCalendarDate } from "@/lib/domain/date-status";
 import { selectUpcomingTasks } from "@/lib/domain/tasks";
 import { daysUntilWedding, isWeddingWeek } from "@/lib/domain/wedding-week";
 import { getWeddingDashboard } from "@/lib/queries/wedding";
+import { getCoupleIdentity } from "@/lib/queries/couple-identity";
+import { countSaved } from "@/lib/domain/couple-vendors";
 
 function summaryLink(href: string, label: string) {
   return (
@@ -34,14 +37,14 @@ const paymentStatusTone = {
 
 export default async function WeddingDashboardPage({ searchParams }: PageProps<"/wedding">) {
   const params = await searchParams;
-  const { wedding, taskSummary, tasks, relationships, budget, budgetItems } = await getWeddingDashboard();
+  const [{ wedding, taskSummary, tasks, relationships, budget, budgetItems }, identity] = await Promise.all([getWeddingDashboard(), getCoupleIdentity()]);
   const days = daysUntilWedding(wedding.wedding_date);
   const weddingWeek = isWeddingWeek(wedding.wedding_date);
   const names = `${wedding.partner_one_name} & ${wedding.partner_two_name}`;
   const today = new Date();
   const upcomingTasks = selectUpcomingTasks(tasks, today, 5);
   const booked = relationships.filter((relationship) => relationship.status === "booked");
-  const savedCount = relationships.filter((relationship) => relationship.status === "saved").length;
+  const savedCount = countSaved(relationships);
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
@@ -54,7 +57,7 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
 
       {params.details === "updated" ? <p className="ea-feedback ea-feedback--success mb-6" role="status">Your Wedding Details have been saved.</p> : null}
       <section className="wedding-dashboard-hero text-center">
-        <span className="mx-auto grid size-16 place-items-center rounded-full border border-gold/50 bg-paper text-wine"><Heart className="size-6" strokeWidth={1.3} /></span>
+        <CoupleProfileMenu choice={identity.avatarChoice} photoUrl={identity.photoUrl} />
         <p className="eyebrow mt-5">Our Wedding</p>
         <h1 className="font-display mt-2 text-5xl leading-tight tracking-tight sm:text-6xl">{names}</h1>
         <div className="wedding-date-card mx-auto mt-6 flex max-w-2xl flex-col items-center justify-center gap-3 border-y px-5 py-5 sm:flex-row sm:gap-5">
@@ -106,11 +109,14 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
             <ul className="grid gap-3 xl:grid-cols-2">
               {booked.slice(0, 3).map((relationship) => {
                 const vendor = Array.isArray(relationship.vendor_profiles) ? relationship.vendor_profiles[0] : relationship.vendor_profiles;
+                const external = Array.isArray(relationship.external_vendors) ? relationship.external_vendors[0] : relationship.external_vendors;
                 const images = vendor?.vendor_images ?? [];
                 const primary = images.find((image) => image.is_primary) ?? images[0];
                 const imageUrl = primary?.external_url ?? (primary?.storage_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/vendor-media/${primary.storage_path}` : null);
-                const subcategory = Array.isArray(vendor?.vendor_subcategories) ? vendor.vendor_subcategories[0] : vendor?.vendor_subcategories;
-                return <li key={relationship.id} className="dashboard-vendor-row grid min-w-0 items-center gap-4 rounded-xl border bg-[#FCF9F6] p-3">{imageUrl ? <span className="dashboard-vendor-image relative size-20 overflow-hidden rounded-md bg-paper-muted"><Image src={imageUrl} alt={primary?.alt_text ?? vendor?.business_name ?? "Booked vendor"} fill sizes="80px" className="object-cover" /></span> : <span className="dashboard-vendor-image grid size-20 place-items-center rounded-md bg-paper-muted font-display text-2xl text-wine">{vendor?.business_name?.slice(0, 1) ?? "V"}</span>}<span className="dashboard-vendor-info min-w-0"><span className="dashboard-vendor-name block font-semibold">{vendor?.business_name ?? "Booked vendor"}</span><span className="dashboard-vendor-category mt-1 block text-xs text-ink-soft">{subcategory?.name ?? "Wedding vendor"}</span><StatusPill tone="success" className="mt-2">Booked</StatusPill></span></li>;
+                const subcategoryValue = vendor?.vendor_subcategories ?? external?.vendor_subcategories ?? null;
+                const subcategory = Array.isArray(subcategoryValue) ? subcategoryValue[0] : subcategoryValue;
+                const businessName = vendor?.business_name ?? external?.business_name ?? "Booked vendor";
+                return <li key={relationship.id} className="dashboard-vendor-row grid min-w-0 items-center gap-4 rounded-xl border bg-[#FCF9F6] p-3">{imageUrl ? <span className="dashboard-vendor-image relative size-20 overflow-hidden rounded-md bg-paper-muted"><Image src={imageUrl} alt={primary?.alt_text ?? businessName} fill sizes="80px" className="object-cover" /></span> : <span className="dashboard-vendor-image grid size-20 place-items-center rounded-md bg-paper-muted font-display text-2xl text-wine">{businessName.slice(0, 1)}</span>}<span className="dashboard-vendor-info min-w-0"><span className="dashboard-vendor-name block font-semibold">{businessName}</span><span className="dashboard-vendor-category mt-1 block text-xs text-ink-soft">{subcategory?.name ?? "Wedding vendor"}{external ? " · Added by you" : ""}</span><StatusPill tone="success" className="mt-2">Booked</StatusPill></span></li>;
               })}
             </ul>
           ) : <p className="text-sm leading-6 text-ink-soft">Booked vendors will appear here automatically.</p>}

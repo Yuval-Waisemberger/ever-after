@@ -19,7 +19,7 @@ export async function getWeddingDashboard() {
   const [{ data: tasks, error: taskError }, { data: relationships, error: vendorError }, { data: budgetItems, error: budgetError }] =
     await Promise.all([
       supabase.from("tasks").select("id, title, category, due_date, status, priority").eq("wedding_id", wedding.id).order("due_date", { ascending: true, nullsFirst: false }),
-      supabase.from("couple_vendors").select("id, status, agreed_price_minor, vendor_profiles(slug, business_name, vendor_subcategories(name), vendor_images(external_url, storage_path, alt_text, is_primary, sort_order))").eq("wedding_id", wedding.id),
+      supabase.from("couple_vendors").select("id, status, is_saved, agreed_price_minor, vendor_profiles(slug, business_name, vendor_subcategories(name), vendor_images(external_url, storage_path, alt_text, is_primary, sort_order)), external_vendors(business_name, vendor_subcategories(name))").eq("wedding_id", wedding.id),
       supabase.from("budget_items").select("id, label, estimated_amount_minor, committed_amount_minor, payments(label, amount_minor, is_paid, due_date)").eq("wedding_id", wedding.id),
     ]);
 

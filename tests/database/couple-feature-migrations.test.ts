@@ -14,7 +14,7 @@ const budgetSql = readFileSync(
   "utf8",
 );
 
-describe("proposed Couple feature migrations (not a live database test)", () => {
+describe("Couple feature migration source contracts (not a live database test)", () => {
   it("keeps external vendors Couple-owned and separate from public marketplace profiles", () => {
     expect(identitySql).toContain("create table public.external_vendors");
     expect(identitySql).toContain('create policy "external_vendors_owner_all"');
@@ -36,4 +36,3 @@ describe("proposed Couple feature migrations (not a live database test)", () => 
     expect(budgetSql).not.toContain("update public.payments");
   });
 });
-

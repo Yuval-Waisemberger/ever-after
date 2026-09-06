@@ -3,14 +3,16 @@ import Link from "next/link";
 import { MapPin, Sparkles, Star } from "lucide-react";
 import { formatIls } from "@/lib/domain/budget";
 import type { MarketplaceVendor } from "@/lib/vendors/types";
+import { SavedVendorButton } from "@/components/vendors/saved-vendor-button";
 
 function humanize(value: string) {
   return value.replaceAll("_", " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
 }
 
-export function VendorCard({ vendor }: { vendor: MarketplaceVendor }) {
+export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: { vendor: MarketplaceVendor; canSave?: boolean; returnTo?: string }) {
   return (
-    <article className="vendor-card group overflow-hidden rounded-2xl border bg-paper">
+    <article className="vendor-card group relative overflow-hidden rounded-2xl border bg-paper">
+      {canSave ? <div className="absolute right-3 top-3 z-10"><SavedVendorButton vendorId={vendor.id} isSaved={vendor.isSaved === true} returnTo={returnTo} compact /></div> : null}
       <Link href={`/vendors/${vendor.slug}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-paper-muted">
           {vendor.imageUrl ? (

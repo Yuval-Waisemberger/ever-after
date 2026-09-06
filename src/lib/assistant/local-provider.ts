@@ -60,7 +60,7 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
     }
 
     if (/booked|which vendors|our vendors/.test(prompt) && !/compare/.test(prompt)) {
-      const booked = context.vendors.filter((vendor) => vendor.status === "booked");
+      const booked = context.vendors.filter((vendor) => vendor.lifecycleStatus === "booked");
       return { text: booked.length ? `You currently have ${booked.length} booked ${booked.length === 1 ? "vendor" : "vendors"}: ${humanList(booked.map((vendor) => vendor.businessName))}.` : "No vendor is marked Booked yet. You can still save, contact, or consider vendors without committing.", sources: ["Couple data", "Internal vendor database"] };
     }
 
@@ -73,7 +73,7 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
     }
 
     if (/compare|fits us|best value|trade-off|tradeoff/.test(prompt)) {
-      const candidates = context.vendors.filter((vendor) => vendor.status === "considering" || vendor.status === "saved");
+      const candidates = context.vendors.filter((vendor) => vendor.lifecycleStatus === "considering" || vendor.isSaved);
       if (candidates.length < 2) {
         return { text: "Mark at least two vendors as Saved or Considering and I can compare their price, services, ratings, fit, and your private notes without asking you to enter them again.", sources: ["Couple data"] };
       }
