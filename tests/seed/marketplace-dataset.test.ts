@@ -24,6 +24,14 @@ const expectedSubcategories: Record<string, { category: string; count: number }>
   officiants: { category: "event-services", count: 22 },
   "event-managers": { category: "event-services", count: 22 },
   "preparation-hotels": { category: "event-services", count: 22 },
+  "wedding-cakes": { category: "cakes-desserts", count: 8 },
+  "dessert-tables": { category: "cakes-desserts", count: 8 },
+  "pastry-patisserie": { category: "cakes-desserts", count: 8 },
+  "custom-sweets": { category: "cakes-desserts", count: 8 },
+  "dance-floor-accessories": { category: "wedding-accessories-party-extras", count: 8 },
+  "glow-accessories": { category: "wedding-accessories-party-extras", count: 8 },
+  "guest-comfort-accessories": { category: "wedding-accessories-party-extras", count: 8 },
+  "party-props-giveaways": { category: "wedding-accessories-party-extras", count: 8 },
 };
 
 const expectedImagePoolCounts: Record<string, number> = {
@@ -48,6 +56,17 @@ const expectedImagePoolCounts: Record<string, number> = {
   "preparation-hotels": 12,
 };
 
+const expectedApprovedPrimaryCounts: Record<string, number> = {
+  "wedding-cakes": 8,
+  "dessert-tables": 8,
+  "pastry-patisserie": 8,
+  "custom-sweets": 8,
+  "dance-floor-accessories": 8,
+  "glow-accessories": 8,
+  "guest-comfort-accessories": 8,
+  "party-props-giveaways": 8,
+};
+
 const allowedStyles = new Set([
   "Vintage", "Rustic / Countryside", "Israeli", "Urban", "Elegant", "Classic",
   "Romantic", "Modern", "Luxury", "Nature", "Intimate", "Minimalist", "Party / Festival",
@@ -61,8 +80,28 @@ const genericBusinessWords = new Set([
   "makeup", "management", "memory", "menswear", "moments", "motion", "music", "officiant", "paper", "photo", "photography", "pictures", "planning",
   "party", "performers", "portrait", "portraits", "preparation", "print", "prints", "producers", "reception", "reel", "reels", "retreat", "rides", "room", "rooms", "routes", "salon",
   "scenes", "services", "shuttle", "shuttles", "social", "sound", "stationery", "stay", "stories", "story", "studio", "suit", "suites", "suits",
-  "styling", "tailor", "tailoring", "the", "transit", "transport", "tuxedo", "visual", "vow", "wedding", "welcome", "works",
+  "accessories", "accessory", "after", "bakes", "bakery", "basket", "baskets", "cake", "cakes", "care", "cart", "celebrate", "comfort", "confectionery", "confections",
+  "custom", "dark", "dessert", "desserts", "details", "display", "displays", "dance", "edible", "electric", "essentials", "extras", "floor", "funwear", "giveaways", "glow", "goods",
+  "guest", "guests", "halo", "heart", "illuminated", "israel", "kit", "kits", "light", "lights", "little", "loop", "makers", "night", "party", "pastries", "pastry", "patisserie",
+  "props", "small", "spark", "step", "sweets", "sweet", "table", "tables", "tiered", "styling", "tailor", "tailoring", "the", "transit", "transport", "tuxedo", "visual", "vow", "wedding", "welcome", "whisk", "works",
 ]);
+
+const normalizedName = (name: string) => name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "");
+
+function editDistance(left: string, right: string) {
+  const matrix = Array.from({ length: left.length + 1 }, (_, row) => [row]);
+  for (let column = 1; column <= right.length; column += 1) matrix[0][column] = column;
+  for (let row = 1; row <= left.length; row += 1) {
+    for (let column = 1; column <= right.length; column += 1) {
+      matrix[row][column] = Math.min(
+        matrix[row - 1][column] + 1,
+        matrix[row][column - 1] + 1,
+        matrix[row - 1][column - 1] + (left[row - 1] === right[column - 1] ? 0 : 1),
+      );
+    }
+  }
+  return matrix[left.length][right.length];
+}
 
 describe("generated marketplace dataset", () => {
   it("preserves the reviewed venue corrections without renaming stable slugs", () => {
@@ -79,17 +118,44 @@ describe("generated marketplace dataset", () => {
   });
 
   it("has deterministic unique identities and the required taxonomy counts", () => {
-    expect(vendors).toHaveLength(432);
-    expect(new Set(vendors.map((vendor) => vendor.id)).size).toBe(432);
-    expect(new Set(vendors.map((vendor) => vendor.slug)).size).toBe(432);
-    expect(new Set(vendors.map((vendor) => vendor.businessName)).size).toBe(432);
-    expect(new Set(vendors.map((vendor) => vendor.description)).size).toBe(432);
+    expect(vendors).toHaveLength(496);
+    expect(new Set(vendors.map((vendor) => vendor.id)).size).toBe(496);
+    expect(new Set(vendors.map((vendor) => vendor.slug)).size).toBe(496);
+    expect(new Set(vendors.map((vendor) => vendor.businessName)).size).toBe(496);
+    expect(new Set(vendors.map((vendor) => normalizedName(vendor.businessName))).size).toBe(496);
+    expect(new Set(vendors.map((vendor) => vendor.description)).size).toBe(496);
     for (const [slug, expected] of Object.entries(expectedSubcategories)) {
       const matches = vendors.filter((vendor) => vendor.subcategorySlug === slug);
       expect(matches).toHaveLength(expected.count);
       expect(matches.every((vendor) => vendor.categorySlug === expected.category)).toBe(true);
-      expect(new Set(matches.map((vendor) => vendor.services.toSorted().join("|"))).size).toBeGreaterThanOrEqual(10);
-      expect(new Set(matches.map((vendor) => `${vendor.minPriceMinor}-${vendor.maxPriceMinor}`)).size).toBeGreaterThanOrEqual(10);
+      const expectedVariation = Math.min(10, expected.count);
+      expect(new Set(matches.map((vendor) => vendor.services.toSorted().join("|"))).size).toBeGreaterThanOrEqual(expectedVariation);
+      expect(new Set(matches.map((vendor) => `${vendor.minPriceMinor}-${vendor.maxPriceMinor}`)).size).toBeGreaterThanOrEqual(expectedVariation);
+    }
+  });
+
+  it("keeps the two new product categories separate and searchable", () => {
+    const categoryCounts = Object.fromEntries([...new Set(vendors.map((vendor) => vendor.categorySlug))].map((category) => [category, vendors.filter((vendor) => vendor.categorySlug === category).length]));
+    expect(categoryCounts).toMatchObject({ "cakes-desserts": 32, "wedding-accessories-party-extras": 32, "music-entertainment": 66, "photography-content": 88 });
+    expect(vendors.filter((vendor) => vendor.categorySlug === "cakes-desserts").every((vendor) => vendor.categoryName === "Cakes & Desserts")).toBe(true);
+    expect(vendors.filter((vendor) => vendor.categorySlug === "wedding-accessories-party-extras").every((vendor) => vendor.categoryName === "Wedding Accessories & Party Extras")).toBe(true);
+    expect(vendors.some((vendor) => `${vendor.businessName} ${vendor.description} ${vendor.services.join(" ")}`.toLowerCase().includes("wedding cake"))).toBe(true);
+    expect(vendors.some((vendor) => vendor.categorySlug === "wedding-accessories-party-extras" && vendor.services.includes("Wedding flip-flops"))).toBe(true);
+    expect(vendors.some((vendor) => vendor.categorySlug === "wedding-accessories-party-extras" && vendor.services.includes("Glow bracelets"))).toBe(true);
+  });
+
+  it("rejects confusing one-edit brand identities within a subcategory", () => {
+    const genericSuffixes = /\b(studio|house|collective|events?|weddings?|photography|films?|media|productions?|design|atelier|works|company|co|music|services?|beauty|flowers?|florals?|gifts?|gallery|team|group|lab|project|boutique|magnets?|social|content|bridal|tailoring|planning|ceremonies|cakes?|desserts?|pastry|patisserie|confections?|accessories|goods|extras|comfort|props|giveaways)\b/gi;
+    for (const [subcategory] of Object.entries(expectedSubcategories)) {
+      const matches = vendors.filter((vendor) => vendor.subcategorySlug === subcategory);
+      const cores = matches.map((vendor) => ({ vendor, core: normalizedName(vendor.businessName.replace(genericSuffixes, "")) }));
+      for (let left = 0; left < cores.length; left += 1) {
+        for (let right = left + 1; right < cores.length; right += 1) {
+          if (Math.min(cores[left].core.length, cores[right].core.length) >= 6) {
+            expect(editDistance(cores[left].core, cores[right].core), `${cores[left].vendor.businessName} / ${cores[right].vendor.businessName}`).toBeGreaterThan(1);
+          }
+        }
+      }
     }
   });
 
@@ -104,7 +170,7 @@ describe("generated marketplace dataset", () => {
     }
     const unusuallyRepeated = [...meaningfulWordFrequency].filter(([, count]) => count > 2);
     expect(unusuallyRepeated).toEqual([]);
-    expect([...meaningfulWordFrequency].filter(([, count]) => count === 2).map(([word]) => word).sort()).toEqual(["courtyard", "mitzpe", "rimon"]);
+    for (const word of ["courtyard", "mitzpe", "rimon"]) expect(meaningfulWordFrequency.get(word)).toBe(2);
   });
 
   it("derives the requested venue ratings from real demo review scores", () => {
@@ -153,7 +219,7 @@ describe("generated marketplace dataset", () => {
 
   it("has varied, internally consistent fictional reviews", () => {
     const reviews = vendors.flatMap((vendor) => vendor.reviews);
-    expect(reviews).toHaveLength(2383);
+    expect(reviews).toHaveLength(2727);
     expect(new Set(reviews.map((review) => review.id)).size).toBe(reviews.length);
     expect(new Set(reviews.map((review) => review.reviewText)).size).toBeGreaterThan(250);
     expect(vendors.filter((vendor) => vendor.reviewCount === 0).length).toBeGreaterThan(0);
@@ -167,8 +233,8 @@ describe("generated marketplace dataset", () => {
         : null;
       expect(vendor.reviewCount).toBe(vendor.reviews.length);
       expect(vendor.ratingAverage).toBe(calculated);
-      expect(vendor.gallery).toHaveLength(1);
-      expect(vendor.gallery[0]?.url).toBe(vendor.imageUrl);
+      expect(vendor.gallery).toHaveLength(vendor.imageUrl ? 1 : 0);
+      expect(vendor.gallery[0]?.url ?? null).toBe(vendor.imageUrl);
       for (const review of vendor.reviews) {
         expect(review.vendorId).toBe(vendor.id);
         const average = (review.professionalism + review.punctuality + review.serviceAttitude + review.valueForMoney) / 4;
@@ -178,13 +244,20 @@ describe("generated marketplace dataset", () => {
     }
   });
 
-  it("references the complete local WebP pool for every vendor and no external image host", () => {
-    const uniqueImageUrls = new Set(vendors.map((vendor) => vendor.imageUrl));
-    expect(uniqueImageUrls.size).toBe(227);
+  it("references the complete local WebP pool plus each approved new-vendor primary at most once", () => {
+    const imageUrls = vendors.flatMap((vendor) => vendor.imageUrl ? [vendor.imageUrl] : []);
+    const uniqueImageUrls = new Set(imageUrls);
+    expect(uniqueImageUrls.size).toBe(291);
+    expect(vendors.filter((vendor) => vendor.imageUrl == null)).toHaveLength(0);
     expect([...uniqueImageUrls].filter((url) => url.includes("?v="))).toHaveLength(13);
 
     for (const vendor of vendors) {
-      expect(vendor.imageUrl).toMatch(/^\/demo-marketplace\/[a-z0-9-]+\/[a-z0-9-]+-\d{2}\.webp(?:\?v=[a-f0-9]{12})?$/);
+      if (!vendor.imageUrl) {
+        expect(Object.keys(expectedApprovedPrimaryCounts)).toContain(vendor.subcategorySlug);
+        expect(vendor.gallery).toHaveLength(0);
+        continue;
+      }
+      expect(vendor.imageUrl).toMatch(/^\/demo-marketplace\/[a-z0-9-]+\/[a-z0-9-]+\.webp(?:\?v=[a-f0-9]{12})?$/);
       const url = new URL(vendor.imageUrl, "http://localhost");
       const imagePath = path.join(process.cwd(), "public", url.pathname.replace(/^\//, ""));
       expect(existsSync(imagePath)).toBe(true);
@@ -205,8 +278,18 @@ describe("generated marketplace dataset", () => {
       expect(urls.size, subcategory).toBe(priority ? 22 : supplemented ? 12 : expectedCount);
       const files = readdirSync(path.join(process.cwd(), "public", "demo-marketplace", subcategory)).filter((name) => name.endsWith(".webp"));
       expect(files, subcategory).toHaveLength(expectedCount);
-      const hashes = [...urls].map((url) => createHash("sha256").update(readFileSync(path.join(process.cwd(), "public", url.split("?")[0]))).digest("hex"));
+      const hashes = [...urls].flatMap((url) => url ? [createHash("sha256").update(readFileSync(path.join(process.cwd(), "public", url.split("?")[0]))).digest("hex")] : []);
       expect(new Set(hashes).size, subcategory).toBe(urls.size);
+    }
+
+    const approvedVendors = vendors.filter((vendor) => vendor.imageUrl?.endsWith("-primary.webp"));
+    expect(approvedVendors).toHaveLength(64);
+    const approvedHashes = approvedVendors.map((vendor) => createHash("sha256").update(readFileSync(path.join(process.cwd(), "public", vendor.imageUrl!.replace(/^\//, "")))).digest("hex"));
+    expect(new Set(approvedHashes).size).toBe(approvedHashes.length);
+    for (const [subcategory, expectedCount] of Object.entries(expectedApprovedPrimaryCounts)) {
+      const covered = approvedVendors.filter((vendor) => vendor.subcategorySlug === subcategory);
+      expect(covered, subcategory).toHaveLength(expectedCount);
+      expect(covered.every((vendor) => vendor.imageUrl === `/demo-marketplace/${subcategory}/${vendor.slug}-primary.webp`)).toBe(true);
     }
   });
 
@@ -222,7 +305,7 @@ describe("generated marketplace dataset", () => {
         }
       }
     }
-    for (const vendor of vendors.filter(v => v.imageUrl.endsWith("makeup-hair-11.webp"))) {
+    for (const vendor of vendors.filter(v => v.imageUrl?.endsWith("makeup-hair-11.webp"))) {
       expect(vendor.services).toContain("Groom grooming");
     }
   });

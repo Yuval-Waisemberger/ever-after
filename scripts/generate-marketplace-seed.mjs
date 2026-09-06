@@ -13,6 +13,8 @@ const categories = [
   ["beauty-attire", "Beauty & Attire", "Wedding attire, makeup, and hair"],
   ["design-flowers", "Design & Flowers", "Event design, flowers, invitations, and gifts"],
   ["event-services", "Event Services", "Logistics, officiants, managers, and preparation locations"],
+  ["cakes-desserts", "Cakes & Desserts", "Wedding cakes, dessert tables, patisserie, and custom sweets"],
+  ["wedding-accessories-party-extras", "Wedding Accessories & Party Extras", "Dance-floor accessories, guest comfort products, props, and small giveaways"],
 ];
 
 const types = [
@@ -35,6 +37,14 @@ const types = [
   { slug: "officiants", name: "Rabbis & Officiants", category: "event-services", count: 22, price: [[800, 1600], [1400, 2400], [2200, 3400], [3200, 4500]], services: ["Ceremony meeting", "Personalized ceremony", "Traditional ceremony", "Egalitarian ceremony", "Bilingual ceremony", "Ketubah guidance", "Civil-celebration option", "Family participation", "Rehearsal", "Short ceremony", "Cultural consultation", "Travel nationwide"], styles: ["Israeli", "Classic", "Modern", "Intimate", "Romantic", "Elegant"], suffix: "Ceremonies", noun: "officiant" },
   { slug: "event-managers", name: "Event Managers", category: "event-services", count: 22, price: [[1500, 2600], [2400, 3600], [3400, 4800], [4600, 6500]], services: ["Wedding-day coordination", "Full planning", "Vendor timeline", "Budget tracking", "Venue liaison", "Guest logistics", "Final confirmations", "Setup supervision", "Payment envelope plan", "Emergency kit", "Rehearsal coordination", "Post-event closeout"], styles: ["Classic", "Modern", "Elegant", "Luxury", "Intimate", "Party / Festival", "Nature"], suffix: "Planning", noun: "event management" },
   { slug: "preparation-hotels", name: "Hotels & Preparation Locations", category: "event-services", count: 22, price: [[1200, 2500], [2300, 4000], [3800, 6200], [5800, 9000]], services: ["Bridal preparation suite", "Overnight stay", "Late checkout", "Breakfast", "Natural-light room", "Photo-friendly spaces", "Family rooms", "Parking", "Terrace", "Vendor access", "Champagne package", "Post-wedding brunch"], styles: ["Luxury", "Classic", "Modern", "Urban", "Romantic", "Nature", "Intimate", "Vintage"], suffix: "House", noun: "preparation location" },
+  { slug: "wedding-cakes", name: "Wedding Cakes", category: "cakes-desserts", count: 8, price: [[900, 1500], [1400, 2300], [2200, 3400], [3200, 4800]], services: ["Tiered wedding cakes", "Custom cake design", "Tasting box", "Delivery and setup", "Fondant finish", "Buttercream finish", "Sugar flowers", "Vegan option", "Gluten-free option", "Personalized cake topper", "Sheet-cake servings", "Dessert styling"], styles: ["Romantic", "Elegant", "Classic", "Modern", "Minimalist", "Luxury", "Vintage", "Nature"], suffix: "Cakes", noun: "wedding cake studio" },
+  { slug: "dessert-tables", name: "Dessert Tables", category: "cakes-desserts", count: 8, price: [[1200, 2200], [2000, 3300], [3100, 4700], [4500, 6800]], services: ["Styled dessert table", "Mini desserts", "Individual portions", "Custom menu", "Tableware and stands", "Delivery and setup", "Late-night sweets", "Dairy-free selection", "Vegan selection", "Personalized signage", "Takeaway boxes", "On-site replenishment"], styles: ["Romantic", "Modern", "Elegant", "Party / Festival", "Luxury", "Rustic / Countryside", "Minimalist", "Israeli"], suffix: "Desserts", noun: "dessert table studio" },
+  { slug: "pastry-patisserie", name: "Pastry & Patisserie", category: "cakes-desserts", count: 8, price: [[700, 1300], [1200, 2100], [2000, 3200], [3000, 4600]], services: ["French pastries", "Israeli pastries", "Mini tarts", "Choux pastries", "Macarons", "Seasonal fruit desserts", "Custom pastry menu", "Tasting box", "Delivery", "Dairy-free selection", "Vegan selection", "Kosher menu"], styles: ["Elegant", "Classic", "Romantic", "Modern", "Luxury", "Minimalist", "Israeli", "Vintage"], suffix: "Patisserie", noun: "wedding patisserie" },
+  { slug: "custom-sweets", name: "Custom Sweets & Confectionery", category: "cakes-desserts", count: 8, price: [[500, 1000], [900, 1600], [1500, 2500], [2400, 3800]], services: ["Personalized chocolates", "Custom candy", "Marzipan favors", "Nougat and pralines", "Edible place cards", "Branded packaging", "Small-batch production", "Delivery", "Vegan selection", "Dairy-free selection", "Custom colors", "Thank-you sweets"], styles: ["Romantic", "Modern", "Luxury", "Israeli", "Minimalist", "Classic", "Party / Festival", "Vintage"], suffix: "Confections", noun: "wedding confectionery" },
+  { slug: "dance-floor-accessories", name: "Dance Floor Accessories", category: "wedding-accessories-party-extras", count: 8, price: [[450, 900], [800, 1400], [1300, 2100], [2000, 3200]], services: ["Dance-floor prop sets", "Novelty glasses", "Party hats", "Handheld signs", "Funwear bundles", "Personalized accessories", "Venue delivery", "Display baskets", "Color-matched sets", "Late-night distribution kits", "Bulk guest packs", "Cleanup bags"], styles: ["Party / Festival", "Modern", "Israeli", "Luxury", "Urban", "Romantic", "Classic", "Minimalist"], suffix: "Party Goods", noun: "dance-floor accessory studio" },
+  { slug: "glow-accessories", name: "Glow & Light-Up Accessories", category: "wedding-accessories-party-extras", count: 8, price: [[400, 800], [700, 1300], [1200, 1900], [1800, 2800]], services: ["Glow bracelets", "Glow necklaces", "Illuminated glasses", "LED rings", "Light-up foam sticks", "Color-matched glow packs", "Bulk guest kits", "Venue delivery", "Display setup", "Battery checks", "Personalized packaging", "Late-night distribution kits"], styles: ["Party / Festival", "Modern", "Urban", "Israeli", "Luxury", "Minimalist"], suffix: "Glow", noun: "light-up accessory studio" },
+  { slug: "guest-comfort-accessories", name: "Guest Comfort Accessories", category: "wedding-accessories-party-extras", count: 8, price: [[600, 1100], [1000, 1700], [1600, 2500], [2400, 3600]], services: ["Wedding flip-flops", "Handheld fans", "Comfort baskets", "Heel protectors", "Stain-removal kits", "Personalized sizing labels", "Display baskets", "Venue delivery", "Bulk guest packs", "Warm-weather kits", "Late-night comfort station", "Custom color palettes"], styles: ["Romantic", "Elegant", "Modern", "Israeli", "Minimalist", "Luxury", "Party / Festival", "Rustic / Countryside"], suffix: "Guest Comfort", noun: "guest comfort supplier" },
+  { slug: "party-props-giveaways", name: "Party Props & Giveaways", category: "wedding-accessories-party-extras", count: 8, price: [[500, 1000], [900, 1600], [1500, 2400], [2300, 3500]], services: ["Personalized giveaways", "Photo props", "Dance-floor props", "Novelty hats", "Custom favor tags", "Small guest gifts", "Themed party packs", "Venue delivery", "Display setup", "Bulk guest packs", "Custom colors", "Take-home packaging"], styles: ["Party / Festival", "Israeli", "Modern", "Romantic", "Vintage", "Luxury", "Urban", "Classic"], suffix: "Extras", noun: "party extra studio" },
 ];
 
 const imagePoolCounts = {
@@ -104,7 +114,96 @@ const curatedCovers = {
   "photo-booths": [...Array.from({ length: 8 }, (_, i) => ["photo-booths", i + 1]), ["magnet-photographers", 10], ["magnet-photographers", 19], ["magnet-photographers", 20], ["magnet-photographers", 14]],
   "event-design": [...Array.from({ length: 8 }, (_, i) => ["event-design", i + 1]), ["flowers", 5], ["flowers", 6], ["flowers", 8], ["event-managers", 4]],
   flowers: [...Array.from({ length: 8 }, (_, i) => ["flowers", i + 1]), ["event-design", 4], ["flowers", 9], ["event-design", 2], ["flowers", 10]],
+  "wedding-cakes": [["guest-gifts", 3], ["event-design", 3], ["flowers", 5], ["guest-gifts", 1], ["event-design", 4], ["flowers", 6], ["guest-gifts", 4], ["event-design", 8]],
+  "dessert-tables": [["event-design", 3], ["guest-gifts", 3], ["flowers", 5], ["event-design", 8], ["guest-gifts", 1], ["flowers", 6], ["event-design", 4], ["guest-gifts", 4]],
+  "pastry-patisserie": [["guest-gifts", 3], ["guest-gifts", 1], ["event-design", 3], ["flowers", 5], ["guest-gifts", 4], ["event-design", 4], ["flowers", 6], ["event-design", 8]],
+  "custom-sweets": [["guest-gifts", 3], ["guest-gifts", 1], ["guest-gifts", 4], ["guest-gifts", 6], ["invitations", 5], ["invitations", 2], ["event-design", 3], ["flowers", 5]],
+  "dance-floor-accessories": [["photo-booths", 3], ["photo-booths", 5], ["attractions", 7], ["djs", 6], ["photo-booths", 1], ["magnet-photographers", 20], ["photo-booths", 2], ["djs", 3]],
+  "glow-accessories": [["djs", 9], ["attractions", 7], ["djs", 6], ["photo-booths", 3], ["photo-booths", 5], ["magnet-photographers", 14], ["djs", 3], ["photo-booths", 1]],
+  "guest-comfort-accessories": [["guest-gifts", 1], ["guest-gifts", 2], ["guest-gifts", 4], ["guest-gifts", 6], ["guest-gifts", 5], ["invitations", 5], ["event-design", 8], ["flowers", 5]],
+  "party-props-giveaways": [["photo-booths", 3], ["photo-booths", 5], ["photo-booths", 1], ["guest-gifts", 1], ["guest-gifts", 6], ["magnet-photographers", 20], ["photo-booths", 2], ["guest-gifts", 2]],
 };
+
+// User-approved primary images for the locally finalized 2026-09-06 Marketplace
+// additions. Each of the 64 new vendors owns one distinct final primary asset.
+const approvedPrimaryImages = {
+  "moon-cakes-workshop-01": "An ivory heart-shaped cake with vintage piping and a ruby fruit center",
+  "sage-cakes-atelier-02": "A two-tier ivory wedding cake with white roses and classic piped detail",
+  "fig-cakes-collective-03": "A restrained two-tier buttercream cake with natural botanical styling",
+  "terra-cakes-house-04": "A long ivory sheet cake with ornate vintage piping and white flowers",
+  "north-cakes-project-05": "A romantic ivory wedding cake crowned with fresh raspberries",
+  "south-cakes-studio-06": "A low celebration cake with cocoa layers and a clean piped finish",
+  "harbor-cakes-works-07": "A dark ganache wedding cake with ivory roses in an outdoor setting",
+  "juniper-cakes-and-co-08": "A pearl-piped two-tier ivory cake with white garden flowers",
+
+  "south-desserts-house-01": "A generous wedding dessert table with fruit, macarons, choux, and individual sweets",
+  "harbor-desserts-project-02": "A refined pistachio-toned table of French pastries and petit desserts",
+  "juniper-desserts-studio-03": "A rustic round fresh-fruit platter styled with warm garden florals",
+  "linen-desserts-works-04": "An orderly fruit-and-dessert display with individual sweets on gold stands",
+  "orchid-desserts-and-co-05": "An architectural rectangular fresh-fruit platter in a pale wedding setting",
+  "amber-desserts-workshop-06": "A garden dessert table centered on a cake with pastries and fruit desserts",
+  "silver-desserts-atelier-07": "An abundant circular fresh-fruit display on an elegant terrace table",
+  "aster-desserts-collective-08": "A celebratory pink-and-ivory table of macarons, chocolates, meringues, and sweets",
+
+  "silver-patisserie-and-co-02": "A Jerusalem terrace spread of choux, fruit tarts, cookies, and macarons",
+  "cypress-patisserie-atelier-04": "A classic French patisserie spread with choux, mille-feuille, eclairs, and tarts",
+  "honey-patisserie-collective-05": "A romantic patisserie table with macarons, meringues, choux, and a simple cake",
+  "amber-patisserie-works-01": "A sesame-crusted tahini tart display with pistachio pastries and white wedding florals",
+  "aster-patisserie-workshop-03": "A pastel macaron tower and precise mini tarts in an elegant Jerusalem wedding setting",
+  "canvas-patisserie-house-06": "A bright citrus patisserie table with lemon tarts, orange pastries, and candied citrus",
+  "rimon-patisserie-project-07": "Sliced chocolate babka with petite choux and floral wedding styling",
+  "sol-patisserie-studio-08": "A graphic display of poppy-seed macarons and geometric petit desserts",
+
+  "canvas-confections-atelier-01": "A graphic pink-and-ivory candy display with gummies, truffles, marshmallows, and bark",
+  "rimon-confections-collective-02": "A pastel custom-sweets display with boxed favors, marshmallows, truffles, and gumdrops",
+  "sol-confections-house-03": "A polished confectionery display of chocolates, candy, and jewel-like sweets",
+  "tamar-confections-project-04": "A warm wedding candy bar with custom sweets and gift-ready presentation",
+  "indigo-confections-studio-05": "Gift-wrapped nougat bars with musical charms and romantic wedding packaging",
+  "willow-confections-works-06": "An ornate ketubah-inspired chocolate collection with ceremonial botanical linework",
+  "kinneret-confections-and-co-07": "A burgundy-ribboned keepsake box filled with polished cocoa wedding favors",
+  "jasmine-confections-workshop-08": "Minimal heart-shaped halva with pistachio, rose, and gift-ready packaging",
+
+  "willow-party-goods-project-01": "An orderly pastel dance-floor table with novelty glasses, props, and disco details",
+  "kinneret-party-goods-studio-02": "A personalized dance-floor station with hats, heart glasses, signs, and confetti",
+  "jasmine-party-goods-works-03": "A basket-led wedding accessory station with funwear, glasses, fans, and glow sticks",
+  "dune-party-goods-and-co-04": "A lively outdoor night display of hats, glasses, headbands, and wedding props",
+  "grove-party-goods-workshop-05": "A coordinated lilac dance-floor set with hats, glasses, bows, fans, and glow sticks",
+  "alma-party-goods-atelier-06": "A wedding-specific prop display with couple face cutouts, glasses, fans, and disco balls",
+  "cedar-party-goods-collective-07": "A bold coordinated dance-floor display with heart glasses, hats, face props, and confetti cannons",
+  "luna-party-goods-house-08": "A compact late-night prop case with heart glasses, handheld signs, leis, and party favors",
+
+  "alma-glow-and-co-01": "A refined glow station with illuminated loops, glasses, foam sticks, and light-up wands",
+  "cedar-glow-workshop-02": "A high-energy neon display of light-up glasses, foam sticks, and glowing wands",
+  "olive-glow-house-05": "A colorful night table of glow necklaces, LED glasses, foam sticks, and light-up wands",
+  "dawn-glow-project-06": "A lush after-dark display of glow sticks, necklaces, neon glasses, and sparkling hats",
+  "luna-glow-atelier-03": "A premium warm-white glow display with illuminated foam sticks, bracelets, and LED rings",
+  "noya-glow-collective-04": "A close wearable-light display of illuminated glasses, bracelets, rings, and wands",
+  "carmel-glow-studio-07": "A romantic glow bar arranged with circular bracelets, rings, and light-up wands",
+  "arava-glow-works-08": "A bold modular night display of colorful light-up glasses, bracelets, rings, and foam sticks",
+
+  "dawn-guest-comfort-collective-01": "A discreet modular guest-comfort station with fans, flip-flops, and practical care items",
+  "carmel-guest-comfort-house-02": "A welcoming comfort table with white fans, flip-flops, and guest-care supplies",
+  "arava-guest-comfort-project-03": "A rustic wooden comfort rack with white flip-flops and neatly arranged essentials",
+  "lark-guest-comfort-studio-04": "A full wedding comfort booth with baskets of footwear, fans, and personal-care items",
+  "velvet-guest-comfort-and-co-06": "A soft neutral guest-care basket centered on fans, tissues, and practical comforts",
+  "mosaic-guest-comfort-workshop-07": "A dedicated white flip-flop station for late-night wedding comfort",
+  "golden-guest-comfort-atelier-08": "An elegant golden-hour basket filled with white handheld wedding fans",
+  "pomegranate-guest-comfort-works-05": "A size-organized wedding comfort station with flip-flops, fans, care supplies, and restock packs",
+
+  "velvet-extras-studio-01": "A polished table of personalized face props, sweet favors, gift bags, fans, and confetti",
+  "mosaic-extras-works-02": "A vintage outdoor props display with couple cutouts, hats, glasses, glow items, and signs",
+  "golden-extras-and-co-03": "A floral party table with couple face sticks, fans, glasses, candy, and confetti favors",
+  "quiet-extras-workshop-04": "A bright tropical party station with colorful glasses, props, glow sticks, and small sweets",
+  "wild-extras-atelier-05": "An ivory-and-gold giveaway table with confetti cannons, favor bags, fans, and bubbles",
+  "moon-extras-collective-06": "A vintage travel case filled with couple face props, heart glasses, sequined hats, and bows",
+  "sage-extras-house-07": "Compact heart-shaped wedding favors and small gift boxes prepared as portable party kits",
+  "fig-extras-project-08": "Polished personalized edible place-card giveaways arranged for wedding guests",
+};
+
+const finalizedMarketplaceSubcategories = new Set([
+  "wedding-cakes", "dessert-tables", "pastry-patisserie", "custom-sweets",
+  "dance-floor-accessories", "glow-accessories", "guest-comfort-accessories", "party-props-giveaways",
+]);
 
 // Display names only: legacy slugs and all IDs deliberately remain stable.
 const venueDisplayNames = [
@@ -129,12 +228,12 @@ const businessNameRoots = {
     "Pazel", "Arbel", "Tzura", "Rakia", "Ofek", "Shavit", "Raviv", "Dafna", "Nesher", "Emek", "Sipur",
   ],
   "magnet-photographers": [
-    "Snapra", "Printel", "Mementa", "Klicka", "Polaroa", "Framely", "Memora", "Picaro", "Zikaro", "Momenta", "Keepla",
+    "Snapra", "Printel", "Mementa", "Klicka", "Polaroa", "Framely", "Memora", "Picaro", "Zikaro", "LumaPrint", "Keepla",
     "Instara", "Smilab", "Miniprinta", "Blinka", "Cheriva", "Printsy", "Focali", "Magneva", "Souvenira", "Klikon", "Keepsia",
   ],
   "social-content": [
     "Reelora", "Vowly", "Dayclip", "Storya", "Mingleon", "Candidra", "Scrolla", "Vistelle", "Keepscene", "Wedline", "Pulseframe",
-    "Vowcast", "Marrymotion", "Scenelet", "Guestory", "Veilview", "Momentia", "Daystory", "Socialle", "Ceremonycut", "Toastly", "Revela",
+    "Vowcast", "Marrymotion", "Scenelet", "Guestory", "Veilview", "Rega Social", "Daystory", "Socialle", "Ceremonycut", "Toastly", "Revela",
   ],
   djs: [
     "Reson", "Beatline", "Tempero", "Basson", "Ritmika", "Vinylit", "Groovem", "Pulseway", "Cadentra", "Deckora", "Nightset",
@@ -142,7 +241,7 @@ const businessNameRoots = {
   ],
   attractions: [
     "Bravura", "Sparkline", "Circella", "Flaria", "Wonderlane", "Festivo", "Marquea", "Kinetica", "Amazeo", "Encorra", "Jubilo",
-    "Roamance", "Glowmere", "Revelrya", "Firelume", "Lumessa", "Playora", "Wondria", "Paradeo", "Vivent", "Merriva", "Joyelle",
+    "Roamance", "Glowmere", "Revelrya", "Firelume", "Lumessa", "Tandem Live", "Wondria", "Paradeo", "Vivent", "Merriva", "Simcha Nova",
   ],
   "photo-booths": [
     "Pictura", "Snapbox", "Boothique", "Flashlet", "Posea", "Clickery", "Portraita", "Keepsnap", "Smilebox", "Framepod", "Shuttery",
@@ -178,7 +277,7 @@ const businessNameRoots = {
   ],
   transportation: [
     "Nesiya", "Routiva", "Shuttleon", "Viaora", "Moventa", "Ridewell", "Transitara", "Roadly", "Guestway", "Fleeton", "Safara",
-    "Wayline", "Journeya", "Caravelle", "Arrivon", "Navetta", "Pathera", "Wheela", "Tripora", "Coachly", "Vanhaven", "Routewise",
+    "Wayline", "Journeya", "Caravelle", "Arrivon", "Navetta", "Derech", "Wheela", "Tripora", "Coachly", "Vanhaven", "Routewise",
   ],
   officiants: [
     "Brita", "Vowen", "Ketuvah", "Chuppan", "Ceremiel", "Promisea", "Blessora", "Kiddusha", "Vowline", "Togethera", "Covenanta",
@@ -192,6 +291,14 @@ const businessNameRoots = {
     "Suitea", "Stayora", "Restelle", "Roomance", "Havera", "Morninga", "Bridalia", "Retreata", "Nestora", "Villae", "Loftia",
     "Sojourna", "Comfora", "Sanctua", "Hostelle", "Daybreaka", "Preparia", "Sleepwell", "Boudoira", "Innara", "Wakefula", "Chambera",
   ],
+  "wedding-cakes": ["Sugar Veil", "Almond & Ivory", "Tiered", "Velvet Crumb", "Noya Bakes", "Butterline", "Ganache Room", "Pearl Whisk"],
+  "dessert-tables": ["Sweet Assembly", "Pistachio Table", "Honeyed", "Dulce Display", "Petite Feast", "Caramel Garden", "Treat Terrace", "Confetti Spoon"],
+  "pastry-patisserie": ["Maison Sesame", "Flour & Fig", "Lev Patisserie", "Golden Rolling Pin", "Meringue Lane", "Citrus Crumb", "Babka & Bloom", "Poppy & Pin"],
+  "custom-sweets": ["Bonbon Tel Aviv", "Marzipan Story", "Sukar", "Praline Parcel", "Nougat Note", "Candy Ketubah", "Cocoa Keepsake", "Halva Heart"],
+  "dance-floor-accessories": ["Rikud", "Afterglow Kit", "Dance Basket", "Midnight Extras", "Floor Fizz", "Hora Supply", "Ritmo", "Last Song Props"],
+  "glow-accessories": ["Luma Loop", "Neon Mazel", "Glowline Israel", "Radiant Wrist", "Liel Lights", "Night Spark", "Halo Extras", "Electric Joy"],
+  "guest-comfort-accessories": ["Soft Step", "Fan & Favor", "Barefoot Basket", "Breeze Booth", "Comfy Celebration", "Guest Ease", "Summer Solace", "Rest & Revel"],
+  "party-props-giveaways": ["Mazel Makers", "Cheers Cart", "Funveil", "Party Parade Goods", "Toast Tokens", "Joy Kit", "Celebrate Small", "Dancing Details"],
 };
 
 const businessNameDescriptors = {
@@ -213,6 +320,14 @@ const businessNameDescriptors = {
   officiants: ["Ceremonies", "Wedding Officiant", "Ceremony Studio", "Chuppah Ceremonies", "Officiant Services", "Wedding Ceremonies", "Ceremony Guidance", "Vow Ceremonies"],
   "event-managers": ["Event Planning", "Wedding Management", "Event Coordination", "Wedding Planning", "Planning Studio", "Celebration Management", "Event Producers", "Wedding Coordination"],
   "preparation-hotels": ["Preparation Suites", "Bridal Stay", "Wedding Hotel", "Preparation House", "Wedding Suites", "Bridal Rooms", "Preparation Retreat", "Wedding Stay"],
+  "wedding-cakes": ["Wedding Cakes", "Cake Atelier", "Tiered Cakes", "Cake Studio", "Celebration Cakes", "Wedding Bakery", "Cake House", "Custom Cakes"],
+  "dessert-tables": ["Dessert Tables", "Sweet Table Studio", "Dessert Atelier", "Celebration Desserts", "Dessert Bar", "Sweet Displays", "Wedding Desserts", "Table of Sweets"],
+  "pastry-patisserie": ["Patisserie", "Wedding Pastry", "Pastry Atelier", "Petit Desserts", "Pastry House", "Celebration Patisserie", "Pastry Studio", "Wedding Bakes"],
+  "custom-sweets": ["Confectionery", "Wedding Sweets", "Sweet Atelier", "Custom Confections", "Chocolate Studio", "Celebration Sweets", "Confection House", "Edible Favors"],
+  "dance-floor-accessories": ["Dance Floor Accessories", "Party Goods", "Dance Floor Kits", "Wedding Funwear", "Party Accessory Studio", "Celebration Props", "Dance Floor Extras", "After-Party Goods"],
+  "glow-accessories": ["Glow Accessories", "Light-Up Goods", "Glow Bar", "Illuminated Extras", "Night Accessories", "Light-Up Studio", "Glow Kits", "After-Dark Goods"],
+  "guest-comfort-accessories": ["Guest Comfort", "Comfort Accessories", "Wedding Comfort Kits", "Guest Essentials", "Comfort Station", "Wedding Extras", "Guest Care Goods", "Comfort Baskets"],
+  "party-props-giveaways": ["Party Props", "Wedding Giveaways", "Celebration Extras", "Party Favor Studio", "Dance Floor Props", "Wedding Extras", "Guest Giveaways", "Party Kits"],
 };
 
 const approvedBusinessNameOverrides = {
@@ -333,7 +448,9 @@ function imageNumberFor(subcategorySlug, localIndex) {
   return (localIndex % imagePoolCounts[subcategorySlug]) + 1;
 }
 
-function imageUrlFor(subcategorySlug, localIndex) {
+function imageUrlFor(subcategorySlug, localIndex, vendorSlug) {
+  if (approvedPrimaryImages[vendorSlug]) return `/demo-marketplace/${subcategorySlug}/${vendorSlug}-primary.webp`;
+  if (finalizedMarketplaceSubcategories.has(subcategorySlug)) return null;
   const cover = subcategorySlug === "wedding-photographers" ? photographyCovers[localIndex]
     : subcategorySlug === "videographers" ? videoCovers[localIndex]
     : curatedCovers[subcategorySlug]?.[localIndex % curatedCovers[subcategorySlug].length];
@@ -436,8 +553,8 @@ function makeVendor(config, typeIndex, localIndex, sequence) {
     phone: null, email: `${slug}@demo-vendor.test`,
     websiteUrl: `https://example.com/demo-vendors/${slug}`, instagramUrl: `https://example.com/demo-instagram/${slug}`,
     isPublic: true,
-    imageUrl: imageUrlFor(config.slug, localIndex),
-    imageAlt: `Demo ${config.noun} portfolio image for ${businessName}`,
+    imageUrl: imageUrlFor(config.slug, localIndex, slug),
+    imageAlt: approvedPrimaryImages[slug] ? `${approvedPrimaryImages[slug]} for ${businessName}` : finalizedMarketplaceSubcategories.has(config.slug) ? "" : `Demo ${config.noun} portfolio image for ${businessName}`,
   };
 }
 
@@ -466,7 +583,7 @@ for (const vendor of vendors) {
   reviews.push(...vendor.reviews);
   vendor.ratingAverage = vendor.reviews.length ? vendor.reviews.reduce((sum, review) => sum + average(review), 0) / vendor.reviews.length : null;
   vendor.reviewCount = vendor.reviews.length;
-  vendor.gallery = [{ id: uuid("40000000", 1000 + vendor.sequence), url: vendor.imageUrl, alt: vendor.imageAlt }];
+  vendor.gallery = vendor.imageUrl ? [{ id: uuid("40000000", 1000 + vendor.sequence), url: vendor.imageUrl, alt: vendor.imageAlt }] : [];
   vendor.recommendation = null;
 }
 
@@ -474,7 +591,7 @@ function sql() {
   const categoryRows = categories.map(([slug, name, description], index) => `  (${sqlText(categoryBySlug[slug].id)}, ${sqlText(slug)}, ${sqlText(name)}, ${sqlText(description)}, ${(index + 1) * 10})`).join(",\n");
   const subcategoryRows = types.map((type) => `  (${sqlText(typeBySlug[type.slug].id)}, ${sqlText(categoryBySlug[type.category].id)}, ${sqlText(type.slug)}, ${sqlText(type.name)}, ${typeBySlug[type.slug].sort})`).join(",\n");
   const vendorRows = vendors.map((vendor) => `  (${[sqlText(vendor.id), sqlText(vendor.slug), sqlText(vendor.businessName), sqlText(vendor.contactName), sqlText(vendor.description), sqlText(vendor.locationCity), sqlText(vendor.categoryId), sqlText(vendor.subcategoryId), sqlEnumArray(vendor.serviceAreas, "wedding_area"), vendor.minPriceMinor, vendor.maxPriceMinor, sqlTextArray(vendor.services), sqlTextArray(vendor.styles), sqlEnumArray(vendor.eventTypes, "wedding_event_type"), vendor.minGuestCapacity ?? "null", vendor.maxGuestCapacity ?? "null", vendor.fridayAvailable ?? "null", vendor.indoorAvailable ?? "null", vendor.outdoorAvailable ?? "null", sqlText(vendor.phone), sqlText(vendor.email), sqlText(vendor.websiteUrl), sqlText(vendor.instagramUrl), "true"].join(", ")})`).join(",\n");
-  const imageRows = vendors.map((vendor) => `  (${sqlText(vendor.gallery[0].id)}, ${sqlText(vendor.id)}, ${sqlText(vendor.imageUrl)}, ${sqlText(vendor.imageAlt)}, 0, true)`).join(",\n");
+  const imageRows = vendors.filter((vendor) => vendor.gallery.length).map((vendor) => `  (${sqlText(vendor.gallery[0].id)}, ${sqlText(vendor.id)}, ${sqlText(vendor.imageUrl)}, ${sqlText(vendor.imageAlt)}, 0, true)`).join(",\n");
   const reviewRows = reviews.map((review) => `  (${[sqlText(review.id), sqlText(review.vendorId), sqlText(review.reviewerDisplayName), review.professionalism, review.punctuality, review.serviceAttitude, review.valueForMoney, review.wouldChooseAgain, sqlText(review.reviewText), "true", "true", sqlText(review.createdAt)].join(", ")})`).join(",\n");
   return `-- GENERATED FILE. Edit scripts/generate-marketplace-seed.mjs, then run pnpm seed:generate.\n-- Fictional deterministic demo data only; no credentials or real vendor claims.\nbegin;\n\ninsert into public.vendor_categories (id, slug, name, description, sort_order) values\n${categoryRows}\non conflict (slug) do update set name = excluded.name, description = excluded.description, sort_order = excluded.sort_order;\n\ninsert into public.vendor_subcategories (id, category_id, slug, name, sort_order) values\n${subcategoryRows}\non conflict (slug) do update set category_id = excluded.category_id, name = excluded.name, sort_order = excluded.sort_order;\n\ninsert into public.vendor_profiles (id, slug, business_name, contact_name, description, location_city, category_id, subcategory_id, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, friday_available, indoor_available, outdoor_available, phone, email, website_url, instagram_url, is_public) values\n${vendorRows}\non conflict (slug) do update set business_name = excluded.business_name, contact_name = excluded.contact_name, description = excluded.description, location_city = excluded.location_city, category_id = excluded.category_id, subcategory_id = excluded.subcategory_id, service_areas = excluded.service_areas, min_price_minor = excluded.min_price_minor, max_price_minor = excluded.max_price_minor, services = excluded.services, styles = excluded.styles, event_types = excluded.event_types, min_guest_capacity = excluded.min_guest_capacity, max_guest_capacity = excluded.max_guest_capacity, friday_available = excluded.friday_available, indoor_available = excluded.indoor_available, outdoor_available = excluded.outdoor_available, phone = excluded.phone, email = excluded.email, website_url = excluded.website_url, instagram_url = excluded.instagram_url, is_public = excluded.is_public;\n\ninsert into public.vendor_images (id, vendor_id, external_url, alt_text, sort_order, is_primary) values\n${imageRows}\non conflict (id) do update set vendor_id = excluded.vendor_id, external_url = excluded.external_url, storage_path = null, alt_text = excluded.alt_text, sort_order = excluded.sort_order, is_primary = excluded.is_primary;\n\ninsert into public.reviews (id, vendor_id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, is_public, is_seeded, created_at) values\n${reviewRows}\non conflict (id) do update set vendor_id = excluded.vendor_id, reviewer_display_name = excluded.reviewer_display_name, professionalism = excluded.professionalism, punctuality = excluded.punctuality, service_attitude = excluded.service_attitude, value_for_money = excluded.value_for_money, would_choose_again = excluded.would_choose_again, review_text = excluded.review_text, is_public = excluded.is_public, is_seeded = excluded.is_seeded, created_at = excluded.created_at;\n\ncommit;\n`;
 }
@@ -485,20 +602,28 @@ function fallbackVendor(vendor) {
 }
 
 const subcategoryCounts = Object.fromEntries(types.map((type) => [type.slug, vendors.filter((vendor) => vendor.subcategorySlug === type.slug).length]));
+const expectedVendorCount = types.reduce((sum, type) => sum + type.count, 0);
+
+function normalizedBusinessName(name) {
+  return name.toLowerCase().normalize("NFKD").replace(/[^a-z0-9]+/g, "").trim();
+}
 
 function validate() {
-  if (vendors.length !== 432) throw new Error(`Expected 432 vendors, received ${vendors.length}.`);
+  if (vendors.length !== expectedVendorCount) throw new Error(`Expected ${expectedVendorCount} vendors, received ${vendors.length}.`);
   if (new Set(vendors.map((vendor) => vendor.id)).size !== vendors.length || new Set(vendors.map((vendor) => vendor.slug)).size !== vendors.length || new Set(vendors.map((vendor) => vendor.businessName)).size !== vendors.length) throw new Error("Vendor identifiers, slugs, and names must be unique.");
+  if (new Set(vendors.map((vendor) => normalizedBusinessName(vendor.businessName))).size !== vendors.length) throw new Error("Normalized vendor business names must be unique.");
   const catalogRoots = Object.values(businessNameRoots).flat();
-  if (catalogRoots.length !== 396 || new Set(catalogRoots.map((root) => root.toLowerCase())).size !== catalogRoots.length) throw new Error("Every non-venue vendor must have one unique fictional brand root.");
+  if (catalogRoots.length !== expectedVendorCount - venueDisplayNames.length || new Set(catalogRoots.map((root) => normalizedBusinessName(root))).size !== catalogRoots.length) throw new Error("Every non-venue vendor must have one unique fictional brand root.");
   if (Object.entries(businessNameRoots).some(([slug, roots]) => typeBySlug[slug]?.count !== roots.length)) throw new Error("A business-name root catalog does not match its subcategory count.");
-  if (types.some((type) => subcategoryCounts[type.slug] !== type.count || (type.slug === "wedding-venues" ? type.count < 30 : type.count < 20))) throw new Error("A subcategory vendor count is below its target.");
+  if (types.some((type) => subcategoryCounts[type.slug] !== type.count || type.count < (type.slug === "wedding-venues" ? 30 : type.category === "cakes-desserts" || type.category === "wedding-accessories-party-extras" ? 8 : 20))) throw new Error("A subcategory vendor count is below its target.");
   for (const vendor of vendors) {
     const type = typeBySlug[vendor.subcategorySlug];
     if (!type || type.category !== vendor.categorySlug) throw new Error(`Category mismatch for ${vendor.slug}.`);
     if (vendor.minPriceMinor < 0 || vendor.minPriceMinor > vendor.maxPriceMinor) throw new Error(`Invalid price range for ${vendor.slug}.`);
     if (vendor.minGuestCapacity != null && vendor.minGuestCapacity > vendor.maxGuestCapacity) throw new Error(`Invalid capacity for ${vendor.slug}.`);
-    if (!/^\/demo-marketplace\/[a-z0-9-]+\/[a-z0-9-]+-\d{2}\.webp(?:\?v=[a-f0-9]{12})?$/.test(vendor.imageUrl)) throw new Error(`Invalid image URL for ${vendor.slug}.`);
+    if (vendor.imageUrl && !/^\/demo-marketplace\/[a-z0-9-]+\/[a-z0-9-]+\.webp(?:\?v=[a-f0-9]{12})?$/.test(vendor.imageUrl)) throw new Error(`Invalid image URL for ${vendor.slug}.`);
+    if (!vendor.imageUrl && !finalizedMarketplaceSubcategories.has(vendor.subcategorySlug)) throw new Error(`Missing image URL for ${vendor.slug}.`);
+    if (vendor.gallery.length !== (vendor.imageUrl ? 1 : 0) || (vendor.gallery[0]?.url ?? null) !== vendor.imageUrl) throw new Error(`Inconsistent gallery for ${vendor.slug}.`);
     for (const review of vendor.reviews) {
       const scores = [review.professionalism, review.punctuality, review.serviceAttitude, review.valueForMoney];
       if (scores.some((score) => score < 1 || score > 5) || review.wouldChooseAgain !== (average(review) >= 3.75)) throw new Error(`Inconsistent review ${review.id}.`);
@@ -523,9 +648,10 @@ for (const [file, content] of outputs) {
 }
 
 const assetDirectory = path.join(root, "public", "demo-marketplace");
-const referencedImageUrls = new Set(vendors.map((vendor) => vendor.imageUrl));
+const referencedImageUrls = new Set(vendors.map((vendor) => vendor.imageUrl).filter(Boolean));
 const expectedAssetCount = Object.values(imagePoolCounts).reduce((sum, count) => sum + count, 0);
-if (referencedImageUrls.size !== expectedAssetCount) throw new Error(`Expected all ${expectedAssetCount} pooled images to be used, found ${referencedImageUrls.size}.`);
+const approvedPrimaryImageCount = Object.keys(approvedPrimaryImages).length;
+if (referencedImageUrls.size !== expectedAssetCount + approvedPrimaryImageCount) throw new Error(`Expected ${expectedAssetCount} pooled and ${approvedPrimaryImageCount} approved images to be used, found ${referencedImageUrls.size}.`);
 for (const imageUrl of referencedImageUrls) {
   const data = await readFile(path.join(root, "public", imageUrl.split("?")[0]));
   if (data.length < 12 || data.toString("ascii", 0, 4) !== "RIFF" || data.toString("ascii", 8, 12) !== "WEBP") {
@@ -537,4 +663,13 @@ for (const [subcategorySlug, expectedCount] of Object.entries(imagePoolCounts)) 
   if (names.length !== expectedCount) throw new Error(`Expected ${expectedCount} ${subcategorySlug} assets, found ${names.length}.`);
 }
 
-console.log(`${checkOnly ? "Validated" : "Generated"} ${vendors.length} fictional vendors, ${reviews.length} fictional reviews, and ${expectedAssetCount} pooled local WebP assets.`);
+const approvedHashes = [];
+for (const subcategorySlug of finalizedMarketplaceSubcategories) {
+  const expectedCount = vendors.filter((vendor) => vendor.subcategorySlug === subcategorySlug && vendor.imageUrl).length;
+  const names = (await readdir(path.join(assetDirectory, subcategorySlug))).filter((name) => name.endsWith("-primary.webp"));
+  if (names.length !== expectedCount) throw new Error(`Expected ${expectedCount} approved ${subcategorySlug} assets, found ${names.length}.`);
+  for (const name of names) approvedHashes.push(createHash("sha256").update(await readFile(path.join(assetDirectory, subcategorySlug, name))).digest("hex"));
+}
+if (new Set(approvedHashes).size !== approvedHashes.length) throw new Error("Approved primary images must have unique file hashes.");
+
+console.log(`${checkOnly ? "Validated" : "Generated"} ${vendors.length} fictional vendors, ${reviews.length} fictional reviews, ${expectedAssetCount} pooled local WebP assets, and ${approvedPrimaryImageCount} approved primary images.`);

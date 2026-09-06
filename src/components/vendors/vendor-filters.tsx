@@ -13,13 +13,15 @@ const categories = [
   ["beauty-attire", "Beauty & Attire"],
   ["design-flowers", "Design & Flowers"],
   ["event-services", "Event Services"],
+  ["cakes-desserts", "Cakes & Desserts"],
+  ["wedding-accessories-party-extras", "Wedding Accessories & Party Extras"],
 ] as const;
 
 export function VendorFiltersForm({ filters, subcategories }: { filters: VendorFilters; subcategories: MarketplaceSubcategory[] }) {
   const [category, setCategory] = useState(filters.category ?? "");
   const [subcategory, setSubcategory] = useState(filters.subcategory ?? "");
   const choices = subcategories.filter((choice) => !category || choice.categorySlug === category);
-  const inputClass = "min-h-11 rounded-xl border bg-paper px-3.5 text-sm";
+  const inputClass = "min-h-11 min-w-0 w-full rounded-xl border bg-paper px-3.5 text-sm";
   return (
     <form method="get" className="paper-panel mt-7 grid gap-4 p-4 sm:p-5 lg:grid-cols-12">
       <label className="relative lg:col-span-4">

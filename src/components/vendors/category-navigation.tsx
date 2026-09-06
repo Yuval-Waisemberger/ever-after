@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Camera, Flower2, Gem, HandPlatter, Music2, Trees } from "lucide-react";
+import { ArrowUpRight, CakeSlice, Camera, Flower2, Gem, HandPlatter, Music2, PartyPopper, Trees } from "lucide-react";
 
 const categories = [
   { slug: "venues", label: "Wedding Venues & Gardens", icon: Trees },
@@ -8,6 +8,8 @@ const categories = [
   { slug: "beauty-attire", label: "Beauty & Attire", icon: Gem },
   { slug: "design-flowers", label: "Design & Flowers", icon: Flower2 },
   { slug: "event-services", label: "Event Services", icon: HandPlatter },
+  { slug: "cakes-desserts", label: "Cakes & Desserts", icon: CakeSlice },
+  { slug: "wedding-accessories-party-extras", label: "Wedding Accessories & Party Extras", icon: PartyPopper },
 ];
 
 export function CategoryNavigation({ selected }: { selected?: string }) {

@@ -56,6 +56,8 @@ const coupleNavigation: NavigationItem[] = [
       { label: "Beauty & Attire", href: "/vendors?category=beauty-attire" },
       { label: "Design & Flowers", href: "/vendors?category=design-flowers" },
       { label: "Event Services", href: "/vendors?category=event-services" },
+      { label: "Cakes & Desserts", href: "/vendors?category=cakes-desserts" },
+      { label: "Wedding Accessories & Party Extras", href: "/vendors?category=wedding-accessories-party-extras" },
       { label: "Our Vendors", href: "/vendors/my" },
     ],
   },

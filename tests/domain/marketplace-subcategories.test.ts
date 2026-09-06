@@ -85,7 +85,7 @@ describe("connected marketplace subcategory query", () => {
   it("preserves disconnected taxonomy and subcategory pagination", async () => {
     mocks.configured.mockReturnValue(false);
     const taxonomy = await getMarketplaceSubcategories();
-    expect(taxonomy).toHaveLength(19);
+    expect(taxonomy).toHaveLength(27);
     expect(taxonomy.filter(item => item.categorySlug === "photography-content")).toHaveLength(4);
     const result = await getMarketplace({ subcategory: "wedding-photographers", page: 2 });
     expect(result).toMatchObject({ total: 22, isPreview: true });

@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? "http://localhost:3000";
+const useExternalServer = process.env.PLAYWRIGHT_EXTERNAL_SERVER === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -7,12 +10,12 @@ export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   reporter: "html",
   use: {
-    baseURL: "http://localhost:3000",
+    baseURL,
     trace: "on-first-retry",
   },
-  webServer: {
+  webServer: useExternalServer ? undefined : {
     command: "pnpm dev",
-    url: "http://localhost:3000",
+    url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
   projects: [

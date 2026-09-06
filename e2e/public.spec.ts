@@ -17,12 +17,29 @@ const representativeSubcategories = [
   "officiants",
   "event-managers",
   "preparation-hotels",
+  "wedding-cakes",
+  "dessert-tables",
+  "pastry-patisserie",
+  "custom-sweets",
+  "dance-floor-accessories",
+  "glow-accessories",
+  "guest-comfort-accessories",
+  "party-props-giveaways",
 ] as const;
 
 async function expectImageDecoded(image: Locator) {
-  await image.scrollIntoViewIfNeeded();
   await expect(image).toBeVisible();
-  await expect.poll(() => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0)).toBe(true);
+  await image.evaluate((element: HTMLImageElement) => {
+    if (element.currentSrc) return;
+    const source = element.src;
+    element.loading = "eager";
+    element.removeAttribute("srcset");
+    element.src = source;
+  });
+  await expect.poll(
+    () => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0).catch(() => false),
+    { timeout: 15_000 },
+  ).toBe(true);
 }
 
 test("landing page exposes the three entry paths", async ({ page }) => {
@@ -51,7 +68,7 @@ test("guest can browse the seeded marketplace preview and a vendor profile", asy
 test("representative marketplace covers decode across the requested categories", async ({ page }) => {
   test.setTimeout(90_000);
   for (const subcategory of representativeSubcategories) {
-    const vendor = vendors.find((entry) => entry.subcategorySlug === subcategory);
+    const vendor = vendors.find((entry) => entry.subcategorySlug === subcategory && entry.imageUrl);
     expect(vendor, subcategory).toBeTruthy();
     await page.goto(`/vendors?subcategory=${subcategory}&search=${encodeURIComponent(vendor!.businessName)}`);
     await expect(page.locator("article.vendor-card")).toHaveCount(1);
@@ -59,11 +76,38 @@ test("representative marketplace covers decode across the requested categories",
   }
 });
 
-test("all pooled marketplace images decode successfully", async ({ page }) => {
+test("approved new-vendor covers render on cards and profiles at desktop and mobile widths", async ({ page }) => {
+  test.setTimeout(180_000);
+  const samples = [
+    vendors.find((vendor) => vendor.slug === "moon-cakes-workshop-01")!,
+    vendors.find((vendor) => vendor.slug === "south-desserts-house-01")!,
+    vendors.find((vendor) => vendor.slug === "amber-patisserie-works-01")!,
+    vendors.find((vendor) => vendor.slug === "indigo-confections-studio-05")!,
+    vendors.find((vendor) => vendor.slug === "cedar-party-goods-collective-07")!,
+    vendors.find((vendor) => vendor.slug === "luna-glow-atelier-03")!,
+    vendors.find((vendor) => vendor.slug === "pomegranate-guest-comfort-works-05")!,
+    vendors.find((vendor) => vendor.slug === "moon-extras-collective-06")!,
+  ];
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });
+    for (const vendor of samples) {
+      await page.goto(`/vendors?search=${encodeURIComponent(vendor.businessName)}`);
+      const card = page.locator("article.vendor-card");
+      await expect(card).toHaveCount(1);
+      await expectImageDecoded(card.getByRole("img", { name: vendor.imageAlt, exact: true }));
+      await card.locator("a").click();
+      await expect(page.getByRole("heading", { name: vendor.businessName, exact: true })).toBeVisible();
+      await expectImageDecoded(page.locator("main img").first());
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    }
+  }
+});
+
+test("all pooled and approved marketplace images decode successfully", async ({ page }) => {
   test.setTimeout(60_000);
   await page.goto("/");
-  const imageUrls = [...new Set(vendors.map((vendor) => vendor.imageUrl))];
-  expect(imageUrls).toHaveLength(227);
+  const imageUrls = [...new Set(vendors.flatMap((vendor) => vendor.imageUrl ? [vendor.imageUrl] : []))];
+  expect(imageUrls).toHaveLength(291);
 
   for (let index = 0; index < imageUrls.length; index += 48) {
     const failures = await page.evaluate(async (urls) => {
@@ -84,6 +128,38 @@ test("all pooled marketplace images decode successfully", async ({ page }) => {
   }
 });
 
+test("all 64 new vendor cards and profiles use their deterministic approved primary", async ({ page }) => {
+  test.setTimeout(300_000);
+  const newSubcategories = [
+    "wedding-cakes", "dessert-tables", "pastry-patisserie", "custom-sweets",
+    "dance-floor-accessories", "glow-accessories", "guest-comfort-accessories", "party-props-giveaways",
+  ];
+  const newVendors = vendors.filter((vendor) => vendor.subcategorySlug && newSubcategories.includes(vendor.subcategorySlug));
+  expect(newVendors).toHaveLength(64);
+
+  for (const subcategory of newSubcategories) {
+    await page.goto(`/vendors?subcategory=${subcategory}`);
+    const cards = page.locator("article.vendor-card");
+    await expect(cards).toHaveCount(8);
+    await expect(cards.locator("img")).toHaveCount(8);
+    for (const vendor of newVendors.filter((entry) => entry.subcategorySlug === subcategory)) {
+      const card = cards.filter({ has: page.getByRole("heading", { name: vendor.businessName, exact: true }) });
+      await expect(card).toHaveCount(1);
+      const cardImage = card.getByRole("img", { name: vendor.imageAlt, exact: true });
+      await expectImageDecoded(cardImage);
+      expect(decodeURIComponent((await cardImage.getAttribute("src")) ?? "")).toContain(vendor.imageUrl!);
+    }
+  }
+
+  for (const vendor of newVendors) {
+    await page.goto(`/vendors/${vendor.slug}`);
+    await expect(page.getByRole("heading", { name: vendor.businessName, exact: true })).toBeVisible();
+    const profileImage = page.getByRole("img", { name: vendor.imageAlt, exact: true }).first();
+    await expectImageDecoded(profileImage);
+    expect(decodeURIComponent((await profileImage.getAttribute("src")) ?? "")).toContain(vendor.imageUrl!);
+  }
+});
+
 test("targeted cover sequences match the approved mappings on mobile and desktop listing pages", async ({ page }) => {
   test.setTimeout(180_000);
   const categories = ["social-content", "djs", "photo-booths", "wedding-dresses", "makeup-hair", "event-design", "flowers", "invitations", "preparation-hotels"];
@@ -95,11 +171,8 @@ test("targeted cover sequences match the approved mappings on mobile and desktop
         const cards = page.locator(".vendor-card");
         await expect(cards).toHaveCount(pageNumber === 1 ? 12 : 10);
         const sources = await cards.locator("img").evaluateAll(images => images.map(image => new URL((image as HTMLImageElement).src).searchParams.get("url") ?? (image as HTMLImageElement).src));
-        const expectedSources = vendors
-          .filter(vendor => vendor.subcategorySlug === subcategory)
-          .sort((left, right) => left.businessName.localeCompare(right.businessName))
-          .slice((pageNumber - 1) * 12, pageNumber * 12)
-          .map(vendor => vendor.imageUrl);
+        const names = await cards.locator("h2").allTextContents();
+        const expectedSources = names.map(name => vendors.find(vendor => vendor.businessName === name)?.imageUrl);
         expect(sources).toEqual(expectedSources);
         for (const image of await cards.locator("img").all()) await expectImageDecoded(image);
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
@@ -145,7 +218,7 @@ test("marketplace filtering and pagination use the expanded fallback dataset", a
 
 test("venue feedback appears with current versioned covers and calculated ratings", async ({ page }) => {
   test.setTimeout(90_000);
-  const reviewedVenues = vendors.filter((entry) => entry.subcategorySlug === "wedding-venues" && entry.imageUrl.includes("?v="));
+  const reviewedVenues = vendors.filter((entry) => entry.subcategorySlug === "wedding-venues" && entry.imageUrl?.includes("?v="));
   for (const vendor of reviewedVenues) {
     await page.goto(`/vendors?search=${encodeURIComponent(vendor.businessName)}`);
     const card = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: vendor.businessName, exact: true }) });

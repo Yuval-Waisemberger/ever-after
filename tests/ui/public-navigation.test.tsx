@@ -5,10 +5,10 @@ import { PublicMobileMenu } from "@/components/layout/public-mobile-menu";
 import vendors from "@/generated/marketplace-demo.json";
 
 describe("public navigation", () => {
-  it("links exactly the six existing category slugs and identifies the selected one", () => {
+  it("links every Marketplace category slug and identifies the selected one", () => {
     const document = new DOMParser().parseFromString(renderToStaticMarkup(<CategoryNavigation selected="photography-content" />), "text/html");
     const links = [...document.querySelectorAll("a")];
-    expect(links).toHaveLength(6);
+    expect(links).toHaveLength(8);
     expect(links.map(link => new URL(link.href, "http://localhost").searchParams.get("category")).sort()).toEqual([...new Set(vendors.map(vendor => vendor.categorySlug))].sort());
     expect(links.every(link => link.hash === "#marketplace-results")).toBe(true);
     expect(document.querySelectorAll('[aria-current="page"]')).toHaveLength(1);

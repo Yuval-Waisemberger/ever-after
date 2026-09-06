@@ -25,6 +25,29 @@ test("real subcategory selector filters Photography and Design while preserving 
   }
 });
 
+test("new product categories remain top-level, searchable, and independently filterable", async ({ page }) => {
+  test.setTimeout(180_000);
+  for (const category of ["cakes-desserts", "wedding-accessories-party-extras"]) {
+    await page.goto(`/vendors?category=${category}`);
+    await expectListing(page, 32);
+    const choices = [...new Map(vendors.filter(v => v.categorySlug === category).map(v => [v.subcategorySlug, v.subcategoryName])).entries()];
+    expect(choices).toHaveLength(4);
+    await expect(page.getByRole("combobox", { name: "Subcategory", exact: true }).locator("option")).toHaveCount(5);
+    for (const [slug, name] of choices) {
+      await page.getByRole("combobox", { name: "Subcategory", exact: true }).selectOption(slug);
+      await page.getByRole("button", { name: "Apply", exact: true }).click();
+      await expectListing(page, 8, name);
+    }
+    const searchable = vendors.find(vendor => vendor.categorySlug === category)!;
+    await page.goto(`/vendors?category=${category}&search=${encodeURIComponent(searchable.businessName)}`);
+    await expectListing(page, 1, searchable.subcategoryName);
+    await expect(page.getByRole("heading", { name: searchable.businessName, exact: true })).toBeVisible();
+  }
+  await page.goto("/vendors?category=music-entertainment");
+  await expectListing(page, 66);
+  await expect(page.getByRole("combobox", { name: "Subcategory", exact: true }).locator('option[value="glow-accessories"]')).toHaveCount(0);
+});
+
 test("subcategory pagination retains filters and changing category clears stale subcategory", async ({ page }) => {
   await page.goto("/vendors?category=photography-content&subcategory=wedding-photographers");
   await expectListing(page, 22, "Wedding Photographers");
@@ -73,6 +96,6 @@ test("mobile selector fits and remains usable", async ({ page }) => {
   await selector.selectOption("videographers");
   await page.getByRole("button", { name: "Apply", exact: true }).click();
   await expectListing(page, 22, "Videographers");
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+  await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect((await selector.boundingBox())!.height).toBeGreaterThanOrEqual(44);
 });
