@@ -1,5 +1,7 @@
 # Detailed Technical Design
 
+> Agent architecture: [AI Agent Specification](AI_AGENT_SPEC.md) is authoritative for the current Phase 1A contract and future Agent direction.
+
 ## 1. Product boundary
 
 Ever After has three ordinary user experiences: a shared Couple account, a Vendor business account,

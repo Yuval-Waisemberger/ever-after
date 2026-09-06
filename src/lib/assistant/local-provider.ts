@@ -1,3 +1,5 @@
+import { classifyUnpaidPayments } from "./payments";
+import type { AgentEvidence } from "./evidence";
 import { formatIls } from "@/lib/domain/budget";
 import { calculateRecommendation } from "@/lib/domain/recommendation";
 import { isDueWithinDays } from "@/lib/domain/tasks";
@@ -40,6 +42,10 @@ function humanList(values: string[]) {
   return `${values.slice(0, -1).join(", ")} and ${values.at(-1)}`;
 }
 
+function answer(text: string, evidence: AgentEvidence[]): AssistantResponse {
+  return { status: "ok", text, evidence };
+}
+
 export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
   readonly name = "local";
 
@@ -47,56 +53,77 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
     const prompt = normalized(message);
     const missing = [
       !context.wedding.weddingDate ? "wedding date" : null,
-      !context.wedding.guestCount ? "guest count" : null,
+      context.wedding.guestCount == null ? "guest count" : null,
       !context.wedding.preferredArea ? "preferred area" : null,
       !context.wedding.styles.length ? "wedding style" : null,
     ].filter((value): value is string => Boolean(value));
+
+    // Market questions must not be mistaken for account-budget queries.
+    if (/\b(requirement|requirements|legal)\b|\b(current|latest)\b.*\b(market|price|prices|range|cost|costs|rules|procedures)\b|market price|cost in israel|good price|good .* price|reasonable|realistic|normal .*range/.test(prompt)) {
+      return {
+        status: "unavailable", text: "That answer depends on current external information. Web research is not configured for this project yet, so I won't invent a current price, rule, or procedure. Ever After Marketplace prices are not a real-world market benchmark.",
+        evidence: [], error: { code: "RESEARCH_UNAVAILABLE", retryable: false },
+      };
+    }
+
+    if (/guest list|guest count|rsvp|attend|not invited|already invited/.test(prompt)) {
+      const guests = context.guestList;
+      return answer(`Your Guest List currently has ${guests.invited} invited, ${guests.attending} attending, ${guests.awaitingResponse} awaiting a response, ${guests.notAttending} not attending, and ${guests.notYetInvited} not yet invited.`, [{ kind: "COUPLE_DATA", section: "guestList" }]);
+    }
+
+    // Payments take precedence over the generic word "due" used by task questions.
+    if (/budget|left|available|paid|payment|overdue/.test(prompt) && !/\btasks?\b/.test(prompt)) {
+      const payments = classifyUnpaidPayments(context.budget.unpaidPayments);
+      const nextPayment = payments.upcoming[0];
+      const overdueText = payments.overdue.length
+        ? ` You have ${payments.overdue.length} overdue unpaid ${payments.overdue.length === 1 ? "payment" : "payments"}, totaling ${formatIls(payments.overdue.reduce((sum, payment) => sum + payment.amountMinor, 0))}.`
+        : " No dated unpaid payments are overdue.";
+      const nextText = nextPayment
+        ? ` Your next upcoming payment is ${formatIls(nextPayment.amountMinor)} on ${nextPayment.dueDate}.`
+        : " There is no upcoming dated payment recorded.";
+      const undatedText = payments.undated.length ? ` ${payments.undated.length} unpaid ${payments.undated.length === 1 ? "payment has" : "payments have"} no due date set.` : "";
+      const budgetText = context.budget.availableMinor == null
+        ? "Your total budget is not set yet."
+        : `You have ${formatIls(context.budget.availableMinor)} available after ${formatIls(context.budget.committedMinor)} in commitments. ${formatIls(context.budget.paidMinor)} has been marked paid.`;
+      return answer(`${budgetText}${overdueText}${nextText}${undatedText}`, [{ kind: "COUPLE_DATA", section: "budget" }]);
+    }
 
     if (/this week|due|task|still need|to do/.test(prompt)) {
       const open = context.tasks.filter((task) => task.status !== "completed");
       const thisWeek = open.filter((task) => isDueWithinDays(task.dueDate, new Date(), 7));
       const urgent = thisWeek.length ? ` Due in the next seven days: ${humanList(thisWeek.map((task) => task.title))}.` : " Nothing with a date is due in the next seven days.";
-      return { text: `You have ${open.length} open ${open.length === 1 ? "task" : "tasks"}.${urgent}`, sources: ["Couple data"] };
-    }
-
-    if (/guest list|guest count|rsvp|attend|not invited|already invited/.test(prompt)) {
-      const guests = context.guestList;
-      return { text: `Your Guest List currently has ${guests.invited} invited, ${guests.attending} attending, ${guests.awaitingResponse} awaiting a response, ${guests.notAttending} not attending, and ${guests.notYetInvited} not yet invited.`, sources: ["Couple data"] };
+      return answer(`You have ${open.length} open ${open.length === 1 ? "task" : "tasks"}.${urgent}`, [{ kind: "COUPLE_DATA", section: "tasks" }]);
     }
 
     if (/booked|which vendors|our vendors/.test(prompt) && !/compare/.test(prompt)) {
       const booked = context.vendors.filter((vendor) => vendor.lifecycleStatus === "booked");
-      return { text: booked.length ? `You currently have ${booked.length} booked ${booked.length === 1 ? "vendor" : "vendors"}: ${humanList(booked.map((vendor) => vendor.businessName))}.` : "No vendor is marked Booked yet. You can still save, contact, or consider vendors without committing.", sources: ["Couple data", "Internal vendor database"] };
-    }
-
-    if (/budget|left|available|paid|payment/.test(prompt)) {
-      const nextPayment = context.budget.upcomingPayments.find((payment) => payment.dueDate);
-      const budgetText = context.budget.availableMinor == null
-        ? "Your total budget is not set yet."
-        : `You have ${formatIls(context.budget.availableMinor)} available after ${formatIls(context.budget.committedMinor)} in commitments. ${formatIls(context.budget.paidMinor)} has been marked paid.`;
-      return { text: `${budgetText}${nextPayment ? ` Your next dated payment is ${formatIls(nextPayment.amountMinor)} on ${nextPayment.dueDate}.` : " There is no upcoming dated payment recorded."}`, sources: ["Couple data"] };
+      const marketplaceIds = booked.filter((vendor) => vendor.source === "marketplace").map((vendor) => vendor.id);
+      return answer(booked.length
+        ? `You currently have ${booked.length} booked ${booked.length === 1 ? "vendor" : "vendors"}: ${humanList(booked.map((vendor) => vendor.businessName))}.`
+        : "No vendor is marked Booked yet. You can still save, contact, or consider vendors without committing.",
+      [{ kind: "COUPLE_DATA", section: "vendors" }, ...(marketplaceIds.length ? [{ kind: "MARKETPLACE_DATA" as const, vendorIds: marketplaceIds }] : [])]);
     }
 
     if (/compare|fits us|best value|trade-off|tradeoff/.test(prompt)) {
       const candidates = context.vendors.filter((vendor) => vendor.lifecycleStatus === "considering" || vendor.isSaved);
       if (candidates.length < 2) {
-        return { text: "Mark at least two vendors as Saved or Considering and I can compare their price, services, ratings, fit, and your private notes without asking you to enter them again.", sources: ["Couple data"] };
+        return answer("Mark at least two vendors as Saved or Considering and I can compare their listed price, services, ratings, and fit using your wedding details.", [{ kind: "COUPLE_DATA", section: "vendors" }, { kind: "AI_RECOMMENDATION" }]);
       }
       const wedding = context.wedding;
-      const ranked = candidates.map((vendor) => ({ vendor, match: calculateRecommendation({ preferredArea: wedding.preferredArea, availableBudgetMinor: context.budget.availableMinor, styles: wedding.styles, guestCount: wedding.guestCount, eventType: wedding.eventType }, { serviceAreas: vendor.serviceAreas, minPriceMinor: vendor.minPriceMinor, maxPriceMinor: vendor.maxPriceMinor, styles: vendor.styles, minGuestCapacity: vendor.minGuestCapacity, maxGuestCapacity: vendor.maxGuestCapacity, eventTypes: vendor.eventTypes, ratingAverage: vendor.ratingAverage }) })).toSorted((a, b) => (b.match.score ?? -1) - (a.match.score ?? -1));
-      const lines = ranked.slice(0, 3).map(({ vendor, match }) => `${vendor.businessName}: ${vendor.minPriceMinor == null ? "price not set" : `${formatIls(vendor.minPriceMinor)}–${formatIls(vendor.maxPriceMinor ?? vendor.minPriceMinor)}`}; ${vendor.services.slice(0, 3).join(", ") || "services not listed"}; ${match.score == null ? "not enough profile evidence for a fit score" : `${match.score}% match from available details`}.`);
-      const contextNote = missing.length ? ` I’m missing your ${humanList(missing)}, so the fit comparison is intentionally partial.` : " I used the wedding details already in your workspace.";
-      return { text: `${lines.join(" ")}${contextNote}`, sources: ["Couple data", "Internal vendor database"] };
+      const ranked = candidates.map((vendor) => ({ vendor, match: calculateRecommendation({ preferredArea: wedding.preferredArea, availableBudgetMinor: context.budget.availableMinor, styles: wedding.styles, guestCount: wedding.guestCount, eventType: wedding.eventType }, { serviceAreas: vendor.serviceAreas, minPriceMinor: vendor.minPriceMinor, maxPriceMinor: vendor.maxPriceMinor, styles: vendor.styles, minGuestCapacity: vendor.minGuestCapacity, maxGuestCapacity: vendor.maxGuestCapacity, eventTypes: vendor.eventTypes, ratingAverage: vendor.ratingAverage }) })).toSorted((a, b) => (b.match.score ?? -1) - (a.match.score ?? -1)).slice(0, 3);
+      const lines = ranked.map(({ vendor, match }) => `${vendor.businessName}: ${vendor.minPriceMinor == null ? "price not set" : `${formatIls(vendor.minPriceMinor)}–${formatIls(vendor.maxPriceMinor ?? vendor.minPriceMinor)}`}; ${vendor.services.slice(0, 3).join(", ") || "services not listed"}; ${match.score == null ? "not enough profile evidence for a fit score" : `${match.score}% match from available details`}.`);
+      const contextNote = missing.length ? ` I'm missing your ${humanList(missing)}, so the fit comparison is intentionally partial.` : " I used the wedding details already in your workspace.";
+      const marketplaceIds = ranked.filter(({ vendor }) => vendor.source === "marketplace").map(({ vendor }) => vendor.id);
+      return answer(`${lines.join(" ")}${contextNote} Fit scores are deterministic recommendations; these listed prices are not a current market benchmark.`, [
+        { kind: "COUPLE_DATA", section: "vendors" }, { kind: "COUPLE_DATA", section: "wedding" }, { kind: "COUPLE_DATA", section: "budget" },
+        ...(marketplaceIds.length ? [{ kind: "MARKETPLACE_DATA" as const, vendorIds: marketplaceIds }] : []), { kind: "AI_RECOMMENDATION" },
+      ]);
     }
 
     const knowledgeAnswer = knowledge.find((entry) => entry.terms.every((term) => prompt.includes(term)));
-    if (knowledgeAnswer) return { text: knowledgeAnswer.answer, sources: ["General guidance"] };
+    if (knowledgeAnswer) return answer(knowledgeAnswer.answer, [{ kind: "AI_RECOMMENDATION" }]);
 
-    if (/current|today|latest|requirement|legal|market price|cost in israel/.test(prompt)) {
-      return { text: "That answer depends on current external information. Web research is not configured for this project yet, so I won’t invent a current price, rule, or procedure. When a research-capable provider is added, this answer should use concise sources and prefer official sources for procedures.", sources: ["General guidance"] };
-    }
-
-    const known = [context.wedding.preferredArea, context.wedding.guestCount ? `${context.wedding.guestCount} guests` : null, ...context.wedding.styles.slice(0, 2)].filter((value): value is string => Boolean(value));
-    return { text: `I can help with your real tasks, budget, payments, booked or considered vendors, vendor comparisons, and general wedding planning. ${known.length ? `I already know: ${humanList(known)}.` : "Your Wedding Details are mostly empty, so I’ll keep personal claims general until you add them."}`, sources: known.length ? ["Couple data", "General guidance"] : ["General guidance"] };
+    const known = [context.wedding.preferredArea, context.wedding.guestCount != null ? `${context.wedding.guestCount} guests` : null, ...context.wedding.styles.slice(0, 2)].filter((value): value is string => Boolean(value));
+    return answer(`I can help with your real tasks, budget, payments, booked or considered vendors, vendor comparisons, and general wedding planning. ${known.length ? `I already know: ${humanList(known)}.` : "Your Wedding Details are mostly empty, so I'll keep personal claims general until you add them."}`, known.length ? [{ kind: "COUPLE_DATA", section: "wedding" }, { kind: "AI_RECOMMENDATION" }] : [{ kind: "AI_RECOMMENDATION" }]);
   }
 }

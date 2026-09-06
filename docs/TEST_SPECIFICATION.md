@@ -1,5 +1,7 @@
 # Test Specification
 
+> Phase 1A Agent regression coverage and validation scope: see [AI Agent Specification](AI_AGENT_SPEC.md#phase-1a-validation) and tests/assistant/.
+
 ## Objectives
 
 Testing must demonstrate core correctness, invalid-input handling, important product flows,

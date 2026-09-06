@@ -1,65 +1,43 @@
-import type { MarketplaceVendor } from "@/lib/vendors/types";
-import type { VendorLifecycleStatus } from "@/lib/domain/couple-vendors";
+import { z } from "zod";
+import type { assistantContextSchema } from "./privacy";
+import { evidenceSchema } from "./evidence";
 
-export type AssistantTask = {
-  id: string;
-  title: string;
-  dueDate: string | null;
-  status: "open" | "in_progress" | "completed";
-  priority: "low" | "medium" | "high";
-};
+export type AssistantContext = z.infer<typeof assistantContextSchema>;
+export type AssistantTask = AssistantContext["tasks"][number];
+export type AssistantVendor = AssistantContext["vendors"][number];
+export type AssistantRequest = { message: string; context: AssistantContext };
 
-export type AssistantVendor = Omit<MarketplaceVendor, "isSaved" | "lifecycleStatus"> & {
-  source: "marketplace" | "external";
-  isSaved: boolean;
-  lifecycleStatus: VendorLifecycleStatus | null;
-  agreedPriceMinor: number | null;
-  privateNotes: string | null;
-};
+export const assistantResponseSchema = z.object({
+  status: z.enum(["ok", "unavailable", "error", "out_of_scope"]),
+  text: z.string().trim().min(1).max(16000),
+  evidence: z.array(evidenceSchema).max(50),
+  error: z.object({
+    code: z.enum(["CONTEXT_UNAVAILABLE", "PROVIDER_UNAVAILABLE", "INVALID_PROVIDER_RESULT", "RESEARCH_UNAVAILABLE"]),
+    retryable: z.boolean(),
+  }).strict().optional(),
+  clarification: z.object({ question: z.string().min(1).max(1000), missingFields: z.array(z.string().max(100)).max(20) }).strict().optional(),
+  // Contracts only. Phase 1A does not execute tools or proposals.
+  toolUsage: z.array(z.object({ name: z.string().min(1).max(100), status: z.enum(["succeeded", "unavailable", "error"]) }).strict()).max(20).optional(),
+  usage: z.object({ inputTokens: z.number().int().nonnegative().optional(), outputTokens: z.number().int().nonnegative().optional() }).strict().optional(),
+  actionProposal: z.object({
+    type: z.enum(["create_task", "book_vendor", "add_budget_item", "mark_payment_paid"]),
+    summary: z.string().min(1).max(1000), arguments: z.record(z.string(), z.unknown()),
+    requiresConfirmation: z.literal(true),
+  }).strict().optional(),
+}).strict().superRefine((result, ctx) => {
+  if ((result.status === "error" || result.status === "unavailable") !== Boolean(result.error)) {
+    ctx.addIssue({ code: "custom", message: "Error metadata must match the result status." });
+  }
+  if (result.status !== "ok" && (result.evidence.length || result.actionProposal)) {
+    ctx.addIssue({ code: "custom", message: "Non-answer states cannot assert evidence or propose actions." });
+  }
+  if (result.status === "ok" && !result.evidence.length) {
+    ctx.addIssue({ code: "custom", message: "Answers must identify their evidence or recommendation basis." });
+  }
+});
+export type AssistantResponse = z.infer<typeof assistantResponseSchema>;
 
-export type AssistantContext = {
-  wedding: {
-    weddingDate: string | null;
-    guestCount: number | null;
-    preferredArea: string | null;
-    eventType: string | null;
-    styles: string[];
-    priorities: string[];
-    totalBudgetMinor: number | null;
-    setupStatus: string;
-  };
-  tasks: AssistantTask[];
-  guestList: {
-    invited: number;
-    attending: number;
-    awaitingResponse: number;
-    notAttending: number;
-    notYetInvited: number;
-  };
-  vendors: AssistantVendor[];
-  budget: {
-    committedMinor: number;
-    paidMinor: number;
-    availableMinor: number | null;
-    upcomingPayments: Array<{ amountMinor: number; dueDate?: string | null }>;
-  };
-};
-
-export type AssistantRequest = {
-  message: string;
-  context: AssistantContext;
-};
-
-export type AssistantResponse = {
-  text: string;
-  sources: Array<"Couple data" | "Internal vendor database" | "General guidance" | "Web research">;
-  actionProposal?: {
-    type: "create_task" | "book_vendor" | "add_budget_item" | "mark_payment_paid";
-    summary: string;
-    arguments: Record<string, unknown>;
-  };
-};
-
+// Adapter names are not tied to any vendor. Only local is registered today.
 export interface WeddingAssistantProvider {
   readonly name: string;
   respond(request: AssistantRequest): Promise<AssistantResponse>;

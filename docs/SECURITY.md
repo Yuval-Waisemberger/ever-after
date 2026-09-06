@@ -1,5 +1,7 @@
 # Security Design
 
+> Agent privacy, grounding, scope, persistence and future write controls: see [AI Agent Specification](AI_AGENT_SPEC.md).
+
 ## Security objectives
 
 Private Couple planning, financial, vendor-note, and Assistant data must never cross wedding
