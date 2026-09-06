@@ -29,7 +29,7 @@ for (const viewport of viewports) {
 test("Couple-owned feature routes retain the authentication boundary", async ({ browser }, testInfo) => {
   const context = await browser.newContext({ baseURL: testInfo.project.use.baseURL });
   const page = await context.newPage();
-  for (const route of ["/wedding", "/settings", "/vendors/my"]) {
+  for (const route of ["/wedding", "/settings", "/vendors/my", "/guests"]) {
     await page.goto(route, { waitUntil: "domcontentloaded" });
     await expect(page).toHaveURL(/\/auth\/couple/);
     await expect(page.getByRole("status")).toContainText("Please sign in to continue");

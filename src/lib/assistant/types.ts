@@ -29,6 +29,13 @@ export type AssistantContext = {
     setupStatus: string;
   };
   tasks: AssistantTask[];
+  guestList: {
+    invited: number;
+    attending: number;
+    awaitingResponse: number;
+    notAttending: number;
+    notYetInvited: number;
+  };
   vendors: AssistantVendor[];
   budget: {
     committedMinor: number;

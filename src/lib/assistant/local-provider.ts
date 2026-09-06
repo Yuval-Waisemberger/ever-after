@@ -59,6 +59,11 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
       return { text: `You have ${open.length} open ${open.length === 1 ? "task" : "tasks"}.${urgent}`, sources: ["Couple data"] };
     }
 
+    if (/guest list|guest count|rsvp|attend|not invited|already invited/.test(prompt)) {
+      const guests = context.guestList;
+      return { text: `Your Guest List currently has ${guests.invited} invited, ${guests.attending} attending, ${guests.awaitingResponse} awaiting a response, ${guests.notAttending} not attending, and ${guests.notYetInvited} not yet invited.`, sources: ["Couple data"] };
+    }
+
     if (/booked|which vendors|our vendors/.test(prompt) && !/compare/.test(prompt)) {
       const booked = context.vendors.filter((vendor) => vendor.lifecycleStatus === "booked");
       return { text: booked.length ? `You currently have ${booked.length} booked ${booked.length === 1 ? "vendor" : "vendors"}: ${humanList(booked.map((vendor) => vendor.businessName))}.` : "No vendor is marked Booked yet. You can still save, contact, or consider vendors without committing.", sources: ["Couple data", "Internal vendor database"] };

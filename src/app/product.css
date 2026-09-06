@@ -97,7 +97,6 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
 .workspace-mobile-subnav[open] > summary svg { transform: rotate(180deg); }
 .workspace-mobile-subnav > div { grid-column: 1 / -1; padding-left: 18px; border-left: 1px solid var(--line); }
 .workspace-mobile-subnav > div a { font-size: 13px; color: var(--ink-soft); }
-.workspace-bottom-nav { background: var(--paper); }
 /* Allow real content to shrink/wrap inside grids instead of widening the page. */
 :where(.workspace-shell, .auth-layout) :is(form, fieldset, label, section, article) { min-width: 0; }
 .workspace-shell fieldset { max-width: 100%; }
@@ -206,7 +205,6 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
   .auth-panel form > .grid { grid-template-columns: minmax(0, 1fr); }
   .auth-page--couple .auth-image { aspect-ratio: 4 / 3; }
   .workspace-shell main { padding-top: 28px; padding-inline: 20px; }
-  .workspace-shell > div > .min-h-screen { padding-bottom: calc(6rem + env(safe-area-inset-bottom)); }
   .workspace-mobile-header { padding-top: max(12px, env(safe-area-inset-top)); }
   .task-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .budget-metrics > div { flex-wrap: wrap; }

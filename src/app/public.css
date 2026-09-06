@@ -99,6 +99,16 @@
   .public-header-inner { padding: 0 24px; gap: 16px; }
   .public-nav-pages { padding-left: 0; gap: 22px; }
   .public-nav-account { gap: 18px; }
+  .public-header--authenticated .public-desktop-nav { display: none; }
+  .public-header--authenticated .public-mobile-menu { display: block; }
+  .public-header--authenticated .public-mobile-menu summary { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--public-line); border-radius: 4px; list-style: none; cursor: pointer; }
+  .public-header--authenticated .public-mobile-menu summary::-webkit-details-marker { display: none; }
+  .public-header--authenticated .public-mobile-menu .menu-close-icon,
+  .public-header--authenticated .public-mobile-menu[open] .menu-open-icon { display: none; }
+  .public-header--authenticated .public-mobile-menu[open] .menu-close-icon { display: block; }
+  .public-header--authenticated .public-mobile-menu[open] nav { display: flex; flex-direction: column; gap: 3px; position: absolute; top: 100%; inset-inline: 0; background: var(--public-ivory); padding: 14px 20px 22px; border-bottom: 1px solid var(--public-line); }
+  .public-header--authenticated .public-mobile-menu nav a { display: flex; align-items: center; min-height: 46px; padding: 10px 12px; font-size: 14px; }
+  .public-header--authenticated .public-mobile-menu nav a:hover { background: var(--public-blush); }
   .pillar { padding-inline: 17px; }
   .category-navigation { grid-template-columns: repeat(3, minmax(0, 1fr)); row-gap: 16px; }
   .category-link:nth-child(4) { border-left: 0; }

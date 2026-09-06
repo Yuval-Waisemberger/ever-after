@@ -18,6 +18,7 @@ import {
   Settings,
   Star,
   Store,
+  UsersRound,
   WalletCards,
 } from "lucide-react";
 import { Wordmark } from "@/components/brand/wordmark";
@@ -44,6 +45,7 @@ const coupleNavigation: NavigationItem[] = [
     ],
   },
   { label: "Our Tasks", href: "/tasks", icon: ListChecks },
+  { label: "Guest List", href: "/guests", icon: UsersRound },
   {
     label: "Vendors",
     href: "/vendors",
@@ -88,7 +90,6 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
     ...item,
     children: item.children?.filter((child) => child.href !== "/wedding/setup" || showSetup),
   }));
-  const mobileNavigation = navigation.slice(0, 5);
 
   return (
     <div className={`workspace-shell min-h-screen bg-canvas lg:grid ${sidebarCollapsed ? "workspace-shell--collapsed" : ""}`}>
@@ -152,12 +153,8 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
             </div>
           </details>
         </header>
-        <div className="min-h-screen pb-24 lg:pb-0">{children}</div>
+        <div className="min-h-screen">{children}</div>
       </div>
-
-      <nav className={`workspace-bottom-nav fixed inset-x-0 bottom-0 z-40 grid ${role === "couple" ? "grid-cols-5" : "grid-cols-4"} border-t px-1 pb-[max(0.35rem,env(safe-area-inset-bottom))] pt-1.5 lg:hidden`} aria-label="Mobile navigation">
-        {mobileNavigation.map((item) => { const Icon = item.icon; return <Link key={item.href} href={item.href} className="flex min-h-14 flex-col items-center justify-center gap-1 rounded-lg px-1 text-center text-[0.65rem] font-semibold text-ink-soft hover:bg-paper-muted hover:text-wine"><Icon className="size-4.5" aria-hidden="true" /><span className="line-clamp-1">{item.label.replace("Wedding Assistant", "Assistant")}</span></Link>; })}
-      </nav>
     </div>
   );
 }

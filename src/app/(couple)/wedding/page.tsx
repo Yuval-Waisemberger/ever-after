@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Bot, CalendarClock, CalendarHeart, CheckCircle2, ListChecks } from "lucide-react";
 import { DashboardCard } from "@/components/wedding/dashboard-card";
 import { CoupleProfileMenu } from "@/components/couple/couple-profile-menu";
+import { GuestDashboardSummary } from "@/components/guests/guest-dashboard-summary";
 import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
 import { TaskStatusPill } from "@/components/tasks/task-status-pill";
 import { deriveBudgetItemStatus, derivePaymentStatus, formatIls } from "@/lib/domain/budget";
@@ -11,7 +12,7 @@ import { selectUpcomingTasks } from "@/lib/domain/tasks";
 import { daysUntilWedding, isWeddingWeek } from "@/lib/domain/wedding-week";
 import { getWeddingDashboard } from "@/lib/queries/wedding";
 import { getCoupleIdentity } from "@/lib/queries/couple-identity";
-import { countSaved } from "@/lib/domain/couple-vendors";
+import { getGuestSummary } from "@/lib/queries/guests";
 
 function summaryLink(href: string, label: string) {
   return (
@@ -37,14 +38,13 @@ const paymentStatusTone = {
 
 export default async function WeddingDashboardPage({ searchParams }: PageProps<"/wedding">) {
   const params = await searchParams;
-  const [{ wedding, taskSummary, tasks, relationships, budget, budgetItems }, identity] = await Promise.all([getWeddingDashboard(), getCoupleIdentity()]);
+  const [{ wedding, taskSummary, tasks, relationships, budget, budgetItems }, identity, guestSummary] = await Promise.all([getWeddingDashboard(), getCoupleIdentity(), getGuestSummary()]);
   const days = daysUntilWedding(wedding.wedding_date);
   const weddingWeek = isWeddingWeek(wedding.wedding_date);
   const names = `${wedding.partner_one_name} & ${wedding.partner_two_name}`;
   const today = new Date();
   const upcomingTasks = selectUpcomingTasks(tasks, today, 5);
   const booked = relationships.filter((relationship) => relationship.status === "booked");
-  const savedCount = countSaved(relationships);
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
@@ -136,8 +136,8 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
           {budget.upcomingPayments.length ? <div className="mt-4 rounded-md bg-[#FCF9F6] p-3"><p className="text-xs font-semibold text-ink-soft">Next payment</p>{budget.upcomingPayments.slice(0, 1).map((payment, index) => { const status = derivePaymentStatus(payment, today); return <div key={`${payment.itemLabel}-${payment.label}-${index}`} className="mt-2 flex flex-wrap items-center gap-2 text-sm"><span className="min-w-0 flex-1 font-semibold">{payment.itemLabel}: {payment.label}</span><StatusPill tone={paymentStatusTone[status.kind]}>{status.label}</StatusPill></div>; })}</div> : null}
         </DashboardCard>
 
-        <DashboardCard title="Saved Vendors" eyebrow="Your shortlist" footer={summaryLink("/vendors/my?status=saved", "See saved vendors")}>
-          <div className="flex items-end gap-3"><span className="font-display text-5xl text-wine">{savedCount}</span><span className="pb-1 text-sm text-ink-soft">saved {savedCount === 1 ? "vendor" : "vendors"}</span></div>
+        <DashboardCard title="Guest List" eyebrow="Guests" footer={summaryLink("/guests", guestSummary.invitationParties ? "See guest list" : "Open guest list")}>
+          <GuestDashboardSummary summary={guestSummary} />
         </DashboardCard>
 
         <DashboardCard title="Wedding Assistant" eyebrow="Grounded guidance" footer={summaryLink("/assistant", "Ask the Assistant")}>

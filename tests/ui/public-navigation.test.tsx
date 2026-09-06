@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CategoryNavigation } from "@/components/vendors/category-navigation";
 import { PublicMobileMenu } from "@/components/layout/public-mobile-menu";
+import { getPublicHeaderLinks } from "@/components/layout/public-header-links";
 import vendors from "@/generated/marketplace-demo.json";
 
 describe("public navigation", () => {
@@ -22,5 +23,25 @@ describe("public navigation", () => {
     expect(document.querySelector('a[href="/wedding"]')?.textContent).toBe("Our Wedding");
     expect(document.querySelector('a[href="/tasks"]')?.textContent).toBe("Our Tasks");
     expect(document.querySelector('a[href="/auth/couple"]')).toBeNull();
+  });
+
+  it("adds Our Guests only to the Couple main navigation in the intended order", () => {
+    const couple = getPublicHeaderLinks("couple");
+    const vendor = getPublicHeaderLinks("vendor");
+    const anonymous = getPublicHeaderLinks(null);
+
+    expect([...couple.navigationLinks, ...couple.accountLinks].map((link) => link.label)).toEqual([
+      "How it works",
+      "Our Wedding",
+      "Our Tasks",
+      "Our Guests",
+      "Vendors",
+      "Budget",
+      "Assistant",
+      "Settings",
+    ]);
+    expect(couple.navigationLinks.find((link) => link.label === "Our Guests")?.href).toBe("/guests");
+    expect(vendor.navigationLinks.some((link) => link.href === "/guests")).toBe(false);
+    expect(anonymous.navigationLinks.some((link) => link.href === "/guests")).toBe(false);
   });
 });

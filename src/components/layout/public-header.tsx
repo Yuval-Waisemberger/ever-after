@@ -1,33 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { PublicMobileMenu } from "./public-mobile-menu";
+import { getPublicHeaderLinks } from "./public-header-links";
 import { getCurrentProfile } from "@/lib/auth/user";
 
 export async function PublicHeader() {
   const profile = await getCurrentProfile();
-  const navigationLinks = profile?.role === "couple"
-    ? [
-        { href: "/#how-it-works", label: "How it works" },
-        { href: "/wedding", label: "Our Wedding" },
-        { href: "/tasks", label: "Our Tasks" },
-        { href: "/vendors", label: "Vendors" },
-        { href: "/budget", label: "Budget" },
-      ]
-    : profile?.role === "vendor"
-      ? [
-          { href: "/vendor", label: "Dashboard" },
-          { href: "/vendor/profile", label: "Business Profile" },
-          { href: "/vendors", label: "Vendors" },
-        ]
-      : [
-          { href: "/#how-it-works", label: "How it works" },
-          { href: "/vendors", label: "Vendors" },
-        ];
-  const accountLinks = profile?.role === "couple"
-    ? [{ href: "/assistant", label: "Assistant" }, { href: "/settings", label: "Settings" }]
-    : profile?.role === "vendor"
-      ? [{ href: "/vendor/settings", label: "Settings" }]
-      : [];
+  const { navigationLinks, accountLinks } = getPublicHeaderLinks(profile?.role);
   return (
     <header className={`public-theme public-header ${profile ? "public-header--authenticated" : ""}`}>
       <a className="public-skip-link" href="#main-content">Skip to content</a>

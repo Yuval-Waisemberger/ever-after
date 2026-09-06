@@ -4,6 +4,7 @@ import { getOwnedWedding } from "./wedding";
 import { getTasks } from "./tasks";
 import type { AssistantContext, AssistantVendor } from "@/lib/assistant/types";
 import { lifecycleFromStoredStatus, type StoredVendorStatus } from "@/lib/domain/couple-vendors";
+import { getGuestSummary } from "./guests";
 
 type AssistantReviewRow = {
   professionalism: number;
@@ -65,7 +66,7 @@ type AssistantRelationshipRow = {
 };
 
 export async function getAssistantContext(): Promise<AssistantContext> {
-  const [wedding, tasks] = await Promise.all([getOwnedWedding(), getTasks()]);
+  const [wedding, tasks, guestList] = await Promise.all([getOwnedWedding(), getTasks(), getGuestSummary()]);
   const supabase = await createClient();
   const [{ data: relationships }, { data: items }] = await Promise.all([
     supabase.from("couple_vendors").select("status, is_saved, agreed_price_minor, private_notes, vendor_profiles(id, slug, business_name, description, location_city, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, friday_available, phone, email, website_url, instagram_url, vendor_categories(slug, name), vendor_subcategories(slug, name), vendor_images(external_url, storage_path, alt_text, is_primary), reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name, phone, email, website_url, notes, vendor_categories(slug, name), vendor_subcategories(slug, name))").eq("wedding_id", wedding.id),
@@ -93,7 +94,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
       : null;
     return [{ id: vendor.id, slug: vendor.slug, businessName: vendor.business_name, description: vendor.description, categorySlug: category?.slug ?? "", categoryName: category?.name ?? "Vendor", subcategorySlug: subcategory?.slug ?? null, subcategoryName: subcategory?.name ?? null, locationCity: vendor.location_city, serviceAreas: vendor.service_areas ?? [], minPriceMinor: vendor.min_price_minor == null ? null : Number(vendor.min_price_minor), maxPriceMinor: vendor.max_price_minor == null ? null : Number(vendor.max_price_minor), services: vendor.services ?? [], styles: vendor.styles ?? [], eventTypes: vendor.event_types ?? [], minGuestCapacity: vendor.min_guest_capacity, maxGuestCapacity: vendor.max_guest_capacity, fridayAvailable: vendor.friday_available, phone: vendor.phone, email: vendor.email, websiteUrl: vendor.website_url, instagramUrl: vendor.instagram_url, imageUrl: image?.external_url ?? storedImageUrl, imageAlt: image?.alt_text ?? "", gallery: [], ratingAverage, reviewCount: reviews.length, reviews: [], recommendation: null, source: "marketplace", isSaved: relationship.is_saved, lifecycleStatus: lifecycleFromStoredStatus(relationship.status), agreedPriceMinor: relationship.agreed_price_minor == null ? null : Number(relationship.agreed_price_minor), privateNotes: relationship.private_notes }];
   });
-  return { wedding: { weddingDate: wedding.wedding_date, guestCount: wedding.guest_count, preferredArea: wedding.preferred_area, eventType: wedding.event_type, styles: wedding.styles ?? [], priorities: wedding.priorities ?? [], totalBudgetMinor: wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor), setupStatus: wedding.setup_status }, tasks: tasks.map((task) => ({ id: task.id, title: task.title, dueDate: task.due_date, status: task.status, priority: task.priority })), vendors, budget: { committedMinor: budget.committedMinor, paidMinor: budget.paidMinor, availableMinor: budget.availableMinor, upcomingPayments: budget.upcomingPayments.map((payment) => ({ amountMinor: payment.amountMinor, dueDate: payment.dueDate })) } };
+  return { wedding: { weddingDate: wedding.wedding_date, guestCount: wedding.guest_count, preferredArea: wedding.preferred_area, eventType: wedding.event_type, styles: wedding.styles ?? [], priorities: wedding.priorities ?? [], totalBudgetMinor: wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor), setupStatus: wedding.setup_status }, tasks: tasks.map((task) => ({ id: task.id, title: task.title, dueDate: task.due_date, status: task.status, priority: task.priority })), guestList: { invited: guestList.invited, attending: guestList.attending, awaitingResponse: guestList.awaitingResponse, notAttending: guestList.notAttending, notYetInvited: guestList.notYetInvited }, vendors, budget: { committedMinor: budget.committedMinor, paidMinor: budget.paidMinor, availableMinor: budget.availableMinor, upcomingPayments: budget.upcomingPayments.map((payment) => ({ amountMinor: payment.amountMinor, dueDate: payment.dueDate })) } };
 }
 
 export async function getLatestAssistantThread() {

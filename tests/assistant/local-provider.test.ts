@@ -45,6 +45,7 @@ function assistantVendor(overrides: Partial<AssistantVendor>): AssistantVendor {
 const context: AssistantContext = {
   wedding: { weddingDate: null, guestCount: 250, preferredArea: "central_israel", eventType: null, styles: ["Romantic"], priorities: ["Photography"], totalBudgetMinor: 18_000_000, setupStatus: "completed" },
   tasks: [{ id: "1", title: "Call the DJ", dueDate: null, status: "open", priority: "medium" }],
+  guestList: { invited: 8, attending: 3, awaitingResponse: 3, notAttending: 2, notYetInvited: 4 },
   vendors: [],
   budget: { committedMinor: 1_200_000, paidMinor: 300_000, availableMinor: 16_800_000, upcomingPayments: [] },
 };
@@ -62,6 +63,21 @@ describe("local assistant provider", () => {
     const response = await provider.respond({ message: "What are the current legal requirements?", context });
     expect(response.text).toContain("Web research is not configured");
     expect(response.sources).not.toContain("Web research");
+  });
+
+  it("uses privacy-preserving Guest List aggregates", async () => {
+    const response = await provider.respond({ message: "How are our guest RSVPs looking?", context });
+    expect(response.text).toContain("8 invited");
+    expect(response.text).toContain("3 attending");
+    expect(response.text).not.toContain("name");
+    expect(response.sources).toEqual(["Couple data"]);
+  });
+
+  it("keeps general invitation wording guidance separate from Guest List totals", async () => {
+    const response = await provider.respond({ message: "What invitation wording should we include?", context });
+    expect(response.text).toContain("couple’s names");
+    expect(response.text).not.toContain("8 invited");
+    expect(response.sources).toEqual(["General guidance"]);
   });
 
   it("uses independent Saved and lifecycle state for comparisons and bookings", async () => {
