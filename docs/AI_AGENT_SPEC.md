@@ -1,6 +1,6 @@
 # Ever After AI Agent Specification
 
-Status: Phase 1B — Provider-independent internal READ tools, following the approved Phase 1A foundation. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. It does not claim future capabilities are implemented.
+Status: Phase 1C-A — Research contracts, source provenance and Agent decision policy, following the approved Phase 1A/1B foundations. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. No real LLM or live research is implemented.
 
 ## Identity and intended experience
 
@@ -13,6 +13,8 @@ The final Agent should understand the authenticated Couple's actual wedding stat
 Phase 1A implements a central policy and provider boundary, structured evidence/results, privacy allowlists, safe local selection, context failure handling, message persistence safety, and deterministic payment date classification. Only the deterministic local provider exists. It is not an LLM and does not have a tool-calling loop.
 
 Phase 1B implements ten internal READ tools, validated contracts, authorization and bounded execution. It prepares selective context access; it does not add automatic per-question orchestration or a model tool loop. Phase 2 will address Hebrew behavior and later RTL UI. Provider integration and live research require explicit approval near the end of the project. No SDK, AI key, paid service, research connection, schema migration, or product write capability is included here.
+
+Phase 1C-A adds separate future research contracts, structured eligibility/current-claim policies, request minimization and provenance validation. It adds no executable research registration, adapter implementation, natural-language tool router, UI, database query or mutation. The existing Local runner and internal READ registry remain unchanged.
 
 ## Wedding-only domain policy
 
@@ -114,7 +116,7 @@ Today uses the `Asia/Jerusalem` calendar to avoid deployment-server timezone cha
 
 An overdue-only case reports overdue payments and no upcoming dated payment. Mixed cases report both groups. Undated obligations are called out. Budget arithmetic remains in the existing domain helper: committed is the sum of commitments, paid is the sum of paid amounts, available is total budget minus committed, and an unknown total produces unknown available budget. The Agent never asks a model to determine authoritative date classification or totals.
 
-## Future research — documentation only
+## Future research — contracts only (Phase 1C-A)
 
 `get_market_benchmark` is central to the final product. It must dynamically research current wedding-market information; it must not use static hard-coded price tables or canned market-price answers.
 
@@ -123,6 +125,65 @@ Future questions include “Is ₪2,000 a good photographer price?”, “Is ₪
 The future result should include sourced current evidence, retrieval/publication dates where available, geography/currency/package comparability, supported ranges only where evidence permits, limitations and uncertainty. A recommendation combines this evidence with Couple constraints and clearly separated Ever After listing comparisons. Failure, stale evidence, or incomparable quotes must return unavailable/insufficient evidence, never a static fallback benchmark.
 
 `research_current_wedding_info` will answer wedding-specific changing questions such as registration procedures or current logistical requirements, favoring official sources for official procedures. Requests need a wedding question, relevant jurisdiction and date; results need source URLs/titles/dates, supported findings and limitations. Neither capability is general-purpose browsing. Both require future domain, privacy, authorization, citation, freshness and cost controls. Neither Phase 1A nor Phase 1B introduces their implementation, network adapter, search access, registry entry, or benchmark dataset.
+
+### Implemented contract boundaries
+
+`research/contracts.ts` exports Zod inputs/results and `futureResearchContracts`. Both entries have `live: false`, input/output schemas and **no execute method**. The active registry remains the ten internal READ tools. `unavailableResearchResult()` is a local pure helper: it returns `unavailable / RESEARCH_DISABLED`, a safe disclosure and `retryable: false`, with no price, source, data or research timestamp. No function performs research, creates a fake retrieval receipt or calls an adapter.
+
+`ResearchAdapter` is an interface only: future `research(normalizedRequest, AbortSignal)` returns unknown output for Ever After validation. No adapter implementation, SDK, factory, provider-specific JSON or fallback is included. OpenAI built-in research or another research provider could eventually implement this boundary after approval, without owning product authorization, domain policy or calculations.
+
+| Contract | Input | Successful/partial result data |
+| --- | --- | --- |
+| `get_market_benchmark` | Required purpose: service_quote, market_range or overall_budget. Category required except for overall budget; optional normalized package features, quote (integer minor-unit amount plus ILS/USD/EUR currency), broad region, event type, guest count and wedding date. Optional offer description stays local. | Purpose/category/region/country, event context, package assumptions, echoed quote if provided, currency, observed range, separately supported typical range, sourced pricing factors, quality/confidence and limitations. |
+| `research_current_wedding_info` | Required wedding-only topic: marriage registration, ceremony documents, wedding procedures, industry norms or wedding logistics; optional planning context. | Topic/region/country, source-referenced findings, quality/confidence and limitations. No price-range field. |
+
+These are deliberately bounded initial vocabularies for Israel (`countryCode: IL`) and the app's existing broad areas; they are not general search text. Research service categories cover venue, photography, videography, music, beauty/attire, design/flowers, food, transportation, officiant, event management, invitations/gifts and accommodation. Package features cover coverage duration, ceremony/reception, staffing/equipment, media outputs, travel, food/drinks and tax inclusion. No numeric prices are attached to categories or features. More jurisdictions, specific procedure assumptions or service detail require reviewed vocabulary extensions; unsupported questions should ask for clarification rather than smuggling free text into a generic search tool.
+
+Output ranges use integer minor currency units, ordered low/high bounds and source IDs. Observed and typical ranges are distinct. A typical range requires a compatible observed range and references spanning at least two source domains; this is a necessary structural check, not proof of independent publishers, representative sampling or comparable packages. Successful benchmarks require an observed range and medium/high declared confidence. Partial results require explicit limitations; their observed/typical range can remain null where evidence cannot support one. Source references must resolve within the returned source list. Echoed quote/category/location/purpose/topic must match the authorized normalized request when provenance is validated. No currency conversion is invented.
+
+### Source model and safe failure outcomes
+
+All four evidence classes remain separate. `evidence.ts` now supports bounded optional source IDs, publisher/domain, publication/update dates, relevance and source type while preserving existing text/source-label compatibility. Research-specific sources additionally require an ID, `origin: external_research`, matching HTTPS URL/domain, retrieval timestamp, relevance and source type: official, reported market guidance, commercial article, advertised listing or research report. Publisher/publication/update dates remain absent when unknown. Dates must be consistent; credentials are forbidden in source URLs. Metadata and descriptions are untrusted content, never instructions.
+
+| State | Meaning and constraints |
+| --- | --- |
+| SUCCESS | Some sufficient evidence supports the bounded result. Requires sources, research timestamp and validated data. |
+| PARTIAL | Useful evidence exists with limitations, missing context or disagreement. Requires sources and limitations; assertions must be qualified. |
+| UNAVAILABLE | Disabled, failed, timed out or safety-limited research. Strict schema forbids data, sources, ranges and researchedAt. |
+| INSUFFICIENT_EVIDENCE | Research ran but cannot support a responsible conclusion (no relevant sources, stale sources, incomparable packages or conflicts). Has research timestamp, optional useful sources and limitations; strict schema forbids numeric result data/ranges. |
+
+`validateResearchProvenance` checks the parsed result against the authorized normalized request and a **server-owned retrieval receipt**: every reported source must match an actually recorded source, and researchedAt must match that receipt and not be in the future. No receipt producer exists in this phase. A model-authored receipt is never trustworthy. Runtime receipt matching cannot prove that an article is accurate, sufficiently current or representative: future retrieval must establish these properties before classifying evidence as verified current. Source access time is not publication freshness.
+
+`validateAnswerProvenance` checks bounded statements against a trusted evidence ledger built by Ever After from authorized tool results and verified research. References cannot be invented or relabelled: Marketplace evidence cannot become external current evidence; advice cannot become Couple records. Factual statements preserve one evidence class; mixed factual sources are split into separate statements. An AI interpretation can explicitly reference its AI_RECOMMENDATION entry plus supporting Couple/Marketplace/external entries. Thus one budget answer can contain stored budget/guest facts, Marketplace comparisons, verified external findings and a separately labelled conclusion. This validates reference/class consistency, not the semantic truth of arbitrary prose; model grounding evaluation remains required. These preparatory validators do not enable external evidence on the current Local runner, which still rejects it.
+
+### Research eligibility and current-market claims
+
+`research/policy.ts` applies a small decision table to a structured domain/purpose/sensitivity assessment. It does not classify arbitrary natural-language questions and adds no giant regex router. A future capable model may propose intent/tool choices; Ever After must validate domain and claim sensitivity server-side. Client/model flags alone never authorize research. Unknown scope requires clarification; unrelated scope redirects with no eligible research tool. The existing conservative Local domain guard is unchanged.
+
+| Intent | Application policy |
+| --- | --- |
+| Own tasks, saved vendors, bookings, payments | Internal tools; stored money is not a market benchmark. Saved-vendor answers can combine relationship and public listing evidence. |
+| Marketplace discovery / which saved vendor fits best | Internal reads and the unchanged deterministic recommendation engine; no web research needed. |
+| Is a quote reasonable? Is our total wedding budget realistic? | Eligible future market benchmark; use relevant Couple budget/guest context and optional Marketplace comparisons separately. |
+| Current wedding procedures/documents/industry information | Eligible future wedding-info research; official sources for official procedures. |
+| Ceremony ideas or drafting a photographer message | AI_RECOMMENDATION/general guidance grounded in relevant supplied/internal facts. No routine research. |
+| Who should I vote for? Unrelated diagnosis/programming | Wedding-only redirect; no research. |
+
+Every decision currently reports `liveResearchAvailable: false`. Eligibility is a policy decision, not an executable grant. For a general-guidance request that includes an external price/market claim, the policy requires benchmark evidence; other location/procedure/regulation/time-sensitive external claims require current wedding-info evidence. Multi-part requests must be split into internal facts, external claims and interpretation by future orchestration.
+
+`currentMarketClaimPolicy` forbids current factual assertions based on unverified/model-memory, unavailable or insufficient evidence and requires a clear inability-to-verify disclosure. Verified partial evidence permits only qualified, specifically supported claims. Verification status must come from the server evidence boundary, not the model. Stable general guidance may still be offered as AI_RECOMMENDATION; it cannot contain unsupported numeric market ranges or purported current legal/procedural facts.
+
+### Future research quality rules
+
+Prefer multiple relevant, current sources when practical. One commercial article is not market truth. Distinguish advertised/listing prices from reported market guidance; consider date/season, location, package contents, tax, guest scale and comparability. Disagreement and unknown information must remain visible. Use official current sources for requirements/procedures. Assess publication/update dates and claim-specific freshness, not merely recent access timestamps. Do not invent missing sources, dates, prices or a representative market average. If comparability/currentness is not established, use partial/insufficient evidence and refrain from unsupported conclusions. Ever After demo listings remain a **separate comparison signal**, never sole proof of a real-world market range.
+
+### Query minimization and future cost controls
+
+`normalizeResearchRequest` parses strict local input and builds a second strict adapter payload from allowlisted attributes. It drops the free-form offer description, excludes names, contacts, auth/wedding IDs, Guest identities and all private notes, coarsens guest count to a 50-person band and wedding date to month, and omits event-specific context entirely for procedural questions. Unknown private fields are rejected. Currency/quoted amount is retained only when explicitly supplied for comparison. No arbitrary query, raw message, raw records or free-form notes can be passed through these contracts. Broad planning attributes may still be personal context; disclosure/retention review is required before any external adapter is enabled. No lexical redaction guarantee is claimed for future added free text.
+
+Normalization sorts/deduplicates package features and uses a server-provided as-of date; `researchRequestKey` supports deduplication of equivalent requests within one answer. An as-of request date is not a claim that research occurred. `FUTURE_RESEARCH_COST_POLICY` documents proposed ceilings of two calls per user message, eight sources per call and a 15-second timeout, with no automatic provider fallback. Result contracts enforce eight sources, twelve findings/factors, twelve assumptions/limitations, and bounded text (generally 500 characters), while answer provenance caps thirty statements/ten references each. Future orchestration must actually enforce call/time limits, cancellation, deduplication, account/session rate limits, aggregate context limits and explicit cost budgets before enablement. No billing, rate API, scheduler, automatic retry, paid fallback or live cache is implemented now.
+
+Future flow: wedding intent/domain check → select necessary internal facts → determine whether a current external claim requires research → normalize/minimize request and deduplicate → enforce future account/call/time/cost controls → approved adapter/retrieval → validate output against trusted source receipt and request → evaluate freshness/quality → assemble statements with explicit evidence references → validate provenance → natural-language response. The model never owns source verification, authorization, authoritative calculations or write execution.
 
 ## Implemented internal READ tools — Phase 1B
 

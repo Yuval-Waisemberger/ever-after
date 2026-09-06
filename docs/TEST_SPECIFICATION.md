@@ -146,3 +146,32 @@ Rating-pagination correction: relevant Assistant Vitest passed 198/198 across fi
 regressions; the earlier 225-test record above refers to the initial Phase 1B validation selection.
 TypeScript, whole-repository ESLint and production build also passed after the correction
 (Next.js 16.3.4, 11 static pages), as did `git diff --check` and new-file whitespace checks.
+
+## Phase 1C-A research contracts and policy
+
+`tests/assistant/research.test.ts` covers minimal/invalid benchmark inputs, strict wedding-only
+topics, source metadata, successful/partial/unavailable/insufficient results, absent/invented
+source references, range/quality constraints and no fabricated local prices/timestamps. Synthetic
+minor-unit fixtures are contract test values only, not market guidance or a benchmark dataset.
+
+Policy tests use labelled structured intent examples (they do not claim natural-language routing):
+internal facts/comparisons, quote/budget realism, current procedures, ideas/drafting and out-of-scope/
+uncertain intent. All six current-claim sensitivity classes reject memory/unavailable/insufficient
+verification. Privacy tests verify omitted free-form offer text, rejected identity/contact/notes
+keys, coarsened date/count context, procedural minimization and canonical equivalent request keys.
+
+Provenance regressions bind source IDs/metadata/research timestamps to a synthetic trusted receipt
+and quote context to the normalized request. Marketplace cannot be relabelled external evidence;
+AI recommendation cannot masquerade as Couple data. Multi-source answers retain four classes.
+Existing Local research guards remain active, the exact ten-tool registry is unchanged, and the
+new modules contain no network/provider/DB-write implementation. Existing Assistant/API/context/
+read-tool suites remain part of relevant validation. All fixtures are local; no research or Supabase
+integration/mutation is involved. Run TypeScript, ESLint, relevant Vitest, production build and
+whitespace checks. Playwright is unnecessary because UI behavior is unchanged.
+
+Results on 2026-09-07: 252/252 Assistant Vitest tests passed across six files, including 54 new
+research tests and the 113 existing READ-tool tests. TypeScript (`tsc --noEmit` and build type
+checking), whole-repository ESLint and production build passed (Next.js 16.3.4, 11 static pages).
+`git diff --check` and separate new-file whitespace/conflict-marker checks passed. No UI changes
+or Playwright run. Validation used the existing bundled Node runtime and installed package
+entrypoints; no SDK/dependency, external research, Supabase mutation or integration QA rows.

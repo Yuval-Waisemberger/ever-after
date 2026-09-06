@@ -230,6 +230,36 @@ landing and demo marketplace usable and make private/auth actions fail safely wi
 
 ## 13. Current limitations
 
+### Phase 1C-A: future research boundaries
+
+The [Agent spec](AI_AGENT_SPEC.md) defines the authoritative research contract. `assistant/research`
+contains `contracts.ts` (two inactive research definitions, four result states, structured sources,
+and an adapter interface), `policy.ts` (structured eligibility/current-claim decisions and minimized
+requests), and `provenance.ts` (request/source receipt and statement/evidence-ledger validation).
+`evidence.ts` extends optional external source metadata while retaining all four source classes.
+No adapter, network implementation, executable research registry, UI or DB change is introduced.
+
+The future benchmark supports quote/range/whole-budget questions with separate observed/typical
+ranges and source references; wedding-info research supports controlled wedding procedure/norms/
+logistics topics. These are Israel-scoped planning vocabularies, not free-form web queries or a
+static price dataset. Requests omit names/contacts/IDs/private notes, discard local offer text,
+coarsen date/count context and omit irrelevant event context for procedures. Strict schemas also
+validate the normalized adapter payload. Sources and timestamps must match a future server-owned
+retrieval receipt; result quote/category/location/topic echoes must match the normalized request.
+
+Eligibility uses structured, server-reviewed domain/purpose/sensitivity input; it is not an NLP
+router. Own records and deterministic comparisons remain internal. Current price/market claims
+need benchmark evidence; other current procedural/regional claims need current wedding research.
+Unavailable or insufficient evidence cannot become numeric results. A mixed-source answer binds
+each fact/interpretation to its actual evidence class, checked against a trusted server ledger.
+Semantic truth, source independence and freshness still require future retrieval/grounding review.
+
+The proposed two-call/eight-source/15-second limits are future orchestration policy; source/content
+bounds are enforced by schemas now. No billing/rate API, fallback or live research exists. The
+ten internal READ registrations, existing Local context path and disabled-research response guard
+remain unchanged. Future integration must implement consent, rate/cost controls and reviewed
+receipt generation before enabling any adapter.
+
 The application code and migrations are complete locally but the migrations have not been applied to
 the remote project in this implementation pass, so connected account/database flows still require the
 user's local/dashboard configuration and integration testing. Helper access and confirmed Assistant

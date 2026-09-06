@@ -144,6 +144,35 @@ or Supabase data mutation is claimed for this phase. No migration/schema/RLS/see
 
 ## Security verification checklist
 
+### Phase 1C-A research preparation
+
+The research definitions are separate inactive contracts with no execute method. The active
+registry remains the ten Phase 1B READ tools. There is no network client, search API, scraper,
+provider implementation, credential variable or product write path in the new research layer.
+
+Research input uses controlled wedding service/topic/feature enums and the app's broad Israeli
+regions. Unknown/private properties are rejected. Normalization omits all names, phones/emails,
+Guest identities, auth/wedding IDs and private notes; local offer text is discarded, exact wedding
+day becomes a month and guest count becomes a 50-person band. Procedures omit unrelated event
+context. A second strict schema validates the actual adapter payload. This avoids forwarding
+private free text; it does not authorize future disclosure without privacy/retention review.
+
+Structured domain and verification flags must be established by a future server boundary, not
+trusted merely because a client/model supplies them. Unrelated scope redirects; uncertain scope
+needs clarification. Closed research topics prevent generic browsing even in a proposed request.
+Current factual claims require verified current evidence; unavailable/insufficient states cannot
+carry prices or result data. General advice must retain its recommendation label.
+
+Source validation requires consistent timestamps, matching HTTPS domain, credential-free URLs
+and bounded metadata. Provenance checks require source records and research time to match a
+trusted server retrieval receipt and request context to remain unchanged. No receipt producer
+exists yet. These checks prevent relabelling registered Marketplace/advice references as external/
+Couple evidence; they do not prove arbitrary text true or a source current. External source
+content is untrusted. Before implementation, retrieval needs SSRF/private-network protection,
+redirect validation, prompt-injection handling, source-quality/freshness assessment and tests.
+No URL is fetched by these contracts. Future call/time/account/cost limits must be enforced before
+enablement; there is no automatic expensive-provider fallback. Local still rejects external evidence.
+
 Before deployment, use at least two Couple accounts, two Vendor accounts, and an anonymous session.
 Attempt cross-wedding reads/writes, cross-vendor profile edits, Vendor review edits, unpublished vendor
 reads, forged ownership IDs, excessive payment totals, invalid ratings, oversized uploads, and direct
