@@ -95,6 +95,44 @@ confirmation, expire old proposals, and log the result.
 
 ## Known risks and future improvements
 
+### Assistant READ-tool boundary (Phase 1B)
+
+All ten tools require a fresh verified `auth.getUser()` identity, Couple role and wedding resolved
+from `owner_user_id`. Even the public Marketplace tools in this Agent registry require that Couple
+session. Input schemas reject extra keys, including client/model wedding IDs. Private reads scope
+to the resolved wedding; payment reads scope through an inner Budget-item ownership join; external
+vendor hydration repeats wedding ownership. Public vendor and review reads require `is_public`.
+RLS remains defense in depth and no service-role credentials are used.
+
+The allowlist contains only the ten reads documented in [AI_AGENT_SPEC.md](AI_AGENT_SPEC.md).
+The server executor rejects unknown/prototype/write/research names. There is no arbitrary table,
+SQL, action executor, HTTP tool endpoint or provider access to the DB client. Every input and final
+result is Zod-validated. Null/error/malformed sources and aggregate caps fail unavailable without
+data or factual evidence; safe errors omit raw exception messages.
+
+Privacy audit of every tool:
+
+| Area | Allowed output | Excluded from query/output |
+| --- | --- | --- |
+| Wedding | Planning preferences, date, budget/setup/venue state | Account IDs, Couple names/phones/emails, avatars, auth metadata |
+| Tasks/Timeline | ID/title/category/date/priority/status and derived timing | Task notes |
+| Budget/Payments | Deterministic totals; bounded deadline labels/amounts/category | Expense/payment notes and unrelated private vendor data |
+| Couple vendors | Saved/lifecycle/agreed price and source-tagged vendor planning facts | Private relationship/external-vendor notes, phones, emails and other contacts |
+| Marketplace/comparison | Public planning attributes and aggregate ratings; minimal match preferences | Raw reviews/reviewer identities, contacts, account ownership |
+| Guest List | Exactly five counts | Every Guest name, phone, email, dietary/private note and individual row |
+
+Guest queries select only RSVP status and invited/attending counts; only computed counts leave the
+tool. Other aggregate source rows also remain internal. Explicit projections and nested output
+allowlists prevent extra fields from reaching results. Permitted free text such as task titles can
+still contain sensitive text typed by users; this is not a general PII detector. No auth credentials,
+tokens or keys enter tool output. Future vendor-contact access needs a separate narrow authorized
+tool and reviewed planning use case.
+
+Tool bounds limit each invocation, not aggregate use across a future conversation. Authentication
+and output filtering do not replace future scope, prompt-injection, rate/call-count, cancellation
+and cost controls. Mocked tests cover query scoping/privacy/error behavior; no live RLS verification
+or Supabase data mutation is claimed for this phase. No migration/schema/RLS/seed file changed.
+
 - Add rate limiting for auth, reviews, search, uploads, and Assistant endpoints at production scale.
 - Add malware/image decoding checks and server-side resizing for uploaded media.
 - Add security headers/CSP tuned to Supabase and approved image domains.

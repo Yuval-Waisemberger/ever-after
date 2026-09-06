@@ -98,3 +98,51 @@ after credentials and migrations are configured; it is not claimed as executed l
 
 Before submission, rerun every command in a clean checkout with configured test environment, run the
 identity policy matrix, and replace pending entries with dated evidence.
+
+## Assistant READ-tool validation — Phase 1B
+
+`tests/assistant/tools/read-tools.test.ts` exercises all ten real tool definitions through the
+server executor. `database-double.ts` is an in-memory read-only PostgREST double, with no network,
+credentials, mutations or actual QA rows. It records selections/filters and models ordering,
+pagination, relation reads and failures. Fixtures include extra private fields so output mapping
+must remove them even if an upstream read unexpectedly returns extras.
+
+Coverage includes:
+
+- Every tool rejects unauthenticated/Vendor calls and caller-supplied wedding IDs, verifies the
+  session anew and scopes private queries to the currently owned wedding.
+- The exact ten-name allowlist rejects product writes, research names and prototype keys.
+- Minimal Wedding Details and actual missing fields preserve null/zero and venue/setup semantics.
+- Task status/priority/date filters, Israel calendar boundaries, page bounds and continuation;
+  Timeline derives from Tasks and leaves relative timing null without a wedding date.
+- Existing deterministic Budget totals, complete multi-batch reads, errors/null versus real empty
+  data, and overdue/upcoming/undated payments with independent bounds and no paid entries.
+- Marketplace attribute filters, quoted search input, public visibility and bounded output;
+  rating-filtered pagination scans past empty candidate chunks, respects combined filters,
+  preserves stable pages without duplicates, and bases `hasMore` only on qualifying vendors.
+  No-match exhaustion, exact-cap exhaustion, early lookahead, and scan-cap failures (including
+  a full page with unresolved lookahead) are explicitly covered. Intermediate rows remain internal.
+- Saved/lifecycle/source/category filters, external-vendor scoping and privacy, unreadable links;
+  comparison calls the existing scoring function and exposes actual reasons/missing evidence.
+- Guest output contains exactly five counts even with explicit name/phone/email/dietary/private-note
+  poison values in fixtures. No individual Guest fields are selected or returned.
+- Aggregate and review processing caps fail unavailable without partial totals/ratings. All ten
+  tool outputs and query projections are audited for forbidden fields.
+
+Existing Assistant foundation, Local provider, context and API regression suites also remain
+required, including the Phase 1A user-message persistence stop and DB-error grounding checks.
+Run TypeScript, ESLint, relevant Vitest/application/domain suites, production build and
+`git diff --check`. No UI files changed, so Playwright/live browser QA is not required in this
+phase. These tests validate server behavior with mocks, not deployed PostgREST/RLS integration.
+
+Results on 2026-09-07: TypeScript and ESLint passed; 225/225 Vitest tests passed across 13 files,
+including 105 new tool tests. Production build passed (Next.js 16.3.4, 11 static pages).
+`git diff --check` passed. Playwright was not run (no UI changes). Commands used the existing
+bundled Node runtime and installed package entrypoints; no dependencies or test accounts/rows were
+created. No Supabase integration tests, migrations, writes, external AI or live research were run.
+
+Rating-pagination correction: relevant Assistant Vitest passed 198/198 across five files, including
+113 read-tool tests. This replaces the candidate-page limitation test with filtered-search
+regressions; the earlier 225-test record above refers to the initial Phase 1B validation selection.
+TypeScript, whole-repository ESLint and production build also passed after the correction
+(Next.js 16.3.4, 11 static pages), as did `git diff --check` and new-file whitespace checks.

@@ -1,6 +1,6 @@
 # Ever After AI Agent Specification
 
-Status: Phase 1A — Agent Core Foundation. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. It does not claim future capabilities are implemented.
+Status: Phase 1B — Provider-independent internal READ tools, following the approved Phase 1A foundation. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. It does not claim future capabilities are implemented.
 
 ## Identity and intended experience
 
@@ -12,7 +12,7 @@ The final Agent should understand the authenticated Couple's actual wedding stat
 
 Phase 1A implements a central policy and provider boundary, structured evidence/results, privacy allowlists, safe local selection, context failure handling, message persistence safety, and deterministic payment date classification. Only the deterministic local provider exists. It is not an LLM and does not have a tool-calling loop.
 
-Phase 1B will introduce internal READ tool contracts, authorization, per-question context selection and execution. Phase 2 will address Hebrew behavior and later RTL UI. Provider integration and live research require explicit approval near the end of the project. No SDK, AI key, paid service, research connection, schema migration, or product write capability is included here.
+Phase 1B implements ten internal READ tools, validated contracts, authorization and bounded execution. It prepares selective context access; it does not add automatic per-question orchestration or a model tool loop. Phase 2 will address Hebrew behavior and later RTL UI. Provider integration and live research require explicit approval near the end of the project. No SDK, AI key, paid service, research connection, schema migration, or product write capability is included here.
 
 ## Wedding-only domain policy
 
@@ -77,7 +77,7 @@ Routine provider exposure is prohibited for Couple phone numbers, secondary Coup
 
 Guest List context is exactly five aggregate counts: invited, attending, awaitingResponse, notAttending, and notYetInvited. No individual Guest row reaches the provider. Couple wedding preferences, task titles/dates/status/priority, limited vendor attributes/lifecycle, and budget totals/unpaid deadlines remain available for the existing local capabilities.
 
-The current phase still loads the existing context bundle for allowed/uncertain questions; it does not introduce a full tool refactor. A clear out-of-scope question loads no wedding context. Phase 1B must select only the necessary read tools/fields and add appropriate limits/pagination. Context volume is not yet a production LLM token budget.
+The Local compatibility path still loads the existing context bundle for allowed/uncertain questions. A clear out-of-scope question loads no wedding context. Phase 1B's new tool outputs have their own strict field and volume bounds, but the existing Local path does not automatically select these tools. Context volume on that legacy path is not yet a production LLM token budget.
 
 Allowlisting is structural, not arbitrary free-text PII detection: a task title, vendor business name/service string, or user-authored chat message can contain sensitive text the user typed. Conversation history is not routinely passed to the provider. Before an external adapter is enabled, review free-text redaction, retention, consent and prompt-injection defenses. Do not claim an absolute guarantee that a user can never type personal data into a permitted string.
 
@@ -122,24 +122,62 @@ Future questions include “Is ₪2,000 a good photographer price?”, “Is ₪
 
 The future result should include sourced current evidence, retrieval/publication dates where available, geography/currency/package comparability, supported ranges only where evidence permits, limitations and uncertainty. A recommendation combines this evidence with Couple constraints and clearly separated Ever After listing comparisons. Failure, stale evidence, or incomparable quotes must return unavailable/insufficient evidence, never a static fallback benchmark.
 
-`research_current_wedding_info` will answer wedding-specific changing questions such as registration procedures or current logistical requirements, favoring official sources for official procedures. Requests need a wedding question, relevant jurisdiction and date; results need source URLs/titles/dates, supported findings and limitations. Neither capability is general-purpose browsing. Both require future domain, privacy, authorization, citation, freshness and cost controls. No implementation, network adapter, search access, registry entry, or benchmark dataset is introduced in Phase 1A.
+`research_current_wedding_info` will answer wedding-specific changing questions such as registration procedures or current logistical requirements, favoring official sources for official procedures. Requests need a wedding question, relevant jurisdiction and date; results need source URLs/titles/dates, supported findings and limitations. Neither capability is general-purpose browsing. Both require future domain, privacy, authorization, citation, freshness and cost controls. Neither Phase 1A nor Phase 1B introduces their implementation, network adapter, search access, registry entry, or benchmark dataset.
 
-## Future internal READ inventory — documentation only
+## Implemented internal READ tools — Phase 1B
 
-| Tool | Intended bounded read |
-| --- | --- |
-| `get_wedding_summary` | Owned wedding details and setup state |
-| `list_tasks` | Owned tasks with relevant status/date filters |
-| `get_timeline_summary` | Existing dated tasks, using deterministic relative dates |
-| `get_budget_summary` | Deterministic totals and unknown/unavailable state |
-| `get_upcoming_payments` | Unpaid deadlines with overdue/upcoming/undated distinctions |
-| `get_couple_vendors` | Owned saved/lifecycle relationships and allowed vendor facts |
-| `search_marketplace_vendors` | Public Marketplace filters, bounded pagination, no implied market representativeness |
-| `compare_vendors` | Authorized candidates, domain scoring, source-separated facts |
-| `get_guest_list_summary` | Five aggregate counts only |
-| `get_missing_wedding_details` | Missing decision-relevant details, without invented defaults |
+Ever After owns `src/lib/assistant/tools/registry.ts`. Its exact allowlist contains the following ten tools. Each definition has a stable name, description, `readOnly: true`, Zod input schema and Zod result schema. `executeAssistantReadTool(name, input)` rejects unknown names (including prototype keys), validates strict input, resolves a fresh server session and owned wedding, executes the fixed query, and validates the entire result. There is no client endpoint, generic SQL/table input, provider-specific tool JSON, write dispatcher or tool loop.
 
-Phase 1B will define and validate inputs/outputs, authenticate each invocation, enforce ownership/field selection, and handle per-tool availability. Provider-supplied IDs are never trusted authorization. No full read-tool registry or dispatcher exists yet.
+| Tool | Input (all optional unless stated) | Validated data output and bounds |
+| --- | --- | --- |
+| `get_wedding_summary` | `{}` | Date, guest estimate, area, event type, styles, priorities, total budget, setup status, venue state/name and booked setup categories. One planning record; null remains unknown. |
+| `list_tasks` | `view`: all (default), open, completed, overdue, due_soon; exact `status`, `priority`; `page`, `limit` | Task ID/title/category/due date/priority/status, pagination, as-of date. Default 25, maximum 50. Filters intersect; open includes in-progress. Due soon is today through seven days ahead inclusive; overdue excludes completed. |
+| `get_timeline_summary` | `page`, `limit`, `includeCompleted` (false) | A page of dated Tasks grouped as overdue, due_soon (0–7 days), upcoming (8–30), later (31+), optionally completed. Existing relative timeline label per task when wedding date exists; otherwise null. Default 25, maximum 50 tasks across all groups, not per group. |
+| `get_budget_summary` | `{}` | `totalBudgetMinor`, `projectedMinor`, `committedMinor`, `paidMinor`, `availableMinor`, `remainingCommittedMinor`. Complete application-calculated totals only. |
+| `get_upcoming_payments` | `limitPerGroup` | Unpaid `overdue`, `upcoming`, `undated` arrays, each default 10/max 20, separate `hasMore` flags and as-of date. Each entry has ID, payment label, amount, due date, expense label and category. |
+| `get_couple_vendors` | `saved`, `lifecycle` (contacted/considering/booked/rejected), `source` (marketplace/external), category slug, `page`, `limit` | Default 12/max 20 relationships, saved flag, lifecycle, agreed price and source-tagged vendor facts. Marketplace facts include taxonomy, city/service areas, price range, services/styles/event types, capacity/Friday availability and rating summary. External facts include only ID/business name/taxonomy. |
+| `search_marketplace_vendors` | `search` (name/city), category/subcategory slugs, `city`, `area`, `minPriceMinor`, `maxPriceMinor`, `style`, `eventType`, `guestCount`, `minRating`, `fridayAvailable`, `page`, `limit` | Public Marketplace facts only, default 12/max 20; pagination over all requested filters, `filtered_results` basis and `ever_after_marketplace_only` scope. No raw reviews, contacts or Couple data. |
+| `compare_vendors` | Required unique `vendorIds`, 2–4 UUIDs | Public facts, deterministic recommendation score/reasons/applicable dimensions, missing evidence dimensions, score status, unavailable candidate IDs and minimal Couple match context. A score is null when fewer than two substantive non-rating dimensions are available. |
+| `get_guest_list_summary` | `{}` | Exactly `invited`, `attending`, `awaitingResponse`, `notAttending`, `notYetInvited`; aggregate-only. |
+| `get_missing_wedding_details` | `{}` | At most nine actual missing planning fields, the advice areas each limits, stored setup status and calculated setup completion. Fields: date, guest estimate, area, event type, styles, priorities, budget, venue state, and venue name only if marked booked. |
+
+All page numbers default to 1 and are capped at 1,000. Money uses integer minor units of ILS (100 = ₪1), matching the application. Pagination uses stable ordering plus an extra sentinel row, which is not returned. Timeline groups summarize the current page, not global task counts. Payments have independent group bounds and continuation flags, not a full payment-history API.
+
+Marketplace filtering uses fixed Supabase builder operations: category/subcategory inner joins, escaped name/city matching, service-area overlap (including flexible coverage), overlapping known price ranges, style/event membership, known capacity bounds and Friday availability. Unknown attributes do not qualify for an explicit filter; no price, capacity or rating is invented. `area=flexible` leaves area unrestricted. Search uses actual public database rows, without the public UI's generated demo fallback or broad row/review query.
+
+**Filtered rating pagination:** ratings are calculated from public numerical review dimensions; there is no stored aggregate rating column. When `minRating` is supplied, the server scans candidates in stable `business_name, id` order, retaining every other database filter on each chunk. It counts only vendors with a known rating at or above the threshold, skips the preceding filtered pages, and retains at most the requested page plus one qualifying lookahead. It continues until that lookahead is found or the candidate set is exhausted. Only the final filtered page and its vendor-ID evidence leave the tool. `paginationBasis: filtered_results` applies with or without a rating filter, and `hasMore` means another vendor satisfies all requested filters. A low-rated initial chunk cannot cause a false empty page. No-match searches return EMPTY only after exhaustion; a requested page beyond the last filtered page is also empty and has `hasMore: false`, without implying that earlier pages were empty. Ordering/pages are deterministic for unchanged source data; separate requests are not a database snapshot.
+
+`MARKETPLACE_SCAN` caps rating searches at 50 candidates per chunk and 1,000 rated candidates per invocation. Each candidate query reads at most 51 rows, including one raw exhaustion sentinel; the sentinel is not rated or returned and begins the next chunk if scanning continues. This permits exact exhaustion detection even at the cap (at most 1,001 distinct candidate rows read). Rating calculation retains the existing 5,000-review processing cap per chunk, with numerical-only reads in batches of 500 and one overflow sentinel. There are at most 20 candidate chunks; no unbounded scan or model-context dump is permitted. If the scan cap is reached without proving either a filtered lookahead or exhaustion, the tool returns UNAVAILABLE / `READ_LIMIT_EXCEEDED`, no data and no factual evidence—even if a partial or full page was found. Read/rating failures also fail closed. No total matching count, static benchmark or schema change is introduced.
+
+Couple-vendor category filtering spans Marketplace and external relations. It processes at most 1,000 scoped relationship identities before category filtering/pagination, then hydrates at most 20 vendors. Lifecycle and saved are independent, using the existing lifecycle mapping. Unreadable linked vendor data returns unavailable instead of implying no bookings.
+
+### Authorization and server boundary
+
+Every invocation, including Marketplace search/comparison in this Agent layer, requires a verified `auth.getUser()` result, `profiles.role = couple`, and the wedding resolved by `owner_user_id = authenticated user ID`. Inputs reject ownership IDs and unknown keys. Every private query scopes to that resolved wedding; payments scope through an inner Budget-item ownership join. Public listing/review reads additionally require `is_public = true`. External vendors are scoped again when hydrated. RLS remains defense in depth; no service role is used.
+
+Only the server query layer imports Supabase. It transitively imports `next/headers` through `supabase/server`, so Next.js prevents a Client Component import. Providers must use metadata and validated results, never import the query layer or receive its internal DB/session context. A future server runner may expose definitions to an adapter, validate an allowlisted model request, invoke this executor, and return the validated result for reasoning. That future runner must also enforce wedding scope and per-turn tool/rate/cost limits; this phase does not expose a new remotely callable endpoint or implement that loop.
+
+### Result and evidence semantics
+
+`contracts.ts` defines a discriminated result:
+
+- `status: success`: validated data plus source evidence.
+- `status: empty`: the same validated shape plus evidence, after successful reads establish a genuinely empty result/page. Known zero counts/totals may appear; unknown budget remains null. An owned wedding with incomplete fields is still success. A budget with no entries and no total is empty; configured budget alone is success.
+- `status: unavailable`: a safe error code/message/retryability and an empty evidence array, with no `data` property. Auth failure, invalid input, missing required source rows, malformed source values, query errors/rejections/null results, and exceeded read caps cannot become empty data or authoritative zero totals.
+
+Error codes are `UNKNOWN_TOOL`, `INVALID_INPUT`, `NOT_AUTHORIZED`, `SOURCE_UNAVAILABLE`, `INVALID_SOURCE_DATA` and `READ_LIMIT_EXCEEDED`. Raw database errors and credentials never enter results. Only `SOURCE_UNAVAILABLE` is marked retryable. Caller cancellation/timeouts and request-rate policies remain future orchestration work.
+
+READ-tool evidence uses the core `COUPLE_DATA`/`MARKETPLACE_DATA` distinction. Couple evidence identifies the authorized section without exposing wedding/account IDs. Marketplace evidence lists the returned public vendor IDs and the Marketplace-only scope (an empty page has an empty ID list). Relationship state/agreed prices and all external-vendor facts are Couple data; source-tagged nested public facts are Marketplace data. Comparison carries both Couple wedding/budget evidence and Marketplace evidence. Deterministic scores/reasons are calculated application results; a future model's interpretation must be separately labeled `AI_RECOMMENDATION`. Neither external-current evidence nor executable proposals are produced by these read tools.
+
+### Aggregate completeness, privacy and compatibility
+
+Authoritative Budget and Guest aggregates read in batches of 500, at most 10,000 source rows per collection plus a sentinel. Public rating aggregation reads only numerical dimensions for the selected vendor set, at most 5,000 reviews plus a sentinel. Exceeding any cap fails unavailable; no truncated total/rating is returned. Raw aggregate rows never enter model context. Separate reads are not a transactional snapshot; inconsistent orphan payments fail closed, and a future higher-scale design should consider approved aggregate queries/snapshot consistency. No schema changes are made here.
+
+Every query uses explicit columns. Zod strips unknown properties from nested output objects. Tasks omit notes; Budget/Payments omit notes and private vendor fields; wedding output omits names, emails, phones, avatars and auth identifiers; external/Couple vendor output omits private notes and contacts. Marketplace contains public planning facts and aggregate ratings only. Guest queries select only RSVP status and invited/attending counts, then return exactly five aggregate counts. No Guest identity/contact/dietary/private-note field is selected or returned. Structural allowlisting does not detect sensitive text typed into an otherwise permitted title or business name.
+
+The existing `/api/assistant` → `runWeddingAgent` → `getAssistantContext` → `LocalWeddingAssistantProvider.respond` path is preserved. The monolithic context still supplies wedding preferences, tasks, vendor relationships, budget/unpaid payments and Guest aggregates to existing deterministic branches. Its Phase 1A whole-turn failure handling, privacy validation and provenance checks remain; it does not inherit the new tools' pagination/processing caps. The only shared behavior refactor extracts `israelCalendarDate` and preserves payment label metadata in the existing unpaid-payment classifier. No fake Agent loop is added, and the Phase 1A response validator still rejects claimed tool activity on the legacy path.
+
+Budget totals reuse `calculateBudgetSummary` unchanged, including its existing projected-cost rule: use a positive commitment, otherwise the estimate. Remaining committed is clamped at zero; available may be negative or unknown. Date calculations reuse Task/Timeline helpers and Phase 1A payment classification with the Israel calendar. Guest counts reuse `calculateGuestSummary`; setup completeness reuses `isWeddingSetupComplete` (optional date/budget can still limit advice). Vendor comparisons call the unchanged `calculateRecommendation`; weights/reasons are not model-generated. The tool withholds a personalized score below the engine's existing two-substantive-dimension recommendation threshold rather than presenting rating alone as personalized fit.
 
 ## Future writes — documentation only
 
@@ -167,3 +205,15 @@ Focused tests cover provider configuration, scope decisions and central invocati
 - Playwright: not run; no UI components changed and no live QA rows were created.
 
 Commands used the existing bundled Node runtime and installed package entrypoints because the default pnpm/system-Node invocation could not resolve/run TypeScript. Vitest's native bundler required execution outside the filesystem sandbox; all database/provider test interactions were mocked. The first focused run exposed the RSVP plural classification gap; it was corrected before the passing run. No dependencies were installed. No live Supabase mutation, migration, external provider/research call, commit, push or deployment was performed.
+
+## Phase 1B validation — 2026-09-07
+
+- TypeScript: passed (`tsc --noEmit`).
+- ESLint: whole-repository check passed; changed tool/payment/test files also passed after final code edits, with no warnings.
+- Vitest: 225/225 across 13 files passed (219 across Assistant/tool/domain/Guest application suites, plus 6 existing Couple feature contracts). This includes 105 new tool tests, and the existing foundation, context, Local provider and API regressions.
+- Production build: passed (`next build`, Next.js 16.3.4; 11 static pages generated; authenticated pages/API remain dynamic).
+- `git diff --check`: passed. Playwright was not run because no UI behavior changed.
+
+All tests used local mocks and in-memory fixtures; no live PostgREST/RLS integration is claimed. The first test run found an overbroad test regex and slow repeated test-collator construction; both test issues were corrected. Installed bundled Node/entrypoints were used, without dependency installation; Vitest/build native tooling ran outside the filesystem sandbox. No SDK, AI key, research connection, product write tool, Supabase mutation/migration/schema/RLS/seed change, commit, push or deployment was performed in Phase 1B.
+
+Rating-pagination correction validation: 198/198 relevant Assistant tests passed across five files, including 113 read-tool tests. Regressions cover later-chunk matches, genuine no-match exhaustion, stable filtered pages/tied names, combined filters, filtered lookahead, output/privacy/provenance bounds, scan-cap failures and exact-cap exhaustion. TypeScript, ESLint, production build (11 static pages) and whitespace checks passed. Validation used mocks; no Marketplace data or schema changes were made.
