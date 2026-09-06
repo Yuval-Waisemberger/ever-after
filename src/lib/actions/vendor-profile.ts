@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/auth/user";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedVendorProfile } from "@/lib/queries/vendor-dashboard";
 import { vendorProfileSchema } from "@/lib/validation/vendor-profile";
@@ -8,6 +9,15 @@ import type { ActionState } from "./state";
 
 const nullable = (value: FormDataEntryValue | null) =>
   typeof value === "string" && value.trim() ? value.trim() : null;
+
+function createVendorSlug(businessName: string, ownerUserId: string) {
+  const base = businessName
+    .toLowerCase()
+    .replace(/&/g, " and ")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "") || "vendor";
+  return `${base}-${ownerUserId.slice(0, 8)}`;
+}
 
 export async function saveVendorProfile(
   _previous: ActionState,
@@ -40,9 +50,10 @@ export async function saveVendorProfile(
     isPublic: formData.get("isPublic") === "on",
   });
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
+  const account = await requireRole("vendor");
   const profile = await getOwnedVendorProfile();
   const supabase = await createClient();
-  const { error } = await supabase.from("vendor_profiles").update({
+  const values = {
     business_name: parsed.data.businessName,
     contact_name: parsed.data.contactName,
     description: parsed.data.description,
@@ -65,18 +76,30 @@ export async function saveVendorProfile(
     website_url: parsed.data.websiteUrl,
     instagram_url: parsed.data.instagramUrl,
     is_public: parsed.data.isPublic,
-  }).eq("id", profile.id);
+  };
+  const result = profile
+    ? await supabase
+        .from("vendor_profiles")
+        .update(values)
+        .eq("id", profile.id)
+        .eq("owner_user_id", account.id)
+    : await supabase.from("vendor_profiles").insert({
+        ...values,
+        owner_user_id: account.id,
+        slug: createVendorSlug(parsed.data.businessName, account.id),
+      });
+  const { error } = result;
   if (error) return { status: "error", message: "The business profile could not be saved." };
   revalidatePath("/vendor");
   revalidatePath("/vendor/profile");
   revalidatePath("/vendors");
-  revalidatePath(`/vendors/${profile.slug}`);
-  return { status: "success", message: "Business profile updated." };
+  if (profile) revalidatePath(`/vendors/${profile.slug}`);
+  return { status: "success", message: profile ? "Business profile updated." : "Business profile created." };
 }
 
 export async function registerVendorImage(vendorId: string, storagePath: string, altText: string) {
   const profile = await getOwnedVendorProfile();
-  if (profile.id !== vendorId || !storagePath.startsWith(`${vendorId}/`)) throw new Error("Invalid image path.");
+  if (!profile || profile.id !== vendorId || !storagePath.startsWith(`${vendorId}/`)) throw new Error("Invalid image path.");
   const supabase = await createClient();
   const { error } = await supabase.from("vendor_images").insert({ vendor_id: vendorId, storage_path: storagePath, alt_text: altText.trim().slice(0, 240), sort_order: profile.vendor_images?.length ?? 0, is_primary: (profile.vendor_images?.length ?? 0) === 0 });
   if (error) throw new Error("Image metadata could not be saved.");
@@ -86,6 +109,7 @@ export async function registerVendorImage(vendorId: string, storagePath: string,
 
 export async function deleteVendorImage(formData: FormData) {
   const profile = await getOwnedVendorProfile();
+  if (!profile) return;
   const imageId = String(formData.get("imageId") ?? "");
   const image = profile.vendor_images?.find((candidate) => candidate.id === imageId);
   if (!image) return;

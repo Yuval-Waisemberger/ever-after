@@ -7,7 +7,20 @@ import { getVendorDashboard } from "@/lib/queries/vendor-dashboard";
 export const metadata: Metadata = { title: "Vendor Dashboard" };
 
 export default async function VendorDashboardPage() {
-  const { profile, reviews, rating, completion } = await getVendorDashboard();
+  const dashboard = await getVendorDashboard();
+  if (!dashboard) {
+    return (
+      <main className="mx-auto max-w-4xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+        <PageHeader
+          eyebrow="Vendor Dashboard"
+          title="Set up your business profile"
+          description="Add your business details to finish preparing your Vendor Dashboard."
+          action={<Link href="/vendor/profile" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-wine px-5 text-sm font-semibold text-white">Start profile setup <ArrowRight className="size-4" /></Link>}
+        />
+      </main>
+    );
+  }
+  const { profile, reviews, rating, completion } = dashboard;
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Vendor Dashboard" title={profile.business_name} description={profile.is_public ? "Your public profile is live in the marketplace." : "Your profile is private until you choose to publish it."} action={<Link href="/vendor/profile" className="inline-flex min-h-11 items-center gap-2 rounded-full bg-wine px-5 text-sm font-semibold text-white">Edit profile <ArrowRight className="size-4" /></Link>} />

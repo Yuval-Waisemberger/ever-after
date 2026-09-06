@@ -59,19 +59,21 @@ export type VendorTaxonomy = Array<{
   vendor_subcategories: Array<{ id: string; name: string; slug: string }>;
 }>;
 
-export async function getOwnedVendorProfile(): Promise<OwnedVendorProfile> {
-  await requireRole("vendor");
+export async function getOwnedVendorProfile(): Promise<OwnedVendorProfile | null> {
+  const account = await requireRole("vendor");
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("vendor_profiles")
     .select("*, vendor_categories(name), vendor_subcategories(name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
-    .single();
-  if (error || !data) throw new Error("Vendor profile could not be loaded.");
-  return data as OwnedVendorProfile;
+    .eq("owner_user_id", account.id)
+    .maybeSingle();
+  if (error) throw new Error("Vendor profile could not be loaded.");
+  return data ? (data as OwnedVendorProfile) : null;
 }
 
 export async function getVendorDashboard() {
   const profile = await getOwnedVendorProfile();
+  if (!profile) return null;
   const reviews = profile.reviews ?? [];
   const rating = reviews.length
     ? reviews.reduce((sum: number, review) => sum + (review.professionalism + review.punctuality + review.service_attitude + review.value_for_money) / 4, 0) / reviews.length
