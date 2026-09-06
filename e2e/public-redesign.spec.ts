@@ -20,10 +20,10 @@ test("public entry links lead to the existing account and guest flows", async ({
   await page.goto("/");
   await page.getByRole("link", { name: "Explore vendors", exact: true }).click();
   await expect(page).toHaveURL(/\/vendors$/);
-  await expect(page.getByText("432 vendors", { exact: true })).toBeVisible();
+  await expect(page.getByText("496 vendors", { exact: true })).toBeVisible();
 });
 
-test("all six category icons use real marketplace filters and preserve search/pagination", async ({ page }) => {
+test("the original category icons use real marketplace filters and preserve search/pagination", async ({ page }) => {
   test.setTimeout(90_000);
   const categories = [
     ["Wedding Venues & Gardens", "venues", 36],
@@ -91,9 +91,9 @@ test("iPhone-sized public pages have accessible menus, stacked CTAs and no overf
   await page.getByRole("navigation", { name: "Mobile navigation" }).getByRole("link", { name: "Vendors", exact: true }).click();
   await expect(page).toHaveURL(/\/vendors$/);
   await expect(page.getByRole("navigation", { name: "Mobile navigation" })).toBeHidden();
-  await expect.poll(() => page.locator(".category-link").evaluateAll(elements => elements.length === 6 && elements.every(el => el.getBoundingClientRect().width >= 44 && el.getBoundingClientRect().height >= 44))).toBe(true);
+  await expect.poll(() => page.locator(".category-link").evaluateAll(elements => elements.length === 8 && elements.every(el => el.getBoundingClientRect().width >= 44 && el.getBoundingClientRect().height >= 44))).toBe(true);
   const categoryBoxes = await page.locator(".category-link").evaluateAll(elements => elements.map(el => ({ top: Math.round(el.getBoundingClientRect().top), width: el.getBoundingClientRect().width, height: el.getBoundingClientRect().height })));
-  expect(new Set(categoryBoxes.map(box => box.top)).size).toBe(3);
+  expect(new Set(categoryBoxes.map(box => box.top)).size).toBe(4);
   expect(categoryBoxes.every(box => box.width >= 44 && box.height >= 44)).toBe(true);
   for (const width of [320, 390, 430, 768, 1536]) {
     await page.setViewportSize({ width, height: 844 });
@@ -114,6 +114,6 @@ test("mobile navigation remains usable without JavaScript", async ({ browser }) 
   await expect(navigation).toBeVisible();
   await navigation.getByRole("link", { name: "Vendors", exact: true }).click();
   await expect(page).toHaveURL(/\/vendors$/);
-  await expect(page.getByText("432 vendors", { exact: true })).toBeVisible();
+  await expect(page.getByText("496 vendors", { exact: true })).toBeVisible();
   await context.close();
 });
