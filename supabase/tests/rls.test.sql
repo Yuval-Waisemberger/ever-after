@@ -52,8 +52,8 @@ select policies_are(
 select policies_are(
   'public',
   'weddings',
-  array['weddings_delete_own', 'weddings_insert_own', 'weddings_select_own', 'weddings_update_own'],
-  'weddings expose only owner policies'
+  array['weddings_couple_role', 'weddings_delete_own', 'weddings_insert_own', 'weddings_select_own', 'weddings_update_own'],
+  'weddings enforce owner access and Couple role'
 );
 
 select policies_are(
@@ -87,8 +87,8 @@ select policies_are(
 select policies_are(
   'public',
   'vendor_profiles',
-  array['vendors_owner_delete', 'vendors_owner_insert', 'vendors_owner_read', 'vendors_owner_update', 'vendors_public_read'],
-  'vendor owner/public policies are present'
+  array['vendors_insert_role', 'vendors_update_role', 'vendors_delete_role', 'vendors_owner_delete', 'vendors_owner_insert', 'vendors_owner_read', 'vendors_owner_update', 'vendors_public_read'],
+  'vendor public/owner policies and Vendor role restrictions are present'
 );
 
 select policies_are(
@@ -101,8 +101,8 @@ select policies_are(
 select policies_are(
   'public',
   'couple_vendors',
-  array['couple_vendors_owner_all'],
-  'couple-vendor relationships expose only the wedding owner policy'
+  array['couple_vendors_owner_all', 'couple_vendors_visible_insert'],
+  'couple-vendor relationships enforce wedding ownership and visible vendor insertion'
 );
 
 select policies_are(
@@ -136,8 +136,8 @@ select policies_are(
 select policies_are(
   'storage',
   'objects',
-  array['vendor_media_owner_delete', 'vendor_media_owner_insert', 'vendor_media_owner_update', 'vendor_media_public_read'],
-  'vendor media exposes only public read and owner-write policies'
+  array['couple_media_owner_delete', 'couple_media_owner_insert', 'couple_media_owner_update', 'couple_media_owner_read', 'vendor_media_owner_delete', 'vendor_media_owner_insert', 'vendor_media_owner_update', 'vendor_media_public_read'],
+  'Storage exposes intended public Vendor media and private Couple owner policies'
 );
 
 select * from finish();

@@ -1,84 +1,138 @@
 # Ever After — Wedding Planner
 
-Ever After is a full-stack wedding workspace for couples, vendors, and guests. Couples manage one
-shared wedding, tasks, a single-source timeline, vendor relationships, a budget, payment schedules,
-and a context-aware Wedding Assistant. Vendors maintain public profiles and galleries. Guests can
-browse published vendors and reviews.
+Ever After is a wedding workspace for a shared Couple account, Vendor businesses and public visitors.
+Couples manage Wedding Details, Tasks and their derived Timeline, Guest List/RSVP, vendors,
+commitments and payment history. Optional Setup connects to the same vendor relationships.
+The Dashboard summarizes these sources; its date area celebrates the final week and wedding day.
 
-The implementation follows `project-docs/Wedding_Planner.docx`, the official course brief in
-`project-docs/Internet_Technologies_English.pdf`, and the local-only `AGENTS.md` guidance.
+## Stack and current status
 
-## Stack
+Next.js 16 App Router, React 19, TypeScript, Supabase PostgreSQL/Auth/Storage/RLS, Zod, Tailwind CSS,
+Vitest and Playwright. Vercel deployment is **pending**. Frankfurt Supabase is the existing live
+backend: wedding-planner-project-eu, eu-central-1. Do not recreate or reseed it for local QA.
+The Assistant currently uses a deterministic Local provider. Real external AI and live research
+are pending; no AI key, paid provider or executable Agent product-write tool is required.
 
-- Next.js 16 App Router, React 19, TypeScript
-- Supabase PostgreSQL, Auth, Row Level Security, and Storage
-- Zod server-side validation
-- Vitest for domain/provider tests and Playwright for critical browser flows
-- Vercel as the required deployment target
+The fictional Marketplace contains **496 vendors, 8 categories, 27 subcategories and 2,727 reviews**.
+Its 291 tracked WebPs comprise 227 pooled images and 64 dedicated newer-vendor primary images.
+See [Marketplace dataset](docs/MARKETPLACE_DATASET.md).
 
-## Local setup
+## Local installation
 
-Requirements: Node.js 22+ and pnpm 11.
+Requirements: Node.js 22+ and pnpm 11. Use the package-manager version declared in package.json.
 
-1. Install dependencies: `pnpm install`.
-2. Copy `.env.example` to `.env.local` if it does not already exist.
-3. In the existing Supabase project, find the public Project URL and publishable key under the
-   project's Connect/API settings. Enter them locally as:
+1. Run `pnpm install`.
+2. Copy .env.example to .env.local only if the local file does not already exist.
+3. Configure the names documented below locally; never commit .env.local.
+4. Use a Supabase database with all repository migrations applied in chronological order, or leave
+   Supabase configuration blank for the read-only demo Marketplace. Private workspace features need Auth/database configuration.
+5. Run `pnpm dev` and open http://localhost:3000.
 
-   ```env
-   NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
-   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
-   NEXT_PUBLIC_SITE_URL=http://localhost:3000
-   AI_PROVIDER=local
-   ```
+| Environment variable | Purpose |
+| --- | --- |
+| NEXT_PUBLIC_SUPABASE_URL | Browser-safe project URL |
+| NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | Browser-safe publishable key |
+| NEXT_PUBLIC_SITE_URL | Canonical application origin for Auth callbacks; localhost during development |
+| AI_PROVIDER | Set to local; omission also selects Local, unsupported explicit values fail safely |
 
-   These two Supabase values are browser-safe, but `.env.local` is still ignored and must never be
-   committed. Do not put a database password, service-role key, Supabase secret key, or AI key in a
-   `NEXT_PUBLIC_*` variable.
-4. Review and apply `supabase/migrations/202609020001_initial_schema.sql`, followed by
-   `supabase/migrations/202609020002_rls_and_storage.sql` and
-   `supabase/migrations/202609030001_vendor_location_city.sql`, to the existing
-   `wedding-planner-project` Supabase project. Never create a second project.
-5. Optionally apply `supabase/seed.sql` in a development/demo environment.
-6. Start the app with `pnpm dev`, then open `http://localhost:3000`.
+The normal app needs no database password, service-role key or AI key. Configure Supabase Auth's
+Site URL and allowed callback/recovery URLs for the intended application origin. Vercel will require
+its own environment settings when deployment is approved. Source specification/course PDFs and
+local coding-agent guidance are not install/build dependencies. The final Product Specification
+is submitted separately.
 
-When Supabase variables are blank, the landing page and a read-only seeded marketplace preview still
-work, while authentication and private workspaces show a safe configuration message. No paid AI
-provider is required: `AI_PROVIDER=local` provides grounded summaries, comparison, and curated
-general guidance.
+## Database setup
 
-## Commands
+Preserve and review every file under supabase/migrations, in this order:
 
-```text
-pnpm dev         local development server
-pnpm lint        ESLint
-pnpm typecheck   TypeScript without emitting files
-pnpm test        Vitest unit/provider suite
-pnpm test:e2e    Playwright browser tests
-pnpm seed:generate regenerate SQL/fallback JSON and validate the local WebP pool
-pnpm seed:check    verify all generated marketplace artifacts are current
-pnpm build       production build
-pnpm check       seed verification + lint + typecheck + unit tests + production build
+1. 202609020001_initial_schema.sql
+2. 202609020002_rls_and_storage.sql
+3. 202609030001_vendor_location_city.sql
+4. 202609040001_profile_role_permissions.sql
+5. 202609050001_couple_identity_and_external_vendors.sql
+6. 202609050002_guest_list.sql
+7. 202609050003_booked_vendor_budget_sync.sql
+8. 202609070001_task_waiting_on_vendor.sql
+9. 202609070002_role_boundary_hardening.sql
+
+These changes are already represented in the live Frankfurt schema, including the reviewed
+050003/070001/070002 applications. Earlier manual SQL Editor applications mean the migration ledger
+is not authoritative. **Do not blindly run db push, replay migrations or alter the ledger.** A fresh
+isolated database needs the complete sequence; an existing database needs catalog preflight and
+separate approval for changes. The enum addition must commit before its new value is used.
+
+supabase/seed.sql is intentional synthetic demo setup, generated with the fallback JSON by
+scripts/generate-marketplace-seed.mjs. Apply it only to an explicitly selected development/demo
+database, never automatically to Frankfurt. Seed checking/generation does not execute SQL.
+Booked commitments are synchronized only by the database; payments alone determine Paid.
+
+## Build and unit tests
+
+- `pnpm lint` — whole-repository ESLint
+- `pnpm typecheck` — TypeScript
+- `pnpm test` — all maintained Vitest tests
+- `pnpm seed:check` — read-only generated-data/image consistency
+- `pnpm seed:generate` — intentionally regenerate local seed/JSON, not the database
+- `pnpm build` — production build
+- `pnpm start` — serve that build
+- `pnpm check` — seed check, lint, typecheck, Vitest, build
+
+Where Windows sandbox restrictions prevent Turbopack builds, `pnpm exec next build --webpack`
+uses the supported alternative bundler without changing application configuration.
+
+## Browser tests
+
+Install the free local browser once: `pnpm exec playwright install chromium`.
+For the normal-app suite, use a separate local server with the two Supabase public variables blank
+at build and start time. This exercises the deterministic preview without live credentials/data.
+For example, in PowerShell 7.5+ (process-only settings; do not edit .env.local):
+
+```powershell
+$env:NEXT_PUBLIC_SUPABASE_URL = ''
+$env:NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = ''
+$env:AI_PROVIDER = 'local'
+pnpm exec next build --webpack
+pnpm exec next start --port 3106
 ```
 
-Playwright needs its free local Chromium runtime once: `pnpm exec playwright install chromium`.
-Database/RLS tests additionally need a Supabase local test environment or reviewed remote test
-project state; they must not be pointed at production data casually.
+In a second terminal, set PLAYWRIGHT_EXTERNAL_SERVER=1 and PLAYWRIGHT_BASE_URL to
+http://localhost:3106, then run:
 
-## Database and demo data
+`pnpm test:e2e public.spec.ts public-redesign.spec.ts responsive-auth.spec.ts visual-consistency.spec.ts auth-verification.spec.ts password-recovery.spec.ts marketplace-subcategories.spec.ts couple-features-boundary.spec.ts security-boundaries.spec.ts --workers=1`
 
-All schema changes are reproducible SQL migrations. Monetary values use integer agorot. The seed is
-generated deterministically from `scripts/generate-marketplace-seed.mjs` and contains 432 fictional
-vendors across the specification's 19 subcategories, 2,383 fictional reviews, and 198 pooled local
-WebP demo images. It contains no accounts, passwords, private credentials, external image dependency, or real
-vendor claims. See `docs/MARKETPLACE_DATASET.md` for the exact distribution and research basis.
+Use the explicit file list: the root config discovers all specs, but five suites require their own
+isolated component hosts. Run those separately from the repository root:
 
-## Deployment
+- `pnpm exec playwright test --config=e2e/assistant.config.ts`
+- `pnpm exec playwright test --config=e2e/budget.config.ts`
+- `pnpm exec playwright test --config=e2e/setup.config.ts`
+- `pnpm exec playwright test --config=e2e/tasks.config.ts`
+- `pnpm exec playwright test --config=e2e/wedding-week.config.ts`
 
-Import the existing GitHub repository into Vercel, configure the same three public environment
-variables there, and update Supabase Auth Site URL/redirect allow-list for the Vercel domain. Keep
-`AI_PROVIDER=local` unless a provider is deliberately selected later. No Git commit, push, Supabase
-mutation, or Vercel deployment is performed automatically by this repository.
+These use loopback ports 3101–3105, synthetic fixtures and no live mutations. The wedding-week
+filename now tests only countdown/date treatment, never a separate operational dashboard.
+Reports, traces, screenshots and caches are ignored. Do not use live records for mutation QA.
 
-See `docs/TECHNICAL_DESIGN.md`, `docs/TEST_SPECIFICATION.md`, `docs/SECURITY.md`,
-`docs/SCALABILITY.md`, and `docs/PRESENTATION_OUTLINE.md` for the course deliverables.
+## PostgreSQL tests
+
+With Docker running and the existing postgres:17 image available locally:
+
+- `node tests/database/task-status-postgres.mjs`
+- `node tests/database/security-rls-postgres.mjs`
+
+Both use disposable local containers, synthetic rows, no host database port and cleanup on exit.
+The security runner covers actual migrations/RLS/triggers; Auth and Storage SQL boundaries use
+minimal stubs. It does not replace full Supabase JWT or Storage HTTP adversarial testing.
+The two maintained SQL tests under supabase/tests use pgTAP: run them against a disposable Supabase-
+compatible database with all migrations and pgTAP available, e.g. `supabase test db` after configuring
+that isolated environment. They are not included in Vitest. Never target the live project.
+
+## Submission documents
+
+[Technical design](docs/TECHNICAL_DESIGN.md), [test specification](docs/TEST_SPECIFICATION.md),
+[security](docs/SECURITY.md), [scalability](docs/SCALABILITY.md),
+[architecture guide](docs/IMPLEMENTATION_GUIDE.md), [Agent specification](docs/AI_AGENT_SPEC.md),
+[booking/budget rules](docs/BOOKED_VENDOR_BUDGET.md) and
+[presentation outline](docs/PRESENTATION_OUTLINE.md).
+The final specification, final presentation, live Vercel URL and repository submission link are
+separate final deliverables. No push or deployment is implied by local commands.

@@ -1,6 +1,6 @@
 # Ever After AI Agent Specification
 
-Status: Phase 1C-B — Wedding planning state, roadmap and conversation contracts, following the approved Phase 1A/1B/1C-A foundations. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. No real LLM or live research is implemented.
+Status: Agent foundation Phases 1A, 1B, 1C-A, 1C-B and Phase 2 bilingual UX are complete. Setup booking/declaration semantics, current financial rules, Waiting on vendor and the shared countdown phase model are integrated. This is the authoritative Agent contract. Only the deterministic Local provider exists; external AI, live research and product-write execution remain unimplemented.
 
 ## Identity and intended experience
 

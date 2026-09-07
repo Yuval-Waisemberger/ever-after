@@ -32,8 +32,9 @@ and returns score/reasons. The UI adds a badge but never filters out a non-recom
 ### Budget flow
 
 Expenses store estimated and/or committed values. Payments belong to an expense. Pure calculation
-code produces summary totals, while Server Actions reject invalid amounts and payment schedules that
-exceed commitment. Dashboard reads the same calculation, so its numbers cannot drift from Budget.
+code computes per-item max(active commitment, actual paid) impacts. Database triggers alone synchronize
+Booked relationships into canonical commitments and serialize payment schedule validation; Server Actions
+provide early validation. Dashboard reads the same calculation, so its numbers cannot drift from Budget.
 
 ### Assistant flow
 
@@ -75,7 +76,7 @@ invalid/cross-owner tests; update the technical/security/test docs.
 
 ## Current handoff boundary
 
-Local code, SQL, seed, domain tests, and course documentation are prepared. The user must enter the two
-public Supabase values locally and apply the reviewed migrations to the existing project before real
-account/database/RLS integration can be exercised. That external step must precede claims that the
-remote-backed demo flow passes.
+Frankfurt is configured with the reviewed schema through 202609070002. Local code remains the
+application source; Vercel deployment and the real external AI provider are pending. See README for
+the complete setup/test commands and current migration guidance. The final Product Specification is
+submitted separately; local source-reference documents are not build requirements.

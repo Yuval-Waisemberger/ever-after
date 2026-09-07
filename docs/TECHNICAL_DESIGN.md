@@ -1,6 +1,6 @@
 # Detailed Technical Design
 
-> Agent architecture: [AI Agent Specification](AI_AGENT_SPEC.md) is authoritative for the current Phase 1A contract and future Agent direction.
+> Agent architecture: [AI Agent Specification](AI_AGENT_SPEC.md) is authoritative for the completed Agent foundation and bilingual UX contract and future Agent direction.
 
 ## 1. Product boundary
 
@@ -25,8 +25,7 @@ role, then wrap pages in a role-specific shell. Server Components fetch page dat
 are restricted to interactive forms, filters, wizard navigation, upload progress, and chat state.
 
 `src/proxy.ts` refreshes Supabase cookie sessions; it is not treated as authorization. Every database
-operation also passes through grants, RLS, foreign keys, and checks. The production app is deployed
-to Vercel; data, Auth, and vendor media stay in the existing Supabase project.
+operation also passes through grants, RLS, foreign keys, and checks. Vercel deployment is pending; data, Auth, and vendor media stay in the existing Supabase project.
 
 ## 3. Routes
 
@@ -41,6 +40,9 @@ to Vercel; data, Auth, and vendor media stay in the existing Supabase project.
 | `/wedding/details` | Couple | View/edit the wedding's stored facts |
 | `/wedding/timeline` | Couple | Derived view of dated Tasks |
 | `/tasks` | Couple | Task CRUD/status/priority/date management |
+| `/guests` | Couple | Guest List/household RSVP and aggregate counts |
+| `/reviews` | Couple | Own review management |
+| `/auth/forgot-password`, `/auth/reset-password`, `/auth/verification` | public | Recovery and verification |
 | `/vendors/my` | Couple | Saved/contacted/considering/booked/rejected relationships |
 | `/budget` | Couple | Total, expenses, payment schedule, paid history |
 | `/assistant` | Couple | Grounded chat and vendor comparison |
@@ -51,26 +53,28 @@ to Vercel; data, Auth, and vendor media stay in the existing Supabase project.
 | `/vendor/explore` | Vendor | Marketplace entry |
 | `/vendor/settings` | Vendor | Account context and logout |
 
-There is intentionally no standalone Dashboard, Wedding Profile, Compare, Reviews, Payments, or
-Wedding Week navigation item.
+There is no separate Wedding Week dashboard, Wedding Profile, Compare or Payments area. My Reviews
+is a Couple route; the normal Our Wedding Dashboard remains the only dashboard.
 
 ## 4. Data model
 
 ### Ownership graph
 
-`auth.users -> profiles -> weddings -> {tasks, couple_vendors, budget_items, assistant_threads}`
+`auth.users -> profiles -> weddings -> {tasks, guests, external_vendors, couple_vendors, budget_items, assistant_threads}`
 
 `profiles(vendor) -> vendor_profiles -> {vendor_images, received reviews}`
 
 `budget_items -> payments`; `assistant_threads -> assistant_messages`; `couple_vendors` joins one
 wedding and one vendor. Review authorship points to a wedding, except immutable `is_seeded` demo
-reviews. Deletions cascade through private workspace children; deleting a couple-vendor relationship
-sets the optional budget link to null to retain financial history.
+reviews. Canonical expenses and payment history are protected from relationship deletion/detachment.
+Vendor-profile references from relationships/reviews use RESTRICT. Account deletion with financial
+history needs a separately reviewed workflow, not an assumed cascade.
 
 ### Key constraints
 
 - One profile per Auth user; one wedding per Couple owner; one vendor profile per Vendor owner.
-- One couple-vendor relationship per `(wedding_id, vendor_id)`.
+- One relationship per wedding/Marketplace vendor or wedding/External Vendor identity; the two
+  identity columns are mutually exclusive. Multiple vendors in one category remain valid.
 - One non-seed review per `(wedding_id, vendor_id)`; PostgreSQL permits multiple seed rows because
   their `wedding_id` is null.
 - Ratings are 1–5; money and guest counts are non-negative/positive as appropriate.
@@ -91,7 +95,8 @@ through `auth.uid()` and the stored role/owner relationships.
 
 Guests receive public-category, published-vendor, media, and public-review reads only. Couples can
 access only their wedding graph. Vendors edit only their owned business and media; reviews remain
-read-only to vendors. See `docs/SECURITY.md` and the second migration for the full policy matrix.
+read-only to vendors. See [SECURITY.md](SECURITY.md) and the complete chronological migration set,
+including 070002 role hardening, for the current policy matrix.
 
 ## 6. Server Actions and Route Handlers
 
@@ -123,8 +128,9 @@ There is no Redux or client-side server cache.
 
 ## 8. Vendor taxonomy and discovery
 
-High-level groups are Venues, Photography & Content, Music & Entertainment, Beauty & Attire, Design
-& Flowers, and Event Services. Seeded subcategories implement the exact detailed types from the
+The fictional Marketplace has 496 vendors, 8 categories, 27 subcategories, 2,727 reviews and 291
+runtime images. Groups are Venues, Photography & Content, Music & Entertainment, Beauty & Attire,
+Design & Flowers, Event Services, Cakes & Desserts, and Wedding Accessories & Party Extras. Seeded subcategories implement the exact detailed types from the
 specification. Search, category, subcategory, service area, price, rating, capacity, Friday
 availability, and service filters remain explicit and understandable. Booked categories are never
 removed from marketplace results.
@@ -175,7 +181,8 @@ and explicit payment corrections remain possible after unbooking/reduction; no a
 rewriting occurs. The application provides early validation and safe errors; DB validation is final.
 
 See [BOOKED_VENDOR_BUDGET.md](BOOKED_VENDOR_BUDGET.md) for migration review, protections, and sequencing.
-The revised migration is **not applied to Frankfurt** by this implementation task.
+The revised 050003 migration is applied successfully to Frankfurt; canonical IDs and financial
+history were preserved during the approved cutover.
 
 ## 11. Wedding Assistant
 
@@ -313,12 +320,10 @@ ten internal READ registrations, existing Local context path and disabled-resear
 remain unchanged. Future integration must implement consent, rate/cost controls and reviewed
 receipt generation before enabling any adapter.
 
-The application code and migrations are complete locally but the migrations have not been applied to
-the remote project in this implementation pass, so connected account/database flows still require the
-user's local/dashboard configuration and integration testing. Helper access and confirmed Assistant
-writes remain second priority. After-wedding/community features remain third priority. Real payment
-processing, calendars, WhatsApp, RSVP, seating, invitation sending, vendor messaging, and real-time
-availability are deliberately out of scope.
+The current Frankfurt schema includes all nine repository migrations through role hardening 070002.
+Earlier manual migration history is not authoritative; inspect catalogs before approved changes.
+Vercel deployment, external AI/live research, full JWT/Storage HTTP adversarial QA, Helper access and
+confirmed Assistant write execution remain pending. No external service is implied by local builds.
 
 ## Phase 2 Assistant language and rendering
 

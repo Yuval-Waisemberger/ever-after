@@ -36,3 +36,7 @@ Thumbs.db
 
 # Persistent local Codex guidance: never commit unless explicitly requested
 /AGENTS.md
+
+# Local source/reference material, never required by runtime
+/local-input/
+/project-docs/

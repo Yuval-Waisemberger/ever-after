@@ -19,10 +19,9 @@ One shared Couple login represents both partners, as required by the product spe
 numbers are profile data, not credentials. The database signup trigger creates the matching profile
 and wedding/vendor row; only `couple` and `vendor` roles are accepted.
 
-The local Auth readiness changes are described in [AUTH_SECURITY_READINESS.md](AUTH_SECURITY_READINESS.md).
 Migration `202609040001_profile_role_permissions.sql` restricts authenticated profile updates to
-`display_name` and `phone`, in addition to existing own-row RLS. It must be applied before relying
-on immutable account roles. Callback redirects are strictly application-relative; signup and resend
+`display_name` and `phone`, in addition to existing own-row RLS. It is applied in Frankfurt and protects
+immutable account roles. Callback redirects are strictly application-relative; signup and resend
 use the configured site origin and Supabase's existing PKCE/token/email infrastructure.
 
 ## Authorization and RLS matrix
@@ -215,7 +214,7 @@ The client validates replies and uses controlled localized error messages rather
 Phase 2 browser tests use synthetic in-memory conversations on an isolated local component host. All API responses are mocked and external browser requests are blocked; no live authenticated Assistant message is sent or Supabase QA row created. This does not substitute for future authorized live authentication/RLS integration testing. No AI SDK/key, paid service, product write tool or live research is enabled.
 
 
-## Database-owned booking commitments (050003, pending reviewed application)
+## Database-owned booking commitments (050003 applied in Frankfurt)
 
 Canonical Budget rows cannot be created, detached, reclassified or have their commitment overridden
 by ordinary authenticated Budget writes. Manual items cannot acquire relationship links. The sync

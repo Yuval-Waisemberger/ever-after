@@ -7,7 +7,7 @@ one calm workspace: “Your wedding. One place. Less chaos.” Introduce Couple,
 
 ## 1:00–2:00 — Requirements and architecture
 
-Show the product specification/course brief, then the architecture: Next.js on Vercel, Supabase
+Show the separately submitted final Product Specification, then the architecture: Next.js on Vercel, Supabase
 PostgreSQL/Auth/RLS/Storage, Server Components for reads, Server Actions for mutations, and a small
 server-only Assistant provider. Emphasize one source of truth and RLS as the real authorization layer.
 
@@ -22,10 +22,12 @@ server-only Assistant provider. Emphasize one source of truth and RLS as the rea
 7. Save/consider two photographers and ask the Assistant to compare them.
 8. Point out source labels: Couple data, Internal vendor database, or General guidance.
 9. Book one vendor; show My Vendors and Dashboard update.
-10. Add the vendor expense/deposit in Budget and show committed, paid, available, upcoming payment.
+10. Enter an agreed price in the booking flow; show the database-created canonical Budget commitment.
+    Record an actual payment separately in Budget and explain Paid versus Available.
 11. Ask “What tasks do we have this week?” and show the answer uses actual Task data.
 
-If the test date is within seven days, show the Wedding Week emphasis. Keep normal navigation visible.
+Show Guest List/RSVP aggregate counts. Demonstrate the local date-area countdown preview: final week,
+Tomorrow, Today is the day and Just married. There is no operational Wedding Week dashboard.
 
 ## 8:30–10:00 — Vendor and public experiences
 
@@ -48,7 +50,7 @@ pagination growth path.
 
 ## 13:30–15:00 — Limitations and next steps
 
-Be explicit: no paid AI, no automatic Assistant writes, no real payments, no RSVP/seating/calendar/
+Be explicit: real external AI/live research and Vercel deployment are still pending; no paid AI, no automatic Assistant writes, no payment processing, no seating/calendar/
 WhatsApp, and Helper access remains second priority. Explain the confirmed-action design and secure
 temporary Helper link as future work. Finish with the live Vercel URL and GitHub URL once available.
 

@@ -1,6 +1,6 @@
 # Test Specification
 
-> Phase 1A Agent regression coverage and validation scope: see [AI Agent Specification](AI_AGENT_SPEC.md#phase-1a-validation) and tests/assistant/.
+> Current Assistant foundation coverage and boundaries: see [AI Agent Specification](AI_AGENT_SPEC.md) and tests/assistant/.
 
 ## Objectives
 
@@ -16,18 +16,19 @@ when it actually ran in the relevant environment.
 | Budget | projected/committed/paid/available formulas, payment ordering | `tests/domain/budget.test.ts` |
 | Tasks | open/due-this-week/completed percentage, empty list | `tests/domain/tasks.test.ts` |
 | Timeline | relative grouping, absolute dates without wedding date, no duplication | `tests/domain/timeline.test.ts` |
-| Wedding Week | inclusive final seven days and out-of-window behavior | `tests/domain/wedding-week.test.ts` |
+| Wedding countdown | normal/final-week/tomorrow/day/post-wedding states; development preview only | `tests/domain/wedding-week.test.ts` |
 | Vendor profile | deterministic completion percentage/next steps | `tests/domain/vendor-profile.test.ts` |
 | Local Assistant | grounded task answer and missing-context/general behavior | `tests/assistant/local-provider.test.ts` |
 | Marketplace seed | taxonomy/counts, deterministic IDs, ranges, review consistency, local images, idempotent SQL shape | `tests/seed/marketplace-dataset.test.ts` |
 
 Vitest discovers only `tests/**/*.test.ts(x)` so Playwright specs are not accidentally executed by a
-second runner. The current suite has 26 tests across nine files.
+second runner. Use the current Vitest runner output for exact test totals; historical phase counts are not the
+current suite size. Current commands and fixture/database entry points are documented in README.
 
 ## Browser tests
 
 `e2e/public.spec.ts` verifies the logged-out entry paths, seeded guest marketplace/profile flow,
-pagination/filtering, successful browser decoding for all 162 unique pooled WebPs (including named
+pagination/filtering, successful browser decoding for all 291 unique pooled/dedicated WebPs (including named
 representatives from 15 requested subcategories), and the private Couple-route redirect without configuration.
 Additional connected-environment Playwright
 cases should cover:
@@ -38,10 +39,10 @@ cases should cover:
 4. Task create/edit/status/date/delete updates both Tasks and Timeline.
 5. Couple searches/filters vendors, views a public profile, and changes relationship statuses.
 6. Two considered photographers are compared by the Assistant using stored facts.
-7. Booking appears in My Vendors and Dashboard; explicit Budget entry and payments calculate correctly.
+7. Booking appears in Our Vendors and Dashboard; database-owned canonical commitments and actual payments calculate correctly.
 8. Vendor registers, edits only its profile, uploads/removes an image, and sees review summaries.
 9. Guest can browse published profiles but receives no private workspace data.
-10. Wedding Week treatment activates within seven days and normal navigation remains available.
+10. Only the existing date area changes during the final week; normal Dashboard cards remain once each.
 
 ## Database/RLS tests
 
@@ -55,11 +56,12 @@ Couple B, Vendor A, and Vendor B sessions. Verify:
 - status/review uniqueness, price/capacity bounds, rating ranges, and image-source checks fail safely;
 - a forged budget item, payment, review, or assistant-thread parent ID is rejected;
 - storage upload/delete is owner-folder-only;
-- cascade/SET NULL deletion behavior preserves required financial history.
+- canonical deletion/reparenting protections and RESTRICT foreign keys preserve financial history.
 
-`supabase/tests/rls.test.sql` contains a structural pgTAP starting point for schema/RLS presence. The
-identity-based policy matrix requires a running Supabase test environment and must be completed/run
-after credentials and migrations are configured; it is not claimed as executed locally here.
+`supabase/tests/rls.test.sql` checks schema/RLS and the final policy inventory, including role
+restrictions and both media buckets. The maintained isolated PostgreSQL security runner executes
+the actual migrations and an identity-based SQL policy matrix. Supabase JWT and Storage HTTP
+adversarial verification remain Final Production QA; SQL stubs do not replace those layers.
 
 ## Validation and error cases
 
@@ -80,24 +82,15 @@ after credentials and migrations are configured; it is not claimed as executed l
 - Test mobile widths, tablet, desktop, long names, empty states, and over-budget state.
 - Verify setup can be skipped and resumed; booked categories remain browsable.
 - Verify no fake Dashboard data and no inaccurate relative timeline without wedding date.
-- Execute the full 19-step presentation demo flow from the specification.
+- Execute the current presentation flow in PRESENTATION_OUTLINE.md; the final Product Specification is submitted separately.
 - Inspect browser network/server logs for accidental secrets or private over-fetching.
 
-## Commands and current result record
+## Running maintained validation
 
-| Check | Command | Result on 2026-09-03 |
-|---|---|---|
-| TypeScript | `pnpm typecheck` | passed |
-| ESLint | `pnpm lint` | passed with zero warnings |
-| Seed artifacts | `pnpm seed:check` | passed: 432 vendors, 2,380 reviews, 162 referenced WebPs |
-| Unit/provider | `pnpm test` | passed, 26/26 across nine files |
-| Production build | `pnpm build` | passed |
-| Public Playwright | `pnpm test:e2e` | passed, 6/6; all 162 unique WebPs decoded and visible covers checked in 15 subcategories |
-| Manual local browser | local marketplace, filtered results, page 2, and vendor profile | passed: preview banner; daytime/evening venue photos and profile decoded; Drone + South returned 9; videographer page 2 returned 10 |
-| RLS integration | Supabase local test command | not run; project not connected/migrated |
-
-Before submission, rerun every command in a clean checkout with configured test environment, run the
-identity policy matrix, and replace pending entries with dated evidence.
+README documents the normal-app E2E command, all five fixture-specific Playwright configs,
+the two explicit PostgreSQL runners, pgTAP requirements, unit tests and build commands.
+Use current runner output for totals. Dated phase records below describe their original scope,
+not the size or deployment status of the current suite.
 
 ## Assistant READ-tool validation — Phase 1B
 
@@ -253,7 +246,7 @@ tools needed sandbox escalation. No package installation or external service was
 No Supabase data/schema/RLS/migration/seed mutation, commit, push or deployment occurred.
 
 
-## Booked Vendor → Budget final architecture (050003 pending application)
+## Booked Vendor → Budget final architecture (050003 applied in Frankfurt)
 
 - `tests/domain/budget.test.ts`: per-item max(commitment, paid), unknown/negative Available,
   preserved paid spending after unbooking, rebooking schedules, independent reconciliation flags,
@@ -293,7 +286,7 @@ Production build passed with Next.js 16.3.4 using `next build --webpack`, includ
 `Cannot find module 'node:net'`; parent/child Node diagnostics showed the bundled Node v24 runtime.
 Package scripts were not changed. Build process-only Supabase settings pointed to an unreachable
 localhost port, never Frankfurt. `git diff --check` and untracked-file whitespace/conflict-marker
-checks passed. No PostgreSQL engine was available (Docker daemon stopped); migration tests are
+checks passed. During the initial implementation run no PostgreSQL engine was available; migration tests were
 source contracts only, not SQL execution, concurrency proof or live RLS QA. No migration was applied.
 
 ## Wedding Setup → real vendor relationships
@@ -473,3 +466,35 @@ Final Production QA retains full Supabase JWT adversarial and Storage HTTP bound
 Later Cleanup retains narrow Upcoming titles, normal Budget overdue-payment wording, and
 non-security feedback handling in older bookmark/review/media actions. No seeds, live QA records,
 other migrations, migration-history changes, pushes or deployments occurred during closeout.
+
+## Repository cleanup validation — 2026-09-08
+
+Cleanup preserved runtime source, scripts, migrations, seed/JSON, packages, active tests/fixtures and
+all public runtime assets byte-for-byte. Only documentation/ignore rules, approved historical-file
+removals and stale RLS policy expectations changed. Reference originals remain ignored locally.
+
+- TypeScript, whole-repository ESLint, seed consistency and production webpack build passed.
+- All 762 Vitest cases across 53 files passed across the full run and focused image-suite rerun.
+  The first image-inventory run exceeded its five-second limit under concurrent load; a 30-second
+  command-line budget passed without editing assertions. Initial sandbox startup was retried with
+  local subprocess permission.
+- All 107 maintained Playwright cases passed: normal app 62, Assistant 15, Budget 7, Setup 10,
+  Tasks 5 and countdown 8. One Task case and two countdown widths initially exceeded the 30-second
+  whole-test timeout during the build; unchanged cases passed with a 90-second runner timeout.
+  Normal-app tests used a credential-free production build; fixture suites used isolated hosts.
+  All 291 Marketplace assets decoded, and all 64 dedicated newer-vendor card/profile mappings passed.
+- Both maintained PostgreSQL runners passed against disposable PostgreSQL 17.11. Security executed
+  179 assertions. The Task runner passed its enum/order/preservation/CRUD/rollback checks on retry
+  after a transient container-startup race. Containers and volumes were removed.
+- All 45 assertions in the repaired RLS SQL test matched the actual isolated PostgreSQL catalog.
+  Native pgTAP was unavailable in the plain postgres:17 image: this was direct assertion-content
+  verification, not native pgTAP execution. Both pgTAP SQL files remain maintained for an isolated
+  Supabase-compatible test environment with that extension.
+- No active reference to removed files, missing fixture, credential-pattern finding or changed
+  protected runtime file was found. Whitespace checking passed. No Frankfurt connection/mutation,
+  live QA records, push or deployment was part of cleanup.
+
+Remaining final QA: native pgTAP runner integration, full Supabase JWT adversarial checks and Storage
+HTTP boundaries. Later cleanup retains narrow Upcoming titles, normal Budget overdue-payment wording
+and older non-security bookmark/review/media feedback. The isolated Task runner's transient startup
+readiness race is documented for future test-runner maintenance; no runner redesign was made here.

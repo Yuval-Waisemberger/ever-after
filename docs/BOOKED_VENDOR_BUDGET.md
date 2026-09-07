@@ -1,8 +1,8 @@
-# Booked Vendor → Budget: reviewed application plan
+# Booked Vendor → Budget: current architecture
 
-Implementation prepared locally; **050003 has not been applied to Frankfurt**. No automatic
-migration runner or live test is part of this change. Earlier SQL Editor applications are not
-recorded in a reliable migration ledger.
+**050003 is applied successfully to Frankfurt.** Isolated PostgreSQL execution, legacy adoption,
+concurrency/rollback checks and authenticated read-only application verification passed before the
+approved checkpoint. Earlier SQL Editor applications are not recorded in a reliable migration ledger.
 
 ## Ownership and retained history
 
@@ -64,11 +64,13 @@ category, notes, commitment and payment history are preserved. Missing eligible 
 if a refreshed preflight establishes any, are inserted without payments. Partial uniqueness ensures
 one item per non-null relationship. New linked manual items are prohibited.
 
-Known preflight: 1 wedding, 3 relationships, 1 priced booking, 1 linked expense, 1 payment, no duplicate
+Historical application preflight: 1 wedding, 3 relationships, 1 priced booking, 1 linked expense, 1 payment, no duplicate
 groups. Immediately after adopting that snapshot, Total ₪170,000 / Committed ₪100,000 / Paid ₪100,000 /
-Available ₪70,000 must remain unchanged. No specific live IDs or secrets are embedded in the migration.
+Available ₪70,000 were preserved. No specific live IDs or secrets are embedded in the migration.
 
-## Application sequence — requires separate approval
+## Application sequence — historical cutover and future fresh-database guidance
+
+This sequence is complete for Frankfurt; do not reapply it. A future database requires its own review.
 
 1. Review SQL and run a disposable PostgreSQL rehearsal, including actual two-connection concurrency
    and authenticated/cross-Couple RLS checks. Local source-contract tests do not prove these behaviors.
