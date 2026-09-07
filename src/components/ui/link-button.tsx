@@ -6,11 +6,9 @@ type LinkButtonProps = ComponentProps<typeof Link> & {
 };
 
 const toneClasses = {
-  primary:
-    "border-wine bg-wine text-white hover:border-wine-dark hover:bg-wine-dark",
-  secondary:
-    "border-line bg-paper text-ink hover:border-gold hover:bg-paper-muted",
-  quiet: "border-transparent bg-transparent text-wine hover:bg-wine/5",
+  primary: "ea-button--primary",
+  secondary: "ea-button--secondary",
+  quiet: "ea-button--quiet",
 };
 
 export function LinkButton({

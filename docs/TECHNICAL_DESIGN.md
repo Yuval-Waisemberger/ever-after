@@ -1,5 +1,7 @@
 # Detailed Technical Design
 
+Shared presentation primitives, route/loading boundaries and later page ownership are mapped in [Visual and motion foundation](VISUAL_FOUNDATION.md). Page-specific final design work remains separate.
+
 > Agent architecture: [AI Agent Specification](AI_AGENT_SPEC.md) is authoritative for the completed Agent foundation and bilingual UX contract and future Agent direction.
 
 ## 1. Product boundary

@@ -31,7 +31,7 @@ export function FormField({ label, error, hint, id, className = "", ...props }: 
         {isPassword ? (
           <button
             type="button"
-            className="absolute inset-y-0 right-1 grid min-h-11 min-w-11 place-items-center text-ink-soft transition hover:text-wine"
+            className="ea-icon-button absolute inset-y-0 right-1"
             onClick={() => setPasswordVisible((visible) => !visible)}
             aria-label={passwordVisible ? `Hide ${label.toLowerCase()}` : `Show ${label.toLowerCase()}`}
             aria-pressed={passwordVisible}

@@ -1,24 +1,24 @@
-/* Public-only art direction. Private workspace tokens and components stay unchanged. */
+/* Public art direction; shared palette and motion roles come from globals.css. */
 .public-theme {
-  --public-ivory: #fcf9f6;
-  --public-ink: #50463d;
-  --public-muted: #6b6056;
-  --public-gold: #a67d50;
-  --public-wine: #7a2b3f;
-  --public-blush: #f5ede9;
-  --public-blush-accent: #ddb3ae;
-  --public-error-tint: #f7e3df;
-  --public-line: #ddb3ae;
+  --public-ivory: var(--canvas);
+  --public-ink: var(--ink);
+  --public-muted: var(--ink-soft);
+  --public-gold: var(--gold);
+  --public-wine: var(--wine);
+  --public-blush: var(--blush);
+  --public-blush-accent: var(--blush-accent);
+  --public-error-tint: var(--danger-tint);
+  --public-line: var(--blush-accent);
   color: var(--public-ink);
   background: var(--public-ivory);
-  font-family: "Aptos", "Segoe UI", Arial, sans-serif;
+  font-family: var(--font-body);
 }
 .public-theme :is(a, button, summary, input, select):focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 5px;
 }
 .public-theme :is(h1, h2, h3) {
-  font-family: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  font-family: var(--font-editorial);
   font-weight: 400;
 }
 .public-header { position: relative; z-index: 20; border-bottom: 1px solid var(--public-blush-accent); background: var(--public-ivory); }
@@ -29,12 +29,12 @@
 .public-desktop-nav { display: flex; flex: 1; align-items: center; justify-content: space-between; }
 .public-nav-pages, .public-nav-account { display: flex; align-items: center; gap: 32px; }
 .public-nav-pages { margin: 0 auto; padding-left: 36px; gap: 46px; }
-.public-desktop-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; letter-spacing: .11em; text-transform: uppercase; transition: color 160ms; }
+.public-desktop-nav a { display: inline-flex; align-items: center; min-height: 44px; font-size: 12px; letter-spacing: .11em; text-transform: uppercase; transition: color var(--motion-hover) var(--ease-standard); }
 .public-desktop-nav a:hover { color: var(--public-wine); }
 .public-header--authenticated .public-nav-pages { gap: clamp(18px, 2.2vw, 38px); padding-left: 18px; }
 .public-header--authenticated .public-nav-account { gap: 18px; }
 .public-header--authenticated .public-desktop-nav a { font-size: 11px; letter-spacing: .09em; }
-.public-button { display: inline-flex; justify-content: center; align-items: center; min-height: 50px; border: 1px solid; border-radius: 5px; padding: 13px 28px; font-size: 14px; font-weight: 500; letter-spacing: .15em; text-transform: uppercase; text-decoration: none; transition: background-color 160ms, color 160ms; }
+.public-button { display: inline-flex; justify-content: center; align-items: center; min-height: 50px; border: 1px solid; border-radius: var(--control-radius); padding: 13px 28px; font-size: 14px; font-weight: 500; letter-spacing: .15em; text-transform: uppercase; text-decoration: none; }
 .public-desktop-nav .header-signup { min-height: 38px; padding: 9px 18px; border-color: var(--public-wine); color: var(--public-wine); }
 .public-desktop-nav .header-signup:hover { background: var(--public-blush); }
 .public-mobile-menu { display: none; }
@@ -54,8 +54,8 @@
 .hero-description { margin: 18px auto 0; font-size: clamp(17px, 1.3vw, 20px); font-weight: 350; line-height: 1.6; max-width: 590px; }
 .hero-actions { display: flex; justify-content: center; gap: 25px; margin-top: 38px; }
 .hero-actions .public-button { min-width: 234px; }
-.hero-primary { color: #fffaf3; background: var(--public-wine); border-color: var(--public-wine); }
-.hero-primary:hover { background: #5f1f30; border-color: #5f1f30; }
+.hero-primary { color: var(--cream); background: var(--action-primary); border-color: var(--public-wine); box-shadow: inset 0 1px rgb(255 250 243 / 12%), 0 2px 4px rgb(73 62 56 / 8%); }
+.hero-primary:hover { background: var(--action-primary-hover); border-color: var(--wine-dark); }
 .hero-secondary { color: #fffaf3; background: rgb(122 43 63 / 16%); border-color: var(--public-blush-accent); }
 .hero-secondary:hover { background: var(--public-blush); color: var(--public-wine); }
 .hero-vendor { margin: 29px 0 0; font-size: 16px; line-height: 1.6; }

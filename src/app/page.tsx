@@ -18,7 +18,7 @@ export default async function HomePage() {
   return (
     <div className="public-theme landing-page">
       <PublicHeader />
-      <main id="main-content">
+      <main id="main-content" className="ea-page-transition">
         <section className="landing-hero" aria-labelledby="hero-title">
           {/* Keep a future approved video swap confined to this media layer. */}
           <div className="hero-media" aria-hidden="true">
