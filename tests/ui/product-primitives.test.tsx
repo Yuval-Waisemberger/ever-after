@@ -56,8 +56,8 @@ describe("Ever After shared presentation contracts", () => {
       </div>,
     ));
     const pills = [...document.querySelectorAll(".ea-status-pill")];
-    expect(pills.map((pill) => pill.textContent)).toEqual(["Overdue 1 day", "Paid"]);
-    expect(pills[0]?.classList.contains("ea-status-pill--danger")).toBe(true);
-    expect(pills[1]?.classList.contains("ea-status-pill--success")).toBe(true);
+    expect(pills.map((pill) => pill.textContent)).toEqual(["Not started", "Overdue 1 day", "Paid"]);
+    expect(pills[1]?.classList.contains("ea-status-pill--danger")).toBe(true);
+    expect(pills[2]?.classList.contains("ea-status-pill--success")).toBe(true);
   });
 });

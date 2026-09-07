@@ -260,3 +260,19 @@ Unavailable/capped reads are explicit. The Assistant registry remains ten READ t
 are distinguished from actual bookings. No external provider, language service or research is added.
 QA uses mocked queries and isolated localhost fixtures with external requests blocked; no Frankfurt
 Setup/vendor/financial data is used for mutation QA.
+
+## Task waiting status boundaries (2026-09-07)
+
+Waiting is a user-selected enum, not vendor authorization or an inferred vendor link. Server actions
+retain authenticated Couple role checks and server-resolved wedding ownership. Task ID plus owned
+wedding ID scopes every edit/status/delete; database RLS remains defense in depth. Invalid enums,
+UUIDs, read/write failures and zero matching rows cannot produce false success. Database errors are
+replaced with safe messages. Draft fields survive validation failure; no new public endpoint exists.
+Assistant task context still excludes notes and other private fields, and the ten-tool allowlist
+remains read-only. No external AI/language service, research or credentials were introduced.
+Local SQL tests use a network-isolated disposable Docker PostgreSQL container, no published ports,
+synthetic records and no live credentials. Public schema is real; the minimal Auth stub is not
+Supabase Auth/RLS integration validation. Mocked application tests also exercise actual role and
+ownership resolution. Implementation QA did not contact Frankfurt. The subsequent authorized live
+closeout applied only the approved enum addition after read-only preflight. Task row fingerprints,
+ownership constraints, indexes and RLS were unchanged; authenticated smoke checks made no data writes.

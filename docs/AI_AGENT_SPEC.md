@@ -178,7 +178,7 @@ The shared Budget helper's legacy `upcomingPayments` property contains active un
 - Undated: unpaid, with no due date; never assumed overdue or next.
 - Paid records are excluded upstream; no unpaid records produces empty groups.
 
-Today uses the `Asia/Jerusalem` calendar to avoid deployment-server timezone changes. Due today is upcoming. This is an explicit Assistant calendar choice; existing unrelated task/Budget helpers are unchanged. Tests inject time, including an Israel/UTC date boundary.
+Today uses the `Asia/Jerusalem` calendar to avoid deployment-server timezone changes. Due today is upcoming. This calendar policy is now shared with Task/Dashboard/deadline domain helpers. Tests inject time, including an Israel/UTC date boundary.
 
 An overdue-only case reports overdue payments and no upcoming dated payment. Mixed cases report both groups. Undated obligations are called out. Budget arithmetic remains in the existing domain helper: committed is the sum of commitments, paid is the sum of paid amounts, available is total budget minus the sum of each item’s max(active commitment, actual paid), and an unknown total produces unknown available budget. The Agent never asks a model to determine authoritative date classification or totals.
 
@@ -258,7 +258,7 @@ Ever After owns `src/lib/assistant/tools/registry.ts`. Its exact allowlist conta
 | Tool | Input (all optional unless stated) | Validated data output and bounds |
 | --- | --- | --- |
 | `get_wedding_summary` | `{}` | Date, guest estimate, area, event type, styles, priorities, total budget, setup status, legacy venue state/name, details-later category declarations and explicit derived `bookingStates`. One planning record; null remains unknown. |
-| `list_tasks` | `view`: all (default), open, completed, overdue, due_soon; exact `status`, `priority`; `page`, `limit` | Task ID/title/category/due date/priority/status, pagination, as-of date. Default 25, maximum 50. Filters intersect; open includes in-progress. Due soon is today through seven days ahead inclusive; overdue excludes completed. |
+| `list_tasks` | `view`: all (default), open, completed, overdue, due_soon; exact `status`, `priority`; `page`, `limit` | Task ID/title/category/due date/priority/status, pagination, as-of date. Default 25, maximum 50. Filters intersect; open includes in-progress and waiting-on-vendor tasks. Due soon is today through seven days ahead inclusive; overdue excludes completed. |
 | `get_timeline_summary` | `page`, `limit`, `includeCompleted` (false) | A page of dated Tasks grouped as overdue, due_soon (0–7 days), upcoming (8–30), later (31+), optionally completed. Existing relative timeline label per task when wedding date exists; otherwise null. Default 25, maximum 50 tasks across all groups, not per group. |
 | `get_budget_summary` | `{}` | `totalBudgetMinor`, `projectedMinor`, `committedMinor`, `paidMinor`, `availableMinor`, `remainingCommittedMinor`. Complete application-calculated totals only. |
 | `get_upcoming_payments` | `limitPerGroup` | Unpaid `overdue`, `upcoming`, `undated` arrays, each default 10/max 20, separate `hasMore` flags and as-of date. Each entry has ID, payment label, amount, due date, expense label and category. |
@@ -373,3 +373,18 @@ not notes/contacts. The existing Local provider still describes only actual rela
 The roadmap uses fresh vendor evidence and the shared category mapping; stale declarations beside
 unbooked relationships require review. Guest context remains aggregate-only. The ten internal
 READ tools, provider restrictions and non-live research remain unchanged.
+
+## Waiting on vendor task semantics (2026-09-07)
+
+Task contracts use the central four-status definition, including `waiting_on_vendor`. It remains
+incomplete, including in `list_tasks` view=open and due/overdue filtering. Tool names, bounds,
+authorization and privacy are unchanged; notes never enter routine provider context.
+Roadmap signals retain factual reason/deadline bucket/priority and add `taskAction`: `follow_up`
+for waiting, `complete_work` otherwise. An overdue waiting item still has task_overdue/high priority;
+future reasoning should suggest checking a response or following up about the recorded title,
+not repeating the Couple's completed side. No specific vendor is inferred.
+Local deterministic English/Hebrew compatibility supports waiting and overdue subsets; explicit
+payment/budget questions retain financial routing. Routine week summaries label waiting titles as
+follow-up work. Empty subsets reflect successful reads; the existing context-unavailable boundary
+remains in force. This is not a real LLM, semantic task rewrite, new tool or external AI integration.
+All calendar comparisons now share the domain Asia/Jerusalem policy used by Tasks and Dashboard.

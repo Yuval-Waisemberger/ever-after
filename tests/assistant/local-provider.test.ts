@@ -98,3 +98,29 @@ describe("deterministic payment dates", () => {
     expect(overdueOnly.text).toContain("no upcoming dated payment");
   });
 });
+
+describe("waiting and overdue subsets", () => {
+  it.each(["What are we waiting on?", "על מה אנחנו מחכים?"])("uses waiting facts and follow-up wording: %s", async message => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-07T12:00:00Z"));
+    const context = assistantContext();
+    context.tasks = [{ id: "w", title: "Final song list", dueDate: "2026-09-06", status: "waiting_on_vendor", priority: "high" }, { id: "x", title: "Other task", dueDate: "2026-09-06", status: "open", priority: "low" }];
+    const result = await provider.respond({ message, context });
+    expect(result.text).toContain("Final song list"); expect(result.text).not.toContain("Other task");
+    expect(result.text).toMatch(/Follow up|מעקב/);
+  });
+  it.each(["What tasks are overdue?", "אילו משימות באיחור?"])("returns only overdue incomplete tasks: %s", async message => {
+    vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-07T12:00:00Z"));
+    const context = assistantContext(); context.tasks = [
+      { id: "w", title: "Late task", dueDate: "2026-09-06", status: "waiting_on_vendor", priority: "high" },
+      { id: "d", title: "Finished task", dueDate: "2026-09-06", status: "completed", priority: "high" },
+      { id: "f", title: "Future task", dueDate: "2026-09-08", status: "open", priority: "high" },
+    ];
+    const result = await provider.respond({ message, context });
+    expect(result.text).toContain("Late task"); expect(result.text).not.toMatch(/Finished task|Future task/);
+  });
+});
+
+it("does not route Guest awaiting responses to waiting Tasks", async () => {
+  const response = await provider.respond({ message: "How many on our guest list are awaiting a response?", context: assistantContext() });
+  expect(response.evidence).toEqual([{ kind: "COUPLE_DATA", section: "guestList" }]);
+});

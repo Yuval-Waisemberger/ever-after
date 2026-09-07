@@ -1,12 +1,9 @@
+import { israelCalendarDate } from "@/lib/domain/calendar";
+export { israelCalendarDate } from "@/lib/domain/calendar";
 type UnpaidPayment = { amountMinor: number; dueDate: string | null };
 
 // Date-only deadlines use the Israel calendar, independent of server timezone.
 // Due today is upcoming, never overdue. Inputs contain only unpaid records.
-export function israelCalendarDate(now = new Date()) {
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Jerusalem", year: "numeric", month: "2-digit", day: "2-digit",
-  }).format(now);
-}
 
 export function classifyUnpaidPayments<T extends UnpaidPayment[]>(payments: T, now = new Date()) {
   const today = israelCalendarDate(now);

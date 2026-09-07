@@ -184,3 +184,10 @@ it("keeps execution allowlists READ-only, research disabled and the new layer fr
   expect(Object.values(futureResearchContracts).every((contract) => contract.live === false && !("execute" in contract))).toBe(true);
   for (const file of readdirSync("src/lib/assistant/planning")) expect(readFileSync(`src/lib/assistant/planning/${file}`, "utf8")).not.toMatch(/\.insert\(|\.upsert\(|\.update\(|\.delete\(|\bfetch\(|from ["'](?:openai|@anthropic)|executeAssistantReadTool\(/);
 });
+
+it("waiting produces a follow-up signal while preserving overdue urgency", () => {
+  const input = sources(); input.tasks.result.data.tasks[0].status = "waiting_on_vendor";
+  const signal = buildPlanningState(input, {}, now).signals.find(s => s.id.startsWith("task:"));
+  expect(signal).toMatchObject({ taskAction: "follow_up", reason: "task_overdue", priority: "high", bucket: "immediate" });
+  expect(signal).not.toHaveProperty("vendorId");
+});

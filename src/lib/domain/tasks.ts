@@ -1,6 +1,7 @@
 import { calendarDayDifference, deadlineLabel } from "./date-status";
 
-export type TaskStatus = "open" | "in_progress" | "completed";
+import { TASK_STATUS_LABELS, type TaskStatus } from "./task-status";
+export { TASK_STATUSES, TASK_STATUS_LABELS, type TaskStatus } from "./task-status";
 export type TaskPriority = "low" | "medium" | "high";
 
 export type TaskSummary = {
@@ -38,15 +39,11 @@ export function calculateTaskSummary(
 export function taskDisplayStatus(
   task: { status: TaskStatus; dueDate: string | null },
   today = new Date(),
-): { kind: "completed" | "overdue" | "due_soon" | "in_progress" | "not_started"; label: string } {
-  if (task.status === "completed") return { kind: "completed", label: "Completed" };
-  if (task.dueDate) {
-    const deadline = deadlineLabel(task.dueDate, today);
-    if (deadline.kind === "overdue") return { kind: "overdue", label: deadline.label };
-    if (deadline.kind === "due_soon") return { kind: "due_soon", label: deadline.label };
-  }
-  if (task.status === "in_progress") return { kind: "in_progress", label: "In progress" };
-  return { kind: "not_started", label: "Not started" };
+) {
+  return {
+    workflow: { kind: task.status, label: TASK_STATUS_LABELS[task.status] },
+    deadline: task.status !== "completed" && task.dueDate ? deadlineLabel(task.dueDate, today) : null,
+  };
 }
 
 export function selectUpcomingTasks<T extends {
@@ -74,19 +71,29 @@ export function selectUpcomingTasks<T extends {
     .slice(0, limit);
 }
 
-function startOfUtcDate(value: string | Date): Date {
-  const date = typeof value === "string" ? new Date(`${value.slice(0, 10)}T00:00:00Z`) : value;
-  return new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate()));
+export function isDueWithinDays(dueDate: string | null, today: Date, days: number): boolean {
+  if (!dueDate) return false;
+  const difference = calendarDayDifference(dueDate, today);
+  return difference >= 0 && difference <= days;
 }
 
-export function isDueWithinDays(
-  dueDate: string | null,
-  today: Date,
-  days: number,
-): boolean {
-  if (!dueDate) return false;
-  const start = startOfUtcDate(today);
-  const due = startOfUtcDate(dueDate);
-  const difference = Math.round((due.getTime() - start.getTime()) / 86_400_000);
-  return difference >= 0 && difference <= days;
+export function filterTasks<T extends { status: TaskStatus; category: string | null }>(tasks: T[], status: TaskStatus | "all" | "incomplete" = "all", category = ""): T[] {
+  return tasks.filter(task => (!category || task.category === category) &&
+    (status === "all" || (status === "incomplete" ? task.status !== "completed" : task.status === status)));
+}
+
+// Operational selection only: no records are created and no vendor is inferred.
+export function selectWeddingWeekTasks<T extends { id: string; status: TaskStatus; dueDate: string | null; priority: TaskPriority }>(tasks: T[], weddingDate: string | null, today: Date): T[] {
+  const weddingDays = weddingDate ? calendarDayDifference(weddingDate, today) : null;
+  const rank = { high: 0, medium: 1, low: 2 };
+  return [...new Map(tasks.filter(task => {
+    if (task.status === "completed") return false;
+    const days = task.dueDate ? calendarDayDifference(task.dueDate, today) : null;
+    return task.status === "waiting_on_vendor" || task.priority === "high" ||
+      (days != null && (days <= 0 || (weddingDays != null && days <= weddingDays)));
+  }).map(task => [task.id, task])).values()].sort((a, b) => {
+    const overdue = (task: T) => task.dueDate != null && calendarDayDifference(task.dueDate, today) < 0;
+    return Number(overdue(b)) - Number(overdue(a)) || rank[a.priority] - rank[b.priority] ||
+      (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.id.localeCompare(b.id);
+  });
 }

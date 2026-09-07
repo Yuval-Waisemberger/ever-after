@@ -2,7 +2,7 @@ import { classifyUnpaidPayments } from "./payments";
 import type { AgentEvidence } from "./evidence";
 import { formatIls } from "@/lib/domain/budget";
 import { calculateRecommendation } from "@/lib/domain/recommendation";
-import { isDueWithinDays } from "@/lib/domain/tasks";
+import { localTaskSubset, localTaskSummary } from "./local-task-summary";
 import type { AssistantRequest, AssistantResponse, WeddingAssistantProvider } from "./types";
 import { assistantCopy, selectResponseLanguage } from "./language";
 import { hebrewLocalSummary, localPrompt, researchClarification } from "./local-bilingual";
@@ -64,6 +64,9 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
       };
     }
 
+    const taskSubset = localTaskSubset(prompt);
+    if (taskSubset) return answer(localTaskSummary(context.tasks, language, taskSubset), [{ kind: "COUPLE_DATA", section: "tasks" }]);
+
     if (language === "he") return hebrewLocalSummary(prompt, context);
 
     if (/guest list|guest count|rsvp|attend|not invited|already invited/.test(prompt)) {
@@ -89,10 +92,7 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
     }
 
     if (/this week|due|task|still need|to do/.test(prompt)) {
-      const open = context.tasks.filter((task) => task.status !== "completed");
-      const thisWeek = open.filter((task) => isDueWithinDays(task.dueDate, new Date(), 7));
-      const urgent = thisWeek.length ? ` Due in the next seven days: ${humanList(thisWeek.map((task) => task.title))}.` : " Nothing with a date is due in the next seven days.";
-      return answer(`You have ${open.length} open ${open.length === 1 ? "task" : "tasks"}.${urgent}`, [{ kind: "COUPLE_DATA", section: "tasks" }]);
+      return answer(localTaskSummary(context.tasks, language, null), [{ kind: "COUPLE_DATA", section: "tasks" }]);
     }
 
     if (/booked|which vendors|our vendors/.test(prompt) && !/compare/.test(prompt)) {

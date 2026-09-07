@@ -394,3 +394,39 @@ Confirm booking. Inline pagination is removed; the server search retains its exi
 bound 1–50 and stable name/ID order,
 explicit service filter and a restricted 80-character name/city search. No reviews/contacts leave the
 picker action. Unclassified Booked vendors cause unknown category gaps rather than invented matches.
+
+## Task workflow refinement (2026-09-07)
+
+`domain/task-status.ts` owns the four stored statuses: `open` (Not started), `in_progress`,
+`waiting_on_vendor`, `completed`. Waiting is an explicit Couple choice: their current part is done,
+and vendor-side response/delivery is outstanding. No vendor identity or foreign key is inferred.
+Any incomplete status can complete directly; quick reopen selects `open`; Edit allows any status.
+
+Workflow and date urgency are independent. Tasks and Timeline show both pills. Completed tasks
+have no overdue pill. Overdue means incomplete and due before the current Israel calendar date;
+due soon includes today through +7, excluding +8. `domain/calendar.ts` defines Asia/Jerusalem today;
+`date-status.ts`, Tasks, Dashboard, Timeline deadlines, Assistant and roadmap share it. Date-only
+values remain calendar dates; UTC arithmetic between those dates avoids DST duration errors.
+The payment classifier re-exports the shared calendar helper for existing consumers.
+
+Task forms use central options, visible field errors, unique field IDs and controlled drafts.
+Rejected submissions preserve entered values. Quick actions display safe failures. Save/update,
+quick status and delete inspect database errors and returned IDs; zero affected rows never mean
+success. Every mutation resolves the owned wedding and scopes updates/deletes by task AND wedding.
+Refresh is targeted to `/tasks`, `/wedding`, `/wedding/timeline`, `/assistant`.
+
+Timeline still derives from dated tasks and retains waiting in its normal timing group. Undated
+waiting remains in Unscheduled Tasks; wedding-date edits never alter task dates. Dashboard still
+has Open, Due this week, Completed; Open means all incomplete statuses, including waiting.
+The status filter's Not started is exact `open`; Assistant `view=open` is broader incomplete.
+Category and workflow filters intersect.
+
+`selectWeddingWeekTasks` is a pure, deduplicated selector: incomplete overdue/today/through wedding
+day, high-priority (including undated), or waiting tasks. Overdue sorts first, then priority/date/ID.
+With no wedding date it includes overdue/today/high-priority/waiting without inventing an end date.
+No operational Wedding Week UI or automatic status inference is introduced.
+
+Migration `202609070001_task_waiting_on_vendor.sql` adds only the enum value before `completed`.
+The reviewed file was applied to Frankfurt on 2026-09-07 after read-only preflight; all four existing
+Task rows were preserved. Enum DDL must commit before any writes using the new value. Existing rows,
+indexes, ownership, RLS, columns and tables are unchanged. No backfill or blind `db push` is needed.

@@ -1,3 +1,4 @@
+import { israelCalendarDate } from "./calendar";
 const DAY_MS = 86_400_000;
 
 function utcDate(value: string | Date): Date {
@@ -6,7 +7,7 @@ function utcDate(value: string | Date): Date {
 }
 
 export function calendarDayDifference(date: string, today = new Date()): number {
-  return Math.round((utcDate(date).getTime() - utcDate(today).getTime()) / DAY_MS);
+  return Math.round((utcDate(date).getTime() - utcDate(israelCalendarDate(today)).getTime()) / DAY_MS);
 }
 
 export function isPastCalendarDate(date: string | null, today = new Date()): boolean {

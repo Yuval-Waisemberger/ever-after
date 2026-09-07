@@ -33,3 +33,11 @@ describe("buildTimeline", () => {
     expect(tasks.filter((task) => !task.dueDate).map((task) => task.id)).toEqual(["3"]);
   });
 });
+
+it("retains waiting workflow in the normal date group with or without a wedding date", () => {
+  const task = { id: "waiting", title: "Contract", dueDate: "2026-09-07", status: "waiting_on_vendor" as const };
+  for (const wedding of [null, "2026-09-12"]) {
+    const groups = buildTimeline([task, { ...task, id: "undated", dueDate: null }], wedding);
+    expect(groups).toHaveLength(1); expect(groups[0].tasks).toEqual([task]);
+  }
+});

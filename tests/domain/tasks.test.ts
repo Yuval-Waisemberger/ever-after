@@ -4,6 +4,7 @@ import {
   calculateTaskSummary,
   isDueWithinDays,
   selectUpcomingTasks,
+  filterTasks, selectWeddingWeekTasks,
   taskDisplayStatus,
 } from "@/lib/domain/tasks";
 import { isPastCalendarDate } from "@/lib/domain/date-status";
@@ -37,13 +38,11 @@ describe("task summaries", () => {
     expect(summary).toEqual({ total: 4, completed: 1, open: 3, dueThisWeek: 1, completion: 25 });
   });
 
-  it("derives deadline urgency ahead of workflow while completed is always final", () => {
+  it("keeps waiting workflow and overdue independent", () => {
     const today = new Date("2026-09-02T12:00:00Z");
-    expect(taskDisplayStatus({ status: "open", dueDate: "2026-08-31" }, today)).toEqual({ kind: "overdue", label: "Overdue 2 days" });
-    expect(taskDisplayStatus({ status: "in_progress", dueDate: "2026-09-04" }, today)).toEqual({ kind: "due_soon", label: "Due Friday" });
-    expect(taskDisplayStatus({ status: "completed", dueDate: "2026-08-31" }, today)).toEqual({ kind: "completed", label: "Completed" });
-    expect(taskDisplayStatus({ status: "in_progress", dueDate: null }, today)).toEqual({ kind: "in_progress", label: "In progress" });
-    expect(taskDisplayStatus({ status: "open", dueDate: null }, today)).toEqual({ kind: "not_started", label: "Not started" });
+    expect(taskDisplayStatus({ status: "waiting_on_vendor", dueDate: "2026-08-31" }, today)).toMatchObject({ workflow: { kind: "waiting_on_vendor", label: "Waiting on vendor" }, deadline: { kind: "overdue", label: "Overdue 2 days" } });
+    expect(taskDisplayStatus({ status: "completed", dueDate: "2026-08-31" }, today).deadline).toBeNull();
+    expect(taskDisplayStatus({ status: "open", dueDate: null }, today).deadline).toBeNull();
   });
 
   it("allows past dates as data and prioritizes overdue work before the next seven days", () => {
@@ -59,4 +58,20 @@ describe("task summaries", () => {
     ], today);
     expect(selected.map((task) => task.id)).toEqual(["old-high", "old-low", "future"]);
   });
+});
+
+it("uses Israel midnight including summer and winter boundaries", () => {
+  expect(isPastCalendarDate("2026-09-07", new Date("2026-09-07T20:59:59Z"))).toBe(false);
+  expect(isPastCalendarDate("2026-09-07", new Date("2026-09-07T21:00:00Z"))).toBe(true);
+  expect(isPastCalendarDate("2026-01-07", new Date("2026-01-07T22:00:00Z"))).toBe(true);
+});
+it("waiting is open, filters intersect categories, and operational tasks deduplicate", () => {
+  const waiting = { id: "w", status: "waiting_on_vendor" as const, category: "Venue", dueDate: "2026-09-09", priority: "low" as const };
+  const tasks = [waiting, { ...waiting, id: "done", status: "completed" as const }, { ...waiting, id: "high", status: "open" as const, category: "Other", dueDate: null, priority: "high" as const }];
+  const now = new Date("2026-09-07T12:00:00Z");
+  expect(filterTasks(tasks, "waiting_on_vendor", "Venue")).toEqual([waiting]);
+  expect(filterTasks(tasks, "incomplete")).toHaveLength(2);
+  expect(calculateTaskSummary(tasks, now)).toEqual({ total: 3, completed: 1, open: 2, dueThisWeek: 1, completion: 33 });
+  expect(selectWeddingWeekTasks([...tasks, waiting], null, now).map(t => t.id)).toEqual(["high", "w"]);
+  expect(selectWeddingWeekTasks([{ ...waiting, status: "open", dueDate: "2026-09-10" }], "2026-09-12", now)).toHaveLength(1);
 });

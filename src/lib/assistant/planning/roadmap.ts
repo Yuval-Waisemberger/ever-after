@@ -30,6 +30,7 @@ const bucket = z.enum(["immediate", "next_7_days", "next_30_days", "later", "und
 const reason = z.enum(["task_overdue", "task_due", "task_undated", "payment_overdue", "payment_due", "payment_undated", "vendor_not_recorded_booked", "vendor_details_needed", "budget_overcommitted", "rsvp_pending", "invitations_pending"]);
 const signalSchema = z.object({
   id: z.string().max(100), kind: z.literal("DETERMINISTIC_SIGNAL"), reason, bucket, priority: c.priority,
+  taskAction: z.enum(["follow_up", "complete_work"]).optional(),
   entityIds: z.array(c.id).max(60), category: planningCategory.optional(), count: c.money.optional(),
   basis: z.array(z.object({ tool: readToolName, evidenceClass: z.literal("COUPLE_DATA") }).strict()).min(1).max(3),
   priorityBasis: z.enum(["deadline", "stored_task_priority", "couple_priority", "explicit_request", "venue_dependency", "financial_state", "guest_responses"]),
@@ -82,7 +83,7 @@ export function buildPlanningState(rawSources: unknown, rawRequest: unknown = {}
   for (const task of facts.tasks?.tasks ?? []) {
     if (task.status === "completed") continue;
     const overdue = Boolean(task.dueDate && task.dueDate < asOfDate);
-    signals.push({ id: `task:${task.id}`, kind: "DETERMINISTIC_SIGNAL", reason: overdue ? "task_overdue" : task.dueDate ? "task_due" : "task_undated", bucket: windowFor(task.dueDate), priority: overdue ? "high" : task.priority, entityIds: [task.id], basis: basis("list_tasks"), priorityBasis: overdue ? "deadline" : "stored_task_priority" });
+    signals.push({ id: `task:${task.id}`, taskAction: task.status === "waiting_on_vendor" ? "follow_up" : "complete_work", kind: "DETERMINISTIC_SIGNAL", reason: overdue ? "task_overdue" : task.dueDate ? "task_due" : "task_undated", bucket: windowFor(task.dueDate), priority: overdue ? "high" : task.priority, entityIds: [task.id], basis: basis("list_tasks"), priorityBasis: overdue ? "deadline" : "stored_task_priority" });
   }
   if (facts.payments) {
     const classified = classifyUnpaidPayments([...facts.payments.overdue, ...facts.payments.upcoming, ...facts.payments.undated], now);

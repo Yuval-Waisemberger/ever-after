@@ -350,3 +350,43 @@ Autocomplete validation: TypeScript and whole-repository ESLint passed without w
 119/119 relevant Vitest tests across 13 files and 10/10 isolated Playwright checks passed.
 Dropdown screenshots were inspected at all four widths. Production webpack build passed
 with unreachable localhost Supabase settings. No Frankfurt writes or migrations occurred.
+
+## Task waiting refinement validation (2026-09-07)
+
+Focused regressions cover four statuses, invalid stored overdue, action DB errors/zero rows,
+forged and cross-Couple IDs, actual role/owner resolution with mocked data, no automatic vendor or
+financial writes, field errors, retained drafts, complete/reopen/delete, intersecting filters,
+waiting as Open, derived overdue and completed exclusion, +0/+7/+8 dates, Israel summer/winter
+midnight, Task-derived Timeline with/without wedding date, and deduplicated Wedding Week selection.
+Assistant tests cover waiting/overdue English and Hebrew subsets, privacy, ten READ tools and
+roadmap follow-up intent with overdue urgency. Task titles are referenced, never interpreted to
+invent vendor identity.
+
+Real SQL: `node tests/database/task-status-postgres.mjs` uses the existing `postgres:17` image
+(version observed 17.11), executes the repository initial public schema with only an Auth stub,
+then the exact new migration. It verifies existing rows byte-for-byte via SQL EXCEPT, enum order,
+new status/CRUD/query compatibility, harmless replay, rejection of `overdue`, transactional rollback
+on forced error and PostgreSQL's requirement to commit enum DDL before using its new value.
+Container and anonymous volume are removed in finally. No Frankfurt test records are created.
+
+Browser: `playwright test --config e2e/tasks.config.ts`, isolated Vite host on 127.0.0.1:3104,
+real Task form/rows/filters and Timeline page, synthetic action/query doubles, external requests
+blocked, fixed clock. Widths: 1440/768/390/360. Covers two pills, wrapping/overflow, dated/undated
+waiting, form selection, keyboard/native controls, quick complete/reopen/edit/delete, combined
+filters and safe errors/draft preservation. Screenshots go to ignored test-results only.
+
+Final local run: 531 Vitest tests across 32 files passed; five Playwright tests passed, including
+all four responsive widths with the production product stylesheet. Screenshots were visually
+inspected. Whole-repository ESLint and production Webpack build passed. TypeScript was checked
+separately after generation of Next build types. PostgreSQL 17.11 execution passed and removed its
+container/volume. Production build used process-only dummy loopback Supabase configuration.
+Browser QA covers isolated components and mocked actions, not authenticated live Frankfurt flows.
+
+Subsequent live closeout on 2026-09-07: Frankfurt preflight passed, and only the exact approved
+`202609070001_task_waiting_on_vendor.sql` was applied. Catalog verification confirmed enum ordering
+and unchanged Task columns, constraints, indexes, triggers and RLS. All four existing Task IDs and
+full-row fingerprints were unchanged (three open, one in progress; none automatically waiting).
+Authenticated read-only smoke passed for `/tasks`, `/wedding/timeline`, `/wedding` and `/assistant`:
+new form option/filter, independent workflow/deadline pills, Task-derived Timeline and existing
+Dashboard metrics rendered without enum/runtime errors. No Task mutation or Assistant message was
+submitted, and no QA records were created.

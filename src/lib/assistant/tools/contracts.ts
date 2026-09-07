@@ -1,3 +1,4 @@
+import { TASK_STATUSES } from "@/lib/domain/task-status";
 import { BOOKING_CATEGORIES, BOOKING_STATES } from "@/lib/domain/booking-state";
 import { z } from "zod";
 import { contextSectionSchema } from "../evidence";
@@ -12,7 +13,7 @@ export const date = z.iso.date();
 export const area = z.enum(["central_israel", "sharon", "north", "jerusalem", "south", "flexible"]);
 export const eventType = z.enum(["evening", "friday_afternoon", "daytime", "undecided"]);
 export const slug = z.string().min(1).max(80).regex(/^[a-z0-9-]+$/);
-export const status = z.enum(["open", "in_progress", "completed"]);
+export const status = z.enum(TASK_STATUSES);
 export const priority = z.enum(["low", "medium", "high"]);
 export const lifecycle = z.enum(["contacted", "considering", "booked", "rejected"]);
 const page = z.number().int().min(1).max(1000).default(1);

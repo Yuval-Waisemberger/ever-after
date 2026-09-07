@@ -1,3 +1,4 @@
+import { TASK_STATUSES } from "@/lib/domain/task-status";
 import { z } from "zod";
 
 const money = z.number().int().nonnegative();
@@ -14,7 +15,7 @@ export const assistantContextSchema = z.object({
   }),
   tasks: z.array(z.object({
     id: z.string(), title: z.string(), dueDate: date,
-    status: z.enum(["open", "in_progress", "completed"]), priority: z.enum(["low", "medium", "high"]),
+    status: z.enum(TASK_STATUSES), priority: z.enum(["low", "medium", "high"]),
   })),
   guestList: z.object({
     invited: money, attending: money, awaitingResponse: money, notAttending: money, notYetInvited: money,

@@ -10,6 +10,7 @@ function refreshTaskViews() {
   revalidatePath("/tasks");
   revalidatePath("/wedding");
   revalidatePath("/wedding/timeline");
+  revalidatePath("/assistant");
 }
 
 export async function saveTask(
@@ -18,7 +19,7 @@ export async function saveTask(
 ): Promise<ActionState> {
   const parsed = taskSchema.safeParse(formObject(formData));
   if (!parsed.success) {
-    return { status: "error", errors: parsed.error.flatten().fieldErrors };
+    return { status: "error", message: "Please check the task fields below.", errors: parsed.error.flatten().fieldErrors };
   }
 
   const wedding = await getOwnedWedding();
@@ -34,34 +35,38 @@ export async function saveTask(
   };
 
   const result = parsed.data.id
-    ? await supabase.from("tasks").update(values).eq("id", parsed.data.id).eq("wedding_id", wedding.id)
-    : await supabase.from("tasks").insert(values);
+    ? await supabase.from("tasks").update(values).eq("id", parsed.data.id).eq("wedding_id", wedding.id).select("id").maybeSingle()
+    : await supabase.from("tasks").insert(values).select("id").single();
 
-  if (result.error) {
+  if (result.error || !result.data) {
     return { status: "error", message: "The task could not be saved. Please try again." };
   }
   refreshTaskViews();
   return { status: "success", message: parsed.data.id ? "Task updated." : "Task created." };
 }
 
-export async function changeTaskStatus(formData: FormData) {
+export async function changeTaskStatus(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = taskStatusSchema.safeParse(formObject(formData));
-  if (!parsed.success) return;
+  if (!parsed.success) return { status: "error", message: "This task action is invalid. Refresh the page and try again." };
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  await supabase
+  const result = await supabase
     .from("tasks")
     .update({ status: parsed.data.status })
     .eq("id", parsed.data.id)
-    .eq("wedding_id", wedding.id);
+    .eq("wedding_id", wedding.id).select("id").maybeSingle();
+  if (result.error || !result.data) return { status: "error", message: "The task could not be changed. Refresh and try again." };
   refreshTaskViews();
+  return { status: "success", message: "Task updated." };
 }
 
-export async function deleteTask(formData: FormData) {
+export async function deleteTask(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = taskIdSchema.safeParse(formObject(formData));
-  if (!parsed.success) return;
+  if (!parsed.success) return { status: "error", message: "This task action is invalid. Refresh the page and try again." };
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  await supabase.from("tasks").delete().eq("id", parsed.data.id).eq("wedding_id", wedding.id);
+  const result = await supabase.from("tasks").delete().eq("id", parsed.data.id).eq("wedding_id", wedding.id).select("id").maybeSingle();
+  if (result.error || !result.data) return { status: "error", message: "The task could not be changed. Refresh and try again." };
   refreshTaskViews();
+  return { status: "success", message: "Task updated." };
 }

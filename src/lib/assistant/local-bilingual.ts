@@ -2,7 +2,7 @@ import type { AssistantContext, AssistantResponse } from "./types";
 import { assistantCopy } from "./language";
 import { clarificationSchema } from "./planning/policy";
 import { classifyUnpaidPayments } from "./payments";
-import { isDueWithinDays } from "@/lib/domain/tasks";
+import { localTaskSummary } from "./local-task-summary";
 import { formatIls } from "@/lib/domain/budget";
 
 // Five small demonstration intents; no semantic quote extraction or agent loop.
@@ -30,8 +30,7 @@ export function hebrewLocalSummary(prompt: string, context: AssistantContext): A
     return answer(`${summary}\n${p.overdue.length ? `${p.overdue.length} תשלומים שלא שולמו נמצאים באיחור.` : "אין תשלומים מתוארכים באיחור."}\n${p.upcoming[0] ? `התשלום הקרוב: ${formatIls(p.upcoming[0].amountMinor)} בתאריך ${p.upcoming[0].dueDate}.` : "לא רשום תשלום עתידי עם תאריך יעד."}${p.undated.length ? `\nל־${p.undated.length} תשלומים פתוחים לא הוגדר תאריך יעד.` : ""}`, "budget");
   }
   if (/this week|due|task|still need|to do/.test(prompt)) {
-    const open = context.tasks.filter((t) => t.status !== "completed"), upcoming = open.filter((t) => isDueWithinDays(t.dueDate, new Date(), 7));
-    return answer(`יש לכם ${open.length} משימות פתוחות.\n${upcoming.length ? `בשבעת הימים הקרובים: ${upcoming.map((t) => t.title).join(", ")}.` : "אין משימות מתוארכות לשבעת הימים הקרובים."}`, "tasks");
+    return answer(localTaskSummary(context.tasks, "he", null), "tasks");
   }
   if (/booked|which vendors|our vendors/.test(prompt) && !/compare/.test(prompt)) {
     const booked = context.vendors.filter((v) => v.lifecycleStatus === "booked");

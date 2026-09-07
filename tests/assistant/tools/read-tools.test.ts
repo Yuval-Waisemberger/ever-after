@@ -398,3 +398,14 @@ describe("Guest PII and aggregate completeness", () => {
     for (const call of db.state.calls) expect(call.selection).not.toMatch(/\*|\b(phone|email|notes|private_notes|dietary_notes|review_text|reviewer_display_name|avatar_choice|avatar_storage_path|contact_override|password|token)\b/);
   });
 });
+
+it("waiting remains incomplete, filterable, dated and private", async () => {
+  const waiting = { ...task(700), status: "waiting_on_vendor", due_date: "2026-09-06", notes: "SECRET TASK NOTES" };
+  db.state.tables.tasks = [waiting];
+  const open = await data("list_tasks", c.taskData, { view: "open", status: "waiting_on_vendor" });
+  expect(open.tasks).toHaveLength(1); expect(open.tasks[0].status).toBe("waiting_on_vendor");
+  expect(JSON.stringify(open)).not.toContain("SECRET");
+  expect((await data("list_tasks", c.taskData, { view: "overdue" })).tasks).toHaveLength(1);
+  const timeline = await data("get_timeline_summary", c.timelineData);
+  expect(JSON.stringify(timeline)).toContain("waiting_on_vendor"); expect(JSON.stringify(timeline)).not.toContain("SECRET");
+});
