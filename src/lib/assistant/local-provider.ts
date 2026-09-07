@@ -4,6 +4,8 @@ import { formatIls } from "@/lib/domain/budget";
 import { calculateRecommendation } from "@/lib/domain/recommendation";
 import { isDueWithinDays } from "@/lib/domain/tasks";
 import type { AssistantRequest, AssistantResponse, WeddingAssistantProvider } from "./types";
+import { assistantCopy, selectResponseLanguage } from "./language";
+import { hebrewLocalSummary, localPrompt, researchClarification } from "./local-bilingual";
 
 const knowledge: Array<{ terms: string[]; answer: string }> = [
   {
@@ -32,10 +34,6 @@ const knowledge: Array<{ terms: string[]; answer: string }> = [
   },
 ];
 
-function normalized(value: string) {
-  return value.toLocaleLowerCase();
-}
-
 function humanList(values: string[]) {
   if (!values.length) return "none yet";
   if (values.length === 1) return values[0];
@@ -49,8 +47,8 @@ function answer(text: string, evidence: AgentEvidence[]): AssistantResponse {
 export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
   readonly name = "local";
 
-  async respond({ message, context }: AssistantRequest): Promise<AssistantResponse> {
-    const prompt = normalized(message);
+  async respond({ message, context, language = selectResponseLanguage(message).language }: AssistantRequest): Promise<AssistantResponse> {
+    const prompt = localPrompt(message);
     const missing = [
       !context.wedding.weddingDate ? "wedding date" : null,
       context.wedding.guestCount == null ? "guest count" : null,
@@ -61,10 +59,12 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
     // Market questions must not be mistaken for account-budget queries.
     if (/\b(requirement|requirements|legal)\b|\b(current|latest)\b.*\b(market|price|prices|range|cost|costs|rules|procedures)\b|market price|cost in israel|good price|good .* price|reasonable|realistic|normal .*range/.test(prompt)) {
       return {
-        status: "unavailable", text: "That answer depends on current external information. Web research is not configured for this project yet, so I won't invent a current price, rule, or procedure. Ever After Marketplace prices are not a real-world market benchmark.",
-        evidence: [], error: { code: "RESEARCH_UNAVAILABLE", retryable: false },
+        status: "unavailable", text: language === "he" ? assistantCopy.he.research : "That answer depends on current external information. Web research is not configured for this project yet, so I won't invent a current price, rule, or procedure. Ever After Marketplace prices are not a real-world market benchmark.",
+        language, clarificationIntent: researchClarification(message, context), evidence: [], error: { code: "RESEARCH_UNAVAILABLE", retryable: false },
       };
     }
+
+    if (language === "he") return hebrewLocalSummary(prompt, context);
 
     if (/guest list|guest count|rsvp|attend|not invited|already invited/.test(prompt)) {
       const guests = context.guestList;

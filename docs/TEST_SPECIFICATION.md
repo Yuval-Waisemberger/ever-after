@@ -210,3 +210,44 @@ server-history tests. Production build passed (Next.js 16.3.4, 11 static pages).
 and separate new-file whitespace/conflict checks passed. No UI changes or Playwright run.
 Tests used mocked data and injected clocks; no Supabase integration/mutation, external service,
 package installation, system-clock change, migration, seed or QA data operation was performed.
+
+## Phase 2 bilingual Assistant validation
+
+`tests/assistant/language.test.ts` covers Hebrew/English detection, mixed-language dominance,
+ambiguous recent-language fallback, explicit text/UI preferences, real deterministic Hebrew
+tasks/budget/Guest/booked summaries, proper names, preserved English behavior, Hebrew scope
+redirects, unavailable sections, non-live research with structured clarification and absence of
+external detection. Existing context/read-tool privacy tests continue to prove aggregate-only
+Guest output and READ-only boundaries. API regressions cover Hebrew response metadata and
+safe failed-insert retry metadata without new persistence columns or disconnected generation.
+
+`tests/ui/assistant.test.tsx` checks per-paragraph direction, bidi isolation, composer/role
+alignment, accessible controls, source labels, localized clarification and failed-history behavior.
+`e2e/assistant-language.spec.ts` mounts the real chat component with real CSS on an isolated
+test-only host. It blocks external requests and mocks the API, avoiding Supabase mutation.
+Run `pnpm exec playwright test --config e2e/assistant.config.ts` (or the installed CLI with the
+bundled Node runtime). The fixture uses installed Vitest/Vite tooling without a new dependency.
+
+The browser matrix includes Hebrew and English conversations at 1440, 1280, 1024, 768, 390,
+375 and 360px. Checks cover computed RTL/LTR, role alignment, mixed names/dates/currency,
+horizontal overflow, chip/bubble/composer bounds, scrolling, keyboard send, focus restoration
+and browser exceptions. A 360px flow also exercises pending/disabled state, safe research
+unavailability, clarification, raw-error suppression, failed-insert retry and an empty reply.
+Screenshots under ignored `test-results/assistant-visual` are visually reviewed at all widths.
+The bounded chat viewport deliberately scrolls; the entire history need not fit onscreen.
+
+These checks cover the component and its page-width wrapper, not a live authenticated AppShell
+or real database/provider round trip. Screen-reader announcements use semantic log/status/alert,
+labels and source lists; no hardware screen-reader certification is claimed. No broader site
+translation, real semantic quote extraction or external model memory is claimed.
+
+Validation record — 2026-09-07: TypeScript (`tsc --noEmit`) and whole-repository ESLint passed.
+Relevant Vitest: 330/330 tests across 10 files passed, including 20 language tests, four UI
+tests, 15 API tests and all existing Assistant/context/tool/planning/research/history suites.
+Playwright Chromium: 15/15 passed. All 14 conversation screenshots were visually inspected;
+short dates/currency wrapping was improved and rechecked, including 360px clarification/errors.
+Final production build passed (Next.js 16.3.4, 11 static pages; Assistant/API remain dynamic).
+`git diff --check` and separate untracked-file whitespace/conflict-marker checks passed.
+Commands used installed entrypoints with the bundled Node runtime; native browser/bundler
+tools needed sandbox escalation. No package installation or external service was used.
+No Supabase data/schema/RLS/migration/seed mutation, commit, push or deployment occurred.

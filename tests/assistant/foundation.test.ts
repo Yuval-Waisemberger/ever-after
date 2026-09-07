@@ -34,7 +34,7 @@ describe("central domain policy", () => {
     expect(assessWeddingDomain(message)).toBe("out_of_scope");
   });
   it("does not reject an unknown language or natural follow-up based on language", () => {
-    expect(assessWeddingDomain("אפשר לעזור עם החתונה שלנו?")).toBe("uncertain");
+    expect(assessWeddingDomain("אפשר לעזור עם החתונה שלנו?")).toBe("in_scope");
     expect(assessWeddingDomain("Tell me more")).toBe("uncertain");
   });
   it("blocks before context loading and before any provider is called", async () => {
@@ -101,7 +101,7 @@ describe("privacy and unavailable context", () => {
     expect(JSON.stringify(clean)).not.toMatch(/private|secret/);
     const provider = { name: "fake", respond: vi.fn().mockResolvedValue(recommendation) };
     await runWeddingAgent({ message: "Compare wedding vendors", provider, loadContext: async () => dirty });
-    expect(provider.respond).toHaveBeenCalledWith({ message: "Compare wedding vendors", context: clean });
+    expect(provider.respond).toHaveBeenCalledWith({ message: "Compare wedding vendors", context: clean, language: "en" });
   });
   it.each(["vendors", "budget", "tasks", "guestList", "wedding"] as const)("does not generate facts after a %s read failure", async (section) => {
     const provider = { name: "fake", respond: vi.fn() };

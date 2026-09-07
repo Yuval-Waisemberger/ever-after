@@ -300,3 +300,19 @@ user's local/dashboard configuration and integration testing. Helper access and 
 writes remain second priority. After-wedding/community features remain third priority. Real payment
 processing, calendars, WhatsApp, RSVP, seating, invitation sending, vendor messaging, and real-time
 availability are deliberately out of scope.
+
+## Phase 2 Assistant language and rendering
+
+`assistant/language.ts` owns the `he`/`en` selection contract and localized safe copy. The API validates optional `recentLanguage` and `requestedLanguage` enums; `runWeddingAgent` selects language and passes it to the provider, including safe scope/error responses. Explicit text requests override the UI selector; otherwise explicit selection wins, then a lightweight letter-count heuristic, with recent-language fallback for ambiguous input. These hints do not grant access or change authorization. There is no external detection API or new persisted language field.
+
+`local-bilingual.ts` adds five small intent aliases and deterministic Hebrew summaries using the existing context and payment/task helpers. English branches and deterministic recommendation weights remain intact. Unsupported Hebrew reasoning falls back honestly. The ten READ-tool registry, planning snapshots and bounded-history contracts are not replaced by orchestration or an LLM loop. Current live context loading remains monolithic, as documented in Phase 1B.
+
+`AssistantChat` now owns its localized heading/controls. Paragraphs and textarea use `dir="auto"`; `MessageContent` isolates Latin and numeric runs with `bdi`, allowing long content to wrap and retaining short dates/currency on one line. Role-based flex alignment remains independent of language. Known persisted evidence labels map to compact source chips, never to invented citations. The optional Phase 1C-B clarification intent is rendered from controlled field/question mappings; the Local price example remains unavailable research, not semantic quote extraction.
+
+Client Zod validation rejects empty/malformed replies. API error codes select safe local copy; raw server errors are ignored. A failed user insert returns the owned thread ID for safe retry; other ambiguous outcomes are not automatically retried. History load failures disable sending. Existing Supabase conversation persistence remains text/source based; transient language/clarification metadata does not survive a reload. No schema, product-write executor, research adapter or dependency change is needed.
+
+Browser verification uses a separate test-only Vite host for the real component and production CSS. It resolves the Vite dependency already installed with Vitest, disables env-file loading and mocks all Assistant calls. This host is not an application route, authentication bypass or live Supabase test. Run it through `e2e/assistant.config.ts`; generated screenshots/cache stay in ignored test directories.
+
+The Assistant surface declares its UI language, and each message paragraph declares a language
+from its first Hebrew/Latin letter for assistive technology. This presentation hint is separate
+from response-language preference detection; it is not semantic mixed-language parsing.

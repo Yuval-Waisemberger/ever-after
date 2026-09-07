@@ -46,6 +46,22 @@ beforeEach(() => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 describe("Assistant API persistence and permissions", () => {
+  it("returns Hebrew language metadata without adding persistence columns", async () => {
+    const response = await POST(request("מה המשימות שלי השבוע?"));
+    const body = await response.json();
+    expect(response.status).toBe(200); expect(body.agent.language).toBe("he");
+    expect(body.message.content).toContain("משימות פתוחות");
+    expect(writes[1].values).not.toHaveProperty("language");
+  });
+  it("returns a safe Hebrew error and retry thread when user persistence fails", async () => {
+    userInsertFails = true;
+    const response = await POST(request("מה התקציב שלנו?"));
+    const body = await response.json();
+    expect(response.status).toBe(500); expect(body.errorCode).toBe("MESSAGE_NOT_SAVED");
+    expect(body.error).toContain("לשמור"); expect(body.threadId).toBe(threadId);
+    expect(JSON.stringify(body)).not.toContain("secret");
+    expect(mocks.context).not.toHaveBeenCalled();
+  });
   it("stops before context/provider generation if user-message insert fails", async () => {
     userInsertFails = true;
     const generate = vi.spyOn(LocalWeddingAssistantProvider.prototype, "respond");
@@ -83,7 +99,7 @@ describe("Assistant API persistence and permissions", () => {
   it("rejects unsupported providers clearly before writes", async () => {
     vi.stubEnv("AI_PROVIDER", "openai");
     const response = await POST(request());
-    expect(response.status).toBe(503); expect((await response.json()).error).toContain("Unsupported AI_PROVIDER");
+    expect(response.status).toBe(503); const body = await response.json(); expect(body.errorCode).toBe("PROVIDER_UNAVAILABLE"); expect(body.error).not.toContain("AI_PROVIDER");
     expect(writes).toEqual([]);
   });
   it("rejects inaccessible threads and fails closed on thread read errors", async () => {

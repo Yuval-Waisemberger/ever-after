@@ -1,21 +1,25 @@
 import { z } from "zod";
 import type { assistantContextSchema } from "./privacy";
 import { evidenceSchema } from "./evidence";
+import { assistantLanguage, type AssistantLanguage } from "./language";
+import { clarificationSchema } from "./planning/policy";
 
 export type AssistantContext = z.infer<typeof assistantContextSchema>;
 export type AssistantTask = AssistantContext["tasks"][number];
 export type AssistantVendor = AssistantContext["vendors"][number];
-export type AssistantRequest = { message: string; context: AssistantContext };
+export type AssistantRequest = { message: string; context: AssistantContext; language?: AssistantLanguage };
 
 export const assistantResponseSchema = z.object({
   status: z.enum(["ok", "unavailable", "error", "out_of_scope"]),
   text: z.string().trim().min(1).max(16000),
+  language: assistantLanguage.optional(),
   evidence: z.array(evidenceSchema).max(50),
   error: z.object({
     code: z.enum(["CONTEXT_UNAVAILABLE", "PROVIDER_UNAVAILABLE", "INVALID_PROVIDER_RESULT", "RESEARCH_UNAVAILABLE"]),
     retryable: z.boolean(),
   }).strict().optional(),
   clarification: z.object({ question: z.string().min(1).max(1000), missingFields: z.array(z.string().max(100)).max(20) }).strict().optional(),
+  clarificationIntent: clarificationSchema.optional(),
   // Contracts only. Phase 1A does not execute tools or proposals.
   toolUsage: z.array(z.object({ name: z.string().min(1).max(100), status: z.enum(["succeeded", "unavailable", "error"]) }).strict()).max(20).optional(),
   usage: z.object({ inputTokens: z.number().int().nonnegative().optional(), outputTokens: z.number().int().nonnegative().optional() }).strict().optional(),

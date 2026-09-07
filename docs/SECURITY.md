@@ -203,3 +203,13 @@ Attempt cross-wedding reads/writes, cross-vendor profile edits, Vendor review ed
 reads, forged ownership IDs, excessive payment totals, invalid ratings, oversized uploads, and direct
 access to every protected route. Record the results in the test report; do not infer RLS success from
 the UI alone.
+
+## Phase 2 language and Assistant UI boundaries
+
+Language selection is local deterministic processing. Only `he`/`en` hints cross the existing authenticated Assistant API; they cannot select a wedding, widen context or authorize a tool. The existing context privacy allowlist, aggregate-only Guest output, evidence validator and ten READ registrations remain in force. Chat text can contain user-entered sensitive information and is not claimed PII-free. No text is sent to an external language/AI/research service.
+
+Messages render as React text, not HTML/Markdown injection. Bidi isolation changes presentation only; it does not rewrite stored names. Known source labels are allowlisted for display. A chip is a category label, not proof of a new retrieval; current external evidence is still rejected by the live Local result guard. Structured clarifications expose controlled planning questions, not raw contracts/debug data or executable actions.
+
+The client validates replies and uses controlled localized error messages rather than raw API errors, SQL details or provider configuration strings. User-message persistence must succeed before generation, as before. Only an explicit failed user insert enables direct retry; no automatic replay follows an unknown network outcome. Failed history reads disable sending. Language and clarification metadata require no migration and add no private account fields to context.
+
+Phase 2 browser tests use synthetic in-memory conversations on an isolated local component host. All API responses are mocked and external browser requests are blocked; no live authenticated Assistant message is sent or Supabase QA row created. This does not substitute for future authorized live authentication/RLS integration testing. No AI SDK/key, paid service, product write tool or live research is enabled.
