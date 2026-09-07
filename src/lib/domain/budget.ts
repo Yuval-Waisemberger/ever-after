@@ -9,6 +9,8 @@ export type PaymentForBudget = {
 };
 
 export type BudgetItemForSummary = {
+  source?: "manual" | "booked_vendor";
+  relationshipStatus?: string | null;
   estimatedAmountMinor?: number | null;
   committedAmountMinor?: number | null;
   payments?: PaymentForBudget[];
@@ -21,10 +23,28 @@ export type BudgetSummary = {
   paidMinor: number;
   availableMinor: number | null;
   remainingCommittedMinor: number;
+  budgetImpactMinor: number;
   upcomingPayments: PaymentForBudget[];
 };
 
-export type BudgetItemStatus = "estimated" | "committed" | "partially_paid" | "paid";
+export type BudgetItemStatus = "estimated" | "committed" | "partially_paid" | "paid" | "inactive";
+
+export function isPaymentScheduleActive(item: Pick<BudgetItemForSummary, "source" | "relationshipStatus">): boolean {
+  return item.source !== "booked_vendor" || item.relationshipStatus === "booked";
+}
+
+/** Money spent is never made available again by cancelling/reducing a commitment. */
+export function calculateBudgetImpact(item: BudgetItemForSummary) {
+  const committedMinor = asMoney(item.committedAmountMinor);
+  const paidMinor = (item.payments ?? []).reduce((sum, p) => sum + (p.isPaid ? asMoney(p.amountMinor) : 0), 0);
+  const scheduledMinor = (item.payments ?? []).reduce((sum, p) => sum + asMoney(p.amountMinor), 0);
+  return {
+    committedMinor, paidMinor, scheduledMinor,
+    budgetImpactMinor: Math.max(committedMinor, paidMinor),
+    paidExceedsCommitment: paidMinor > committedMinor,
+    scheduledExceedsCommitment: scheduledMinor > committedMinor,
+  };
+}
 
 export function deriveBudgetItemStatus(item: BudgetItemForSummary): {
   kind: BudgetItemStatus;
@@ -38,6 +58,7 @@ export function deriveBudgetItemStatus(item: BudgetItemForSummary): {
   const committedMinor = item.committedAmountMinor == null
     ? null
     : asMoney(item.committedAmountMinor);
+  if (!isPaymentScheduleActive(item)) return { kind: "inactive", label: "Inactive booking", paidMinor };
   if (committedMinor == null) return { kind: "estimated", label: "Estimated", paidMinor };
   if (committedMinor > 0 && paidMinor >= committedMinor) {
     return { kind: "paid", label: "Paid", paidMinor };
@@ -78,12 +99,13 @@ export function calculateBudgetSummary(
   );
 
   const payments = items.flatMap((item) => item.payments ?? []);
+  const budgetImpactMinor = items.reduce((sum, item) => sum + calculateBudgetImpact(item).budgetImpactMinor, 0);
   const paidMinor = payments.reduce(
     (total, payment) => total + (payment.isPaid ? asMoney(payment.amountMinor) : 0),
     0,
   );
 
-  const upcomingPayments = payments
+  const upcomingPayments = items.filter(isPaymentScheduleActive).flatMap((item) => item.payments ?? [])
     .filter((payment) => !payment.isPaid)
     .toSorted((left, right) => {
       if (!left.dueDate && !right.dueDate) return 0;
@@ -99,8 +121,12 @@ export function calculateBudgetSummary(
     projectedMinor,
     committedMinor,
     paidMinor,
-    availableMinor: normalizedTotal == null ? null : normalizedTotal - committedMinor,
-    remainingCommittedMinor: Math.max(committedMinor - paidMinor, 0),
+    availableMinor: normalizedTotal == null ? null : normalizedTotal - budgetImpactMinor,
+    remainingCommittedMinor: items.reduce((sum, item) => {
+      const impact = calculateBudgetImpact(item);
+      return sum + Math.max(impact.committedMinor - impact.paidMinor, 0);
+    }, 0),
+    budgetImpactMinor,
     upcomingPayments,
   };
 }

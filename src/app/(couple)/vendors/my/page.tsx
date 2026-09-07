@@ -39,6 +39,8 @@ export default async function MyVendorsPage({ searchParams }: PageProps<"/vendor
   return (
     <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Vendors" title="Our Vendors" description="Bookmarks and relationship stages live side by side, including private vendors you add yourself." action={<div className="flex flex-wrap gap-2"><LinkButton href="/vendors" tone="secondary">Explore vendors</LinkButton><a href="#add-external-vendor" className="ea-button ea-button--primary"><Plus className="size-4" />Add external vendor</a></div>} />
+      {params.relationship === "error" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">The vendor change and budget could not be saved. Please try again.</p> : null}
+      {params.relationship === "financial-history" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">This vendor could not be deleted. If it has financial history, change its lifecycle instead; payments must be preserved.</p> : null}
       {params.relationship === "updated" ? <p role="status" className="ea-feedback ea-feedback--success mt-5">Your vendor details have been saved.</p> : null}
 
       <details id="add-external-vendor" className="mt-7 rounded-lg border bg-paper p-5 sm:p-6">

@@ -23,6 +23,7 @@ function summaryLink(href: string, label: string) {
 }
 
 const budgetStatusTone = {
+  inactive: "neutral",
   estimated: "neutral",
   committed: "progress",
   partially_paid: "warning",

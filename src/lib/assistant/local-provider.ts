@@ -84,7 +84,7 @@ export class LocalWeddingAssistantProvider implements WeddingAssistantProvider {
       const undatedText = payments.undated.length ? ` ${payments.undated.length} unpaid ${payments.undated.length === 1 ? "payment has" : "payments have"} no due date set.` : "";
       const budgetText = context.budget.availableMinor == null
         ? "Your total budget is not set yet."
-        : `You have ${formatIls(context.budget.availableMinor)} available after ${formatIls(context.budget.committedMinor)} in commitments. ${formatIls(context.budget.paidMinor)} has been marked paid.`;
+        : `You have ${formatIls(context.budget.availableMinor)} available after commitments and actual spending. Active commitments total ${formatIls(context.budget.committedMinor)}. ${formatIls(context.budget.paidMinor)} has been marked paid.`;
       return answer(`${budgetText}${overdueText}${nextText}${undatedText}`, [{ kind: "COUPLE_DATA", section: "budget" }]);
     }
 

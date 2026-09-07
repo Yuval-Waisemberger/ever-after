@@ -29,6 +29,13 @@ beforeEach(() => {
 });
 
 describe("Assistant context queries", () => {
+  it("keeps paid spending after unbooking and excludes inactive unpaid schedules", async () => {
+    results.set("budget_items", { error: null, data: [{ source: "booked_vendor", couple_vendors: { status: "rejected" }, estimated_amount_minor: 100000, committed_amount_minor: null, payments: [
+      { amount_minor: 20000, is_paid: true, due_date: null },
+      { amount_minor: 80000, is_paid: false, due_date: "2027-01-01" },
+    ] }] });
+    expect((await getAssistantContext()).budget).toEqual({ committedMinor: 0, paidMinor: 20000, availableMinor: 17980000, unpaidPayments: [] });
+  });
   it.each([["couple_vendors", "vendors"], ["budget_items", "budget"]])("fails closed when %s returns an error even with data", async (table, section) => {
     results.set(table, { data: [], error: { message: "private database failure" } });
     await expect(getAssistantContext()).rejects.toMatchObject({ name: "AssistantContextUnavailableError", section });

@@ -26,7 +26,7 @@ export function hebrewLocalSummary(prompt: string, context: AssistantContext): A
   }
   if (/budget|left|available|paid|payment|overdue/.test(prompt) && !/\btasks?\b/.test(prompt)) {
     const b = context.budget, p = classifyUnpaidPayments(b.unpaidPayments);
-    const summary = b.availableMinor == null ? "התקציב הכולל שלכם עדיין לא הוגדר." : `נותרו ${formatIls(b.availableMinor)} מתוך התקציב לאחר התחייבויות בסך ${formatIls(b.committedMinor)}. סומנו כשולמו ${formatIls(b.paidMinor)}.`;
+    const summary = b.availableMinor == null ? "התקציב הכולל שלכם עדיין לא הוגדר." : `נותרו ${formatIls(b.availableMinor)} מתוך התקציב לאחר התחייבויות והוצאות ששולמו. ההתחייבויות הפעילות הן בסך ${formatIls(b.committedMinor)}. סומנו כשולמו ${formatIls(b.paidMinor)}.`;
     return answer(`${summary}\n${p.overdue.length ? `${p.overdue.length} תשלומים שלא שולמו נמצאים באיחור.` : "אין תשלומים מתוארכים באיחור."}\n${p.upcoming[0] ? `התשלום הקרוב: ${formatIls(p.upcoming[0].amountMinor)} בתאריך ${p.upcoming[0].dueDate}.` : "לא רשום תשלום עתידי עם תאריך יעד."}${p.undated.length ? `\nל־${p.undated.length} תשלומים פתוחים לא הוגדר תאריך יעד.` : ""}`, "budget");
   }
   if (/this week|due|task|still need|to do/.test(prompt)) {

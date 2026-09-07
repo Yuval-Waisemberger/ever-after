@@ -20,10 +20,10 @@ export async function getWeddingDashboard() {
     await Promise.all([
       supabase.from("tasks").select("id, title, category, due_date, status, priority").eq("wedding_id", wedding.id).order("due_date", { ascending: true, nullsFirst: false }),
       supabase.from("couple_vendors").select("id, status, is_saved, agreed_price_minor, vendor_profiles(slug, business_name, vendor_subcategories(name), vendor_images(external_url, storage_path, alt_text, is_primary, sort_order)), external_vendors(business_name, vendor_subcategories(name))").eq("wedding_id", wedding.id),
-      supabase.from("budget_items").select("id, label, estimated_amount_minor, committed_amount_minor, payments(label, amount_minor, is_paid, due_date)").eq("wedding_id", wedding.id),
+      supabase.from("budget_items").select("id, label, source, couple_vendors(status), estimated_amount_minor, committed_amount_minor, payments(label, amount_minor, is_paid, due_date)").eq("wedding_id", wedding.id),
     ]);
 
-  if (taskError || vendorError || budgetError) throw new Error("Dashboard summary could not be loaded.");
+  if (taskError || vendorError || budgetError || !budgetItems || budgetItems.some(item => !item.payments)) throw new Error("Dashboard summary could not be loaded.");
 
   const normalizedTasks = (tasks ?? []).map((task) => ({
     id: task.id,
@@ -36,6 +36,8 @@ export async function getWeddingDashboard() {
   const normalizedBudgetItems = (budgetItems ?? []).map((item) => ({
     id: item.id,
     label: item.label,
+    source: item.source as "manual" | "booked_vendor",
+    relationshipStatus: (Array.isArray(item.couple_vendors) ? item.couple_vendors[0] : item.couple_vendors)?.status ?? null,
     estimatedAmountMinor: item.estimated_amount_minor == null ? null : Number(item.estimated_amount_minor),
     committedAmountMinor: item.committed_amount_minor == null ? null : Number(item.committed_amount_minor),
     payments: (item.payments ?? []).map((payment) => ({

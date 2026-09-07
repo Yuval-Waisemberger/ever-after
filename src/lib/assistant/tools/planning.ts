@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { calculateBudgetSummary } from "@/lib/domain/budget";
+import { calculateBudgetSummary, isPaymentScheduleActive } from "@/lib/domain/budget";
 import { calculateGuestSummary, GUEST_RSVP_STATUSES } from "@/lib/domain/guests";
 import { calendarDayDifference } from "@/lib/domain/date-status";
 import { relativeTimelineLabel } from "@/lib/domain/timeline";
@@ -76,16 +76,18 @@ export async function readBudget(context: ToolContext) {
 }
 export const getBudgetSummary = defineReadTool("get_budget_summary", "Read complete deterministic budget totals; incomplete aggregate reads are unavailable.", c.noInput, c.budgetData, (_, context) => readBudget(context));
 
-const paymentRow = z.object({ id: c.id, label: c.text, amount_minor: c.dbMoney, due_date: c.date.nullable(), budget_items: z.object({ label: c.text, category: c.text.nullable() }) });
+const paymentRow = z.object({ id: c.id, label: c.text, amount_minor: c.dbMoney, due_date: c.date.nullable(), budget_items: z.object({ label: c.text, category: c.text.nullable(), source: z.enum(["manual", "booked_vendor"]), couple_vendors: z.object({ status: z.string() }).nullable() }) });
 export const getUpcomingPayments = defineReadTool("get_upcoming_payments", "Read unpaid deadlines, bounded separately for overdue, upcoming and undated groups.", c.paymentsInput, c.paymentData, async (input, context) => {
   const keys = ["overdue", "upcoming", "undated"] as const;
-  const batches = await Promise.all(keys.map((group) => {
-    let query = context.db.from("payments").select("id, label, amount_minor, due_date, budget_items!inner(wedding_id, label, category)").eq("budget_items.wedding_id", context.weddingId).eq("is_paid", false);
-    if (group === "overdue") query = query.lt("due_date", context.today);
-    if (group === "upcoming") query = query.gte("due_date", context.today);
-    if (group === "undated") query = query.is("due_date", null);
-    return rows(query.order("due_date", { nullsFirst: false }).order("id").limit(input.limitPerGroup + 1), paymentRow, input.limitPerGroup + 1);
-  }));
+  // Filter inactive booking schedules BEFORE bounded result selection/lookahead.
+  // The internal scan has the existing aggregate cap; incomplete reads fail closed.
+  const candidates = await allRows((from, to) => context.db.from("payments")
+    .select("id, label, amount_minor, due_date, budget_items!inner(wedding_id, label, category, source, couple_vendors(status))")
+    .eq("budget_items.wedding_id", context.weddingId).eq("is_paid", false)
+    .order("due_date", { nullsFirst: false }).order("id").range(from, to), paymentRow, c.LIMITS.aggregateRows);
+  const active = candidates.filter((row) => isPaymentScheduleActive({ source: row.budget_items.source, relationshipStatus: row.budget_items.couple_vendors?.status }));
+  const batches = keys.map((group) => active.filter((row) => group === "undated" ? row.due_date == null
+    : row.due_date != null && (group === "overdue" ? row.due_date < context.today : row.due_date >= context.today)));
   const selected = batches.flatMap((batch) => batch.slice(0, input.limitPerGroup)).map((row) => ({ id: row.id, label: row.label, amountMinor: row.amount_minor, dueDate: row.due_date, expenseLabel: row.budget_items.label, category: row.budget_items.category }));
   const classified = classifyUnpaidPayments(selected, context.now);
   return { data: { ...classified, hasMore: { overdue: batches[0].length > input.limitPerGroup, upcoming: batches[1].length > input.limitPerGroup, undated: batches[2].length > input.limitPerGroup }, asOfDate: context.today }, empty: !selected.length, evidence: [coupleEvidence("budget")] };

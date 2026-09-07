@@ -251,3 +251,47 @@ Final production build passed (Next.js 16.3.4, 11 static pages; Assistant/API re
 Commands used installed entrypoints with the bundled Node runtime; native browser/bundler
 tools needed sandbox escalation. No package installation or external service was used.
 No Supabase data/schema/RLS/migration/seed mutation, commit, push or deployment occurred.
+
+
+## Booked Vendor → Budget final architecture (050003 pending application)
+
+- `tests/domain/budget.test.ts`: per-item max(commitment, paid), unknown/negative Available,
+  preserved paid spending after unbooking, rebooking schedules, independent reconciliation flags,
+  multiple payments and remaining committed without cross-expense offsets.
+- `tests/application/booked-budget-actions.test.ts`: Marketplace detail/quick book and repeated
+  lifecycle writes, price NULL/zero/changes, independent bookmarks, External Vendor failures/deletion,
+  owned-wedding scopes, forged canonical fields, safe read/mutation failures and payment history edits.
+- `tests/database/booked-budget-migration.test.ts`: SQL SOURCE CONTRACT checks for adoption,
+  preconditions, transaction, uniqueness, both vendor types, lifecycle trigger, canonical guards,
+  history protections and parent locking. These do NOT execute PostgreSQL or prove concurrent/RLS behavior.
+- `tests/ui/budget.test.tsx`: actual Budget page and forms render canonical controls, inactive history,
+  safe errors, reconciliation warnings and External Vendor names without a duplicate-link selector.
+- Existing Assistant context/read-tool tests verify shared finance consumers exclude inactive
+  schedules before lookahead and retain paid impact without expanding their capabilities.
+- `e2e/budget-booking.spec.ts` with `e2e/budget.config.ts`: real Budget components on a synthetic,
+  isolated Vite host (port 3102), no .env loading/Supabase client, external browser requests blocked.
+  Covers unbook/rebook, reduction, form errors, protected inputs, and 1440/768/390/360 widths.
+
+Before live approval, execute the migration in a disposable PostgreSQL database with synthetic
+schema/roles and test the following under authenticated owner and non-owner roles: insert Booked
+with/without price; add/change/clear price; unbook/rebook same item ID; both vendor sources; adoption
+preserves a differing estimate/ID/paid row; duplicates/ambiguous/ownership/partial objects abort;
+canonical tampering and External Vendor cascade deletion fail; empty saved placeholder deletion
+succeeds; new over-limit payments fail; two concurrent schedule additions serialize; historical
+payments survive later reductions and allow annotations. Contract tests alone do not replace this.
+No live records may be created for these checks without separate authorization.
+
+Validation record — 2026-09-07: TypeScript and whole-repository ESLint passed. The full Vitest
+run passed 600/601 tests; the unrelated local image-pool enumeration timed out under concurrent
+build/browser load, then its complete 13-test file passed alone. Four additional External Vendor
+cases and the final link changes passed in a 41/41 focused rerun. The final Marketplace finance-consumer tests also passed 9/9 (including two new cases). All 607 current tests therefore
+passed across the full run and isolated reruns. Budget Playwright passed 7/7 on the final run;
+the first attempt had one fixture-startup timeout under load, with six tests passing.
+
+Production build passed with Next.js 16.3.4 using `next build --webpack`, including TypeScript and
+11 static pages. Default Turbopack was attempted twice and failed in its local CSS worker with
+`Cannot find module 'node:net'`; parent/child Node diagnostics showed the bundled Node v24 runtime.
+Package scripts were not changed. Build process-only Supabase settings pointed to an unreachable
+localhost port, never Frankfurt. `git diff --check` and untracked-file whitespace/conflict-marker
+checks passed. No PostgreSQL engine was available (Docker daemon stopped); migration tests are
+source contracts only, not SQL execution, concurrency proof or live RLS QA. No migration was applied.

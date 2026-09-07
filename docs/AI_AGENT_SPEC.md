@@ -48,7 +48,7 @@ Phase 1C-B adds a separate `assistant/planning` layer. It consumes fresh, authen
 
 `planning/roadmap.ts` accepts a strict bounded bundle of existing tool results plus the actual task/vendor invocation inputs. This is an internal server boundary, not a client endpoint or model-supplied evidence bag. Each tool result retains success/empty/unavailable semantics; not-requested sources stay explicit. Invalid source contracts, duplicated signal IDs, stale task/payment as-of dates or mismatched pagination fail closed. Successful empty reads remain factual; unavailable sections have null facts, empty evidence and explicit limitations, never fabricated zero values.
 
-The output contains the actual wedding details, bounded tasks/vendor relationships, authoritative budget totals, classified unpaid payments, Guest aggregates, missing-detail fields, source statuses/evidence, phase, vendor gaps, deterministic signals and bounded roadmap windows. Wedding facts include date, guest estimate, broad location, event type, styles, priorities, setup/venue and booked categories. Saved/Considering facts remain available for future interpretation; they are never counted as Booked. Existing budget arithmetic and vendor recommendation weights are unchanged.
+The output contains the actual wedding details, bounded tasks/vendor relationships, authoritative budget totals, classified unpaid payments, Guest aggregates, missing-detail fields, source statuses/evidence, phase, vendor gaps, deterministic signals and bounded roadmap windows. Wedding facts include date, guest estimate, broad location, event type, styles, priorities, setup/venue and booked categories. Saved/Considering facts remain available for future interpretation; they are never counted as Booked. Budget totals use the shared product domain calculation; vendor recommendation weights are unchanged.
 
 No checklist dataset is created. Vendor-gap candidates come from explicit requested service categories, the known wedding's venue dependency, and a small mapping of stored Photography/Music/Design priorities to actual vendor taxonomy. The mapping translates existing Setup labels and taxonomy slugs, not English user intent. Other services are not universally assumed necessary. The current persisted model has no per-category low-priority flag; a validated, explicitly user-requested `lowerPriorityCategories` preference may reduce non-venue urgency without pretending it is stored Wedding Details. Unselected priorities are not assumed low priority.
 
@@ -169,7 +169,7 @@ Only conversation threads/messages may be written by this API. There is no produ
 
 ## Deterministic payment semantics
 
-The shared Budget helper's legacy `upcomingPayments` property contains all unpaid records. The Assistant maps it to the truthful name `unpaidPayments`; no unrelated Budget screen semantics are changed.
+The shared Budget helper's legacy `upcomingPayments` property contains active unpaid records, including overdue payments. Unpaid schedules of unbooked canonical vendor expenses are excluded; actual paid spending remains in Budget totals. The Assistant maps this to `unpaidPayments`.
 
 `payments.ts` classifies these records before response wording:
 
@@ -180,7 +180,7 @@ The shared Budget helper's legacy `upcomingPayments` property contains all unpai
 
 Today uses the `Asia/Jerusalem` calendar to avoid deployment-server timezone changes. Due today is upcoming. This is an explicit Assistant calendar choice; existing unrelated task/Budget helpers are unchanged. Tests inject time, including an Israel/UTC date boundary.
 
-An overdue-only case reports overdue payments and no upcoming dated payment. Mixed cases report both groups. Undated obligations are called out. Budget arithmetic remains in the existing domain helper: committed is the sum of commitments, paid is the sum of paid amounts, available is total budget minus committed, and an unknown total produces unknown available budget. The Agent never asks a model to determine authoritative date classification or totals.
+An overdue-only case reports overdue payments and no upcoming dated payment. Mixed cases report both groups. Undated obligations are called out. Budget arithmetic remains in the existing domain helper: committed is the sum of commitments, paid is the sum of paid amounts, available is total budget minus the sum of each item’s max(active commitment, actual paid), and an unknown total produces unknown available budget. The Agent never asks a model to determine authoritative date classification or totals.
 
 ## Future research — contracts only (Phase 1C-A)
 
@@ -358,3 +358,9 @@ The response optionally carries Phase 1C-B `clarificationIntent`; the UI renders
 The composer has an accessible label, 44px send target, native language selector, normal Enter for newlines and Ctrl/Cmd+Enter to send without intercepting IME composition. Loading prevents duplicate submits; focus returns to the composer. Replies are validated before display; technical server strings are never rendered. Only a confirmed failed user-message insert offers direct retry and restores the draft. Unknown network/persistence outcomes are not automatically replayed. Unavailable history disables sending rather than treating a failed read as a new empty conversation.
 
 Real reasoning, external language services, live research, paid capabilities and product-data writes remain disabled. Full-site Hebrew/RTL, semantic quote extraction, external model memory and exhaustive Hebrew understanding remain outside this phase.
+
+
+Product finance integration update (no new Agent capability): payment read tools filter inactive
+booking schedules before bounded output/lookahead. The internal scan uses the existing 500-row
+batches and 10,000-row aggregate cap; reaching incomplete data returns unavailable. Output bounds,
+privacy/provenance, the ten READ registrations, and provider/research restrictions are unchanged.

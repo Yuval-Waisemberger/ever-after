@@ -1,9 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
+import * as scoring from "@/lib/domain/recommendation";
 
-const mocks = vi.hoisted(() => ({ configured: vi.fn(), fetch: vi.fn() }));
+const mocks = vi.hoisted(() => ({ configured: vi.fn(), fetch: vi.fn(), profile: vi.fn() }));
 vi.mock("@/lib/supabase/config", () => ({ isSupabaseConfigured: mocks.configured }));
-vi.mock("@/lib/auth/user", () => ({ getCurrentProfile: async () => null }));
+vi.mock("@/lib/auth/user", () => ({ getCurrentProfile: mocks.profile }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => createSupabaseClient(
   "https://example.supabase.co", "test-public-key",
   { global: { fetch: mocks.fetch }, auth: { persistSession: false, autoRefreshToken: false } },
@@ -12,16 +13,32 @@ import { getMarketplace, getMarketplaceSubcategories } from "@/lib/queries/vendo
 
 beforeEach(() => {
   vi.clearAllMocks();
+  mocks.profile.mockResolvedValue(null);
   vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", "https://example.supabase.co");
   mocks.configured.mockReturnValue(true);
   mocks.fetch.mockImplementation(async () => new Response("[]", {
     status: 200, headers: { "content-type": "application/json", "content-range": "0-0/22" },
   }));
 });
-afterEach(() => vi.unstubAllEnvs());
+afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
 const request = () => new URL(String(mocks.fetch.mock.calls[0][0]));
 
 describe("connected marketplace subcategory query", () => {
+  it.each([false, true])("uses paid budget impact for matching, with unknown finance on failure=%s", async unavailable => {
+    mocks.profile.mockResolvedValue({ role: "couple" });
+    const spy = vi.spyOn(scoring, "calculateRecommendation");
+    mocks.fetch.mockImplementation(async (input: string) => {
+      const url = new URL(String(input));
+      const table = url.pathname.split("/").at(-1);
+      const rows = table === "weddings" ? { id: "wedding", total_budget_minor: 170000, styles: [], preferred_area: null, guest_count: null, event_type: null }
+        : table === "budget_items" ? [{ committed_amount_minor: null, payments: [{ amount_minor: 20000, is_paid: true }] }]
+        : table === "couple_vendors" ? []
+        : [{ id: "vendor", slug: "studio", business_name: "Studio", is_public: true, vendor_categories: { slug: "photography-content", name: "Photography" }, vendor_images: [], reviews: [] }];
+      return new Response(JSON.stringify(unavailable && table === "budget_items" ? { message: "private failure" } : rows), { status: unavailable && table === "budget_items" ? 400 : 200, headers: { "content-type": "application/json", "content-range": "0-0/1" } });
+    });
+    await getMarketplace({ page: 1 });
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({ availableBudgetMinor: unavailable ? null : 150000 }), expect.anything());
+  });
   it("filters parent vendors with an inner join before count and pagination", async () => {
     const result = await getMarketplace({ category: "photography-content", subcategory: "wedding-photographers", page: 2 });
     const params = request().searchParams;

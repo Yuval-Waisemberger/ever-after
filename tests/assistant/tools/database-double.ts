@@ -18,7 +18,7 @@ export function task(value: number, overrides: Row = {}): Row {
   return { id: uuid(value), wedding_id: weddingId, title: `Task ${value}`, category: "Photography", due_date: "2026-09-08", status: "open", priority: "medium", notes: "PRIVATE_SENTINEL", ...overrides };
 }
 export function expense(value: number, overrides: Row = {}): Row {
-  return { id: uuid(value), wedding_id: weddingId, label: "Photographer", category: "Photography", estimated_amount_minor: 800000, committed_amount_minor: 1000000, notes: "PRIVATE_SENTINEL", ...overrides };
+  return { id: uuid(value), wedding_id: weddingId, source: "manual", couple_vendor_id: null, label: "Photographer", category: "Photography", estimated_amount_minor: 800000, committed_amount_minor: 1000000, notes: "PRIVATE_SENTINEL", ...overrides };
 }
 export function payment(value: number, overrides: Row = {}): Row {
   return { id: uuid(value), budget_item_id: uuid(300), label: "Deposit", amount_minor: 200000, due_date: "2026-09-08", is_paid: false, notes: "PRIVATE_SENTINEL", ...overrides };
@@ -46,7 +46,11 @@ export function database() {
   function hydrate(table: string, row: Row): Row {
     const find = (table: string, id: unknown) => state.tables[table]?.find((item) => item.id === id) ?? null;
     if (table === "vendor_profiles" || table === "external_vendors") return { ...row, vendor_categories: find("vendor_categories", row.category_id), vendor_subcategories: find("vendor_subcategories", row.subcategory_id) };
-    if (table === "payments") return { ...row, budget_items: find("budget_items", row.budget_item_id) };
+    if (table === "budget_items") return { ...row, couple_vendors: find("couple_vendors", row.couple_vendor_id) };
+    if (table === "payments") {
+      const item = find("budget_items", row.budget_item_id);
+      return { ...row, budget_items: item ? hydrate("budget_items", item) : null };
+    }
     if (table === "couple_vendors") {
       const publicVendor = find("vendor_profiles", row.vendor_id); const external = find("external_vendors", row.external_vendor_id);
       return { ...row, vendor_profiles: publicVendor ? hydrate("vendor_profiles", publicVendor) : null, external_vendors: external ? hydrate("external_vendors", external) : null };

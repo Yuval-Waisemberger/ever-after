@@ -146,17 +146,36 @@ and non-match cases.
 
 ## 10. Budget and payment rules
 
-For every budget item:
+Relationship lifecycle and agreed price are authoritative booking facts. Migration
+`202609050003_booked_vendor_budget_sync.sql` makes the database the sole writer of canonical
+`booked_vendor` commitments. `setVendorStatus` no longer writes Budget items. Marketplace and
+External Vendors use the same relationship trigger. Manual expenses remain independent/unlinked.
 
-- projected contribution = committed amount when set, otherwise estimated amount;
-- committed contribution = committed amount or zero;
-- paid contribution = sum of its paid payments.
+For every Budget item, `calculateBudgetImpact` calculates:
 
-Workspace totals are `projected`, `committed`, `paid`, `available = total - committed`, and
-`remaining committed = max(committed - paid, 0)`. Negative `available` is intentionally retained to
-show an over-budget state. Unpaid dated payments sort before undated payments. A payment cannot make
-the scheduled payment sum exceed its item's committed amount. Booking a vendor never silently creates
-an expense; the couple makes that financial decision explicitly.
+- active committed contribution = committed amount or zero;
+- paid contribution = sum of actual `is_paid` payment records;
+- budget impact = max(active committed contribution, paid contribution).
+
+Available = total budget minus SUM of item impacts, not max of the global totals. Unknown total
+budget yields unknown Available; negative Available remains visible. Remaining committed is the
+SUM of max(item commitment - item paid, 0), so overpayment of one expense never covers another.
+Projected/Estimated keeps its existing positive-commitment-or-estimate formula; retained estimates
+are planning information and never themselves reduce Available.
+
+Unbooking or clearing an agreed price removes commitment without deleting the canonical item or
+payments. Rebooking reuses it. Non-null legacy estimates are preserved. Unpaid schedules for an
+unbooked canonical item are historical/inactive and excluded from Dashboard and Assistant upcoming
+obligations; paid records always count. A price reduction can leave historical paid/scheduled totals
+above commitment. Budget displays a reconciliation notice and never assumes a refund.
+
+Payment INSERTs/increases lock the parent Budget row before summing schedules. The database rejects
+new obligations exceeding positive active commitment. Existing annotations, paid flags, reductions
+and explicit payment corrections remain possible after unbooking/reduction; no automatic payment
+rewriting occurs. The application provides early validation and safe errors; DB validation is final.
+
+See [BOOKED_VENDOR_BUDGET.md](BOOKED_VENDOR_BUDGET.md) for migration review, protections, and sequencing.
+The revised migration is **not applied to Frankfurt** by this implementation task.
 
 ## 11. Wedding Assistant
 

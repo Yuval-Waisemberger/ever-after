@@ -213,3 +213,29 @@ Messages render as React text, not HTML/Markdown injection. Bidi isolation chang
 The client validates replies and uses controlled localized error messages rather than raw API errors, SQL details or provider configuration strings. User-message persistence must succeed before generation, as before. Only an explicit failed user insert enables direct retry; no automatic replay follows an unknown network outcome. Failed history reads disable sending. Language and clarification metadata require no migration and add no private account fields to context.
 
 Phase 2 browser tests use synthetic in-memory conversations on an isolated local component host. All API responses are mocked and external browser requests are blocked; no live authenticated Assistant message is sent or Supabase QA row created. This does not substitute for future authorized live authentication/RLS integration testing. No AI SDK/key, paid service, product write tool or live research is enabled.
+
+
+## Database-owned booking commitments (050003, pending reviewed application)
+
+Canonical Budget rows cannot be created, detached, reclassified or have their commitment overridden
+by ordinary authenticated Budget writes. Manual items cannot acquire relationship links. The sync
+trigger uses SECURITY DEFINER with an empty search path, fixed SQL and no callable RPC interface;
+EXECUTE is revoked from PUBLIC/anon/authenticated. The Budget guard permits only the nested trigger
+running as that function's trusted migration owner, never a caller-settable configuration flag.
+Relationship identity/ownership is immutable, and existing RLS remains defense in depth.
+
+Deletion of a relationship with any linked canonical item is blocked, including External Vendor
+cascade deletion. Canonical Budget deletion is blocked; deletion of any expense with payment rows
+is also blocked. Consequently account/wedding hard-deletion with financial history requires a
+separate explicitly reviewed retention workflow, not an accidental cascade. Empty saved-only
+placeholders remain removable. Explicit authorized payment correction/deletion remains available;
+no sync path deletes or changes payments automatically.
+
+Schedule mutations lock their parent item to serialize totals with concurrent schedules and price
+changes. New amounts/increases must fit active commitment. Historical excess following a price
+reduction remains representable. Existing payment identity/parent cannot be moved. Payment actions
+require Couple ownership, reject unavailable validation reads, and return safe errors on DB failure.
+Budget/vendor failures never expose SQL text or claim a successful trigger transaction.
+
+Tests in this phase use isolated mocks/component fixtures only. No Frankfurt connection, mutation,
+new credentials, schema application, migration ledger change or AI capability is authorized here.

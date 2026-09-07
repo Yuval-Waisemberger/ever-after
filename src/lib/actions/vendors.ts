@@ -27,32 +27,32 @@ function refreshVendorViews() {
   revalidatePath("/assistant");
 }
 
-function redirectToReturn(formData: FormData) {
-  const returnTo = safeInternalPath(formData.get("returnTo"), "");
+function redirectToReturn(formData: FormData, outcome = "updated") {
+  const returnTo = safeInternalPath(formData.get("returnTo"), "/vendors/my");
   if (returnTo) {
     const separator = returnTo.includes("?") ? "&" : "?";
-    redirect(`${returnTo}${separator}relationship=updated`);
+    redirect(`${returnTo}${separator}relationship=${outcome}`);
   }
 }
 
 export async function setVendorStatus(formData: FormData) {
   const parsed = vendorStatusSchema.safeParse(formObject(formData));
+  if (!parsed.success) redirectToReturn(formData, "error");
   if (!parsed.success) return;
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
   const isDetailsForm = formData.get("detailsMode") === "true";
   const { data: currentRelationship, error: currentRelationshipError } = await supabase
     .from("couple_vendors")
-    .select("is_saved")
+    .select("id")
     .eq("wedding_id", wedding.id)
     .eq("vendor_id", parsed.data.vendorId)
     .maybeSingle();
-  if (currentRelationshipError) return;
+  if (currentRelationshipError) redirectToReturn(formData, "error");
   const values = {
     wedding_id: wedding.id,
     vendor_id: parsed.data.vendorId,
     status: parsed.data.status,
-    is_saved: currentRelationship?.is_saved === true,
     ...(isDetailsForm
       ? {
           agreed_price_minor:
@@ -63,30 +63,14 @@ export async function setVendorStatus(formData: FormData) {
         }
       : {}),
   };
-  const { data: relationship, error } = await supabase.from("couple_vendors").upsert(
-    values,
-    { onConflict: "wedding_id,vendor_id" },
-  ).select("id").single();
-  if (error || !relationship) return;
+  // One relationship write. Its database trigger owns the financial transaction.
+  // Updating an existing row never rewrites the independent bookmark flag.
+  const mutation = currentRelationship
+    ? supabase.from("couple_vendors").update(values).eq("id", currentRelationship.id).eq("wedding_id", wedding.id)
+    : supabase.from("couple_vendors").insert({ ...values, is_saved: false });
+  const { data: relationship, error } = await mutation.select("id").single();
+  if (error || !relationship) redirectToReturn(formData, "error");
 
-  if (isDetailsForm && parsed.data.status === "booked" && parsed.data.agreedPriceShekels != null) {
-    const committedAmountMinor = parsed.data.agreedPriceShekels * 100;
-    const [{ data: existingItem }, { data: vendor }] = await Promise.all([
-      supabase.from("budget_items").select("id").eq("wedding_id", wedding.id).eq("couple_vendor_id", relationship.id).order("created_at").limit(1).maybeSingle(),
-      supabase.from("vendor_profiles").select("business_name, vendor_subcategories(name), vendor_categories(name)").eq("id", parsed.data.vendorId).single(),
-    ]);
-    const subcategory = Array.isArray(vendor?.vendor_subcategories) ? vendor.vendor_subcategories[0] : vendor?.vendor_subcategories;
-    const category = Array.isArray(vendor?.vendor_categories) ? vendor.vendor_categories[0] : vendor?.vendor_categories;
-    const budgetValues = {
-      wedding_id: wedding.id,
-      couple_vendor_id: relationship.id,
-      label: vendor?.business_name ?? "Booked vendor",
-      category: subcategory?.name ?? category?.name ?? "Vendor",
-      committed_amount_minor: committedAmountMinor,
-    };
-    if (existingItem) await supabase.from("budget_items").update(budgetValues).eq("id", existingItem.id).eq("wedding_id", wedding.id);
-    else await supabase.from("budget_items").insert(budgetValues);
-  }
   refreshVendorViews();
   redirectToReturn(formData);
 }
@@ -96,12 +80,13 @@ export async function setMarketplaceVendorSaved(formData: FormData) {
   if (!parsed.success) return;
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const { data: relationship } = await supabase.from("couple_vendors")
+  const { data: relationship, error: relationshipReadError } = await supabase.from("couple_vendors")
     .select("id, status, agreed_price_minor, private_notes, contact_override, payment_reference, external_vendor_id")
     .eq("wedding_id", wedding.id)
     .eq("vendor_id", parsed.data.vendorId)
     .maybeSingle();
 
+  if (relationshipReadError) redirectToReturn(formData, "error");
   if (!relationship) {
     if (!parsed.data.isSaved) return;
     const { error } = await supabase.from("couple_vendors").insert({
@@ -118,10 +103,11 @@ export async function setMarketplaceVendorSaved(formData: FormData) {
       .eq("wedding_id", wedding.id);
     if (error) return;
   } else {
-    const { count: budgetItemCount } = await supabase.from("budget_items")
+    const { count: budgetItemCount, error: budgetReadError } = await supabase.from("budget_items")
       .select("id", { count: "exact", head: true })
       .eq("wedding_id", wedding.id)
       .eq("couple_vendor_id", relationship.id);
+    if (budgetReadError || budgetItemCount == null) redirectToReturn(formData, "error");
     const shouldDelete = shouldDeleteAfterUnsave({
       status: relationship.status as StoredVendorStatus,
       agreedPriceMinor: relationship.agreed_price_minor == null ? null : Number(relationship.agreed_price_minor),
@@ -146,21 +132,23 @@ export async function setRelationshipSaved(formData: FormData) {
   if (!parsed.success) return;
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const { data: relationship } = await supabase.from("couple_vendors")
+  const { data: relationship, error: relationshipReadError } = await supabase.from("couple_vendors")
     .select("id, status, agreed_price_minor, private_notes, contact_override, payment_reference, external_vendor_id")
     .eq("id", parsed.data.relationshipId)
     .eq("wedding_id", wedding.id)
     .maybeSingle();
+  if (relationshipReadError || !relationship) redirectToReturn(formData, "error");
   if (!relationship) return;
 
   if (parsed.data.isSaved) {
     const { error } = await supabase.from("couple_vendors").update({ is_saved: true }).eq("id", relationship.id).eq("wedding_id", wedding.id);
     if (error) return;
   } else {
-    const { count: budgetItemCount } = await supabase.from("budget_items")
+    const { count: budgetItemCount, error: budgetReadError } = await supabase.from("budget_items")
       .select("id", { count: "exact", head: true })
       .eq("wedding_id", wedding.id)
       .eq("couple_vendor_id", relationship.id);
+    if (budgetReadError || budgetItemCount == null) redirectToReturn(formData, "error");
     const shouldDelete = shouldDeleteAfterUnsave({
       status: relationship.status as StoredVendorStatus,
       agreedPriceMinor: relationship.agreed_price_minor == null ? null : Number(relationship.agreed_price_minor),
@@ -218,11 +206,11 @@ export async function saveExternalVendor(
       .eq("id", parsed.data.externalVendorId)
       .eq("wedding_id", wedding.id);
     if (externalError) return { status: "error", message: "The external vendor details could not be saved." };
-    const { error: relationshipError } = await supabase.from("couple_vendors")
+    const { data: savedRelationship, error: relationshipError } = await supabase.from("couple_vendors")
       .update(relationshipValues)
       .eq("id", parsed.data.relationshipId)
-      .eq("wedding_id", wedding.id);
-    if (relationshipError) return { status: "error", message: "The relationship details could not be saved." };
+      .eq("wedding_id", wedding.id).select("id").single();
+    if (relationshipError || !savedRelationship) return { status: "error", message: "The booking and budget could not be saved. Please try again." };
     refreshVendorViews();
     return { status: "success", message: "External vendor updated." };
   }
@@ -251,11 +239,11 @@ export async function deleteExternalVendor(formData: FormData) {
   if (!parsed.success) return;
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const { error } = await supabase.from("external_vendors")
+  const { data, error } = await supabase.from("external_vendors")
     .delete()
     .eq("id", parsed.data.externalVendorId)
-    .eq("wedding_id", wedding.id);
-  if (error) return;
+    .eq("wedding_id", wedding.id).select("id").single();
+  if (error || !data) redirect("/vendors/my?relationship=financial-history");
   refreshVendorViews();
 }
 

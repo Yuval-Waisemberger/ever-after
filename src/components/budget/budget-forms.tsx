@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+
 import { useActionState } from "react";
 import { saveBudgetItem, savePayment, setTotalBudget } from "@/lib/actions/budget";
 import { initialActionState } from "@/lib/actions/state";
@@ -16,13 +18,8 @@ export function TotalBudgetForm({ totalMinor }: { totalMinor: number | null }) {
   return <form action={action} className="grid gap-3"><Feedback state={state} /><FormField name="totalBudgetShekels" type="number" min={0} label="Total wedding budget (₪)" defaultValue={totalMinor == null ? "" : totalMinor / 100} /><SubmitButton className="justify-self-start" pendingLabel="Saving…">Save total budget</SubmitButton></form>;
 }
 
-type BookedRelationship = {
-  id: string;
-  agreed_price_minor: number | string | null;
-  vendor_profiles: { business_name: string } | Array<{ business_name: string }> | null;
-};
-
 type BudgetItemInitial = {
+  source?: "manual" | "booked_vendor";
   id?: string;
   coupleVendorId?: string | null;
   label?: string;
@@ -32,7 +29,8 @@ type BudgetItemInitial = {
   notes?: string | null;
 };
 
-export function BudgetItemForm({ booked, initial = {} }: { booked: BookedRelationship[]; initial?: BudgetItemInitial }) {
+export function BudgetItemForm({ initial = {} }: { initial?: BudgetItemInitial }) {
+  const canonical = initial.source === "booked_vendor";
   const [state, action] = useActionState(saveBudgetItem, initialActionState);
   return (
     <form action={action} className="grid gap-4">
@@ -42,8 +40,8 @@ export function BudgetItemForm({ booked, initial = {} }: { booked: BookedRelatio
         <FormField name="label" label="Expense" placeholder="Photographer" defaultValue={initial.label ?? ""} required />
         <label className="grid gap-2 text-sm font-semibold">Category (optional)<select name="category" defaultValue={initial.category ?? ""} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal"><option value="">No category</option>{initial.category && !BUDGET_CATEGORIES.includes(initial.category as typeof BUDGET_CATEGORIES[number]) ? <option value={initial.category}>{initial.category}</option> : null}{BUDGET_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}</select></label>
       </div>
-      <label className="grid gap-2 text-sm font-semibold">Booked vendor (optional)<select name="coupleVendorId" defaultValue={initial.coupleVendorId ?? ""} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal"><option value="">No linked vendor</option>{booked.map((relationship) => { const vendor = Array.isArray(relationship.vendor_profiles) ? relationship.vendor_profiles[0] : relationship.vendor_profiles; return <option key={relationship.id} value={relationship.id}>{vendor?.business_name ?? "Booked vendor"}</option>; })}</select></label>
-      <div className="grid gap-4 sm:grid-cols-2"><FormField name="estimatedShekels" type="number" min={0} label="Estimated (₪)" defaultValue={initial.estimatedMinor == null ? "" : initial.estimatedMinor / 100} /><FormField name="committedShekels" type="number" min={0} label="Committed (₪)" defaultValue={initial.committedMinor == null ? "" : initial.committedMinor / 100} /></div>
+      {canonical ? <p className="text-sm text-ink-soft">The committed amount is managed from <Link href="/vendors/my" className="font-semibold text-wine underline">vendor booking details</Link>. This expense stays linked when the booking is inactive.</p> : <p className="text-sm text-ink-soft">Manual expenses are independent. Manage vendor commitments in <Link href="/vendors/my" className="font-semibold text-wine underline">Our Vendors</Link>.</p>}
+      <div className="grid gap-4 sm:grid-cols-2"><FormField name="estimatedShekels" type="number" min={0} label="Estimated (₪)" defaultValue={initial.estimatedMinor == null ? "" : initial.estimatedMinor / 100} />{!canonical ? <FormField name="committedShekels" type="number" min={0} label="Committed (₪)" defaultValue={initial.committedMinor == null ? "" : initial.committedMinor / 100} /> : null}</div>
       <label className="grid gap-2 text-sm font-semibold">Notes (optional)<textarea name="notes" rows={3} defaultValue={initial.notes ?? ""} className="rounded-xl border bg-paper px-3.5 py-3 text-base font-normal" /></label>
       <SubmitButton className="justify-self-start" pendingLabel={initial.id ? "Saving expense…" : "Adding expense…"}>{initial.id ? "Save expense" : "Add expense"}</SubmitButton>
     </form>

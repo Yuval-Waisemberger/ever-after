@@ -41,7 +41,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
       .select("status, is_saved, agreed_price_minor, vendor_profiles(id, business_name, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name)")
       .eq("wedding_id", wedding.id)),
     readAssistantSection("budget", () => supabase.from("budget_items")
-      .select("estimated_amount_minor, committed_amount_minor, payments(amount_minor, is_paid, due_date)")
+      .select("source, couple_vendors(status), estimated_amount_minor, committed_amount_minor, payments(amount_minor, is_paid, due_date)")
       .eq("wedding_id", wedding.id)),
   ]);
   // A successful empty array means no records. Failure/null data never means zero.
@@ -50,6 +50,8 @@ export async function getAssistantContext(): Promise<AssistantContext> {
   const budget = calculateBudgetSummary(wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor), budgetResult.data.map((item) => {
     if (!item.payments) throw new AssistantContextUnavailableError("budget");
     return {
+      source: item.source as "manual" | "booked_vendor",
+      relationshipStatus: (Array.isArray(item.couple_vendors) ? item.couple_vendors[0] : item.couple_vendors)?.status ?? null,
       estimatedAmountMinor: item.estimated_amount_minor == null ? null : Number(item.estimated_amount_minor),
       committedAmountMinor: item.committed_amount_minor == null ? null : Number(item.committed_amount_minor),
       payments: item.payments.map((payment) => ({ amountMinor: Number(payment.amount_minor), isPaid: payment.is_paid, dueDate: payment.due_date })),
@@ -84,7 +86,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
     vendors,
     budget: {
       committedMinor: budget.committedMinor, paidMinor: budget.paidMinor, availableMinor: budget.availableMinor,
-      // The shared budget helper's legacy upcomingPayments field contains ALL unpaid payments.
+      // The shared budget helper's legacy upcomingPayments field contains active unpaid payments (including overdue).
       unpaidPayments: budget.upcomingPayments.map((payment) => ({ amountMinor: payment.amountMinor, dueDate: payment.dueDate ?? null })),
     },
   };

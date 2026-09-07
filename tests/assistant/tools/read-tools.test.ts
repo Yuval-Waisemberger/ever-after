@@ -187,6 +187,19 @@ describe("budget and payment reads", () => {
     expect(result.upcoming).toHaveLength(20); expect(result.hasMore.upcoming).toBe(true);
     expect(await executeAssistantReadTool("get_upcoming_payments", { limitPerGroup: 21 })).toMatchObject({ error: { code: "INVALID_INPUT" } });
   });
+  it("filters inactive schedules before lookahead and retains actual paid budget impact", async () => {
+    db.state.tables.couple_vendors = [relation(900, { status: "rejected" })];
+    db.state.tables.budget_items = [expense(300, { source: "booked_vendor", couple_vendor_id: uuid(900), committed_amount_minor: null }), expense(302)];
+    db.state.tables.payments = [
+      ...Array.from({ length: 25 }, (_, i) => payment(700 + i)),
+      payment(800, { is_paid: true, amount_minor: 200000 }),
+      payment(801, { budget_item_id: uuid(302) }),
+    ];
+    const result = await data("get_upcoming_payments", c.paymentData, { limitPerGroup: 1 });
+    expect(result.upcoming.map(p => p.id)).toEqual([uuid(801)]);
+    expect(result.hasMore.upcoming).toBe(false);
+    expect((await data("get_budget_summary", c.budgetData)).availableMinor).toBe(16800000);
+  });
   it("returns EMPTY when there are no unpaid payments, UNAVAILABLE on read failures", async () => {
     db.state.tables.payments = [payment(600, { is_paid: true })];
     expect(await executeAssistantReadTool("get_upcoming_payments")).toMatchObject({ status: "empty", data: { overdue: [], upcoming: [], undated: [] } });

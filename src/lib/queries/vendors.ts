@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { getCurrentProfile } from "@/lib/auth/user";
 import { calculateRecommendation } from "@/lib/domain/recommendation";
+import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import { demoVendors } from "@/lib/vendors/demo";
@@ -135,14 +136,20 @@ async function getWeddingRecommendationContext() {
     .select("id, preferred_area, total_budget_minor, styles, guest_count, event_type")
     .single();
   if (!wedding) return null;
-  const [{ data: items }, { data: relationships }] = await Promise.all([
-    supabase.from("budget_items").select("committed_amount_minor").eq("wedding_id", wedding.id),
+  const [{ data: items, error: budgetError }, { data: relationships, error: relationshipError }] = await Promise.all([
+    supabase.from("budget_items").select("committed_amount_minor, payments(amount_minor, is_paid)").eq("wedding_id", wedding.id),
     supabase.from("couple_vendors").select("vendor_id, status, is_saved").eq("wedding_id", wedding.id).not("vendor_id", "is", null),
   ]);
-  const committed = (items ?? []).reduce((sum, item) => sum + Number(item.committed_amount_minor ?? 0), 0);
+  if (relationshipError || !relationships) throw new Error("Your vendor relationships could not be loaded.");
+  // Unavailable finance means an unknown match dimension, never a fabricated full budget.
+  const available = budgetError || !items || items.some(item => !item.payments) ? null
+    : calculateBudgetSummary(wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor), items.map(item => ({
+      committedAmountMinor: item.committed_amount_minor == null ? null : Number(item.committed_amount_minor),
+      payments: item.payments.map(p => ({ amountMinor: Number(p.amount_minor), isPaid: p.is_paid })),
+    }))).availableMinor;
   return {
     preferredArea: wedding.preferred_area,
-    availableBudgetMinor: wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor) - committed,
+    availableBudgetMinor: available,
     styles: wedding.styles,
     guestCount: wedding.guest_count,
     eventType: wedding.event_type,
