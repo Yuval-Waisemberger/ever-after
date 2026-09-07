@@ -52,7 +52,7 @@ The output contains the actual wedding details, bounded tasks/vendor relationshi
 
 No checklist dataset is created. Vendor-gap candidates come from explicit requested service categories, the known wedding's venue dependency, and a small mapping of stored Photography/Music/Design priorities to actual vendor taxonomy. The mapping translates existing Setup labels and taxonomy slugs, not English user intent. Other services are not universally assumed necessary. The current persisted model has no per-category low-priority flag; a validated, explicitly user-requested `lowerPriorityCategories` preference may reduce non-venue urgency without pretending it is stored Wedding Details. Unselected priorities are not assumed low priority.
 
-Either a Setup booking or an actual Booked relationship suppresses a gap signal. Gaps mean **not recorded booked**, not proof that the Couple lacks a vendor outside Ever After. Gaps stay unknown if wedding/vendor evidence is unavailable, the vendor selection is filtered/paginated, or an unclassified booking could cover the service. This bounded foundation does not scan all relationship pages automatically. Preferred missing services near the wedding get elevated priority; lower-priority services stay low, while venue dependency can remain urgent. It never invents vendor arrival/contact details, transport arrangements, venue instructions or a wedding-day schedule.
+Only a real Booked relationship confirms a booking. A Setup declaration suppresses a generic search signal but produces `vendor_details_needed`; it never produces a confirmed booking. The shared `booking-state` domain distinguishes confirmed, reported/details-later, not-recorded and unknown/review states. Legacy venue status/name is declaration metadata only. Gaps mean **not recorded booked**, not proof that the Couple lacks a vendor outside Ever After. Gaps stay unknown if wedding/vendor evidence is unavailable, the vendor selection is filtered/paginated, or an unclassified booking could cover the service. This bounded foundation does not scan all relationship pages automatically. Preferred missing services near the wedding get elevated priority; lower-priority services stay low, while venue dependency can remain urgent. It never invents vendor arrival/contact details, transport arrangements, venue instructions or a wedding-day schedule.
 
 Non-completed overdue tasks, actual scheduled tasks, unpaid deadlines and undated obligations produce referenced signals. An overcommitted budget uses the existing negative available amount, not a model calculation or market judgment. In the final month/week/day, actual awaiting-response and not-yet-invited aggregate counts produce readiness signals. Post-wedding state keeps real task/payment obligations but stops pre-wedding booking/RSVP signals. It does not create a made-up post-wedding checklist.
 
@@ -257,7 +257,7 @@ Ever After owns `src/lib/assistant/tools/registry.ts`. Its exact allowlist conta
 
 | Tool | Input (all optional unless stated) | Validated data output and bounds |
 | --- | --- | --- |
-| `get_wedding_summary` | `{}` | Date, guest estimate, area, event type, styles, priorities, total budget, setup status, venue state/name and booked setup categories. One planning record; null remains unknown. |
+| `get_wedding_summary` | `{}` | Date, guest estimate, area, event type, styles, priorities, total budget, setup status, legacy venue state/name, details-later category declarations and explicit derived `bookingStates`. One planning record; null remains unknown. |
 | `list_tasks` | `view`: all (default), open, completed, overdue, due_soon; exact `status`, `priority`; `page`, `limit` | Task ID/title/category/due date/priority/status, pagination, as-of date. Default 25, maximum 50. Filters intersect; open includes in-progress. Due soon is today through seven days ahead inclusive; overdue excludes completed. |
 | `get_timeline_summary` | `page`, `limit`, `includeCompleted` (false) | A page of dated Tasks grouped as overdue, due_soon (0–7 days), upcoming (8–30), later (31+), optionally completed. Existing relative timeline label per task when wedding date exists; otherwise null. Default 25, maximum 50 tasks across all groups, not per group. |
 | `get_budget_summary` | `{}` | `totalBudgetMinor`, `projectedMinor`, `committedMinor`, `paidMinor`, `availableMinor`, `remainingCommittedMinor`. Complete application-calculated totals only. |
@@ -364,3 +364,12 @@ Product finance integration update (no new Agent capability): payment read tools
 booking schedules before bounded output/lookahead. The internal scan uses the existing 500-row
 batches and 10,000-row aggregate cap; reaching incomplete data returns unavailable. Output bounds,
 privacy/provenance, the ten READ registrations, and provider/research restrictions are unchanged.
+
+
+Setup integration does not add an Agent capability. `get_wedding_summary` uses the same minimal
+relationship reader as Setup, with a 200-relationship bound and explicit unknown states on
+failed/incomplete reads. Its booking-state output contains category state and relationship IDs,
+not notes/contacts. The existing Local provider still describes only actual relationship bookings.
+The roadmap uses fresh vendor evidence and the shared category mapping; stale declarations beside
+unbooked relationships require review. Guest context remains aggregate-only. The ten internal
+READ tools, provider restrictions and non-live research remain unchanged.

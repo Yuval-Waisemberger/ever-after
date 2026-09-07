@@ -80,6 +80,17 @@ describe("registry and authorization", () => {
 });
 
 describe("wedding and missing details", () => {
+  it("exposes declarations as details later and failed booking reads as unknown", async () => {
+    db.state.tables.couple_vendors = [];
+    let result = await data("get_wedding_summary", c.weddingData);
+    expect(result.bookingStates?.find(s => s.category === "venue")?.state).toBe("REPORTED_ARRANGED_DETAILS_LATER");
+    db.state.tables.couple_vendors = [relation(900, { status: "rejected" })];
+    db.state.tables.weddings[0].booked_categories = ["Photographer"];
+    result = await data("get_wedding_summary", c.weddingData);
+    expect(result.bookingStates?.find(s => s.category === "photographer")?.state).not.toBe("CONFIRMED_BOOKED");
+    expect(JSON.stringify(result)).not.toContain("PRIVATE_SENTINEL");
+  });
+
   it("returns only existing planning fields without contacts or account metadata", async () => {
     const result = await data("get_wedding_summary", c.weddingData);
     expect(result.venueName).toBe("Our Venue"); expect(result.bookedCategories).toEqual(["Venue"]);
@@ -88,7 +99,7 @@ describe("wedding and missing details", () => {
     expect(db.state.calls.filter((call) => call.table === "weddings").every((call) => !call.selection?.includes("*"))).toBe(true);
   });
   it("identifies actual missing facts and retains optional budget zero as known", async () => {
-    Object.assign(db.state.tables.weddings[0], { wedding_date: null, guest_count: null, preferred_area: null, event_type: "undecided", styles: [], priorities: [], total_budget_minor: 0, venue_status: null, venue_name: null, setup_status: "skipped" });
+    Object.assign(db.state.tables.weddings[0], { wedding_date: null, guest_count: null, preferred_area: null, event_type: "undecided", styles: [], priorities: [], total_budget_minor: 0, venue_status: null, venue_name: null, booked_categories: [], setup_status: "skipped" });
     const result = await data("get_missing_wedding_details", c.missingData);
     expect(result.fields.map((field) => field.field)).toEqual(["weddingDate", "guestCount", "preferredArea", "eventType", "styles", "priorities", "venueStatus"]);
     expect(result.fields[0].limits).toContain("timeline_advice"); expect(result.setupComplete).toBe(false);

@@ -5,9 +5,9 @@ import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { calculateTaskSummary, type TaskStatus } from "@/lib/domain/tasks";
 
 export const getOwnedWedding = cache(async () => {
-  await requireRole("couple");
+  const profile = await requireRole("couple");
   const supabase = await createClient();
-  const { data, error } = await supabase.from("weddings").select("*").single();
+  const { data, error } = await supabase.from("weddings").select("*").eq("owner_user_id", profile.id).single();
   if (error || !data) throw new Error("Wedding details could not be loaded.");
   return data;
 });

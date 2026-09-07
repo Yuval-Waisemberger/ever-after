@@ -1,5 +1,6 @@
 "use server";
 
+import { writeMarketplaceRelationship, createExternalRelationship } from "@/lib/vendors/relationship-write";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -23,6 +24,8 @@ function refreshVendorViews() {
   revalidatePath("/vendors");
   revalidatePath("/vendors/my");
   revalidatePath("/wedding");
+  revalidatePath("/wedding/setup");
+  revalidatePath("/wedding/details");
   revalidatePath("/budget");
   revalidatePath("/assistant");
 }
@@ -42,33 +45,8 @@ export async function setVendorStatus(formData: FormData) {
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
   const isDetailsForm = formData.get("detailsMode") === "true";
-  const { data: currentRelationship, error: currentRelationshipError } = await supabase
-    .from("couple_vendors")
-    .select("id")
-    .eq("wedding_id", wedding.id)
-    .eq("vendor_id", parsed.data.vendorId)
-    .maybeSingle();
-  if (currentRelationshipError) redirectToReturn(formData, "error");
-  const values = {
-    wedding_id: wedding.id,
-    vendor_id: parsed.data.vendorId,
-    status: parsed.data.status,
-    ...(isDetailsForm
-      ? {
-          agreed_price_minor:
-            parsed.data.agreedPriceShekels == null
-              ? null
-              : parsed.data.agreedPriceShekels * 100,
-          private_notes: parsed.data.privateNotes,
-        }
-      : {}),
-  };
-  // One relationship write. Its database trigger owns the financial transaction.
-  // Updating an existing row never rewrites the independent bookmark flag.
-  const mutation = currentRelationship
-    ? supabase.from("couple_vendors").update(values).eq("id", currentRelationship.id).eq("wedding_id", wedding.id)
-    : supabase.from("couple_vendors").insert({ ...values, is_saved: false });
-  const { data: relationship, error } = await mutation.select("id").single();
+  const { data: relationship, error } = await writeMarketplaceRelationship(supabase, wedding.id, parsed.data.vendorId, parsed.data.status,
+    isDetailsForm ? { agreed_price_minor: parsed.data.agreedPriceShekels == null ? null : parsed.data.agreedPriceShekels * 100, private_notes: parsed.data.privateNotes } : {});
   if (error || !relationship) redirectToReturn(formData, "error");
 
   refreshVendorViews();
@@ -215,21 +193,8 @@ export async function saveExternalVendor(
     return { status: "success", message: "External vendor updated." };
   }
 
-  const { data: externalVendor, error: externalError } = await supabase.from("external_vendors")
-    .insert(externalValues)
-    .select("id")
-    .single();
-  if (externalError || !externalVendor) return { status: "error", message: "The external vendor could not be added." };
-  const { error: relationshipError } = await supabase.from("couple_vendors").insert({
-    wedding_id: wedding.id,
-    vendor_id: null,
-    external_vendor_id: externalVendor.id,
-    ...relationshipValues,
-  });
-  if (relationshipError) {
-    await supabase.from("external_vendors").delete().eq("id", externalVendor.id).eq("wedding_id", wedding.id);
-    return { status: "error", message: "The external vendor relationship could not be created." };
-  }
+  const created = await createExternalRelationship(supabase, wedding.id, externalValues, relationshipValues);
+  if (!created.ok) return { status: "error", message: "The external vendor could not be confirmed. Refresh Our Vendors before trying again." };
   refreshVendorViews();
   return { status: "success", message: "External vendor added to Our Vendors." };
 }

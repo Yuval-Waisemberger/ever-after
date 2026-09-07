@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedWedding } from "@/lib/queries/wedding";
 import { weddingDetailsSchema, weddingSetupSchema } from "@/lib/validation/wedding";
-import { isWeddingSetupComplete } from "@/lib/domain/wedding-setup";
+import { weddingSetupStatus } from "@/lib/domain/wedding-setup";
 import type { ActionState } from "./state";
 
 function rawWeddingValues(formData: FormData) {
@@ -26,14 +26,13 @@ function rawWeddingValues(formData: FormData) {
 function weddingUpdate(data: Awaited<ReturnType<typeof weddingSetupSchema.parse>>) {
   return {
     wedding_date: data.weddingDate,
-    venue_status: data.venueStatus,
-    venue_name: data.venueStatus === "booked" ? data.venueName : null,
+
     guest_count: data.guestCount,
     preferred_area: data.preferredArea,
     event_type: data.eventType,
     styles: data.styles,
     priorities: data.priorities,
-    booked_categories: data.bookedCategories,
+
     total_budget_minor:
       data.totalBudgetShekels == null ? null : data.totalBudgetShekels * 100,
   };
@@ -43,27 +42,32 @@ export async function completeWeddingSetup(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const parsed = weddingSetupSchema.safeParse(rawWeddingValues(formData));
-  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
   const wedding = await getOwnedWedding();
+  const parsed = weddingSetupSchema.safeParse({ ...rawWeddingValues(formData), venueStatus: wedding.venue_status, venueName: wedding.venue_name, bookedCategories: wedding.booked_categories });
+  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
+  if (formData.get("revision") !== wedding.updated_at) return { status: "error", message: "Wedding Details changed since this form opened. Reload before saving; your unsaved entries have not been applied." };
   const supabase = await createClient();
   const { data: saved, error } = await supabase
     .from("weddings")
-    .update({ ...weddingUpdate(parsed.data), setup_status: "completed" })
+    .update({ ...weddingUpdate(parsed.data), setup_status: weddingSetupStatus(parsed.data) })
     .eq("id", wedding.id)
+    .eq("updated_at", String(formData.get("revision")))
     .select("id")
     .single();
   if (error || !saved) return { status: "error", message: "Wedding Setup could not be saved." };
-  revalidatePath("/wedding");
-  revalidatePath("/wedding/details");
-  redirect("/wedding?setup=complete");
+  refreshWeddingViews(true, wedding.total_budget_minor == null ? parsed.data.totalBudgetShekels != null : Number(wedding.total_budget_minor) !== (parsed.data.totalBudgetShekels == null ? null : parsed.data.totalBudgetShekels * 100));
+  redirect(weddingSetupStatus(parsed.data) === "completed" ? "/wedding?setup=complete" : "/wedding?setup=partial");
 }
 
-export async function skipWeddingSetup() {
+export async function skipWeddingSetup(previous: ActionState): Promise<ActionState> {
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  await supabase.from("weddings").update({ setup_status: "skipped" }).eq("id", wedding.id);
-  revalidatePath("/wedding");
+  void previous;
+  try {
+    const { data, error } = await supabase.from("weddings").update({ setup_status: "skipped" }).eq("id", wedding.id).select("id").single();
+    if (error || !data) return { status: "error", message: "Setup could not be skipped. Please try again." };
+  } catch { return { status: "error", message: "Setup could not be skipped. Please try again." }; }
+  refreshWeddingViews();
   redirect("/wedding");
 }
 
@@ -71,20 +75,17 @@ export async function saveWeddingDetails(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
+  const wedding = await getOwnedWedding();
   const parsed = weddingDetailsSchema.safeParse({
     ...rawWeddingValues(formData),
+    venueStatus: wedding.venue_status, venueName: wedding.venue_name, bookedCategories: wedding.booked_categories,
     partnerOneName: formData.get("partnerOneName"),
     partnerTwoName: formData.get("partnerTwoName"),
   });
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
-  const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const setupComplete = isWeddingSetupComplete(parsed.data);
-  const setupStatus = setupComplete
-    ? "completed"
-    : wedding.setup_status === "completed"
-      ? "skipped"
-      : wedding.setup_status;
+  if (formData.get("revision") !== wedding.updated_at) return { status: "error", message: "Wedding Details changed since this form opened. Reload before saving; your unsaved entries have not been applied." };
+  const setupStatus = weddingSetupStatus(parsed.data);
   const { data: saved, error } = await supabase
     .from("weddings")
     .update({
@@ -94,13 +95,18 @@ export async function saveWeddingDetails(
       setup_status: setupStatus,
     })
     .eq("id", wedding.id)
+    .eq("updated_at", String(formData.get("revision")))
     .select("id")
     .single();
   if (error || !saved) return { status: "error", message: "Wedding Details could not be saved." };
-  revalidatePath("/wedding");
-  revalidatePath("/wedding/details");
-  revalidatePath("/wedding/timeline");
-  revalidatePath("/vendors");
-  revalidatePath("/assistant");
+  refreshWeddingViews(true, wedding.total_budget_minor == null ? parsed.data.totalBudgetShekels != null : Number(wedding.total_budget_minor) !== (parsed.data.totalBudgetShekels == null ? null : parsed.data.totalBudgetShekels * 100));
+
   redirect("/wedding?details=updated");
+}
+
+function refreshWeddingViews(preferences = false, budget = false) {
+  const paths = ["/wedding", "/wedding/setup", "/wedding/details"];
+  if (preferences) paths.push("/wedding/timeline", "/vendors", "/assistant");
+  if (budget) paths.push("/budget");
+  for (const path of paths) revalidatePath(path);
 }

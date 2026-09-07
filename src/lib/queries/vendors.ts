@@ -202,8 +202,8 @@ export async function getMarketplace(filters: VendorFilters) {
   const from = (filters.page - 1) * PAGE_SIZE;
   const [marketplaceResult, context] = await Promise.all([
     filters.minRating == null
-      ? query.order("business_name").range(from, from + PAGE_SIZE - 1)
-      : query.order("business_name"),
+      ? query.order("business_name").order("id").range(from, from + PAGE_SIZE - 1)
+      : query.order("business_name").order("id"),
     getWeddingRecommendationContext(),
   ]);
   const { data, error, count } = marketplaceResult;

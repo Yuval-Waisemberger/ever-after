@@ -1,3 +1,4 @@
+import { BOOKING_CATEGORIES } from "@/lib/domain/booking-state";
 import { z } from "zod";
 
 export const WEDDING_STYLES = [
@@ -28,21 +29,7 @@ export const WEDDING_PRIORITIES = [
   "Luxury experience",
 ] as const;
 
-export const BOOKED_CATEGORIES = [
-  "Venue",
-  "Photographer",
-  "Videographer",
-  "DJ",
-  "Wedding dress",
-  "Suit",
-  "Makeup and hair",
-  "Event design",
-  "Flowers",
-  "Rabbi / officiant",
-  "Event manager",
-  "Transportation",
-  "Other",
-] as const;
+export const BOOKED_CATEGORIES = BOOKING_CATEGORIES.map(c => c.label);
 
 export const AREAS = [
   ["central_israel", "Central Israel"],

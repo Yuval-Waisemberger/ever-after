@@ -15,12 +15,16 @@ export type WeddingSetupCompletionInput = {
  */
 export function isWeddingSetupComplete(value: WeddingSetupCompletionInput) {
   return Boolean(
-    value.venueStatus &&
-      (value.venueStatus !== "booked" || value.venueName) &&
+    (value.venueStatus !== "booked" || value.venueName) &&
       value.guestCount &&
       value.preferredArea &&
       value.eventType &&
       value.styles.length > 0 &&
       value.priorities.length > 0,
   );
+}
+
+/** Untouched accounts start not_started; explicit Skip/partial saves are skipped. */
+export function weddingSetupStatus(value: WeddingSetupCompletionInput): "completed" | "skipped" {
+  return isWeddingSetupComplete(value) ? "completed" : "skipped";
 }

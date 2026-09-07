@@ -1,3 +1,4 @@
+import { BOOKING_CATEGORIES, BOOKING_STATES } from "@/lib/domain/booking-state";
 import { z } from "zod";
 import { contextSectionSchema } from "../evidence";
 
@@ -33,10 +34,11 @@ export const compareInput = z.object({ vendorIds: z.array(id).min(2).max(LIMITS.
 
 // Output allowlists strip extra properties at every nested object. No raw row is returned.
 export const weddingData = z.object({
+  bookingStates: z.array(z.object({ category: z.enum(BOOKING_CATEGORIES.map(c => c.key)), state: z.enum(BOOKING_STATES), declared: z.boolean(), confirmedIds: z.array(id).max(200), needsReview: z.boolean() })).max(13).optional(),
   weddingDate: date.nullable(), guestCount: z.number().int().min(1).max(5000).nullable(), preferredArea: area.nullable(), eventType: eventType.nullable(),
   styles: z.array(text).max(20), priorities: z.array(text).max(20), totalBudgetMinor: money.nullable(),
   setupStatus: z.enum(["not_started", "skipped", "completed"]), venueStatus: z.enum(["booked", "not_yet", "looking"]).nullable(),
-  venueName: text.nullable(), bookedCategories: z.array(text).max(20),
+  venueName: text.nullable(), bookedCategories: z.array(text).max(20).describe("Couple-reported arrangements awaiting vendor details, never confirmed vendor bookings"),
 });
 export const task = z.object({ id, title: text, category: text.nullable(), dueDate: date.nullable(), priority, status });
 export const pagination = z.object({ page: z.number().int().positive(), limit: z.number().int().positive().max(50), hasMore: z.boolean() });

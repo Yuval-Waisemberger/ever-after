@@ -54,7 +54,8 @@ describe("050001 application contracts", () => {
   it("keeps external vendors Couple-owned, out of public marketplace queries, and free of image upload behavior", () => {
     expect(vendorActions).toContain('.from("external_vendors")');
     expect(vendorActions).toContain('.eq("wedding_id", wedding.id)');
-    expect(vendorActions).toContain("external_vendor_id: externalVendor.id");
+    expect(vendorActions).toContain("createExternalRelationship(supabase, wedding.id");
+    expect(read("src/lib/vendors/relationship-write.ts")).toContain("external_vendor_id: created.data.id");
     expect(vendorActions).not.toContain("image_storage_path");
     expect(marketplaceQuery).not.toContain('.from("external_vendors")');
     expect(ourVendorsPage).toContain('data-vendor-source={isExternal ? "external" : "marketplace"}');

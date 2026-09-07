@@ -1,3 +1,5 @@
+import { BOOKING_CATEGORIES, categoryBookingState } from "@/lib/domain/booking-state";
+import { readBookingRelationships } from "@/lib/queries/booking-relationships";
 import { z } from "zod";
 import { calculateBudgetSummary, isPaymentScheduleActive } from "@/lib/domain/budget";
 import { calculateGuestSummary, GUEST_RSVP_STATUSES } from "@/lib/domain/guests";
@@ -17,7 +19,8 @@ const weddingRow = z.object({
 });
 export async function readWedding(context: ToolContext) {
   const row = await one(context.db.from("weddings").select(weddingColumns).eq("id", context.weddingId).single(), weddingRow);
-  return c.weddingData.parse({ weddingDate: row.wedding_date, guestCount: row.guest_count, preferredArea: row.preferred_area, eventType: row.event_type,
+  const bookings = await readBookingRelationships(context.db, context.weddingId);
+  return c.weddingData.parse({ bookingStates: BOOKING_CATEGORIES.map(c => categoryBookingState(c.key, { ...bookings, declarations: row.booked_categories, legacyVenueStatus: row.venue_status })), weddingDate: row.wedding_date, guestCount: row.guest_count, preferredArea: row.preferred_area, eventType: row.event_type,
     styles: row.styles, priorities: row.priorities, totalBudgetMinor: row.total_budget_minor, setupStatus: row.setup_status,
     venueStatus: row.venue_status, venueName: row.venue_name, bookedCategories: row.booked_categories });
 }
@@ -110,7 +113,7 @@ export const getMissingWeddingDetails = defineReadTool("get_missing_wedding_deta
   if (!wedding.styles.length) add("styles", ["vendor_recommendations"]);
   if (!wedding.priorities.length) add("priorities", ["roadmap", "budget_advice"]);
   if (wedding.totalBudgetMinor == null) add("totalBudgetMinor", ["budget_advice", "vendor_recommendations"]);
-  if (!wedding.venueStatus) add("venueStatus", ["roadmap", "timeline_advice"]);
+  if (!wedding.venueStatus && !wedding.bookingStates?.some(s => s.category === "venue" && ["CONFIRMED_BOOKED", "REPORTED_ARRANGED_DETAILS_LATER"].includes(s.state))) add("venueStatus", ["roadmap", "timeline_advice"]);
   if (wedding.venueStatus === "booked" && !wedding.venueName) add("venueName", ["timeline_advice"]);
   return { data: { fields, setupStatus: wedding.setupStatus, setupComplete: isWeddingSetupComplete(wedding) }, empty: !fields.length, evidence: [coupleEvidence("wedding")] };
 });

@@ -258,8 +258,8 @@ validates authenticated tool snapshots and builds bounded facts, date phases and
 request; `conversation.ts` bounds recent messages and follow-up pointers; `history-server.ts`
 provides a fresh-auth, wedding/thread-scoped READ of recent application-owned messages.
 
-Planning uses existing date/payment helpers, budget tool totals, task status/priority and Setup/
-relationship bookings. Vendor-gap candidates come from explicit requested categories, venue
+Planning uses existing date/payment helpers, budget tool totals, task status/priority, Setup declarations and confirmed
+relationship bookings as distinct states. Vendor-gap candidates come from explicit requested categories, venue
 dependency and mapped existing Couple priorities. Partial/unavailable reads cannot establish
 absence; date-labelled snapshots must be fresh. No checklist/price database, roadmap persistence,
 automatic task creation, provider loop, recommendation-weight change or new tool registration.
@@ -335,3 +335,62 @@ Browser verification uses a separate test-only Vite host for the real component 
 The Assistant surface declares its UI language, and each message paragraph declares a language
 from its first Hebrew/Latin letter for assistive technology. This presentation hint is separate
 from response-language preference detection; it is not semantic mixed-language parsing.
+
+
+## Wedding Setup and real vendor relationships
+
+Setup and Wedding Details retain the existing preference form and add a separate optional arranged-
+vendors section. Each service offers Search Ever After, Add external vendor, or Add details later.
+The exact label/taxonomy mapping lives in `domain/booking-state.ts`; Other requires explicitly choosing
+a real service for a vendor and never invents a taxonomy. Multiple vendors per category are allowed.
+
+Only `couple_vendors.status = booked` confirms identified bookings. `weddings.booked_categories`
+stores unresolved Couple declarations only. A legacy `venue_status = booked` is also read as a
+declaration, not a relationship. The old free-text name is labelled metadata. Venue looking/not-yet
+and declaration controls share the section, cannot override a confirmed venue, and keep the existing
+constraint compatible by clearing the legacy booked flag when resolving/normalizing declarations.
+No free-text name is turned into a vendor. No schema changes are required.
+
+Setup and Our Vendors share `writeMarketplaceRelationship` and `createExternalRelationship` in
+`vendors/relationship-write.ts`. Callers authorize and validate; these internal operations are not
+client-callable actions. Marketplace patches omit notes/bookmarks/contacts. Blank Setup price preserves
+an existing agreement; zero is explicit. External creation needs a name, real taxonomy and optional
+price; contacts remain optional. Existing vendor editing/rebooking stays in Our Vendors. Replacement
+is explicitly unbook-old/confirm/book-new, using separate identities, never an atomic-sounding swap.
+
+Booking saves first. Only confirmed success permits a fresh-read/compare-and-set removal of the
+declaration. Cleanup failure returns confirmed-with-review, never a failed-booking retry. External
+creation still uses two requests and protected cleanup on relationship error. An uncertain outcome
+locks further creation in the current panel and directs the Couple to Our Vendors; no automatic
+retry or business-name deduplication is claimed. Browser reload permits a new deliberate operation.
+A durable exactly-once request mechanism and atomic replacement are outside this schema-free scope.
+
+050003 remains the only Booked-to-Committed writer. Setup never writes Budget items or payments.
+Successful booking links to Budget for actual payments; no deposit field is offered. Paid history,
+per-item max(commitment, paid) impact and inactive unpaid schedules are unchanged.
+
+Both preference actions use `weddingSetupStatus` / `isWeddingSetupComplete`: completed means guest
+estimate, area, event type, at least one style and priority are present; optional venue metadata must
+be internally valid. Date, budget and vendor identification are optional. not_started is the initial
+untouched account state; skipped means explicit Skip or a partial saved preference form. Clearing a
+required preference can legitimately change completed to skipped. Unrelated valid saves cannot.
+Skip writes status only, checks DB success, bypasses native validation and never saves the draft.
+
+Controlled wedding drafts preserve input after failed submissions. Field errors move/focus the
+wizard to the relevant step. Each form retains its original updated_at revision and the server
+checks it both before saving and in the UPDATE predicate. A stale save fails without changing data.
+Bookings/declarations save independently and never submit stale preference fields. This deliberately
+rejects the whole conflicting form; it does not merge drafts or provide realtime collaboration.
+
+Preference changes refresh Wedding/Setup/Details, Timeline, Marketplace and Assistant; Total Budget
+changes also refresh Budget. Vendor writes refresh Setup/Details alongside existing financial/vendor
+consumers. Dashboard cards still use actual Booked relationships only; declarations cannot make cards.
+Setup relationship reads cap at 200 (201st sentinel); taxonomy at 100. Failed/capped reads never imply
+missing bookings. The inline typeahead waits for two letters/digits and debounces 300ms. It reuses
+Marketplace page 1 (at most 12 public candidates), presents at most six suggestions, and ignores
+obsolete responses on typing/service changes or unmount. It supports pointer/touch and
+Arrow Up/Down, Enter and Escape with combobox/listbox semantics. Selection is local until
+Confirm booking. Inline pagination is removed; the server search retains its existing page
+bound 1–50 and stable name/ID order,
+explicit service filter and a restricted 80-character name/city search. No reviews/contacts leave the
+picker action. Unclassified Booked vendors cause unknown category gaps rather than invented matches.

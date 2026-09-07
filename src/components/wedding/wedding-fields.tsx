@@ -1,8 +1,9 @@
-import { ChoiceGrid } from "@/components/ui/choice-grid";
+"use client";
+import { useWeddingDraft } from "./wedding-draft";
+import type { ComponentProps } from "react";
 import { FormField } from "@/components/ui/form-field";
 import {
   AREAS,
-  BOOKED_CATEGORIES,
   EVENT_TYPES,
   WEDDING_PRIORITIES,
   WEDDING_STYLES,
@@ -19,65 +20,68 @@ export type WeddingFieldValues = {
   priorities?: string[];
   bookedCategories?: string[];
   totalBudgetMinor?: number | null;
+  revision?: string;
 };
 
-function SelectField({ label, name, value, children, emptyLabel = "Not set yet", includeEmpty = true }: { label: string; name: string; value?: string | null; children: React.ReactNode; emptyLabel?: string; includeEmpty?: boolean }) {
+export function WeddingInput(props: ComponentProps<typeof FormField>) {
+  const draft = useWeddingDraft();
+  if (!draft || !props.name) return <FormField {...props} />;
+  const { defaultValue, ...rest } = props;
+  void defaultValue;
+  return <FormField {...rest} value={String(draft.values[props.name] ?? "")} onChange={event => draft.set(props.name!, event.target.value)} />;
+}
+function ChoiceGrid({ name, choices, selected = [] }: { name: string; choices: readonly string[]; selected?: readonly string[] }) {
+  const draft = useWeddingDraft();
+  const checked = (draft?.values[name] ?? selected) as readonly string[];
+  return <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">{choices.map(choice => <label key={choice} className="ea-choice flex cursor-pointer items-center gap-3 rounded-xl border bg-paper px-3 py-3 text-sm transition has-[:checked]:border-wine has-[:checked]:bg-wine/5"><input type="checkbox" name={name} value={choice} checked={checked.includes(choice)} onChange={event => draft?.set(name, event.target.checked ? [...checked, choice] : checked.filter(c => c !== choice))} className="size-4 accent-wine" /><span>{choice}</span></label>)}</div>;
+}
+
+function SelectField({ error, label, name, value, children, emptyLabel = "Not set yet", includeEmpty = true }: { error?: string; label: string; name: string; value?: string | null; children: React.ReactNode; emptyLabel?: string; includeEmpty?: boolean }) {
+  const draft = useWeddingDraft();
   return (
     <label className="grid gap-2 text-sm font-semibold">
       {label}
-      <select name={name} defaultValue={value ?? (includeEmpty ? "" : "not_yet")} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal">
+      <select aria-invalid={Boolean(error)} name={name} value={String(draft?.values[name] ?? value ?? (includeEmpty ? "" : "not_yet"))} onChange={event => draft?.set(name, event.target.value)} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal">
         {includeEmpty ? <option value="">{emptyLabel}</option> : null}
         {children}
       </select>
+      {error ? <span role="alert" className="text-xs text-red-800">{error}</span> : null}
     </label>
   );
 }
 
-export function WeddingBasicsFields({ values = {} }: { values?: WeddingFieldValues }) {
-  return (
-    <div className="grid gap-5">
-      <div className="grid gap-5 sm:grid-cols-2">
-        <FormField name="weddingDate" type="date" lang="en-GB" label="Wedding date" defaultValue={values.weddingDate ?? ""} hint="Day / month / year. Leave blank if the date is not set yet." />
-        <SelectField name="venueStatus" label="Venue status" value={values.venueStatus} includeEmpty={false}>
-          <option value="booked">Booked</option>
-          <option value="looking">Currently looking</option>
-          <option value="not_yet">Not booked yet</option>
-        </SelectField>
-      </div>
-      <FormField name="venueName" label="Venue name (if booked)" defaultValue={values.venueName ?? ""} />
-      <fieldset className="grid gap-3">
-        <legend className="text-sm font-semibold">What is already booked?</legend>
-        <ChoiceGrid name="bookedCategories" choices={BOOKED_CATEGORIES} selected={values.bookedCategories} />
-      </fieldset>
-    </div>
-  );
+type Errors = Record<string, string[] | undefined>;
+type FieldsProps = { values?: WeddingFieldValues; errors?: Errors };
+export function WeddingBasicsFields({ values = {}, errors = {} }: FieldsProps) {
+  return <WeddingInput name="weddingDate" type="date" lang="en-GB" label="Wedding date" defaultValue={values.weddingDate ?? ""} error={errors.weddingDate?.[0]} hint="Day / month / year. Leave blank if the date is not set yet. Manage venue arrangements in the separate vendor section below." />;
 }
 
-export function WeddingCharacteristicsFields({ values = {} }: { values?: WeddingFieldValues }) {
+export function WeddingCharacteristicsFields({ values = {}, errors = {} }: FieldsProps) {
   return (
     <div className="grid gap-5 sm:grid-cols-3">
-      <FormField name="guestCount" type="number" min={1} max={5000} label="Estimated guests" defaultValue={values.guestCount ?? ""} />
-      <SelectField name="preferredArea" label="Preferred area" value={values.preferredArea}>
+      <WeddingInput name="guestCount" type="number" min={1} max={5000} label="Estimated guests" defaultValue={values.guestCount ?? ""} error={errors.guestCount?.[0]} />
+      <SelectField error={errors.preferredArea?.[0]} name="preferredArea" label="Preferred area" value={values.preferredArea}>
         {AREAS.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </SelectField>
-      <SelectField name="eventType" label="Event type / time" value={values.eventType}>
+      <SelectField error={errors.eventType?.[0]} name="eventType" label="Event type / time" value={values.eventType}>
         {EVENT_TYPES.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </SelectField>
     </div>
   );
 }
 
-export function WeddingStyleFields({ values = {} }: { values?: WeddingFieldValues }) {
-  return <ChoiceGrid name="styles" choices={WEDDING_STYLES} selected={values.styles} />;
+export function WeddingStyleFields({ values = {}, errors = {} }: FieldsProps) {
+  return <fieldset tabIndex={-1} data-field="styles"><legend className="sr-only">Styles</legend><ChoiceGrid name="styles" choices={WEDDING_STYLES} selected={values.styles} />{errors.styles ? <p role="alert">{errors.styles[0]}</p> : null}</fieldset>;
 }
 
-export function WeddingPriorityFields({ values = {} }: { values?: WeddingFieldValues }) {
-  return <ChoiceGrid name="priorities" choices={WEDDING_PRIORITIES} selected={values.priorities} />;
+export function WeddingPriorityFields({ values = {}, errors = {} }: FieldsProps) {
+  return <fieldset tabIndex={-1} data-field="priorities"><legend className="sr-only">Priorities</legend><ChoiceGrid name="priorities" choices={WEDDING_PRIORITIES} selected={values.priorities} />{errors.priorities ? <p role="alert">{errors.priorities[0]}</p> : null}</fieldset>;
 }
 
-export function WeddingBudgetFields({ values = {} }: { values?: WeddingFieldValues }) {
+export function WeddingBudgetFields({ values = {}, errors = {} }: FieldsProps) {
   return (
-    <FormField
+    <WeddingInput
+      error={errors.totalBudgetShekels?.[0]}
       name="totalBudgetShekels"
       type="number"
       min={0}

@@ -1,3 +1,4 @@
+import { BOOKING_STATES, categoryBookingState } from "@/lib/domain/booking-state";
 import { z } from "zod";
 import { daysUntilWedding } from "@/lib/domain/wedding-week";
 import { calendarDayDifference } from "@/lib/domain/date-status";
@@ -5,14 +6,6 @@ import { israelCalendarDate, classifyUnpaidPayments } from "../payments";
 import * as c from "../tools/contracts";
 import { readToolName } from "./policy";
 
-// Metadata mapping existing persisted Setup labels / Marketplace slugs, never user intent keywords.
-const categories = {
-  venue: ["Venue", "wedding-venues"], photographer: ["Photographer", "wedding-photographers"],
-  videographer: ["Videographer", "videographers"], dj: ["DJ", "djs"],
-  dress: ["Wedding dress", "wedding-dresses"], suit: ["Suit", "suits"], makeup: ["Makeup and hair", "makeup-hair"],
-  design: ["Event design", "event-design"], flowers: ["Flowers", "flowers"], officiant: ["Rabbi / officiant", "officiants"],
-  manager: ["Event manager", "event-managers"], transportation: ["Transportation", "transportation"],
-} as const;
 export const planningCategory = z.enum(["venue", "photographer", "videographer", "dj", "dress", "suit", "makeup", "design", "flowers", "officiant", "manager", "transportation"]);
 type Category = z.output<typeof planningCategory>;
 const preferenceCategories: Record<string, Category> = { Photography: "photographer", "Music and party atmosphere": "dj", "Design and aesthetics": "design" };
@@ -34,7 +27,7 @@ const phaseSchema = z.object({
   daysRemaining: z.number().int().nonnegative().nullable(), daysSinceWedding: z.number().int().nonnegative().nullable(),
 }).strict();
 const bucket = z.enum(["immediate", "next_7_days", "next_30_days", "later", "undated"]);
-const reason = z.enum(["task_overdue", "task_due", "task_undated", "payment_overdue", "payment_due", "payment_undated", "vendor_not_recorded_booked", "budget_overcommitted", "rsvp_pending", "invitations_pending"]);
+const reason = z.enum(["task_overdue", "task_due", "task_undated", "payment_overdue", "payment_due", "payment_undated", "vendor_not_recorded_booked", "vendor_details_needed", "budget_overcommitted", "rsvp_pending", "invitations_pending"]);
 const signalSchema = z.object({
   id: z.string().max(100), kind: z.literal("DETERMINISTIC_SIGNAL"), reason, bucket, priority: c.priority,
   entityIds: z.array(c.id).max(60), category: planningCategory.optional(), count: c.money.optional(),
@@ -51,7 +44,7 @@ export const roadmapSchema = z.object({
   limitations: z.array(z.string().max(80)).max(30), signals: z.array(signalSchema).max(150),
   roadmap: z.array(z.object({ window: bucket, signalIds: z.array(z.string().max(100)).max(20), omitted: c.money }).strict()).max(5),
   requestedHorizonDays: z.number().int().min(1).max(30),
-  vendorGaps: z.array(z.object({ category: planningCategory, state: z.enum(["booked", "not_recorded_booked", "unknown"]), priority: c.priority }).strict()).max(12),
+  vendorGaps: z.array(z.object({ category: planningCategory, state: z.enum(BOOKING_STATES), priority: c.priority }).strict()).max(12),
   futureInterpretation: z.literal("AI_RECOMMENDATION"), externalEvidence: z.literal("not_available"),
 }).strict();
 export function weddingPhase(weddingDate: string | null, now = new Date()) {
@@ -101,14 +94,17 @@ export function buildPlanningState(rawSources: unknown, rawRequest: unknown = {}
   const preferred = new Set<Category>((facts.wedding?.priorities ?? []).flatMap((value) => preferenceCategories[value] ? [preferenceCategories[value]] : []));
   if (facts.wedding) { desired.add("venue"); preferred.forEach((value) => desired.add(value)); }
   const vendorGaps = [...desired].sort().map((category) => {
-    const metadata = categories[category];
-    const booked = Boolean(facts.wedding?.bookedCategories.includes(metadata[0]) || (category === "venue" && facts.wedding?.venueStatus === "booked") || facts.vendors?.vendors.some((entry) => entry.lifecycle === "booked" && (entry.vendor.subcategory?.slug === metadata[1] || (category === "venue" && entry.vendor.category?.slug === "venues"))));
-    const ambiguousBooking = facts.vendors?.vendors.some((entry) => entry.lifecycle === "booked" && !entry.vendor.subcategory);
-    const state = booked ? "booked" as const : completeVendors && facts.wedding && !ambiguousBooking ? "not_recorded_booked" as const : "unknown" as const;
+    const booking = categoryBookingState(category, {
+      relationships: (facts.vendors?.vendors ?? []).map(entry => ({ id: entry.relationshipId, status: entry.lifecycle, category: entry.vendor.category?.slug ?? null, subcategory: entry.vendor.subcategory?.slug ?? null })),
+      declarations: facts.wedding?.bookedCategories ?? [], legacyVenueStatus: facts.wedding?.venueStatus,
+      complete: completeVendors && Boolean(facts.wedding),
+    });
+    const state = booking.state;
     const important = category === "venue" || (preferred.has(category) && !request.lowerPriorityCategories.includes(category));
     const close = phase.daysRemaining != null && phase.daysRemaining <= 30 && phase.key !== "post_wedding";
     const priority = category !== "venue" && request.lowerPriorityCategories.includes(category) ? "low" as const : important && close ? "high" as const : "medium" as const;
-    if (state === "not_recorded_booked" && phase.key !== "post_wedding") signals.push({ id: `vendor:${category}`, kind: "DETERMINISTIC_SIGNAL", reason: "vendor_not_recorded_booked", bucket: important && close ? "immediate" : "later", priority, category, entityIds: [], basis: [...basis("get_wedding_summary"), ...basis("get_couple_vendors")], priorityBasis: category === "venue" ? "venue_dependency" : preferred.has(category) ? "couple_priority" : "explicit_request" });
+    if (state === "NOT_RECORDED_AS_BOOKED" && phase.key !== "post_wedding") signals.push({ id: `vendor:${category}`, kind: "DETERMINISTIC_SIGNAL", reason: "vendor_not_recorded_booked", bucket: important && close ? "immediate" : "later", priority, category, entityIds: [], basis: [...basis("get_wedding_summary"), ...basis("get_couple_vendors")], priorityBasis: category === "venue" ? "venue_dependency" : preferred.has(category) ? "couple_priority" : "explicit_request" });
+    if (state === "REPORTED_ARRANGED_DETAILS_LATER") signals.push({ id: `vendor-details:${category}`, kind: "DETERMINISTIC_SIGNAL", reason: "vendor_details_needed", bucket: "later", priority: "low", category, entityIds: [], basis: basis("get_wedding_summary"), priorityBasis: "explicit_request" });
     return { category, state, priority };
   });
   if (facts.budget?.availableMinor != null && facts.budget.availableMinor < 0) signals.push({ id: "budget:overcommitted", kind: "DETERMINISTIC_SIGNAL", reason: "budget_overcommitted", bucket: "immediate", priority: "high", entityIds: [], basis: basis("get_budget_summary"), priorityBasis: "financial_state" });
@@ -119,7 +115,7 @@ export function buildPlanningState(rawSources: unknown, rawRequest: unknown = {}
   signals.sort((a, b) => rank[a.priority] - rank[b.priority] || a.id.localeCompare(b.id));
   if (new Set(signals.map((signal) => signal.id)).size !== signals.length) throw new Error("Duplicate planning source records.");
   const windows = ["immediate", "next_7_days", "next_30_days", "later", "undated"] as const;
-  if (vendorGaps.some((gap) => gap.state === "unknown")) limitations.push("vendor_gaps_unknown");
+  if (vendorGaps.some((gap) => gap.state === "UNKNOWN_NEEDS_REVIEW")) limitations.push("vendor_gaps_unknown");
   return roadmapSchema.parse({ asOfDate, phase, facts, sourceStates: Object.fromEntries(Object.entries(results).map(([key, value]) => [key, value?.status ?? "not_requested"])),
     sourceEvidence: Object.fromEntries(Object.entries(results).map(([key, value]) => [key, value?.evidence ?? []])), limitations,
     overallState: limitations.length ? "limited" : signals.length ? "attention_signals" : "no_signals_in_available_data", signals, vendorGaps,

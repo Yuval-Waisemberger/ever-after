@@ -295,3 +295,58 @@ Package scripts were not changed. Build process-only Supabase settings pointed t
 localhost port, never Frankfurt. `git diff --check` and untracked-file whitespace/conflict-marker
 checks passed. No PostgreSQL engine was available (Docker daemon stopped); migration tests are
 source contracts only, not SQL execution, concurrency proof or live RLS QA. No migration was applied.
+
+## Wedding Setup → real vendor relationships
+
+This feature uses mocked database clients and isolated browser fixtures only. It does not
+apply a migration or exercise writes against Frankfurt. Existing 050003 remains the owner
+of booking commitments; the Setup integration does not introduce a financial writer.
+
+- `tests/domain/booking-state.test.ts`: exact mapping against repository taxonomy, multiple
+  vendors, confirmed/reported/not-recorded/unknown states, legacy venue metadata, stale
+  declarations after unbooking, rebooking and shared optional Setup completion.
+- `tests/application/setup-bookings.test.ts`: authenticated Marketplace selection, owned
+  relationship reuse, omitted/zero/positive prices, preservation of notes/bookmarks, external
+  creation and uncertain outcomes, declaration-only writes, booking-before-cleanup ordering,
+  cleanup warnings, category/ID validation, bounded public search, completion, Skip failures,
+  field validation, timestamp conflict protection and targeted refresh.
+- `tests/application/setup-reads.test.ts`: explicit Couple role/owner scope, minimal relationship
+  output, incomplete/error reads, broken references and processing bounds.
+- Existing vendor/Budget action tests continue to cover normal lifecycle changes, financial
+  history protections and absence of a duplicate application Budget writer. Assistant planning
+  and read-tool tests distinguish declarations from confirmed bookings and retain Guest privacy.
+- `e2e/setup-bookings.spec.ts`, configured by `e2e/setup.config.ts`, renders the real Setup
+  components with synthetic server-action fixtures on port 3103. No environment credentials
+  are loaded and external browser requests are blocked. Chromium checks cover autocomplete
+  keyboard/touch selection, stale responses, empty results and declaration resolution, uncertain external creation, stale preferences, invalid-step
+  focus and retained draft values, Skip bypass/failure, and 1440/768/390/360px overflow checks.
+
+Validation record: 513/513 Vitest tests in 35 application/domain/Assistant/UI files passed.
+TypeScript and whole-repository ESLint passed. Isolated Setup Playwright passed 8/8.
+Browser testing initially exposed React resetting uncontrolled inputs after a failed action;
+controlled draft fields corrected this, and the final browser rerun passed. No live Setup,
+vendor, budget or payment QA records were created. Mocked operations do not independently
+prove live RLS or database concurrency; existing database protections remain required.
+
+Production build passed with `next build --webpack` (Next.js 16.3.4, 11 static pages;
+Setup/Details and authenticated application routes remain dynamic). Process-only Supabase
+configuration pointed to unreachable localhost, not Frankfurt. `git diff --check` and new-file
+whitespace/conflict-marker checks passed. Package/lockfiles and migrations are unchanged.
+No commit, push, deployment or live database mutation was performed for this feature.
+
+
+Setup autocomplete regression coverage:
+- `tests/ui/vendor-typeahead.test.tsx` uses fake timers and deferred responses for minimum
+  meaningful characters, debounce resets, service constraints, six-result limit, keyboard
+  selection, clearing selection, stale replies, safe errors and pending-search cancellation.
+- `e2e/setup-bookings.spec.ts` verifies explicit booking with the selected ID/optional price,
+  keyboard and touch selection, empty results, Escape, delayed older responses and long-name
+  dropdown bounds at 1440/768/390/360px. Existing external/details-later and Skip checks remain.
+- Server booking/search operations and database behavior are unchanged. Existing mocked
+  action tests retain coverage for ownership, public taxonomy, relationship reuse and no
+  duplicate application Budget/payment writer. QA remains isolated from Frankfurt.
+
+Autocomplete validation: TypeScript and whole-repository ESLint passed without warnings;
+119/119 relevant Vitest tests across 13 files and 10/10 isolated Playwright checks passed.
+Dropdown screenshots were inspected at all four widths. Production webpack build passed
+with unreachable localhost Supabase settings. No Frankfurt writes or migrations occurred.

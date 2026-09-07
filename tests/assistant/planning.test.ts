@@ -37,13 +37,14 @@ describe("personalized planning state", () => {
     const input = sources();
     if (where === "setup") { input.wedding.data.bookedCategories.push("Photographer"); input.vendors.result.data.vendors = []; }
     const state = buildPlanningState(input, {}, now);
-    expect(state.vendorGaps.find((gap) => gap.category === "photographer")?.state).toBe("booked");
+    expect(state.vendorGaps.find((gap) => gap.category === "photographer")?.state).toBe(where === "setup" ? "REPORTED_ARRANGED_DETAILS_LATER" : "CONFIRMED_BOOKED");
+    if (where === "setup") expect(state.signals.some(s => s.reason === "vendor_details_needed")).toBe(true);
     expect(state.signals.some((signal) => signal.id === "vendor:photographer")).toBe(false);
   });
   it("raises a preferred missing category near the wedding, respects lower priority and saved state", () => {
     const input = sources(); input.vendors.result.data.vendors = [vendor("considering")];
     const state = buildPlanningState(input, {}, now);
-    expect(state.vendorGaps.find((gap) => gap.category === "photographer")).toMatchObject({ state: "not_recorded_booked", priority: "high" });
+    expect(state.vendorGaps.find((gap) => gap.category === "photographer")).toMatchObject({ state: "NOT_RECORDED_AS_BOOKED", priority: "high" });
     expect(state.facts.vendors?.vendors[0]).toMatchObject({ saved: true, lifecycle: "considering" });
     expect(buildPlanningState(input, { lowerPriorityCategories: ["photographer"] }, now).vendorGaps.find((gap) => gap.category === "photographer")?.priority).toBe("low");
     input.wedding.data.priorities = [];
@@ -54,7 +55,7 @@ describe("personalized planning state", () => {
     const vendors = mode === "unavailable" ? { input: {}, result: failed } : mode === "filtered" ? { ...input.vendors, input: { saved: true } }
       : mode === "ambiguous" ? { ...input.vendors, result: result({ ...input.vendors.result.data, vendors: [{ ...vendor(), vendor: { ...vendor().vendor, subcategory: null } }] }, "vendors") }
         : { ...input.vendors, result: result({ ...input.vendors.result.data, pagination: { page: 1, limit: 12, hasMore: true } }, "vendors") };
-    expect(buildPlanningState({ ...input, vendors }, {}, now).vendorGaps.find((gap) => gap.category === "photographer")?.state).toBe("unknown");
+    expect(buildPlanningState({ ...input, vendors }, {}, now).vendorGaps.find((gap) => gap.category === "photographer")?.state).toBe("UNKNOWN_NEEDS_REVIEW");
   });
   it("never substitutes failed reads with empty facts or a zero budget", () => {
     const state = buildPlanningState({ ...sources(), budget: failed, guests: failed, payments: failed }, {}, now);

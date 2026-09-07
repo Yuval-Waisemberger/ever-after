@@ -239,3 +239,24 @@ Budget/vendor failures never expose SQL text or claim a successful trigger trans
 
 Tests in this phase use isolated mocks/component fixtures only. No Frankfurt connection, mutation,
 new credentials, schema application, migration ledger change or AI capability is authorized here.
+
+
+## Setup booking integration
+
+All Setup actions resolve the authenticated Couple's owned wedding; the shared wedding query now
+also filters owner_user_id explicitly. Caller-supplied wedding/External IDs are rejected by the strict
+Setup booking contract. Marketplace IDs are re-read as public and checked against the chosen actual
+subcategory/category. External rows receive server-owned wedding identity and real taxonomy IDs.
+Existing RLS and 050003 protect ownership, relationship identity and canonical financial history.
+
+Shared internal relationship operations preserve omitted fields; minimal Setup forms cannot clear
+private notes, contact fields or independent bookmarks. Setup writes no financial records. Declaration
+updates use fresh updated_at compare-and-set; preferences retain a submitted original revision to
+reject stale whole-form writes. Neither client-selected ownership nor hidden-field omission bypasses
+server validation. Failed/uncertain creation must be reviewed, not automatically replayed.
+
+Booking summaries/pickers expose planning identity/taxonomy only, no routine contacts/private notes.
+Unavailable/capped reads are explicit. The Assistant registry remains ten READ tools; declarations
+are distinguished from actual bookings. No external provider, language service or research is added.
+QA uses mocked queries and isolated localhost fixtures with external requests blocked; no Frankfurt
+Setup/vendor/financial data is used for mutation QA.
