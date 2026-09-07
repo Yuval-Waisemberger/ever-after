@@ -357,7 +357,7 @@ Focused regressions cover four statuses, invalid stored overdue, action DB error
 forged and cross-Couple IDs, actual role/owner resolution with mocked data, no automatic vendor or
 financial writes, field errors, retained drafts, complete/reopen/delete, intersecting filters,
 waiting as Open, derived overdue and completed exclusion, +0/+7/+8 dates, Israel summer/winter
-midnight, Task-derived Timeline with/without wedding date, and deduplicated Wedding Week selection.
+midnight and Task-derived Timeline with/without wedding date.
 Assistant tests cover waiting/overdue English and Hebrew subsets, privacy, ten READ tools and
 roadmap follow-up intent with overdue urgency. Task titles are referenced, never interpreted to
 invent vendor identity.
@@ -390,3 +390,29 @@ Authenticated read-only smoke passed for `/tasks`, `/wedding/timeline`, `/weddin
 new form option/filter, independent workflow/deadline pills, Task-derived Timeline and existing
 Dashboard metrics rendered without enum/runtime errors. No Task mutation or Assistant message was
 submitted, and no QA records were created.
+
+
+## Simplified date-countdown validation (2026-09-07)
+
+Tests replace the discarded operational-card expectations. Domain cases cover no date, +8/+7/+3/
++1/0/-1, Israel summer/winter and DST transition midnights, fine countdowns, no negative values,
+shared roadmap semantics, preview anchoring/validation and production/non-local denial. UI tests
+exercise the actual page production guard and verify preview changes only date-area markup while
+all six normal cards remain identical and present once. No operational sections render.
+
+The isolated e2e/wedding-week fixture renders the real page with synthetic normal-dashboard data,
+mocked read queries/headers, production styling and an injected browser clock. External browser
+requests are blocked. Playwright covers all six dated states at 1440/1280/1024/768/390/375/360,
+missing date, keyboard focus, compact countdown height, no horizontal overflow and timer rollover
+from the day before to Wedding Day. No live wedding date, system clock or Supabase record is changed.
+
+Final result: 141 Vitest tests across 15 files passed, including the actual page production guard.
+Eight Playwright tests passed, with six states captured at all seven widths (42 screenshots) and
+minute-to-midnight rollover coverage. Screenshots were visually reviewed. Whole-repository
+ESLint, final TypeScript, production Webpack build and git diff --check passed. The build used
+process-only dummy loopback Supabase configuration. Authenticated localhost previewDaysBefore=3
+also rendered successfully with one of each normal card; no data-changing action was submitted.
+
+Later cleanup remains outside this task: long titles in the normal Upcoming card become narrow
+beside pills on small screens, and the normal Budget card's “Next payment” heading can describe
+an overdue item. Neither normal card was changed in this date-area-only pass.

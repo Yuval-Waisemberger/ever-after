@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bot, CalendarClock, CalendarHeart, CheckCircle2, ListChecks } from "lucide-react";
+import { ArrowRight, Bot, CalendarClock, CheckCircle2, ListChecks } from "lucide-react";
 import { DashboardCard } from "@/components/wedding/dashboard-card";
 import { CoupleProfileMenu } from "@/components/couple/couple-profile-menu";
 import { GuestDashboardSummary } from "@/components/guests/guest-dashboard-summary";
@@ -9,7 +9,9 @@ import { TaskStatusPill } from "@/components/tasks/task-status-pill";
 import { deriveBudgetItemStatus, derivePaymentStatus, formatIls } from "@/lib/domain/budget";
 import { formatCalendarDate } from "@/lib/domain/date-status";
 import { selectUpcomingTasks } from "@/lib/domain/tasks";
-import { daysUntilWedding, isWeddingWeek } from "@/lib/domain/wedding-week";
+import { headers } from "next/headers";
+import { WeddingDateCountdown } from "@/components/wedding/wedding-date-countdown";
+import { getWeddingDatePreview } from "@/lib/domain/wedding-date-preview";
 import { getWeddingDashboard } from "@/lib/queries/wedding";
 import { getCoupleIdentity } from "@/lib/queries/couple-identity";
 import { getGuestSummary } from "@/lib/queries/guests";
@@ -40,8 +42,7 @@ const paymentStatusTone = {
 export default async function WeddingDashboardPage({ searchParams }: PageProps<"/wedding">) {
   const params = await searchParams;
   const [{ wedding, taskSummary, tasks, relationships, budget, budgetItems }, identity, guestSummary] = await Promise.all([getWeddingDashboard(), getCoupleIdentity(), getGuestSummary()]);
-  const days = daysUntilWedding(wedding.wedding_date);
-  const weddingWeek = isWeddingWeek(wedding.wedding_date);
+  const previewNow = getWeddingDatePreview(wedding.wedding_date, params, process.env.NODE_ENV, process.env.NODE_ENV === "development" ? (await headers()).get("host") ?? "" : "");
   const names = `${wedding.partner_one_name} & ${wedding.partner_two_name}`;
   const today = new Date();
   const upcomingTasks = selectUpcomingTasks(tasks, today, 5);
@@ -49,25 +50,12 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
 
   return (
     <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
-      {weddingWeek ? (
-        <div className="wedding-week-banner mb-7 px-5 py-4">
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-white/75">Wedding Week</p>
-          <p className="font-display mt-1 text-2xl">The final details, kept close.</p>
-        </div>
-      ) : null}
-
       {params.details === "updated" ? <p className="ea-feedback ea-feedback--success mb-6" role="status">Your Wedding Details have been saved.</p> : null}
       <section className="wedding-dashboard-hero text-center">
         <CoupleProfileMenu choice={identity.avatarChoice} photoUrl={identity.photoUrl} />
         <p className="eyebrow mt-5">Our Wedding</p>
         <h1 className="font-display mt-2 text-5xl leading-tight tracking-tight sm:text-6xl">{names}</h1>
-        <div className="wedding-date-card mx-auto mt-6 flex max-w-2xl flex-col items-center justify-center gap-3 border-y px-5 py-5 sm:flex-row sm:gap-5">
-          <CalendarHeart className="size-6 shrink-0 text-gold" strokeWidth={1.35} />
-          <div className="text-center sm:text-left">
-            <p className="font-display text-2xl text-wine">{wedding.wedding_date ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${wedding.wedding_date}T00:00:00Z`)) : "Wedding date not set yet"}</p>
-            {wedding.wedding_date ? <p className="mt-1 text-sm text-ink-soft">{days === 0 ? "Today is your day" : days != null && days > 0 ? `${days} days until your celebration` : "Your wedding day has passed"}</p> : <p className="mt-1 text-sm text-ink-soft">Choose it whenever the moment feels right.</p>}
-          </div>
-        </div>
+        <WeddingDateCountdown key={`${today.getTime()}-${previewNow}`} weddingDate={wedding.wedding_date} initialNow={today.getTime()} previewNow={previewNow} />
         <Link href="/wedding/details" className="ea-button mt-5 border border-line bg-paper text-ink hover:border-wine hover:text-wine">Edit wedding details</Link>
       </section>
 

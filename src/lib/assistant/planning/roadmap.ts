@@ -1,6 +1,6 @@
 import { BOOKING_STATES, categoryBookingState } from "@/lib/domain/booking-state";
 import { z } from "zod";
-import { daysUntilWedding } from "@/lib/domain/wedding-week";
+import { getWeddingPhase } from "@/lib/domain/wedding-week";
 import { calendarDayDifference } from "@/lib/domain/date-status";
 import { israelCalendarDate, classifyUnpaidPayments } from "../payments";
 import * as c from "../tools/contracts";
@@ -49,10 +49,9 @@ export const roadmapSchema = z.object({
   futureInterpretation: z.literal("AI_RECOMMENDATION"), externalEvidence: z.literal("not_available"),
 }).strict();
 export function weddingPhase(weddingDate: string | null, now = new Date()) {
-  c.date.nullable().parse(weddingDate);
-  const days = daysUntilWedding(weddingDate, new Date(`${israelCalendarDate(now)}T00:00:00Z`));
-  return phaseSchema.parse({ key: days == null ? "unknown_date" : days < 0 ? "post_wedding" : days === 0 ? "wedding_day" : days <= 7 ? "wedding_week" : days <= 30 ? "final_month" : "before_wedding",
-    daysRemaining: days == null ? null : Math.max(0, days), daysSinceWedding: days == null ? null : Math.max(0, -days) });
+  const phase = getWeddingPhase(weddingDate, now);
+  const keys = { NO_DATE: "unknown_date", POST_WEDDING: "post_wedding", WEDDING_DAY: "wedding_day", FINAL_WEEK: "wedding_week", DAY_BEFORE: "wedding_week", NORMAL: phase.daysRemaining! <= 30 ? "final_month" : "before_wedding" };
+  return phaseSchema.parse({ ...phase, key: keys[phase.key] });
 }
 export function buildPlanningState(rawSources: unknown, rawRequest: unknown = {}, now = new Date()) {
   const sources = planningSourcesSchema.parse(rawSources);

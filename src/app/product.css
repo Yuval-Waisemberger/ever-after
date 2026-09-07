@@ -119,8 +119,6 @@ input::file-selector-button { padding: 9px 12px; margin-right: 12px; border: 0; 
 .dashboard-vendor-row .dashboard-vendor-name, .dashboard-vendor-row .dashboard-vendor-category { word-break: normal; overflow-wrap: break-word; hyphens: none; }
 .task-summary-grid > div { min-width: 0; padding: 7px 5px; }
 .ea-dashboard-card strong { font-variant-numeric: tabular-nums; font-weight: 500; }
-.wedding-week-banner { background: var(--paper-muted); color: var(--ink); border: 1px solid var(--gold); border-left-width: 3px; border-radius: var(--surface-radius); }
-.wedding-week-banner > p:first-child { color: var(--gold); }
 .budget-metrics { background: var(--paper-muted); border: 1px solid var(--line); border-radius: var(--surface-radius); gap: 0; }
 .budget-metrics > div { background: transparent; border: 0; border-radius: 0; padding: 22px 18px; }
 .budget-metrics > div + div { border-left: 1px solid var(--line); }

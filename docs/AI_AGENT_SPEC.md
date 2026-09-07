@@ -62,7 +62,7 @@ Facts retain COUPLE_DATA / MARKETPLACE_DATA tool evidence. Each `DETERMINISTIC_S
 
 ### Date phases and Wedding Week readiness
 
-The builder reuses `daysUntilWedding`, `calendarDayDifference` and `classifyUnpaidPayments`, using an injected clock and the Asia/Jerusalem calendar. Phases are unknown date, before wedding (>30 days), final month (8–30), Wedding Week (1–7), Wedding Day (0) and post-wedding (<0). Countdown output never becomes negative: remaining days clamp to zero after the wedding, with a separate nonnegative days-since value. Missing dates give null timing; absolute task/payment deadlines still work. There is no system-clock or Supabase date manipulation.
+The builder reuses `getWeddingPhase`, `calendarDayDifference` and `classifyUnpaidPayments`, using an injected clock and the Asia/Jerusalem calendar. Phases are unknown date, before wedding (>30 days), final month (8–30), Wedding Week (1–7), Wedding Day (0) and post-wedding (<0). Countdown output never becomes negative: remaining days clamp to zero after the wedding, with a separate nonnegative days-since value. Missing dates give null timing; absolute task/payment deadlines still work. There is no system-clock or Supabase date manipulation.
 
 Wedding Week/Day readiness currently means grounded signals from available tasks, unpaid payments, recorded bookings, wedding details and Guest totals. It does not mean day-of logistics/schedules/contacts have been implemented. No UI mode changes occur in this phase.
 
@@ -388,3 +388,12 @@ payment/budget questions retain financial routing. Routine week summaries label 
 follow-up work. Empty subsets reflect successful reads; the existing context-unavailable boundary
 remains in force. This is not a real LLM, semantic task rewrite, new tool or external AI integration.
 All calendar comparisons now share the domain Asia/Jerusalem policy used by Tasks and Dashboard.
+
+
+## Simplified final-week product decision (2026-09-07)
+
+Wedding Week now means date-area celebration only, not an operational Dashboard mode. The roadmap
+phase adapter reuses the small shared getWeddingPhase helper, preserving existing week/day/post
+and final-month contracts. Operational Task IDs/selection added for the discarded Dashboard were
+removed. Existing deterministic planning signals and ten READ tools remain unchanged. Preview
+clocks never enter Assistant context; there is no new Agent capability or external AI work.

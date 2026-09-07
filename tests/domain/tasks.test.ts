@@ -4,7 +4,7 @@ import {
   calculateTaskSummary,
   isDueWithinDays,
   selectUpcomingTasks,
-  filterTasks, selectWeddingWeekTasks,
+  filterTasks,
   taskDisplayStatus,
 } from "@/lib/domain/tasks";
 import { isPastCalendarDate } from "@/lib/domain/date-status";
@@ -65,13 +65,11 @@ it("uses Israel midnight including summer and winter boundaries", () => {
   expect(isPastCalendarDate("2026-09-07", new Date("2026-09-07T21:00:00Z"))).toBe(true);
   expect(isPastCalendarDate("2026-01-07", new Date("2026-01-07T22:00:00Z"))).toBe(true);
 });
-it("waiting is open, filters intersect categories, and operational tasks deduplicate", () => {
+it("waiting is open and filters intersect categories", () => {
   const waiting = { id: "w", status: "waiting_on_vendor" as const, category: "Venue", dueDate: "2026-09-09", priority: "low" as const };
   const tasks = [waiting, { ...waiting, id: "done", status: "completed" as const }, { ...waiting, id: "high", status: "open" as const, category: "Other", dueDate: null, priority: "high" as const }];
   const now = new Date("2026-09-07T12:00:00Z");
   expect(filterTasks(tasks, "waiting_on_vendor", "Venue")).toEqual([waiting]);
   expect(filterTasks(tasks, "incomplete")).toHaveLength(2);
   expect(calculateTaskSummary(tasks, now)).toEqual({ total: 3, completed: 1, open: 2, dueThisWeek: 1, completion: 33 });
-  expect(selectWeddingWeekTasks([...tasks, waiting], null, now).map(t => t.id)).toEqual(["high", "w"]);
-  expect(selectWeddingWeekTasks([{ ...waiting, status: "open", dueDate: "2026-09-10" }], "2026-09-12", now)).toHaveLength(1);
 });

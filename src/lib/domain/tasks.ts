@@ -81,19 +81,3 @@ export function filterTasks<T extends { status: TaskStatus; category: string | n
   return tasks.filter(task => (!category || task.category === category) &&
     (status === "all" || (status === "incomplete" ? task.status !== "completed" : task.status === status)));
 }
-
-// Operational selection only: no records are created and no vendor is inferred.
-export function selectWeddingWeekTasks<T extends { id: string; status: TaskStatus; dueDate: string | null; priority: TaskPriority }>(tasks: T[], weddingDate: string | null, today: Date): T[] {
-  const weddingDays = weddingDate ? calendarDayDifference(weddingDate, today) : null;
-  const rank = { high: 0, medium: 1, low: 2 };
-  return [...new Map(tasks.filter(task => {
-    if (task.status === "completed") return false;
-    const days = task.dueDate ? calendarDayDifference(task.dueDate, today) : null;
-    return task.status === "waiting_on_vendor" || task.priority === "high" ||
-      (days != null && (days <= 0 || (weddingDays != null && days <= weddingDays)));
-  }).map(task => [task.id, task])).values()].sort((a, b) => {
-    const overdue = (task: T) => task.dueDate != null && calendarDayDifference(task.dueDate, today) < 0;
-    return Number(overdue(b)) - Number(overdue(a)) || rank[a.priority] - rank[b.priority] ||
-      (a.dueDate ?? "9999").localeCompare(b.dueDate ?? "9999") || a.id.localeCompare(b.id);
-  });
-}

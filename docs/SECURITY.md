@@ -276,3 +276,13 @@ Supabase Auth/RLS integration validation. Mocked application tests also exercise
 ownership resolution. Implementation QA did not contact Frankfurt. The subsequent authorized live
 closeout applied only the approved enum addition after read-only preflight. Task row fingerprints,
 ownership constraints, indexes and RLS were unchanged; authenticated smoke checks made no data writes.
+
+
+## Date countdown and local previews (2026-09-07)
+
+The final-week treatment adds no queries, actions, contact exposure or permission changes. Existing
+Couple authentication, wedding ownership and RLS remain unchanged. Preview parameters are parsed
+only for development on exact localhost/loopback hosts; production ignores them. They change only
+a presentation clock anchored to the stored wedding date, never task deadlines, payments, actual
+dates, records, cookies or storage. There is no preview write endpoint. The browser timer only
+updates component state. No external AI/service/library or schema change was introduced.

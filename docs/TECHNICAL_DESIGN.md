@@ -36,7 +36,7 @@ to Vercel; data, Auth, and vendor media stay in the existing Supabase project.
 | `/auth/couple`, `/auth/vendor` | public | Separate login/registration paths |
 | `/auth/callback` | public | Supabase PKCE code exchange |
 | `/vendors`, `/vendors/[slug]` | public | Searchable marketplace and public profile/reviews |
-| `/wedding` | Couple | Main Dashboard summaries and Wedding Week emphasis |
+| `/wedding` | Couple | Main Dashboard summaries and date-area countdown |
 | `/wedding/setup` | Couple | Five-step optional/skippable personalization |
 | `/wedding/details` | Couple | View/edit the wedding's stored facts |
 | `/wedding/timeline` | Couple | Derived view of dated Tasks |
@@ -421,12 +421,35 @@ has Open, Due this week, Completed; Open means all incomplete statuses, includin
 The status filter's Not started is exact `open`; Assistant `view=open` is broader incomplete.
 Category and workflow filters intersect.
 
-`selectWeddingWeekTasks` is a pure, deduplicated selector: incomplete overdue/today/through wedding
-day, high-priority (including undated), or waiting tasks. Overdue sorts first, then priority/date/ID.
-With no wedding date it includes overdue/today/high-priority/waiting without inventing an end date.
-No operational Wedding Week UI or automatic status inference is introduced.
-
 Migration `202609070001_task_waiting_on_vendor.sql` adds only the enum value before `completed`.
 The reviewed file was applied to Frankfurt on 2026-09-07 after read-only preflight; all four existing
 Task rows were preserved. Enum DDL must commit before any writes using the new value. Existing rows,
 indexes, ownership, RLS, columns and tables are unchanged. No backfill or blind `db push` is needed.
+
+
+## Date-area celebration: final product decision (2026-09-07)
+
+Wedding Week is only a small treatment inside the existing wedding-date/countdown area. The
+normal Our Wedding dashboard remains the sole dashboard, with exactly one of each normal card.
+The uncommitted operational panel, source projections, added taxonomy queries, operational task
+selector and operational fixtures/tests were removed. No Task/Budget/vendor/Guest query or action
+changes are needed. There is no Wedding Week or post-wedding operational mode.
+
+`getWeddingPhase` uses the shared Israel calendar: NO_DATE, NORMAL (>7 days), FINAL_WEEK (7–2),
+DAY_BEFORE (1), WEDDING_DAY (0), POST_WEDDING. Roadmap maps these to its existing keys, including
+its final-month refinement. No new Agent output/tool is introduced. The normal date presentation
+is retained outside the final week; final-week days, Tomorrow, Today is the day and Just married
+use the same area. A data-phase attribute is available for the later motion/design pass.
+
+`WeddingDateCountdown` uses the server timestamp for hydration, then updates once per minute.
+The hours/minutes target is the START of the stored wedding calendar day in Asia/Jerusalem;
+`startOfIsraelDay` resolves midnight using Intl timezone rules, including DST, not a fixed offset.
+No ceremony time is inferred. Minutes round upward; all durations clamp at zero. On Wedding Day
+the fine timer disappears. The interval is cleaned up on unmount and absent when no date exists.
+Confetti and micro-motion are deferred to the Final Design / Motion pass; no dependency was added.
+
+Local previews require NODE_ENV=development and an exact localhost/loopback Host. Supported query
+parameters are previewDaysBefore=8|7|3|1|0 or previewDaysAfter=1, exclusively. They derive a synthetic
+midday clock from the actual stored wedding date and affect ONLY the date component. All normal
+cards still use real server time/data. No date means no preview. Production ignores parameters.
+The preview is labeled, URL-only, and never persisted; it runs forward at the normal clock rate.
