@@ -230,6 +230,40 @@ landing and demo marketplace usable and make private/auth actions fail safely wi
 
 ## 13. Current limitations
 
+### Phase 1C-B: planning and conversation foundation
+
+The [Agent spec](AI_AGENT_SPEC.md) documents `assistant/planning`: `policy.ts` defines a small
+capability-to-READ-tool plan, structured clarification and future research eligibility; `roadmap.ts`
+validates authenticated tool snapshots and builds bounded facts, date phases and planning signals;
+`quotes.ts` validates future model quote extraction and prepares a minimized non-live benchmark
+request; `conversation.ts` bounds recent messages and follow-up pointers; `history-server.ts`
+provides a fresh-auth, wedding/thread-scoped READ of recent application-owned messages.
+
+Planning uses existing date/payment helpers, budget tool totals, task status/priority and Setup/
+relationship bookings. Vendor-gap candidates come from explicit requested categories, venue
+dependency and mapped existing Couple priorities. Partial/unavailable reads cannot establish
+absence; date-labelled snapshots must be fresh. No checklist/price database, roadmap persistence,
+automatic task creation, provider loop, recommendation-weight change or new tool registration.
+Source classes remain separate from deterministic signal reasons and future AI interpretation.
+
+Phases use Israel calendar dates and injected time, including unknown date, final month, week,
+day and post-wedding; no negative countdown. Roadmap windows reference at most 20 signals each,
+with omissions shown, and underlying READ-tool bounds remain unchanged. Wedding Week readiness
+does not fabricate contacts, arrival times or operational schedules.
+
+Quote validation reuses known wedding region/date/guest context and asks only for missing material
+fields via language-neutral intent/reason codes. Three bounded package fields (coverage hours,
+professional count, video scope) extend the Phase 1C-A normalized benchmark contract. There is no
+text extractor or external call; free text is rejected and add-ons are not counted as included.
+
+History loads newest eight messages plus a sentinel with ownership checks, then keeps at most
+2,000 characters per whole message / 10,000 total. Optional server-selected relevance can omit
+messages; omissions are explicit. It remains local and provider-unready until future semantic
+privacy review. Follow-up pointers are wedding/thread-scoped, expire in 15 minutes, hold four
+vendors / six tool statuses and require fresh authorization/data. A compact summary remains future
+work. Local provider, Assistant API, current monolithic compatibility context and UI are unchanged.
+This phase is preparation for future natural reasoning, not a working real conversational Agent.
+
 ### Phase 1C-A: future research boundaries
 
 The [Agent spec](AI_AGENT_SPEC.md) defines the authoritative research contract. `assistant/research`

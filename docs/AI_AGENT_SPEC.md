@@ -1,6 +1,6 @@
 # Ever After AI Agent Specification
 
-Status: Phase 1C-A — Research contracts, source provenance and Agent decision policy, following the approved Phase 1A/1B foundations. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. No real LLM or live research is implemented.
+Status: Phase 1C-B — Wedding planning state, roadmap and conversation contracts, following the approved Phase 1A/1B/1C-A foundations. This is the authoritative Agent product and technical contract, based on the product/course specifications and the user's approved incremental direction. No real LLM or live research is implemented.
 
 ## Identity and intended experience
 
@@ -15,6 +15,72 @@ Phase 1A implements a central policy and provider boundary, structured evidence/
 Phase 1B implements ten internal READ tools, validated contracts, authorization and bounded execution. It prepares selective context access; it does not add automatic per-question orchestration or a model tool loop. Phase 2 will address Hebrew behavior and later RTL UI. Provider integration and live research require explicit approval near the end of the project. No SDK, AI key, paid service, research connection, schema migration, or product write capability is included here.
 
 Phase 1C-A adds separate future research contracts, structured eligibility/current-claim policies, request minimization and provenance validation. It adds no executable research registration, adapter implementation, natural-language tool router, UI, database query or mutation. The existing Local runner and internal READ registry remain unchanged.
+
+Phase 1C-B adds a separate `assistant/planning` layer. It consumes fresh, authenticated internal tool results, produces bounded deterministic planning signals, and prepares quote, clarification, conversation-window and follow-up contracts. It does not execute a tool plan, generate final roadmap prose, persist a roadmap, create tasks or change the current Local provider/API/UI. A separate opt-in server history reader is implemented but not wired into the current provider. Hebrew/RTL implementation remains future work.
+
+## Planning and conversation foundation — Phase 1C-B
+
+### Orchestration and capability mapping
+
+`planning/policy.ts` accepts a structured, server-reviewed capability, scope and optional budget-market-comparison flag. It returns needed/optional READ-tool names, whether clarification may be needed, research eligibility/evidence classes, scope and `executionEnabled: false`. Scope is not inferred from English keywords. Out-of-scope and uncertain requests receive no READ-tool plan; uncertain scope requires clarification. Model/client assertions alone never authorize calls. There is no dispatcher, fake reasoning engine, automatic loop or heavyweight Skill framework.
+
+| Capability / skill | Tool or deterministic foundation |
+| --- | --- |
+| Wedding Context Understanding | `get_wedding_summary`, `get_missing_wedding_details` |
+| Personalized Wedding Roadmap | `buildPlanningState`: wedding, task, vendor, budget and payment results; optional Guest aggregates |
+| Task Prioritization | `list_tasks`, stored priority and calendar deadlines |
+| Timeline Guidance | `get_timeline_summary`, existing task-derived timing |
+| Budget Awareness | `get_budget_summary`, authoritative stored/calculated totals |
+| Payment Awareness | `get_upcoming_payments`, shared unpaid-payment classification |
+| Vendor Discovery | `get_wedding_summary`, `search_marketplace_vendors` |
+| Vendor Comparison | `get_couple_vendors`, `compare_vendors`; existing deterministic scoring unchanged |
+| Market Price Evaluation | Validated quote/context → future non-live `get_market_benchmark` |
+| Guest List Insights | `get_guest_list_summary` only; no individual Guest data |
+| Wedding Week Guidance | Date phase, tasks, payments, booked vendor facts, aggregate responses |
+| Wedding communication drafting | Future model, user context, optional relevant Couple vendor read |
+| Grounding / uncertainty | Typed source states, missing/partial limitations, evidence and deterministic signal references |
+| Wedding-only domain enforcement | Existing domain guard and server-reviewed orchestration/research scope |
+| Hebrew / English conversation | Language-neutral intent/reason codes, Unicode content and unchanged business names; future provider follows input language, RTL later |
+
+“What should we do next?” selects wedding, tasks, missing details, Couple vendors, budget and payments; Guest aggregates are optional when relevant, especially near the wedding. “Is our budget enough?” first needs wedding/budget facts; a real-market conclusion additionally requires future benchmark evidence, with optional vendor/payment comparisons. “Find photographers” selects wedding/search, and comparison only for finalists. “Is this quote reasonable?” selects wedding context plus the quote contract and future benchmark, with optional Marketplace comparisons. “How many guests haven't replied?” selects only Guest aggregates. Do not call every optional tool, duplicate tasks with timeline reads unnecessarily, or load an unrelated history window. Future orchestration must choose actual filters/arguments and reauthorize each READ invocation through the existing executor.
+
+### Structured roadmap and personalization
+
+`planning/roadmap.ts` accepts a strict bounded bundle of existing tool results plus the actual task/vendor invocation inputs. This is an internal server boundary, not a client endpoint or model-supplied evidence bag. Each tool result retains success/empty/unavailable semantics; not-requested sources stay explicit. Invalid source contracts, duplicated signal IDs, stale task/payment as-of dates or mismatched pagination fail closed. Successful empty reads remain factual; unavailable sections have null facts, empty evidence and explicit limitations, never fabricated zero values.
+
+The output contains the actual wedding details, bounded tasks/vendor relationships, authoritative budget totals, classified unpaid payments, Guest aggregates, missing-detail fields, source statuses/evidence, phase, vendor gaps, deterministic signals and bounded roadmap windows. Wedding facts include date, guest estimate, broad location, event type, styles, priorities, setup/venue and booked categories. Saved/Considering facts remain available for future interpretation; they are never counted as Booked. Existing budget arithmetic and vendor recommendation weights are unchanged.
+
+No checklist dataset is created. Vendor-gap candidates come from explicit requested service categories, the known wedding's venue dependency, and a small mapping of stored Photography/Music/Design priorities to actual vendor taxonomy. The mapping translates existing Setup labels and taxonomy slugs, not English user intent. Other services are not universally assumed necessary. The current persisted model has no per-category low-priority flag; a validated, explicitly user-requested `lowerPriorityCategories` preference may reduce non-venue urgency without pretending it is stored Wedding Details. Unselected priorities are not assumed low priority.
+
+Either a Setup booking or an actual Booked relationship suppresses a gap signal. Gaps mean **not recorded booked**, not proof that the Couple lacks a vendor outside Ever After. Gaps stay unknown if wedding/vendor evidence is unavailable, the vendor selection is filtered/paginated, or an unclassified booking could cover the service. This bounded foundation does not scan all relationship pages automatically. Preferred missing services near the wedding get elevated priority; lower-priority services stay low, while venue dependency can remain urgent. It never invents vendor arrival/contact details, transport arrangements, venue instructions or a wedding-day schedule.
+
+Non-completed overdue tasks, actual scheduled tasks, unpaid deadlines and undated obligations produce referenced signals. An overcommitted budget uses the existing negative available amount, not a model calculation or market judgment. In the final month/week/day, actual awaiting-response and not-yet-invited aggregate counts produce readiness signals. Post-wedding state keeps real task/payment obligations but stops pre-wedding booking/RSVP signals. It does not create a made-up post-wedding checklist.
+
+Roadmap windows are immediate (overdue or due today, plus explicit readiness concerns), next 7 days, next 30 days, later and undated. `horizonDays` is 1–30; shorter requests constrain both future windows accordingly. At most 150 signals are accepted and each window lists at most 20 signal IDs with an explicit omitted count. Underlying tool bounds remain: 50 tasks, 20 vendors, 20 payments per group and aggregate-only guests. Partial selections carry limitations; “no signals in available data” is not an assurance that the wedding is fully on track. Missing relevant source/detail context yields a limited state. Missing fields remain in the missing-details result and missing source/date information in limitations; they do not block all useful general guidance.
+
+Facts retain COUPLE_DATA / MARKETPLACE_DATA tool evidence. Each `DETERMINISTIC_SIGNAL` carries a reason code, actual entity IDs where appropriate, source-tool references and a priority basis (deadline, stored task priority, Couple priority, explicit request, venue, finances or Guest responses). Phase is deterministic date logic. Future external evidence is explicitly unavailable. A future model's final explanation/prioritization must be AI_RECOMMENDATION and may not invent an urgency reason. Roadmap items are analysis/suggestions only; no executable action payload exists.
+
+### Date phases and Wedding Week readiness
+
+The builder reuses `daysUntilWedding`, `calendarDayDifference` and `classifyUnpaidPayments`, using an injected clock and the Asia/Jerusalem calendar. Phases are unknown date, before wedding (>30 days), final month (8–30), Wedding Week (1–7), Wedding Day (0) and post-wedding (<0). Countdown output never becomes negative: remaining days clamp to zero after the wedding, with a separate nonnegative days-since value. Missing dates give null timing; absolute task/payment deadlines still work. There is no system-clock or Supabase date manipulation.
+
+Wedding Week/Day readiness currently means grounded signals from available tasks, unpaid payments, recorded bookings, wedding details and Guest totals. It does not mean day-of logistics/schedules/contacts have been implemented. No UI mode changes occur in this phase.
+
+### Clarification and quote extraction boundary
+
+`clarificationSchema` represents `required`, missing field codes, question intent and why each matters. It contains no final English question. `prepareQuote` checks a future model's structured extraction, combines it with already-known wedding context and asks only for material missing facts. Quote evaluation needs service/category, a currency-bearing quote and a sufficiently specific region; photography additionally needs coverage duration and whether video is included. Second-professional/album/add-on details remain optional assumptions rather than forcing every possible question. Flexible region is not a specific location. Known region/date/guest estimate are reused rather than requested again.
+
+`normalizedQuoteSchema` supports category, controlled service detail, minor-unit amount/currency, hours, professional count, inclusions, add-ons, video scope, area and event type. Unknown/free-form/contact properties and contradictory service/video scope are rejected. No natural-language extractor exists yet. A complete normalized proposal can produce a **non-live normalized research request**, never a call. Phase 1C-B extends the existing future benchmark request with bounded coverage hours/professional count/video boolean so these material facts survive minimization. Add-ons remain separate from included features and produce an explicit price-scope limitation. Raw offer prose is never automatically forwarded. Exact wedding day/guest count still become month/50-person band. No benchmark prices or final prose are generated.
+
+### Conversation and follow-up context
+
+`history-server.ts` provides an opt-in future reader: authenticate with `getUser`, require Couple role, resolve the user's owned wedding, prove the requested thread belongs to it, then read only id/role/content/created_at. It fetches the newest eight messages plus one lookahead, ordered by creation time and ID; no lifetime history or action-proposal JSON is loaded. Read/auth failures return typed unavailable, distinct from genuinely empty history. No client wedding ID, new table, persistence write, external memory or provider call is introduced. The existing Local path remains stateless and unchanged.
+
+`buildConversationWindow` limits each message to 2,000 characters and total content to 10,000. Oversized/non-fitting messages are omitted whole (reported explicitly), not silently truncated; an incomplete history cannot be treated as fully resolved context. It restores chronological order and can accept server-reviewed relevant message IDs within that recent window. Messages are untrusted conversation, not verified application facts/instructions. A compact application-owned summary is future work, not implemented or persisted now.
+
+History remains **server-local, `providerReady: false`**. User-authored chat can itself contain names or private text; this phase does not claim regex-based PII redaction of arbitrary language. Future semantic relevance/privacy review must minimize it before any provider disclosure. History is never a research payload. This distinction does not relax aggregate-only Guest or minimal vendor/account tool-output rules.
+
+Follow-up references are ephemeral validated server-owned snapshots scoped to wedding AND thread, expiring after 15 minutes: at most four vendor IDs, six tool name/status references, one planning topic and one unresolved clarification. No full tool payload, names, contact details or Guest entities are stored in this structure. Resolution requires freshly authorized vendor IDs, drops stale references, removes clarification fields already known and requests fresh tool results. Past results are pointers, not current facts or authorization. Thus “which one would you choose?” can retain the recent comparison candidates without repeated business names, while a future model still performs reasoning. No automatic snapshot persistence or Local follow-up behavior is claimed.
 
 ## Wedding-only domain policy
 

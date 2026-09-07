@@ -22,6 +22,7 @@ const planning = {
 export const benchmarkInputSchema = z.object({
   purpose: z.enum(["service_quote", "market_range", "overall_budget"]), category: researchService.optional(),
   packageFeatures: z.array(packageFeature).max(14).default([]), quotedPrice: quote.optional(),
+  coverageHours: z.number().min(0.5).max(24).optional(), numberOfProfessionals: z.number().int().min(1).max(50).optional(), videoIncluded: z.boolean().optional(),
   // Local-only context, deliberately excluded by normalizeResearchRequest.
   offerDescription: text.optional(), ...planning,
 }).strict().superRefine((input, ctx) => {

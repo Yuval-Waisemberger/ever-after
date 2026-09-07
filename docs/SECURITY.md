@@ -144,6 +144,31 @@ or Supabase data mutation is claimed for this phase. No migration/schema/RLS/see
 
 ## Security verification checklist
 
+### Phase 1C-B planning and conversation
+
+The planning builder consumes fresh authenticated tool outputs and actual invocation metadata
+inside the server boundary. It is not a new public endpoint; a client/model must never manufacture
+the source bundle, eligibility flags, follow-up snapshot or authorized-ID list. Input/output Zod
+allowlists preserve minimal wedding/task/payment/vendor fields and aggregate-only Guest facts.
+Unavailable reads stay null/limited, filtered vendor pages cannot prove a missing booking and
+stale dated snapshots are rejected. Signals reference deterministic reasons and source classes;
+they contain no executable writes. Existing ten-tool authorization and RLS defenses are unchanged.
+
+The optional history reader reauthenticates, requires Couple role and proves wedding/thread
+ownership before reading recent messages. It selects no account/contact fields or action proposals,
+does not read other threads and distinguishes query failure from empty history. Limits are eight
+messages (nine-row lookahead), 2,000 characters per included message and 10,000 total. Chat content
+is untrusted and may contain PII voluntarily typed by the user: it stays server-local with
+`providerReady: false`; no claim of automatic semantic redaction is made. Future provider disclosure
+requires relevance/privacy minimization. It can never be passed directly to external research.
+
+Follow-up pointers carry IDs only, expire after 15 minutes, are checked against both wedding and
+thread and must be resolved against freshly authorized vendor IDs. Old tool statuses do not prove
+current facts. Raw tool payloads, Guest identities, contact fields and private notes are rejected.
+Quote proposals use strict controlled fields, bound numeric package facts and reject unknown/free
+text properties. Wedding context is reused, then existing research normalization coarsens date and
+guest scale. Research remains disabled; no LLM, SDK/key, paid service, write, schema or data mutation.
+
 ### Phase 1C-A research preparation
 
 The research definitions are separate inactive contracts with no execute method. The active

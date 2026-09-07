@@ -175,3 +175,38 @@ checking), whole-repository ESLint and production build passed (Next.js 16.3.4, 
 `git diff --check` and separate new-file whitespace/conflict-marker checks passed. No UI changes
 or Playwright run. Validation used the existing bundled Node runtime and installed package
 entrypoints; no SDK/dependency, external research, Supabase mutation or integration QA rows.
+
+## Phase 1C-B planning / quote / conversation contracts
+
+`tests/assistant/planning.test.ts` covers actual planning facts and evidence, booked Setup/relationship
+suppression, preferred and explicitly lower-priority vendor gaps, incomplete/filtered/ambiguous
+vendor reads, unavailable financial/Guest sources, overdue/upcoming/completed/undated tasks,
+payment classification including today, bounded roadmap windows and omission metadata, fresh dated
+snapshots, missing date and post-wedding behavior. It checks Guest/account/vendor/task/payment PII
+field removal, stable business names, injected Israel calendar phase boundaries and no negative
+countdown. No system clock or live data is modified.
+
+Policy/quote tests cover minimal Guest tool selection, internal budget versus market realism,
+scope rejection, missing material package clarification, reuse of known Wedding Details, strict
+normalized quote validation, retained package quantities/video false, add-on scope and minimized
+research attributes. There is no natural-language extraction or final generated English/Hebrew prose.
+
+Conversation tests cover chronological Unicode messages, whole-message omission, relevance
+selection, eight-message/10,000-character limits, provider-unready status, bounded ephemeral vendor/
+tool pointers, expiry/scope/authorization refresh and resolved clarification removal. Free-form
+chat is not asserted PII-free; these tests prove it is not an outbound provider/research payload.
+
+`tests/assistant/history-server.test.ts` mocks Supabase and checks authentication, Vendor denial,
+owned-wedding/thread filters, bounded newest-message reads, cross-thread rejection, query failures,
+genuine empty history and lookahead. No live integration calls/QA rows are used. Registry/source
+guards preserve ten internal READ tools, inactive research and no Agent writes/external integration.
+Run relevant Assistant Vitest, TypeScript, ESLint, production build and whitespace checks; no UI
+change means Playwright is unnecessary. Existing Assistant foundation/API/context/read-tool tests
+remain required because the provider and compatibility path are intentionally unchanged.
+
+Results on 2026-09-07: TypeScript and whole-repository ESLint passed; 304/304 Assistant Vitest
+tests passed across eight files, including 43 planning/quote/conversation tests and nine new
+server-history tests. Production build passed (Next.js 16.3.4, 11 static pages). `git diff --check`
+and separate new-file whitespace/conflict checks passed. No UI changes or Playwright run.
+Tests used mocked data and injected clocks; no Supabase integration/mutation, external service,
+package installation, system-clock change, migration, seed or QA data operation was performed.

@@ -55,6 +55,7 @@ export const normalizedResearchRequestSchema = z.discriminatedUnion("tool", [
   z.object({ tool: z.literal("get_market_benchmark"), attributes: z.object({
     ...normalizedPlanningFields, purpose: benchmarkInputSchema.shape.purpose, category: benchmarkInputSchema.shape.category,
     packageFeatures: benchmarkInputSchema.shape.packageFeatures, quotedPrice: benchmarkInputSchema.shape.quotedPrice,
+    coverageHours: benchmarkInputSchema.shape.coverageHours, numberOfProfessionals: benchmarkInputSchema.shape.numberOfProfessionals, videoIncluded: benchmarkInputSchema.shape.videoIncluded,
   }).strict() }).strict(),
   z.object({ tool: z.literal("research_current_wedding_info"), attributes: z.object({ ...normalizedPlanningFields, topic: currentInfoInputSchema.shape.topic }).strict() }).strict(),
 ]);
@@ -69,6 +70,9 @@ export function normalizeResearchRequest(toolName: unknown, raw: unknown, now = 
       ...(input.category ? { category: input.category } : {}),
       packageFeatures: [...new Set(input.packageFeatures)].sort(),
       ...(input.quotedPrice ? { quotedPrice: input.quotedPrice } : {}),
+      ...(input.coverageHours != null ? { coverageHours: input.coverageHours } : {}),
+      ...(input.numberOfProfessionals != null ? { numberOfProfessionals: input.numberOfProfessionals } : {}),
+      ...(input.videoIncluded != null ? { videoIncluded: input.videoIncluded } : {}),
     } });
   }
   const input = currentInfoInputSchema.parse(raw);
