@@ -286,3 +286,46 @@ only for development on exact localhost/loopback hosts; production ignores them.
 a presentation clock anchored to the stored wedding date, never task deadlines, payments, actual
 dates, records, cookies or storage. There is no preview write endpoint. The browser timer only
 updates component state. No external AI/service/library or schema change was introduced.
+
+## Final role hardening (Frankfurt applied, 2026-09-07)
+
+`202609070002_role_boundary_hardening.sql` is a security-only migration applied to Frankfurt after
+explicit approval and catalog preflight. The preceding policies allowed an authenticated Vendor to create
+an owned wedding, and a Couple to create an owned Vendor profile through direct database access.
+The new restrictive role policies intersect existing ownership policies. `owns_wedding`,
+`owns_budget_item`, `owns_assistant_thread` and `owns_vendor` also require the correct stored
+profile role, denying downstream access even for legacy wrong-role parents. Profile roles remain
+immutable to authenticated clients; signup uses the existing trusted initialization trigger.
+
+A new relationship INSERT must reference a public Marketplace vendor (or an owned External
+Vendor under the existing composite FK). Previously a forged unpublished vendor ID could reach
+050003's SECURITY DEFINER sync and reveal the private business name through a canonical expense.
+Existing relationships remain manageable if a business later unpublishes; identity changes are
+still forbidden by 050003. No second Budget writer or payment path was added.
+
+Vendor-profile deletion previously cascaded into Couple-owned relationships/reviews regardless
+of child RLS. Those two FKs now use RESTRICT. A Vendor can edit/unpublish their own profile but
+cannot erase Couple history by deleting the parent. Financial protections in 050003 stay intact.
+No records are merged, deleted or backfilled by this security migration.
+
+Guest actions now require an affected owned row before reporting success. Missing and forged IDs
+produce the same safe failure. Signup actions no longer return raw provider/trigger error text.
+Other reviewed mutations resolve `requireRole`/`getOwnedWedding` server-side and scope entity IDs
+to that owner; client IDs are never ownership authority. Assistant API thread lookup includes the
+owned wedding, and every one of its unchanged ten READ tools freshly authenticates. Guest data
+remains aggregate-only; task/private vendor notes are excluded from routine Assistant outputs.
+
+Storage design remains unchanged: couple-media is private, role/UUID-namespace scoped; vendor-media
+is intentionally public marketing imagery, including object URLs after unpublishing a profile.
+Do not upload private documents there. Writes require the owned Vendor namespace. SQL policy tests
+cover reads/writes/deletes/path reassignment; browser upload and signed-URL HTTP authorization are
+not reproduced by the local PostgreSQL harness. No Storage architecture changes are introduced.
+
+The approved closeout applied only this complete transactional file through a fresh SQL Editor
+query. Clipboard verification matched the repository text after line-ending normalization, with
+no partial selection. Live function, policy and FK definitions match the migration; all relevant
+private tables retain RLS. Counts and aggregate whole-row fingerprints for nine application tables
+were identical before/after, with no wrong-role parents or invalid references. Storage and other
+unaffected policy definitions also retained the same fingerprint. No live QA rows were created.
+Earlier manual migration history remains non-authoritative; no ledger change or db push was used.
+Full Supabase JWT adversarial and Storage HTTP boundary checks remain Final Production QA.

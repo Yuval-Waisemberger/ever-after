@@ -35,9 +35,9 @@ export async function saveGuest(_previous: ActionState, formData: FormData): Pro
   };
 
   const result = parsed.data.id
-    ? await supabase.from("guests").update(values).eq("id", parsed.data.id).eq("wedding_id", wedding.id)
-    : await supabase.from("guests").insert(values);
-  if (result.error) return { status: "error", message: "The guest could not be saved. Please try again." };
+    ? await supabase.from("guests").update(values).eq("id", parsed.data.id).eq("wedding_id", wedding.id).select("id").maybeSingle()
+    : await supabase.from("guests").insert(values).select("id").single();
+  if (result.error || !result.data) return { status: "error", message: "The guest could not be saved. Please try again." };
 
   refreshGuestViews();
   redirect(`/guests?guest=${parsed.data.id ? "updated" : "added"}`);
@@ -48,7 +48,7 @@ export async function deleteGuest(formData: FormData) {
   if (!parsed.success) return;
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
-  const { error } = await supabase.from("guests").delete().eq("id", parsed.data.id).eq("wedding_id", wedding.id);
-  if (error) throw new Error("The guest could not be deleted. Please try again.");
+  const { data, error } = await supabase.from("guests").delete().eq("id", parsed.data.id).eq("wedding_id", wedding.id).select("id").maybeSingle();
+  if (error || !data) throw new Error("The guest could not be deleted. Please try again.");
   refreshGuestViews();
 }

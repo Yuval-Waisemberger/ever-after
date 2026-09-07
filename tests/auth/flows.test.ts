@@ -29,6 +29,13 @@ beforeEach(() => {
 });
 afterEach(() => vi.unstubAllEnvs());
 describe("signup and resend (mocked provider, no network)", () => {
+  it.each([[signUpCouple, couple], [signUpVendor, vendor]] as const)("does not expose signup provider/database errors", async (action, values) => {
+    mocks.signUp.mockResolvedValue({ data: null, error: { message: "private trigger/database detail" } });
+    const result = await action(idle, form(values));
+    expect(result.status).toBe("error");
+    expect(result.message).toContain("account could not be created");
+    expect(JSON.stringify(result)).not.toContain("private trigger/database detail");
+  });
   it.each([["couple", signUpCouple, couple], ["vendor", signUpVendor, vendor]] as const)("%s no-session signup preserves metadata and waits for email", async (role, action, values) => {
     expect(await action(idle, form(values))).toMatchObject({ status: "success", verificationEmail: common.email });
     expect(mocks.signUp).toHaveBeenCalledWith(expect.objectContaining({ options: expect.objectContaining({ emailRedirectTo: `https://app.example/auth/callback?audience=${role}`, data: expect.objectContaining({ role, display_name: role === "couple" ? couple.displayName : vendor.businessName }) }) }));

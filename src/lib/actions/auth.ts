@@ -97,7 +97,7 @@ export async function signUpCouple(
       },
     },
   });
-  if (error) return { status: "error", message: error.message };
+  if (error) return { status: "error", message: "Your account could not be created. Please try again or sign in if you already have an account." };
   if (data.session) redirect("/wedding/setup");
   return {
     status: "success",
@@ -134,7 +134,7 @@ export async function signUpVendor(
       },
     },
   });
-  if (error) return { status: "error", message: error.message };
+  if (error) return { status: "error", message: "Your account could not be created. Please try again or sign in if you already have an account." };
   if (data.session) redirect("/vendor");
   return {
     status: "success",

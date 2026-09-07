@@ -453,3 +453,23 @@ parameters are previewDaysBefore=8|7|3|1|0 or previewDaysAfter=1, exclusively. T
 midday clock from the actual stored wedding date and affect ONLY the date component. All normal
 cards still use real server time/data. No date means no preview. Production ignores parameters.
 The preview is labeled, URL-only, and never persisted; it runs forward at the normal clock rate.
+
+## Role-boundary hardening (2026-09-07, Frankfurt applied)
+
+The security follow-up `202609070002_role_boundary_hardening.sql` adds restrictive account-role
+guards to existing wedding/Vendor policies and reuses the ownership helpers for all dependent
+private tables. Public Marketplace visibility stays independent of Vendor ownership. The new
+`is_vendor_account` helper mirrors `is_couple_account` with a fixed empty search path.
+
+New Marketplace relationship inserts require public visibility before the privileged booking
+trigger executes. Existing hidden-vendor relationships may still be managed, preserving financial
+history. The two Vendor-profile FKs from Couple relationships and reviews change from CASCADE to
+RESTRICT because FK cascades bypass child RLS. Other financial calculations, triggers, lifecycle
+and Setup behavior are unchanged. No table, column, UI redesign or service was introduced.
+
+Guest mutations use returned owned IDs to distinguish successful writes from zero affected rows.
+Signup returns a safe generic error rather than provider/database details. After separate approval,
+the exact migration was applied as one transaction to wedding-planner-project-eu (eu-central-1).
+Catalog/role-parent preflight and post-application definitions/data fingerprints passed. No other
+migration, ledger update or application-data mutation was performed. Never use the incomplete
+migration ledger as proof of live state.

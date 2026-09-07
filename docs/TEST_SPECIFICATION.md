@@ -416,3 +416,60 @@ also rendered successfully with one of each normal card; no data-changing action
 Later cleanup remains outside this task: long titles in the normal Upcoming card become narrow
 beside pills on small screens, and the normal Budget card's “Next payment” heading can describe
 an overdue item. Neither normal card was changed in this date-area-only pass.
+
+## Final authorization pass (2026-09-07)
+
+`tests/database/security-rls-postgres.mjs` executes every actual repository migration through the
+new role-boundary patch in a disposable PostgreSQL 17 container, with no network/host port, no
+production credentials and synthetic identities only. `auth.uid`, auth.users and minimal Storage
+catalog tables are SQL boundary stubs; public schema, grants, RLS, FKs and financial triggers are
+the actual migrations. Operations run as non-owner authenticated/anon roles, not the superuser.
+
+The harness first reproduces wrong-role wedding/Vendor creation, unpublished-vendor disclosure
+through booking sync and the Vendor deletion cascade. It then tests migration rollback, no data
+backfill, allowed creation/edit flows, legacy wrong-role denial, Couple A/B read/update/delete/
+reassignment isolation, forged inserts, public/Vendor denial, canonical booking protections,
+payment-parent immutability, unbook/rebook preservation, image metadata and Storage namespace
+checks. Cleanup removes the disposable container and volume in finally. Run with an existing
+modern Node runtime: `node tests/database/security-rls-postgres.mjs`; no image download is allowed.
+
+`security-boundaries.test.ts` calls real authorization/owned-parent functions against a database
+double for Setup/Details, Guests, relationships, External Vendors, Budget/payments and media.
+Existing Task authorization, Assistant API and all ten-tool privacy suites remain part of the
+regression run. Guest zero-row/error and safe signup error tests cover the application fixes.
+`role-boundary-migration.test.ts` supplies fast source-contract checks in addition to real SQL.
+
+`e2e/security-boundaries.spec.ts` exercises anonymous private-route redirects and forged Assistant
+requests against a separate local production server with dummy loopback Supabase configuration.
+It submits no signup/login or authenticated product mutation. Full Supabase JWT, PostgREST and
+Storage HTTP integration remain separate from these isolated checks.
+
+Validation results: 611 distinct Vitest tests across 29 files passed across the regression run
+and focused reruns (two initially invalid payment fixtures were corrected). PostgreSQL 17.11
+passed 179 assertions, including a failed-transaction rollback; the disposable DB was removed.
+All 12 anonymous production-browser checks passed after splitting an overlong combined test into
+per-route cases. TypeScript, whole-repository ESLint, production Webpack build and diff whitespace
+checks passed. Those implementation tests used no Frankfurt connection or live QA records.
+
+Approved Frankfurt closeout (2026-09-07): only `202609070002_role_boundary_hardening.sql`
+was applied, as a complete verified SQL Editor transaction after catalog/role/reference preflight.
+Postflight confirmed all five restrictive policies, revised owner-read policy, five function
+definitions, two valid RESTRICT FKs, and enabled private-table RLS. Unaffected policies, including
+Storage, retained their aggregate fingerprint. Whole-row fingerprints and counts were unchanged:
+weddings 1, profiles 2, vendor_profiles 497, couple_vendors 5, reviews 2727, tasks 4, guests 0,
+budget_items 2, payments 1. No invalid references or wrong-role parents were found.
+
+The existing authenticated Couple session rendered `/wedding`, `/tasks`, `/guests`, `/budget`,
+`/vendors/my` and `/assistant` normally; no record or Assistant-message submission was made.
+An isolated anonymous browser loaded Marketplace and a public vendor profile with reviews and
+all displayed images loaded (13/13 and 2/2). The six private Couple routes and both Vendor routes
+redirected to the appropriate sign-in page. The final Vendor-profile check initially timed out
+waiting for network idle; a focused DOM-ready retry passed with no browser exception.
+No authenticated Vendor session was available, so Vendor-page smoke remains unrun; the approved
+isolated role tests provide mutation coverage. No actual live security/runtime failure was found.
+Private Couple-media HTTP rendering was not exercised; public vendor imagery rendered normally.
+
+Final Production QA retains full Supabase JWT adversarial and Storage HTTP boundary verification.
+Later Cleanup retains narrow Upcoming titles, normal Budget overdue-payment wording, and
+non-security feedback handling in older bookmark/review/media actions. No seeds, live QA records,
+other migrations, migration-history changes, pushes or deployments occurred during closeout.

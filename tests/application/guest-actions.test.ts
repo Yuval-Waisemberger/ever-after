@@ -8,6 +8,7 @@ const mocks = vi.hoisted(() => ({
   update: vi.fn(),
   delete: vi.fn(),
   eq: vi.fn(),
+  result: vi.fn(),
   revalidatePath: vi.fn(),
   redirect: vi.fn(),
 }));
@@ -31,9 +32,10 @@ function guestForm(overrides: Record<string, string> = {}) {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.getOwnedWedding.mockResolvedValue({ id: weddingId });
-  const chain = { eq: mocks.eq, error: null };
+  const chain = { eq: mocks.eq, select: () => chain, single: mocks.result, maybeSingle: mocks.result };
+  mocks.result.mockResolvedValue({ data: { id: guestId }, error: null });
   mocks.eq.mockReturnValue(chain);
-  mocks.insert.mockResolvedValue({ error: null });
+  mocks.insert.mockReturnValue(chain);
   mocks.update.mockReturnValue(chain);
   mocks.delete.mockReturnValue(chain);
   mocks.from.mockReturnValue({ insert: mocks.insert, update: mocks.update, delete: mocks.delete });
@@ -41,6 +43,15 @@ beforeEach(() => {
 });
 
 describe("Guest actions", () => {
+  it.each([null, { message: "private database detail" }])("rejects missing/forged rows and read errors without false success", async error => {
+    mocks.result.mockResolvedValue({ data: null, error });
+    const result = await saveGuest({ status: "idle" }, guestForm({ id: guestId }));
+    expect(result.status).toBe("error");
+    expect(JSON.stringify(result)).not.toContain("private database detail");
+    await expect(deleteGuest(guestForm({ id: guestId }))).rejects.toThrow("The guest could not be deleted");
+    expect(mocks.revalidatePath).not.toHaveBeenCalled();
+    expect(mocks.redirect).not.toHaveBeenCalled();
+  });
   it("creates a normalized invitation party for the owned wedding", async () => {
     await expect(saveGuest({ status: "idle" }, guestForm({ partyName: "  ", email: " " }))).rejects.toThrow("REDIRECT:/guests?guest=added");
     expect(mocks.from).toHaveBeenCalledWith("guests");
