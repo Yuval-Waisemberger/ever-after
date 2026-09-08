@@ -18,13 +18,14 @@ export function CategoryNavigation({ selected }: { selected?: string }) {
       <h2 id="category-heading">Browse by Category</h2>
       <nav aria-label="Browse vendor categories" className="category-navigation">
         {categories.map(({ slug, label, icon: Icon }) => (
-          <Link key={slug} href={`/vendors?category=${slug}#marketplace-results`} className="category-link" aria-current={selected === slug ? "page" : undefined}>
+          <Link key={slug} href={`/vendors?category=${slug}#marketplace-results`} className={`category-link category-link--${slug}`} aria-current={selected === slug ? "page" : undefined}>
             <Icon className="category-icon" size={38} strokeWidth={1.15} aria-hidden="true" />
             <span>{label}</span>
             <ArrowUpRight className="category-arrow" size={14} strokeWidth={1.25} aria-hidden="true" />
           </Link>
         ))}
       </nav>
+      <Link href="/vendors#marketplace-results" className="category-all ea-text-action" aria-current={!selected ? "page" : undefined}>All vendors →</Link>
     </section>
   );
 }

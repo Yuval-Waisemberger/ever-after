@@ -1,6 +1,8 @@
+import "@/app/marketplace-polish.css";
+import { RecommendationDetail } from "./recommendation-detail";
 import Image from "next/image";
 import Link from "next/link";
-import { MapPin, Sparkles, Star } from "lucide-react";
+import { Heart, MapPin, Star } from "lucide-react";
 import { formatIls } from "@/lib/domain/budget";
 import type { MarketplaceVendor } from "@/lib/vendors/types";
 import { SavedVendorButton } from "@/components/vendors/saved-vendor-button";
@@ -12,7 +14,7 @@ function humanize(value: string) {
 export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: { vendor: MarketplaceVendor; canSave?: boolean; returnTo?: string }) {
   return (
     <article className="vendor-card group relative overflow-hidden rounded-2xl border bg-paper">
-      {canSave ? <div className="absolute right-3 top-3 z-10"><SavedVendorButton vendorId={vendor.id} isSaved={vendor.isSaved === true} returnTo={returnTo} compact /></div> : null}
+      {canSave ? <div className="absolute right-3 top-3 z-10"><SavedVendorButton vendorId={vendor.id} isSaved={vendor.isSaved === true} returnTo={returnTo} compact /></div> : <Link href="/auth/couple?mode=login" className="vendor-save-button absolute right-3 top-3 z-10 grid size-11 place-items-center rounded-full border bg-paper/90 text-wine" aria-label="Sign in to save vendor"><Heart size={17} aria-hidden="true" /></Link>}
       <Link href={`/vendors/${vendor.slug}`} className="block">
         <div className="relative aspect-[4/3] overflow-hidden bg-paper-muted">
           {vendor.imageUrl ? (
@@ -20,20 +22,16 @@ export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: {
           ) : (
             <div className="grid h-full place-items-center font-display text-2xl text-ink-soft">{vendor.businessName}</div>
           )}
-          {vendor.recommendation?.isRecommended ? (
-            <span className="recommendation-badge absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs">
-              <Sparkles className="size-3" /> Recommended for you
-            </span>
-          ) : null}
+
         </div>
         <div className="p-5">
-          <div className="flex items-start justify-between gap-3">
-            <div>
+          <div className="vendor-card-heading flex items-start justify-between gap-3">
+            <div className="min-w-0">
               <p className="text-xs font-bold uppercase tracking-[0.12em] text-wine">{vendor.subcategoryName ?? vendor.categoryName}</p>
               <h2 className="font-display mt-1 text-2xl leading-tight">{vendor.businessName}</h2>
             </div>
             {vendor.ratingAverage != null ? (
-              <span className="inline-flex items-center gap-1 rounded-full bg-gold/10 px-2 py-1 text-xs font-bold"><Star className="size-3 fill-gold text-gold" />{vendor.ratingAverage.toFixed(1)}</span>
+              <span className="vendor-card-rating inline-flex shrink-0 items-center gap-1 rounded-full bg-gold/10 px-2 py-1 text-xs font-bold"><Star className="size-3 fill-gold text-gold" />{vendor.ratingAverage.toFixed(1)}</span>
             ) : null}
           </div>
           {vendor.locationCity ? <p className="mt-2 text-xs font-semibold uppercase tracking-[0.12em] text-wine">{vendor.locationCity}</p> : null}
@@ -44,6 +42,7 @@ export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: {
           </div>
         </div>
       </Link>
+      <RecommendationDetail recommendation={vendor.recommendation} />
     </article>
   );
 }

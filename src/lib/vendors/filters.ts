@@ -12,7 +12,9 @@ function positiveNumber(value: string | undefined): number | undefined {
 
 export function parseVendorFilters(params: Record<string, string | string[] | undefined>): VendorFilters {
   const page = Math.max(1, Math.trunc(positiveNumber(one(params.page)) ?? 1));
+  const sort = one(params.sort);
   return {
+    sort: one(params.category)?.trim() && (sort === "price_asc" || sort === "price_desc") ? sort : undefined,
     search: one(params.search)?.trim() || undefined,
     category: one(params.category)?.trim() || undefined,
     subcategory: one(params.subcategory)?.trim() || undefined,

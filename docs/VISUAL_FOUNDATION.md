@@ -81,7 +81,7 @@ Couple login/signup retain F04's three-part desktop arrangement. At 1440px the r
 
 Landing/Auth harmony reuses `--canvas`, `--paper`, `--blush`, `--line`, `--wine`, `--surface-blush`, `--surface-champagne`, `--shadow-soft` and `--shadow-raised`. Auth no longer has a yellow/champagne radial background or a beige panel endpoint. Its page is ivory with a 25% blush/ivory mix; the near-white panel ends in a 28% blush/white mix, controls are ivory, and champagne is limited to the small support strip. Feature-icon surfaces combine blush gradients, tonal borders and soft inset/elevation shadows. No new palette/global token edits are included.
 
-**Carry forward to later workstreams:** richer surfaces, not new colors. Use layered ivory/blush, tonal neutral surfaces, small champagne accents, controlled shadows and purposeful hover depth. Avoid flat white-on-white layers, added pink, glow or glass effects. Translate signature motion into explicit start/active/rest states, timings, triggers, repeats and reduced-motion behavior; do not substitute a generic pulse for documented choreography. Workstreams B–E still require owner approval before starting.
+**Carry forward to later workstreams:** richer surfaces, not new colors. Use layered ivory/blush, tonal neutral surfaces, small champagne accents, controlled shadows and purposeful hover depth. Avoid flat white-on-white layers, added pink, glow or glass effects. Translate signature motion into explicit start/active/rest states, timings, triggers, repeats and reduced-motion behavior; do not substitute a generic pulse for documented choreography. Later workstreams require explicit owner approval before starting.
 
 Public/Auth verification:
 
@@ -91,7 +91,7 @@ pnpm exec playwright test e2e/public-auth-polish.spec.ts e2e/public-redesign.spe
 pnpm exec playwright test --config=e2e/public-auth.config.ts
 ```
 
-The last command runs an isolated Auth fixture whose pending promise is explicitly resolved by the test. No credentials, environment files or Supabase client are loaded. Real application checks only browse/fill controls; they do not submit live auth forms or create accounts. The targeted suite covers full-width image bounds, absence of continuation masks, image/panel top alignment, logo aspect ratio, whole-opening overlay bounds, repeated icon states, offscreen pauses and reduced motion. Current four-width screenshots and full desktop/mobile opening-plus-icon recordings are local/ignored under `.codex-tmp/public-auth-correction/`. Earlier review artifacts remain preserved. The phase remains uncommitted pending owner visual review.
+The last command runs an isolated Auth fixture whose pending promise is explicitly resolved by the test. No credentials, environment files or Supabase client are loaded. Real application checks only browse/fill controls; they do not submit live auth forms or create accounts. The targeted suite covers full-width image bounds, absence of continuation masks, image/panel top alignment, logo aspect ratio, whole-opening overlay bounds, repeated icon states, offscreen pauses and reduced motion. Current four-width screenshots and full desktop/mobile opening-plus-icon recordings are local/ignored under `.codex-tmp/public-auth-correction/`. Earlier review artifacts remain preserved. Phase 2A is committed at `fb6e74f` after owner visual review.
 
 Deferred findings: the existing JavaScript-disabled Marketplace result-visibility assertion also fails at the protected Phase 1 checkpoint because its streamed content remains hidden. The wider responsive suite also encountered a Marketplace image-load timeout at 768px; all dedicated Public/Auth viewport checks pass. These Marketplace checks are retained, not weakened or removed. Authenticated How It Works routing and other functional handoff requests remain later scoped work; Workstream A preserves existing authenticated redirects and does not modify Marketplace rendering.
 
@@ -110,9 +110,9 @@ Sources: final Design/Motion/UX DOCX (including all archive additions), twelve Z
 | Budget real metric entrance, fixed-value bar fill, real booking-change highlight | DOCX / ZIP 06,13 | 2B | IMPLEMENTED |
 | Guest confirmed/invited ring scale/fade and semantic rows | DOCX / ZIP 16 / Guest recording | 2B | IMPLEMENTED |
 | Setup step fade/slide, selected choices, completed-step progress, actual save toast | DOCX / ZIP 04,09 | 2B | IMPLEMENTED |
-| Marketplace card lift/image zoom/border depth; save heart sequence + 2–3 particles; category hover | DOCX | 2C | DEFERRED — outside Couple Planning scope |
-| Recommendations sparkle and Why this match reveal | DOCX | 2C | DEFERRED — owning workstream not started |
-| Vendor booking check → one 0.8–1.2s confetti burst → rest | DOCX / confetti recording | 2C | DEFERRED — booking UI belongs to Marketplace |
+| Marketplace card lift/image zoom/border depth; save heart sequence + 2–3 particles; category hover | DOCX | 2C | IMPLEMENTED |
+| Recommendations sparkle and Why this match reveal | DOCX | 2C | IMPLEMENTED |
+| Vendor booking check → one 0.8–1.2s confetti burst → rest | DOCX / confetti recording | 2C | IMPLEMENTED |
 | Vendor dashboard completion counter/fill/checklist/tint/rating/section reveals | DOCX / storyboard | 2D | DEFERRED — business account scope |
 | Vendor ratings sequential real stars; Business Profile reveal/focus/explicit save toast; publication check/tint without confetti | DOCX / storyboard | 2D | DEFERRED — business account scope |
 | My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | 2D | DEFERRED — review owning workstream |
@@ -141,7 +141,7 @@ The six existing Dashboard summaries remain exactly once, in two columns on desk
 
 No schema, RLS, ownership, auth, query, persistence, financial formula, booking writer or provider/tool change belongs to this work. Shared effects live in `src/components/planning/`; page-specific CSS stays with its owning components. All new fixture actions/queries use synthetic local data and block external requests. The ignored review media live in `.codex-tmp/phase2b-review/`.
 
-Known limits: a first arrival at Budget has no trustworthy previous canonical amount, so it does not fabricate sync feedback; a later mounted server refresh can highlight the changed item. Full signed-in Frankfurt smoke testing needs an existing authenticated session (the available browser was signed out during this pass). No test accounts or live rows were created. Optional identity float and bar breathing remain deferred to Phase 3, and Phases 2C–2E remain untouched.
+Known limits: a first arrival at Budget has no trustworthy previous canonical amount, so it does not fabricate sync feedback; a later mounted server refresh can highlight the changed item. Full signed-in Frankfurt smoke testing needs an existing authenticated session (the available browser was signed out during this pass). No test accounts or live rows were created. Optional identity float and bar breathing remain deferred to Phase 3, and, at that checkpoint, Phases 2C–2E remained untouched.
 
 
 Phase 2B validation: TypeScript and whole-repository ESLint passed; all 791 Vitest tests passed in 59 files with bounded concurrency; 48 Couple fixture Playwright tests passed (Setup 12, Tasks 6, Budget/Guests 17, Countdown/Timeline 13); production build passed. Screenshots cover all six planning areas at 1440/768/390/360. Countdown and Timeline review videos are local only. The six normal local routes safely redirected the available signed-out session to Couple authentication with no 500 errors; populated application states were tested through isolated fixtures. One earlier asset-test timeout and two multi-state screenshot timeouts were resolved by bounded concurrency/appropriate test timeout, without changing product behavior or assertions. Existing mock Supabase multi-client warnings are test-environment logging, not a new runtime error.
@@ -149,3 +149,31 @@ Phase 2B validation: TypeScript and whole-repository ESLint passed; all 791 Vite
 ## Shared atmospheric canvas correction
 
 `rich-canvas.css`, imported with shared globals, owns one stationary `--rich-canvas` composition for public, Auth, workspace and vendor-profile canvases. Oversized elliptical gradients layer existing rose, blush, champagne and taupe over ivory; they contain no runtime reference imagery, overlay, animation or new palette. The Landing feature region uses the same composition with a taller background size to avoid compressed stripes. Contained panels retain their own readable surfaces. Auth uses the Landing CTA dimensions through `ea-brand-cta` and optional decorative Lucide mail/lock leading icons through FormField; password visibility and submit state remain unchanged. No Vendor Account or Assistant-specific redesign is included.
+
+
+## Phase 2C — Marketplace and vendor discovery
+
+Marketplace, public Vendor Profile and Our Vendors inherit `rich-canvas.css`; their scoped surfaces/interactions live in `marketplace-polish.css`. The eight category links remain canonical; an All vendors reset replaces the redundant category select. Search, area, minimum rating, subcategory and category-specific controls remain. Category motion is hover/focus only: scale 1.035 over 450ms, with a 650ms lens, note, flower, cake-detail or small rotation gesture. Cards rise 4px and images scale 1.035 over 550ms. No ambient category loop or gallery fabrication is added. Layout controls change local presentation only: comfortable two-column desktop / one-column mobile, compact three-column desktop / two-column mobile.
+
+Display by retains directory order and offers category-scoped starting-price ascending/descending. SQL orders before pagination, keeps unknown prices last and uses ID as deterministic tie-breaker; demo mode mirrors it. This is the only query extension. Cross-category price sorting is withheld because venue per-guest prices and package prices are not comparable. Rating sorting is deferred because ratings are calculated from review rows rather than a sortable database aggregate; sorting only the current page would misrepresent the directory. Existing rating filtering and deterministic recommendation weights remain unchanged.
+
+| Interaction | Confirmed trigger and motion | Reduced motion |
+| --- | --- | --- |
+| Save | This form submits, then refreshed `isSaved` changes: heart 1 → 1.15 → .95 → 1 over 650ms, three tiny particles; unsave uses a smaller 400ms return. No initial-load or pending success. | Actual filled/outline state remains; particles hidden. |
+| Recommendation | Real recommended result with earned reasons only. One 800ms sparkle; native keyboard/touch disclosure opens reasons with 5px rise / 240ms. | Final icon and disclosure remain usable. |
+| Booking | Supplied `conffetti.mov` reviewed as the primary sequence. This form requests Booked, then server status changes to Booked: 220ms check, headline enters after 180ms, 16 curated hearts/sparks/petals/dots burst for 1000ms after 280ms, then stable confirmation with actual vendor name. | Stable confirmation, no particles. |
+| External vendor entry | One top-right action opens the complete existing form in a native dialog: 240ms backdrop, 280ms opacity / .98 scale. Business name receives focus; Escape closes and returns focus. | Immediate usable dialog. |
+
+Feedback components observe existing server props; they do not write relationship, Budget or payment data. Failed requests clear their visual intent when real form pending settles. Query flags, existing Booked rows, bookmark changes and unrelated updates cannot trigger confetti. A remounted view without a trustworthy prior state deliberately does not fabricate a success animation. Our Vendors retains its status tabs, separate Saved state and normal Marketplace/External forms. Existing loading/skeleton handling is reused without added delays.
+
+The fixture uses real presentation components, synthetic in-memory actions/reads, no environment files and blocked external requests:
+
+```sh
+pnpm exec playwright test --config=e2e/discovery.config.ts
+pnpm exec playwright test e2e/marketplace-subcategories.spec.ts
+pnpm exec vitest run tests/ui/discovery-presentation.test.tsx tests/ui/vendor-filters.test.tsx tests/domain/marketplace-subcategories.test.ts
+```
+
+Screenshots and short hover/save/booking recordings are ignored under `.codex-tmp/phase2c/`; the seven-page shared-canvas comparison is under `.codex-tmp/rich-canvas/`. Public directory/profile smoke checks are read-only. With no existing authenticated Couple session available, populated Our Vendors and mutation feedback are verified in isolation; no live QA data is created. Full signed-in redirect continuity remains a final authenticated QA check. Vendor Account and Assistant visual work remain deferred; no schema, RLS, migration, dataset, recommendation-weight or provider changes are included.
+
+Phase 2C validation: TypeScript and whole-repository ESLint passed; the full Vitest suite passed all 802 tests in 60 files, followed by a 12-test presentation rerun after compact-card refinement. Ten isolated Marketplace browser checks passed at 1440/768/390/360, including keyboard disclosure, dialog focus/return, compact rating containment, pending/failure feedback, stale intent and reduced motion. Six existing read-only Marketplace filtering tests passed. The final production build and diff whitespace check passed. Existing mock Supabase multi-client warnings and browser-runner color warnings are unchanged test logging.

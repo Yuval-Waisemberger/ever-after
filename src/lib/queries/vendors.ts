@@ -176,6 +176,10 @@ export async function getMarketplaceSubcategories(): Promise<MarketplaceSubcateg
 export async function getMarketplace(filters: VendorFilters) {
   if (!isSupabaseConfigured()) {
     const all = filterDemoVendors(filters);
+    if (filters.category && (filters.sort === "price_asc" || filters.sort === "price_desc")) all.sort((a,b) => {
+      if (a.minPriceMinor == null || b.minPriceMinor == null) return a.minPriceMinor == null ? (b.minPriceMinor == null ? a.id.localeCompare(b.id) : 1) : -1;
+      return (a.minPriceMinor - b.minPriceMinor) * (filters.sort === "price_desc" ? -1 : 1) || a.id.localeCompare(b.id);
+    });
     const from = (filters.page - 1) * PAGE_SIZE;
     return { vendors: all.slice(from, from + PAGE_SIZE), total: all.length, pageSize: PAGE_SIZE, isPreview: true };
   }
@@ -199,11 +203,15 @@ export async function getMarketplace(filters: VendorFilters) {
   if (filters.guestCount != null) query = query.lte("min_guest_capacity", filters.guestCount).gte("max_guest_capacity", filters.guestCount);
   if (filters.friday) query = query.eq("friday_available", true);
   if (filters.service) query = query.contains("services", [filters.service]);
+  // Sort comparable category starting prices before pagination; unknown prices remain last.
+  const ordered = filters.category && (filters.sort === "price_asc" || filters.sort === "price_desc")
+    ? query.order("min_price_minor", { ascending: filters.sort === "price_asc", nullsFirst: false }).order("id")
+    : query.order("business_name").order("id");
   const from = (filters.page - 1) * PAGE_SIZE;
   const [marketplaceResult, context] = await Promise.all([
     filters.minRating == null
-      ? query.order("business_name").order("id").range(from, from + PAGE_SIZE - 1)
-      : query.order("business_name").order("id"),
+      ? ordered.range(from, from + PAGE_SIZE - 1)
+      : ordered,
     getWeddingRecommendationContext(),
   ]);
   const { data, error, count } = marketplaceResult;

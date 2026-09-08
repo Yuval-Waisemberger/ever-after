@@ -57,7 +57,7 @@ test("subcategory pagination retains filters and changing category clears stale 
   await expect(page.getByRole("navigation", { name: "Marketplace pagination" })).toContainText("Page 2 of 2");
   expect(new URL(page.url()).searchParams.get("subcategory")).toBe("wedding-photographers");
   expect((await page.locator(".vendor-card h2").allTextContents()).every(name => !firstNames.includes(name))).toBe(true);
-  await page.getByRole("combobox", { name: "Category", exact: true }).selectOption("design-flowers");
+  await page.getByRole("navigation", { name: "Browse vendor categories" }).getByRole("link", { name: "Design & Flowers" }).click();
   await expect(page.getByRole("combobox", { name: "Subcategory", exact: true })).toHaveValue("");
   await page.getByRole("combobox", { name: "Subcategory", exact: true }).selectOption("flowers");
   await page.getByRole("button", { name: "Apply", exact: true }).click();

@@ -5,49 +5,38 @@ import { Search } from "lucide-react";
 import { AREAS } from "@/lib/validation/wedding";
 import type { MarketplaceSubcategory, VendorFilters } from "@/lib/vendors/types";
 
-const categories = [
-  ["", "All categories"],
-  ["venues", "Venues"],
-  ["photography-content", "Photography & Content"],
-  ["music-entertainment", "Music & Entertainment"],
-  ["beauty-attire", "Beauty & Attire"],
-  ["design-flowers", "Design & Flowers"],
-  ["event-services", "Event Services"],
-  ["cakes-desserts", "Cakes & Desserts"],
-  ["wedding-accessories-party-extras", "Wedding Accessories & Party Extras"],
-] as const;
-
 export function VendorFiltersForm({ filters, subcategories }: { filters: VendorFilters; subcategories: MarketplaceSubcategory[] }) {
-  const [category, setCategory] = useState(filters.category ?? "");
+  const category = filters.category ?? "";
   const [subcategory, setSubcategory] = useState(filters.subcategory ?? "");
   const choices = subcategories.filter((choice) => !category || choice.categorySlug === category);
   const inputClass = "min-h-11 min-w-0 w-full rounded-xl border bg-paper px-3.5 text-sm";
   return (
-    <form method="get" className="paper-panel mt-7 grid gap-4 p-4 sm:p-5 lg:grid-cols-12">
-      <label className="relative lg:col-span-4">
+    <form method="get" className="marketplace-filters paper-panel mt-7 grid gap-4 p-4 sm:p-5 lg:grid-cols-12">
+      <label className="relative lg:col-span-5">
         <span className="sr-only">Search vendors</span>
         <Search className="pointer-events-none absolute left-3.5 top-3.5 size-4 text-ink-soft" />
         <input name="search" defaultValue={filters.search} placeholder="Search a vendor or service" className={`${inputClass} w-full pl-10`} />
       </label>
-      <select aria-label="Category" name="category" value={category} onChange={(event) => { setCategory(event.target.value); setSubcategory(""); }} className={`${inputClass} lg:col-span-3`}>
-        {categories.map(([value, label]) => <option key={value} value={value}>{label}</option>)}
-      </select>
-      <select aria-label="Service area" name="area" defaultValue={filters.area ?? ""} className={`${inputClass} lg:col-span-2`}>
+      <input type="hidden" name="category" value={category} />
+      <select aria-label="Service area" name="area" defaultValue={filters.area ?? ""} className={`${inputClass} lg:col-span-3`}>
         <option value="">All areas</option>
         {AREAS.filter(([value]) => value !== "flexible").map(([value, label]) => <option key={value} value={value}>{label}</option>)}
       </select>
-      <select aria-label="Minimum rating" name="minRating" defaultValue={filters.minRating ?? ""} className={`${inputClass} lg:col-span-2`}>
+      <select aria-label="Minimum rating" name="minRating" defaultValue={filters.minRating ?? ""} className={`${inputClass} lg:col-span-3`}>
         <option value="">Any rating</option>
         <option value="4">4.0+</option>
         <option value="4.5">4.5+</option>
       </select>
       <button className="min-h-11 rounded-xl bg-wine px-4 text-sm font-bold text-white hover:bg-wine-dark lg:col-span-1">Apply</button>
 
-      <label className="grid gap-2 text-sm font-semibold lg:col-span-12">
-        Subcategory
-        <select name="subcategory" value={subcategory} onChange={(event) => setSubcategory(event.target.value)} className={`${inputClass} w-full font-normal sm:max-w-sm`}>
-          <option value="">All subcategories</option>
-          {choices.map((choice) => <option key={choice.slug} value={choice.slug}>{choice.name}</option>)}
+      <select aria-label="Subcategory" name="subcategory" value={subcategory} onChange={(event) => setSubcategory(event.target.value)} className={`${inputClass} lg:col-span-6`}>
+        <option value="">All subcategories</option>
+        {choices.map((choice) => <option key={choice.slug} value={choice.slug}>{choice.name}</option>)}
+      </select>
+      <label className="grid gap-2 text-xs text-ink-soft lg:col-span-6">Display by
+        <select aria-label="Display by" name="sort" defaultValue={filters.sort ?? "name"} className={inputClass}>
+          <option value="name">Directory order</option>
+          {category ? <><option value="price_asc">Starting price: low to high</option><option value="price_desc">Starting price: high to low</option></> : null}
         </select>
       </label>
 

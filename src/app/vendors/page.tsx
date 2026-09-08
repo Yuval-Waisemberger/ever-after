@@ -1,3 +1,5 @@
+import "@/app/marketplace-polish.css";
+import { VendorResults } from "@/components/vendors/vendor-results";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PublicHeader } from "@/components/layout/public-header";
@@ -52,9 +54,9 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
         </div>
         {result.isPreview ? <p className="marketplace-preview">You&apos;re browsing our local demo catalog. All vendor profiles and reviews are fictional.</p> : null}
         <VendorFiltersForm key={JSON.stringify(filters)} filters={filters} subcategories={subcategories} />
-        <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+        <VendorResults>
           {result.vendors.map((vendor) => <VendorCard key={vendor.id} vendor={vendor} canSave={profile?.role === "couple"} returnTo={currentHref} />)}
-        </div>
+        </VendorResults>
         {!result.vendors.length ? <div className="mt-8"><EmptyState title="No vendors match those filters" description="Try a broader area, category, service, or price range. No vendor is hidden because of your bookings." /></div> : null}
         {pageCount > 1 ? (
           <nav className="mt-10 flex items-center justify-center gap-3" aria-label="Marketplace pagination">

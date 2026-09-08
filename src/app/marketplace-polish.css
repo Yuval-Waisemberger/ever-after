@@ -1,0 +1,97 @@
+/* Marketplace presentation; shared canvas, palette and action semantics remain canonical. */
+.directory-page .directory-categories { border-left: 0; }
+.directory-page .category-navigation { border-left: 0; gap: 12px; }
+.directory-page .category-link { border: 1px solid var(--line); border-radius: 14px; background: linear-gradient(150deg, var(--paper), var(--blush)); box-shadow: inset 0 1px var(--paper), var(--shadow-soft); transition: transform 450ms var(--ease-soft), border-color 450ms, box-shadow 450ms; }
+.directory-page .category-link::before { display: none; }
+.directory-page .category-link:is(:hover,:focus-visible,[aria-current=page]) { border-color: var(--rose); box-shadow: var(--shadow-raised); color: var(--wine); }
+.category-all { display: inline-flex; margin-top: 20px; font-size: 13px; min-height: 44px; align-items: center; }
+.marketplace-results > .marketplace-filters { background: linear-gradient(135deg, var(--paper), var(--blush)); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-soft); }
+.marketplace-filters select, .marketplace-filters input { background: var(--paper); }
+.marketplace-display { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; margin-top: 24px; }
+.marketplace-density { display: flex; gap: 6px; }
+.marketplace-density button { min-width: 44px; min-height: 44px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 8px; background: var(--paper); }
+.marketplace-density button[aria-pressed=true] { background: var(--wine); color: var(--cream); border-color: var(--wine); }
+.marketplace-grid { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 24px; margin-top: 24px; }
+.marketplace-grid[data-density=compact] { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.vendor-card.vendor-card { border: 1px solid var(--line); border-radius: 16px; background: var(--surface-standard); box-shadow: var(--shadow-soft), inset 0 1px var(--paper); transition: transform 550ms var(--ease-soft), box-shadow 550ms var(--ease-soft), border-color 550ms; }
+.vendor-card.vendor-card:is(:hover,:focus-within) { border-color: var(--rose); box-shadow: var(--shadow-raised); }
+.vendor-card > a > div:first-child img { transition: transform 550ms var(--ease-soft); }
+.vendor-card .recommendation-detail { position: relative; border-top: 1px solid var(--line); background: var(--surface-champagne); }
+.vendor-card .recommendation-badge { display: flex; width: 100%; align-items: center; gap: 8px; min-height: 44px; padding: 12px 20px; border: 0; border-radius: 0; background: transparent; color: var(--wine); cursor: pointer; font-size: 12px; list-style: none; }
+.recommendation-badge::-webkit-details-marker { display: none; }
+.recommendation-badge::after { content: "+"; margin-left: auto; font-size: 18px; }
+.recommendation-detail[open] .recommendation-badge::after { content: "−"; }
+.recommendation-reasons { padding: 8px 20px 16px; font-size: 13px; color: var(--ink-soft); }
+.recommendation-reasons h3 { font-family: var(--font-body); color: var(--wine); font-size: 12px; margin-bottom: 8px; }
+.recommendation-reasons ul { list-style: disc; padding-left: 16px; line-height: 1.8; }
+.vendor-save-feedback button { position: relative; }
+.save-particles { pointer-events: none; position: absolute; inset: 0; }
+.save-particles i { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--rose); opacity: 0; --save-x: -16px; --save-y: -20px; }
+.save-particles i:nth-child(2) { --save-x: 18px; --save-y: -14px; background: var(--champagne); }
+.save-particles i:nth-child(3) { --save-x: 8px; --save-y: 18px; }
+.vendor-profile-page .vendor-profile-image { border-radius: 20px; box-shadow: var(--shadow-raised); }
+.vendor-profile-page .vendor-profile-intro { padding: clamp(18px,3vw,32px); border: 1px solid var(--line); border-radius: 20px; background: var(--surface-standard); box-shadow: var(--shadow-soft); }
+.vendor-profile-page .vendor-profile-details > section { padding: 28px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-standard); }
+.vendor-profile-page .vendor-profile-details > aside { border: 1px solid var(--line); border-radius: 18px; background: var(--surface-champagne); }
+.vendor-profile-page .vendor-reviews article { background: var(--surface-standard); box-shadow: var(--shadow-soft); }
+.vendor-status-actions { position: relative; }
+.vendor-status-actions button { transition: background-color var(--motion-hover), border-color var(--motion-hover), box-shadow var(--motion-hover); }
+.our-vendors-page .our-vendor-card { border-radius: 18px; background: var(--surface-standard); box-shadow: var(--shadow-soft); }
+.our-vendors-page .our-vendor-card[data-vendor-source=external] { background: linear-gradient(135deg,var(--paper),var(--cream)); }
+.our-vendors-page .status-tabs { padding: 12px; border-radius: 14px; background: var(--surface-blush); border: 1px solid var(--line); }
+.external-vendor-dialog { position: fixed; inset: 0; margin: auto; width: min(720px,calc(100% - 32px)); max-height: calc(100dvh - 48px); overflow-y: auto; padding: clamp(22px,4vw,36px); border: 1px solid var(--line); border-radius: 20px; color: var(--ink); background: var(--surface-standard); box-shadow: var(--shadow-raised); }
+.external-vendor-dialog::backdrop { background: rgb(49 37 33 / 35%); }
+.external-dialog-close { position: absolute; right: 10px; top: 10px; }
+.external-vendor-dialog h2 { padding-right: 30px; font: 30px var(--font-editorial); }
+.booking-celebration { position: relative; overflow: hidden; padding: 28px 16px; margin-top: 20px; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(140deg,var(--paper),var(--blush)); text-align: center; }
+.booking-success-check { display: grid; place-items: center; width: 46px; height: 46px; margin: 0 auto 12px; border-radius: 50%; border: 1px solid var(--wine); color: var(--wine); }
+.booking-celebration h2 { font: 28px var(--font-editorial); margin: 12px 0 8px; }
+.booking-celebration > p:not(.eyebrow) { font-size: 13px; color: var(--ink-soft); }
+.booking-celebration > a { display: inline-flex; min-height: 44px; align-items: center; margin-top: 8px; font-size: 13px; }
+.booking-confetti { pointer-events: none; position: absolute; inset: 0; }
+.booking-confetti > span { position: absolute; left: 50%; top: 48%; color: var(--particle-color); opacity: 0; }
+.booking-confetti i { display: block; width: 6px; height: 6px; background: var(--particle-color); border: 1px solid color-mix(in srgb,var(--wine) 15%,transparent); }
+.confetti-dot { border-radius: 50%; }
+.confetti-petal { border-radius: 80% 10% 80% 20%; width: 10px !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .category-link:is(:hover,:focus-visible) { transform: scale(1.035); }
+  .category-link:is(:hover,:focus-visible) .category-icon { animation: category-detail 650ms var(--ease-soft); }
+  .category-link--photography-content:is(:hover,:focus-visible) .category-icon circle { transform-box: fill-box; transform-origin: center; animation: category-lens 650ms var(--ease-soft); }
+  .category-link--music-entertainment:is(:hover,:focus-visible) .category-icon { animation-name: category-note; }
+  .category-link--design-flowers:is(:hover,:focus-visible) .category-icon { animation-name: category-flower; }
+  .category-link--wedding-accessories-party-extras:is(:hover,:focus-visible) .category-icon { animation-name: category-party; }
+  .category-link--cakes-desserts:is(:hover,:focus-visible) .category-icon path:last-child { animation: category-detail 650ms var(--ease-soft); }
+  .vendor-card:is(:hover,:focus-within) { transform: translateY(-4px); }
+  .vendor-card:is(:hover,:focus-within) > a > div:first-child img { transform: scale(1.035); }
+  [data-save-motion=save] button > svg { animation: vendor-heart 650ms var(--ease-soft); }
+  [data-save-motion=unsave] button > svg { animation: vendor-unheart 400ms var(--ease-soft); }
+  .save-particles i { animation: save-particle 650ms var(--ease-soft) both; }
+  .recommendation-badge > svg { animation: recommendation-spark 800ms var(--ease-soft) 200ms both; }
+  .recommendation-detail[open] .recommendation-reasons { animation: match-reveal 240ms var(--ease-soft); }
+  .external-vendor-dialog[open] { animation: external-dialog-enter 280ms var(--ease-soft); }
+  .external-vendor-dialog[open]::backdrop { animation: external-backdrop 240ms var(--ease-standard); }
+  .booking-success-check svg { stroke-dasharray: 60; animation: booking-check 220ms var(--ease-soft) both; }
+  .booking-celebration h2, .booking-celebration > p { animation: match-reveal 240ms var(--ease-soft) 180ms both; }
+  .booking-confetti > span { animation: booking-burst 1000ms cubic-bezier(.15,.65,.35,1) 280ms both; }
+}
+@keyframes category-detail { 45% { transform: scale(1.06); opacity: .7; } }
+@keyframes category-lens { 45% { transform: scale(.86); } }
+@keyframes category-note { 45% { transform: translateY(-3px) rotate(-4deg); } }
+@keyframes category-flower { 45% { transform: translateY(-3px) scale(1.04); } }
+@keyframes category-party { 45% { transform: rotate(6deg); } }
+@keyframes vendor-heart { 0%,100% { transform: scale(1); } 35% { transform: scale(1.15); } 65% { transform: scale(.95); } }
+@keyframes vendor-unheart { 45% { transform: scale(.92); } }
+@keyframes save-particle { 10% { opacity: .8; } 100% { opacity: 0; transform: translate(var(--save-x),var(--save-y)); } }
+@keyframes recommendation-spark { 40% { transform: scale(1.12); opacity: .6; } }
+@keyframes match-reveal { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+@keyframes external-dialog-enter { from { opacity: 0; transform: scale(.98); } to { opacity: 1; transform: none; } }
+@keyframes external-backdrop { from { opacity: 0; } to { opacity: 1; } }
+@keyframes booking-check { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
+@keyframes booking-burst { 0% { opacity: 0; transform: translate(0,0) scale(.5); } 12% { opacity: .9; } 65% { opacity: .65; } 100% { opacity: 0; transform: translate(var(--burst-x),var(--burst-y)) rotate(var(--burst-turn)) scale(.8); } }
+@media (max-width: 1000px) { .marketplace-grid, .marketplace-grid[data-density=compact] { grid-template-columns: repeat(2,minmax(0,1fr)); } }
+@media (max-width: 600px) { .marketplace-grid { grid-template-columns: minmax(0,1fr); } .marketplace-grid[data-density=compact] { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } .marketplace-grid[data-density=compact] .vendor-card > a > .p-5 { padding: 12px; } .marketplace-grid[data-density=compact] h2 { font-size: 18px; } .marketplace-grid[data-density=compact] .vendor-card .recommendation-badge { padding: 10px; font-size: 10px; } .booking-confetti { transform: scale(.85); } }
+@media (prefers-reduced-motion: reduce) { .vendor-card > a > div:first-child img { transform: none !important; } .booking-confetti, .save-particles { display: none; } }
+@media (max-width: 600px) {
+  .marketplace-grid[data-density=compact] .vendor-card-heading { flex-direction: column; gap: 8px; }
+  .marketplace-grid[data-density=compact] .vendor-card-heading > div { width: 100%; overflow-wrap: anywhere; }
+}

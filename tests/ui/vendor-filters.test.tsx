@@ -17,7 +17,9 @@ describe("subcategory filter control", () => {
     const select = document.querySelector<HTMLSelectElement>('select[name="subcategory"]')!;
     expect([...select.options].map(option => option.value)).toEqual(["", "wedding-photographers", "videographers"]);
     expect(select.value).toBe("videographers");
-    expect(select.closest("label")?.textContent).toContain("Subcategory");
+    expect(select.getAttribute("aria-label")).toBe("Subcategory");
+    expect(document.querySelector("select[name=category]")).toBeNull();
+    expect(document.querySelector<HTMLInputElement>("input[name=category]")?.value).toBe("photography-content");
     expect(document.querySelector<HTMLInputElement>('[name="search"]')?.value).toBe("Films");
     expect(document.querySelector<HTMLInputElement>('[name="service"]')?.value).toBe("Drone");
     expect(document.querySelector<HTMLSelectElement>('[name="minRating"]')?.value).toBe("4");

@@ -48,6 +48,7 @@ export type MarketplaceVendor = {
 };
 
 export type VendorFilters = {
+  sort?: "name" | "price_asc" | "price_desc";
   search?: string;
   category?: string;
   subcategory?: string;

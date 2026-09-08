@@ -37,7 +37,7 @@ test("the original category icons use real marketplace filters and preserve sear
     await page.goto("/vendors");
     await page.getByRole("navigation", { name: "Browse vendor categories" }).getByRole("link", { name: label, exact: true }).click();
     await expect(page).toHaveURL(new RegExp(`category=${slug}#marketplace-results$`));
-    await expect(page.getByLabel("Category", { exact: true })).toHaveValue(slug);
+    await expect(page.locator("input[name=category]")).toHaveValue(slug);
     await expect(page.getByText(`${count} vendors`, { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: label, exact: true })).toHaveAttribute("aria-current", "page");
   }

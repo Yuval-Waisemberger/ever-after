@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState, useState } from "react";
+import { FeedbackSettlement } from "./feedback-settlement";
 import { Save, Trash2 } from "lucide-react";
 import { deleteExternalVendor, saveExternalVendor } from "@/lib/actions/vendors";
 import { initialActionState } from "@/lib/actions/state";
@@ -32,7 +33,7 @@ export function ExternalVendorForm({ taxonomy, value }: { taxonomy: CoupleVendor
 
   return (
     <div className="external-vendor-form">
-      <form action={action} className="grid gap-5">
+      <form action={action} className="grid gap-5"><FeedbackSettlement />
         {value ? <><input type="hidden" name="externalVendorId" value={value.id} /><input type="hidden" name="relationshipId" value={value.relationshipId} /></> : null}
         {state.message ? <p className={`ea-feedback ${state.status === "error" ? "ea-feedback--error" : "ea-feedback--success"}`} role="status">{state.message}</p> : null}
         <div className="grid gap-5 sm:grid-cols-2">

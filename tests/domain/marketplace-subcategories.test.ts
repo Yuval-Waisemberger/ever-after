@@ -50,6 +50,24 @@ describe("connected marketplace subcategory query", () => {
     expect(result).toMatchObject({ total: 22, isPreview: false, pageSize: 12 });
   });
 
+  it.each(["price_asc", "price_desc"] as const)("orders category starting prices %s before bounded pagination with unknown prices last", async sort => {
+    await getMarketplace({ category:"venues", sort, page:2 });
+    const params=request().searchParams;
+    expect(params.get("order")).toBe(`min_price_minor.${sort === "price_asc" ? "asc" : "desc"}.nullslast,id.asc`);
+    expect(params.get("offset")).toBe("12"); expect(params.get("limit")).toBe("12");
+  });
+  it("does not compare category price units across the whole directory", async () => {
+    await getMarketplace({sort:"price_desc",page:1});
+    expect(request().searchParams.get("order")).toBe("business_name.asc,id.asc");
+  });
+  it("sorts the demo category before pagination with identical deterministic ordering", async () => {
+    mocks.configured.mockReturnValue(false);
+    const first=await getMarketplace({category:"venues",sort:"price_asc",page:1});
+    const second=await getMarketplace({category:"venues",sort:"price_asc",page:2});
+    const amounts=[...first.vendors,...second.vendors].map(v=>v.minPriceMinor!);
+    expect(amounts).toEqual([...amounts].sort((a,b)=>a-b)); expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+
   it("preserves the left join when no subcategory is selected", async () => {
     await getMarketplace({ category: "venues", page: 1 });
     expect(request().searchParams.get("select")).toContain("vendor_subcategories(slug,name)");
