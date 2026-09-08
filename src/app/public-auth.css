@@ -18,24 +18,25 @@
 .landing-assistant-dialog > a { display: flex; width: fit-content; margin-top: 16px; font-size: 14px; }
 
 .landing-page { position: relative; isolation: isolate; }
-.landing-page .landing-hero { display: block; min-height: 0; height: 510px; padding: 126px 24px 68px; background: transparent; --hero-wave-height: 65px; }
+/* Content owns height at every width; reserve the curved media boundary below controls. */
+.landing-page .landing-hero { display: flex; flex-direction: column; align-items: center; min-height: 510px; height: auto; padding: clamp(40px, 5vw, 72px) clamp(20px, 4vw, 40px) calc(var(--hero-wave-height) + 12px); background: transparent; --hero-wave-height: 65px; }
 /* The supplied wide photograph is complete. Normal cover cropping only. */
 .landing-page .hero-photo { object-fit: cover; object-position: 50% 50%; }
 .landing-page .hero-media::after { background: linear-gradient(90deg, rgb(30 26 24 / 23%), rgb(30 26 24 / 36%) 43%, rgb(30 26 24 / 15%) 80%); }
 .landing-page .hero-content { max-width: 1000px; margin-inline: auto; }
 .hero-eyebrow { margin-bottom: 7px; font-size: 10px; line-height: 1.6; letter-spacing: .25em; text-transform: uppercase; }
-.landing-page .hero-content h1 { color: var(--cream); font-size: 72px; line-height: 1; letter-spacing: .035em; text-shadow: none; filter: none; }
+.landing-page .hero-content h1 { color: var(--cream); font-size: clamp(38px, 8.5vw, 72px); line-height: 1; letter-spacing: .035em; text-shadow: none; filter: none; }
 .landing-page .hero-ornament { margin: 8px auto; opacity: .8; height: 18px; }
 .landing-page .hero-ornament span { width: 110px; }
-.landing-page .hero-tagline { font-size: 13px; letter-spacing: .24em; }
-.landing-page .hero-description { font-family: var(--font-editorial); font-size: 18px; line-height: 1.35; margin-top: 8px; }
-.landing-page .hero-actions { margin-top: 16px; gap: 24px; }
-.landing-page .hero-actions .public-button { min-width: 240px; min-height: 50px; gap: 20px; font-size: 12px; letter-spacing: .14em; }
+.landing-page .hero-tagline { max-width: 520px; margin-inline: auto; font-size: 13px; letter-spacing: .24em; }
+.landing-page .hero-description { font-family: var(--font-editorial); font-size: 18px; line-height: 1.35; margin-top: 8px; max-width: 510px; }
+.landing-page .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: min(100%, 504px); max-width: none; margin: 16px auto 0; gap: 12px 24px; }
+.landing-page .hero-actions .public-button { min-width: 0; min-height: 50px; gap: 20px; font-size: 12px; letter-spacing: .14em; }
 .landing-page .hero-secondary { border-color: rgb(255 250 243 / 65%); background: rgb(37 30 27 / 15%); }
 .landing-page .hero-secondary:hover { background: var(--cream); color: var(--wine); }
 .landing-page .hero-vendor { margin-top: 10px; font-family: var(--font-editorial); font-size: 16px; }
 .landing-page .hero-vendor a { color: var(--cream); text-decoration: underline; text-decoration-color: rgb(255 250 243 / 55%); }
-.landing-page .hero-scroll { bottom: 32px; border: 1px solid rgb(255 250 243 / 45%); z-index: 3; }
+.landing-page .hero-scroll { position: relative; left: auto; bottom: auto; flex-shrink: 0; margin: 12px auto 0; border: 1px solid rgb(255 250 243 / 45%); z-index: 3; }
 /* Cut the existing curve out of the photo/contrast layer. The page's continuous
    tonal wash shows through, rather than an ivory SVG painted over the photo. */
 .landing-page .hero-media {
@@ -164,6 +165,13 @@
 @keyframes feature-wallet-cycle { 0%, 3%, 24%, 100% { opacity: 1; transform: translate(0); } 5% { opacity: .45; transform: translate(-3px, 1px); } 13%, 18% { opacity: 1; transform: translate(0); } }
 @keyframes feature-spark-cycle { 0%, 3%, 24%, 100% { opacity: 1; transform: scale(1); fill: transparent; } 5% { opacity: .45; transform: scale(.9); } 11% { opacity: 1; transform: scale(var(--spark-scale)); fill: var(--blush); } 16% { opacity: 1; transform: scale(1.02); fill: transparent; } }
 
+/* Four features need enough reading width independently of the navigation breakpoint. */
+@media (max-width: 1080px) {
+  .landing-page .pillar-grid { width: 100%; max-width: 760px; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 0; }
+  .landing-page .pillar { padding: 0 clamp(12px, 3vw, 26px) 5px; border-top: 0; }
+  .landing-page .pillar:nth-child(even) { border-left: 1px solid var(--line); }
+  .landing-page .pillar:nth-child(3) { border-left: 0; }
+}
 @media (max-width: 900px) {
   .landing-navigation .public-header-inner { justify-content: flex-end; height: 59px; }
   .couple-auth-navigation .public-header-inner { justify-content: space-between; }
@@ -177,11 +185,8 @@
   .landing-navigation details nav a { display: flex; align-items: center; min-height: 46px; padding: 10px 12px; font-size: 14px; }
   .landing-navigation details nav a:hover { background: var(--blush); }
   .landing-navigation .landing-assistant-link { align-items: flex-start; border: 0; }
-  .landing-page .landing-hero { height: 470px; padding-top: 92px; }
+  .landing-page .landing-hero { min-height: 470px; }
   .landing-page .hero-photo { object-position: 62% 50%; }
-  .landing-page .hero-content h1 { font-size: 62px; }
-  .landing-page .pillar-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 0; }
-  .landing-page .pillar:nth-child(3) { border-left: 0; }
   .auth-page--couple .auth-layout { width: calc(100% - 64px); max-width: 700px; grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); gap: 28px; padding-top: 24px; }
   .auth-page--couple .auth-introduction { display: contents; }
   .auth-page--couple .auth-copy { grid-column: 1; align-self: center; }
@@ -194,20 +199,22 @@
   .auth-editorial-list { grid-column: 1 / -1; grid-row: 3; display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; width: 100%; max-width: 580px; margin: 0 auto; }
   .auth-editorial-list li:nth-child(3) { border-bottom: 0; }
 }
+@media (max-width: 620px) {
+  .landing-page .hero-actions { grid-template-columns: minmax(0, 1fr); width: min(100%, 320px); }
+}
 @media (max-width: 600px) {
-  .landing-page .landing-hero { height: 550px; min-height: 0; padding: 46px 20px 80px; }
+  .landing-page .landing-hero { min-height: 0; }
   .landing-page .hero-photo { object-position: 64% 50%; }
   .landing-page .hero-media::after { background: rgb(24 20 18 / 44%); }
   .hero-eyebrow { font-size: 9px; letter-spacing: .21em; }
-  .landing-page .hero-content h1 { font-size: clamp(38px, 10.5vw, 62px); letter-spacing: .02em; }
+  .landing-page .hero-content h1 { letter-spacing: .02em; }
   .landing-page .hero-ornament { margin-block: 12px; }
   .landing-page .hero-ornament span { width: 64px; }
-  .landing-page .hero-tagline { font-size: 11px; max-width: 300px; line-height: 1.8; letter-spacing: .18em; }
-  .landing-page .hero-description { font-size: 17px; max-width: 310px; line-height: 1.45; margin-top: 12px; }
+  .landing-page .hero-tagline { font-size: 11px; max-width: 440px; line-height: 1.8; letter-spacing: .18em; }
+  .landing-page .hero-description { font-size: 17px; max-width: 440px; line-height: 1.45; margin-top: 12px; }
   .landing-page .hero-actions { margin-top: 22px; gap: 12px; }
   .landing-page .hero-actions .public-button { min-width: 0; width: 100%; font-size: 11px; }
   .landing-page .hero-vendor { font-size: 15px; margin-top: 18px; }
-  .landing-page .hero-scroll { bottom: 24px; }
   .landing-page .landing-hero { --hero-wave-height: 36px; }
   .landing-petal { width: calc(var(--petal-size) * .7); height: calc(var(--petal-size) * .52); --petal-travel: .65; }
   .landing-petal:nth-child(n+9) { display: none; }
@@ -234,6 +241,11 @@
   .auth-editorial-list { order: 4; gap: 0 14px; }
   .auth-editorial-list li { font-size: 8px; padding-left: 34px; }
   .auth-support-strip { padding: 13px 10px; gap: 10px; }
+}
+@media (max-width: 430px) {
+  .landing-page .pillar-grid { grid-template-columns: minmax(0, 1fr); max-width: 340px; gap: 28px; }
+  .landing-page .pillar:nth-child(n) { border: 0; padding: 0 12px; }
+  .landing-page .pillar p { max-width: 280px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .landing-petals { display: none; }

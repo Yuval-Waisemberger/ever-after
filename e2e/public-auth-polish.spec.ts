@@ -57,9 +57,12 @@ for (const width of [1440, 768, 390, 360]) {
         }
         await expect(page.locator(".pillar")).toHaveCount(4);
         const rows = await page.locator(".pillar").evaluateAll(els => els.map(el => Math.round(el.getBoundingClientRect().top)));
-        expect(new Set(rows).size).toBe(width === 1440 ? 1 : 2);
+        expect(new Set(rows).size).toBe(width === 1440 ? 1 : width <= 430 ? 4 : 2);
         const hero = (await page.locator(".landing-hero").boundingBox())!;
-        expect(hero.height).toBe(width === 1440 ? 510 : width === 768 ? 470 : 550);
+        const vendorLine = (await page.locator(".hero-vendor").boundingBox())!;
+        const scroll = (await page.locator(".hero-scroll").boundingBox())!;
+        expect(scroll.y).toBeGreaterThanOrEqual(vendorLine.y + vendorLine.height);
+        expect(scroll.y + scroll.height).toBeLessThan(hero.y + hero.height);
         // A wide source needs enough height for cover cropping, even on narrow screens.
         expect(await image.evaluate((el: HTMLImageElement) => el.naturalHeight)).toBeGreaterThan(hero.height * .9);
         if (width === 1440) {
