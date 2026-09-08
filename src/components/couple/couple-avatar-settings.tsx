@@ -3,6 +3,7 @@
 import { ImagePlus, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
+import { IdentitySavedToast } from "@/components/couple/identity-saved-toast";
 import { CoupleAvatar } from "@/components/couple/couple-avatar";
 import {
   chooseCoupleAvatar,
@@ -50,6 +51,7 @@ export function CoupleAvatarSettings({
 }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
+  const [saveRevision, setSaveRevision] = useState(0);
   const [message, setMessage] = useState<string>();
   const [isPending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
@@ -58,7 +60,7 @@ export function CoupleAvatarSettings({
     startTransition(async () => {
       const result = await chooseCoupleAvatar(nextChoice);
       setMessage(result.message);
-      if (result.status === "success") router.refresh();
+      if (result.status === "success") { setSaveRevision(value => value + 1); router.refresh(); }
     });
   }
 
@@ -66,7 +68,7 @@ export function CoupleAvatarSettings({
     startTransition(async () => {
       const result = await removeCouplePhoto();
       setMessage(result.message);
-      if (result.status === "success") router.refresh();
+      if (result.status === "success") { setSaveRevision(value => value + 1); router.refresh(); }
     });
   }
 
@@ -98,11 +100,11 @@ export function CoupleAvatarSettings({
     setMessage(result.message);
     setUploading(false);
     if (inputRef.current) inputRef.current.value = "";
-    if (result.status === "success") router.refresh();
+    if (result.status === "success") { setSaveRevision(value => value + 1); router.refresh(); }
   }
 
   return (
-    <section id="couple-profile" className="couple-identity-panel scroll-mt-24 rounded-2xl border bg-paper p-5 sm:p-7" aria-labelledby="couple-identity-title">
+    <section id="couple-profile" className="couple-identity-panel scroll-mt-24 ea-surface ea-surface--blush p-5 sm:p-7" aria-labelledby="couple-identity-title">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
         <CoupleAvatar choice={choice} photoUrl={photoUrl} className="size-24 sm:size-28" sizes="112px" />
         <div>
@@ -111,11 +113,12 @@ export function CoupleAvatarSettings({
         </div>
       </div>
 
+      {saveRevision > 0 ? <IdentitySavedToast key={saveRevision} /> : null}
       {message ? <p className="ea-feedback mt-5" role="status">{message}</p> : null}
 
       <form action={uploadPhoto} className="mt-6 grid gap-3 rounded-lg border border-dashed bg-canvas/60 p-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end">
-        <label className="grid gap-2 text-sm font-semibold">Couple photo
-          <input ref={inputRef} type="file" name="photo" accept="image/jpeg,image/png,image/webp" className="rounded-md border bg-paper p-2 text-sm" />
+        <label className="grid min-w-0 gap-2 text-sm font-semibold">Couple photo
+          <input ref={inputRef} type="file" name="photo" accept="image/jpeg,image/png,image/webp" className="min-w-0 w-full rounded-md border bg-paper p-2 text-sm" />
           <span className="text-xs font-normal leading-5 text-ink-soft">JPEG, PNG or WebP · max 5 MB</span>
         </label>
         <button disabled={uploading || isPending} className="ea-button ea-button--primary"><ImagePlus className="size-4" />{uploading ? "Uploading…" : storagePath ? "Change photo" : "Upload photo"}</button>

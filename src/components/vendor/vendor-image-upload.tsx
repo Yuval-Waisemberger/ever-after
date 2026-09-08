@@ -42,9 +42,9 @@ export function VendorImageUpload({ vendorId }: { vendorId: string }) {
   return (
     <form action={upload} className="grid gap-4 rounded-xl border border-dashed bg-canvas/60 p-4">
       {message ? <p className="text-sm text-ink-soft" role="status">{message}</p> : null}
-      <label className="grid gap-2 text-sm font-semibold">Image<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required className="rounded-xl border bg-paper p-2 text-sm" /></label>
-      <label className="grid gap-2 text-sm font-semibold">Alternative text<input name="alt" maxLength={240} placeholder="Describe the image for visitors who cannot see it" className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal" /></label>
-      <button disabled={uploading} className="inline-flex min-h-11 items-center justify-center gap-2 justify-self-start rounded-full bg-wine px-5 text-sm font-semibold text-white disabled:opacity-60"><Upload className="size-4" />{uploading ? "Uploading…" : "Upload image"}</button>
+      <label className="grid min-w-0 gap-2 text-sm font-semibold">Image<input type="file" name="image" accept="image/jpeg,image/png,image/webp" required className="min-w-0 w-full rounded-xl border bg-paper p-2 text-sm" /></label>
+      <label className="grid min-w-0 gap-2 text-sm font-semibold">Alternative text<input name="alt" maxLength={240} placeholder="Describe the image for visitors who cannot see it" className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal" /></label>
+      <button disabled={uploading} className="ea-button ea-button--primary justify-self-start disabled:opacity-60"><Upload className="size-4" />{uploading ? "Uploading…" : "Upload image"}</button>
     </form>
   );
 }

@@ -115,7 +115,7 @@ Sources: final Design/Motion/UX DOCX (including all archive additions), twelve Z
 | Vendor booking check → one 0.8–1.2s confetti burst → rest | DOCX / confetti recording | 2C | IMPLEMENTED |
 | Vendor dashboard completion counter/fill/checklist/tint/rating/section reveals | DOCX / F08 storyboard | 2D | IMPLEMENTED — detailed choreography below |
 | Vendor ratings sequential real stars; Business Profile reveal/focus/explicit save toast; publication check/tint without confetti | DOCX / F08 storyboard | 2D | IMPLEMENTED — detailed choreography below |
-| Couple My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | Final remaining-page pass | DEFERRED — Couple `/reviews` is outside Vendor Account; Vendor recent-review treatment is implemented in 2D |
+| Couple My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | Final completion pass | IMPLEMENTED — shared review primitives, 1.2s cards, 700ms fractional stars and real update date |
 | Assistant blank/history transitions, considering ornament, context/evidence chips, response reveal and composer | DOCX §15 / F19 | 2E | IMPLEMENTED — precise score and protected boundaries below |
 | Mobile lower-density motion and final cross-site reconciliation | DOCX | 2A–2E / 3–4 | IMPLEMENTED per completed workstream; full cross-site QA DEFERRED to 3–4 |
 
@@ -267,3 +267,117 @@ Reduced motion disables all of the above animation/transition styles and shows f
 Validation uses the closed Assistant fixture (port 3101), with synthetic histories, real presentation components and optional actual Couple shell. Auth is stubbed to deny operations; environment files are not loaded and browser external requests are blocked. No live conversations are created. The sweep covers 320/360/390/430/480/540/600/640/700/768/820/1023/1024/1280/1440, including both sides of collapse. Review screenshots/recording stay ignored under `.codex-tmp/phase2e-review/` and `test-results/`.
 
 Real OpenAI, live research and provider tool-calling remain NOT STARTED for the later functional phase. Agent READ tools, local deterministic answers, provider abstraction, evidence/privacy rules, ownership, database schema and writes are unchanged. Final cross-site consistency/motion QA remains separate.
+
+
+## Final completion pass — authoritative current motion inventory
+
+This inventory supersedes the phase snapshots above, including their remaining-page and final-QA deferrals. The final DOCX was reread; all twelve ZIP prototypes, the Vendor storyboard and all five supplied recordings were inspected again. Recordings: `wedding timeline.mov`, `countdown.mov`, `conffetti.mov`, `gust list.mov`, `general decoration.mov`. The ZIP contributes timing/shape references only: no prototype script, fixed example value, autosave simulation or looping Timeline is shipped.
+
+Each row below is one independently checkable motion requirement (compound DOCX sections are split into these checkpoints). All effects preserve real domain state. Reduced motion always exposes final values/content; decorative loops stop. No artificial request delay or fake streaming is added.
+
+| ID | Motion requirement | Status | Implementation / trigger / timing |
+| --- | --- | --- | --- |
+| G01 | Route continuity | IMPLEMENTED | PageTransition, real App Router template remount; 380ms / 8px; no auth or routing change |
+| G02 | Genuine loading skeleton | IMPLEMENTED | PageLoading on interactive Couple/Vendor routes, only Suspense pending; warm 1.8s shimmer. Public Marketplace renders complete server HTML without its route-level streaming fallback so no-JS visitors can read results |
+| G03 | Reduced motion and final content | IMPLEMENTED | Shared foundation plus component media guards; final SSR content, static pending feedback; live preference changes settle reveals |
+| G04 | Control hover, focus and press | IMPLEMENTED | Shared 180ms hover/focus and 100ms press; visible keyboard outline |
+| L01 | Hero image establishment | IMPLEMENTED | Actual image readiness; 950ms opacity; entry links remain usable while loading |
+| L02 | Whole-opening petal event | IMPLEMENTED | 12 curated independent paths/depths; fewer on mobile; finite approximately 3s; page-level pointer-transparent overlay |
+| L03 | Overlapping hero choreography | IMPLEMENTED | Image → eyebrow/title/ornament/tagline/copy/actions; overlapping 1100ms stages, approximately 2–3s overall |
+| L04 | Feature section reveal | IMPLEMENTED | One observed entrance; focus keeps controls available |
+| L05 | Checklist feature icon | IMPLEMENTED | 10s restful stroke/check cycle, 0s offset, paused offscreen/hidden |
+| L06 | Heart feature icon | IMPLEMENTED | 10s restful small fill/scale cycle, 2.4s offset; no large heartbeat |
+| L07 | Wallet feature icon | IMPLEMENTED | 10s restful tiny detail movement, 4.8s offset |
+| L08 | Assistant feature icon | IMPLEMENTED | 10s restful sequential sparkle accents, 7.2s offset |
+| A01 | Auth focus draw | IMPLEMENTED | Shared accessible outline plus 240ms wine underline |
+| A02 | Password visibility control | IMPLEMENTED | Accessible eye toggle preserves value and actual input semantics |
+| A03 | Auth CTA hover/press/arrow | IMPLEMENTED | Same ea-brand-cta as Landing; small arrow movement and shared depth |
+| A04 | Real authentication pending | IMPLEMENTED | Actual pending label and shimmer only; no timer-based success |
+| A05 | Auth success/error feedback | IMPLEMENTED | Actual action feedback, visible and understandable without movement |
+| S01 | Setup step continuity | IMPLEMENTED | 1100ms desktop / 800ms small screens, 18px slide/fade, on actual step change |
+| S02 | Setup selected choice feedback | IMPLEMENTED | Tonal selected surface and wine accent; real selected values |
+| S03 | Setup progress | IMPLEMENTED | 800ms transition from completed step data, not clicks or invented progress |
+| S04 | Wedding Details saved toast | IMPLEMENTED | Successful existing redirect only; 650ms / 12px, dismissible after 2.8s |
+| C01 | Real wedding countdown interpolation | IMPLEMENTED | AnimatedValue quartic ease-out 2200ms normal / 2000ms final week; once on reveal, tabular real final number |
+| C02 | Final-week/date states | IMPLEMENTED | Real Israel date: normal, final week, Tomorrow, Today is the day, Just married; no negative count or ceremony time |
+| C03 | Dashboard card sequence | IMPLEMENTED | Exactly six existing cards; 650ms entrances with 100ms stagger |
+| C04 | Dashboard metric values | IMPLEMENTED | Real summary values, once on reveal; stable across unrelated rerenders |
+| C05 | Wedding Day sparkle | IMPLEMENTED | NEW: one small date-triggered 1600ms sparkle; no replay on minute renders, no confetti, static under reduced motion |
+| T01 | Progressive Timeline path | IMPLEMENTED | Scroll/resize measurement; furthest visible progress retained; no timer loop or backward erase |
+| T02 | Timeline milestones | IMPLEMENTED | Observed 650ms / 8px rise, current workflow and deadline states retained |
+| T03 | Wedding Day destination | IMPLEMENTED | Drawn heart 1000ms, three small staggered 800ms sparkles; destination is distinct |
+| K01 | Saved Task completion | IMPLEMENTED | Successful state only: 220ms check → 600ms strike → 1250ms surface/layout settle |
+| K02 | Task reopen | IMPLEMENTED | 200ms check removal / 600ms reverse strike / 650ms surface return; no persistence change |
+| K03 | Task filters | IMPLEMENTED | Real category/status selection, shared hover/focus and active feedback; Waiting stays incomplete |
+| B01 | Budget metrics | IMPLEMENTED | Real values interpolate 1800ms once; formulas untouched |
+| B02 | Budget progress fill | IMPLEMENTED | Real defined committed/budget ratio; 1800ms transform, never fabricated width |
+| B03 | Booked expense refresh highlight | IMPLEMENTED | 1200ms after a mounted canonical committed amount changes; no fake highlight without a trustworthy prior value |
+| R01 | Guest attendance ring | IMPLEMENTED | Real attending/invited ratio, 2s scale .92→1 and opacity .5→1; zero remains neutral |
+| R02 | Guest metric counters | IMPLEMENTED | Real aggregate counts, finite AnimatedValue entrance |
+| R03 | Guest row feedback | IMPLEMENTED | Existing real RSVP states use quiet semantic tonal surfaces; no data change |
+| M01 | Marketplace category interactions | IMPLEMENTED | 650ms category-specific hover/focus accents, no ambient row animation |
+| M02 | Vendor card elevation | IMPLEMENTED | Restrained 3–5px hover lift and warm border/shadow depth |
+| M03 | Vendor image response | IMPLEMENTED | Small image zoom with 550ms transition; responsive crop preserved |
+| M04 | Saved-heart success | IMPLEMENTED | Actual saved transition: 1→1.15→.95→1 over 650ms plus three small particles |
+| M05 | Unsave response | IMPLEMENTED | Actual unsave transition, 400ms reverse treatment; no booking celebration |
+| M06 | Recommendation sparkle | IMPLEMENTED | One 800ms accent only when actual deterministic recommendation exists |
+| M07 | Recommendation explanation | IMPLEMENTED | Actual reasons in keyboard-operable disclosure; 240ms reveal |
+| M08 | Marketplace filters/density | IMPLEMENTED | Existing query and density behavior with shared selected/focus states |
+| M09 | External-vendor dialog | IMPLEMENTED | Native modal, 280ms entry, focus containment/Escape/return; existing operation unchanged |
+| M10 | Booking celebration | IMPLEMENTED | Real local booking intent plus saved Booked transition only; check → confirmation → one 1000ms burst after 280ms; failure/bookmark/load cannot trigger |
+| V01 | Vendor completion counter | IMPLEMENTED | Saved profile completion, 1700ms first reveal, no fabricated intermediate milestone |
+| V02 | Vendor completion bar | IMPLEMENTED | Same actual completion, 1400ms fill/update |
+| V03 | Checklist completion | IMPLEMENTED | Real newly completed field: 550ms check, 700ms label, 750ms success surface; existing completed items start finished |
+| V04 | Completion milestone treatment | IMPLEMENTED | 50/75/100 presentation thresholds from real data, restrained message/icon, no confetti |
+| V05 | Aggregate rating entrance | IMPLEMENTED | Real rating, 1500ms finite interpolation; no-review state remains an intentional star/empty message |
+| V06 | Rating star fill | IMPLEMENTED | Actual fractional/unfilled stars; 650ms with 100ms stagger |
+| V07 | Recent review entrance/stars | IMPLEMENTED | Real review data; 1000ms / 12px card entrance and sequential stars; existing grid retained instead of unnecessary carousel |
+| V08 | Business form section reveals | IMPLEMENTED | Observed 700ms / 12px, once; focus exposes controls immediately |
+| V09 | Business input focus draw | IMPLEMENTED | 240ms wine underline plus accessible shared focus |
+| V10 | Save pending/success | IMPLEMENTED | Real Save → Saving… → Saved; pending-only 1500ms shimmer; no autosave |
+| V11 | Profile saved toast | IMPLEMENTED | Real success only, 600ms / 12px, dismissible; no fake result |
+| V12 | Publish success | IMPLEMENTED | Saved publication state only; 500ms check + 800ms soft success reveal; no confetti |
+| AI01 | Blank new-chat entrance | IMPLEMENTED | 550ms / 8px, intentional blank state; histories preserved |
+| AI02 | New chat/conversation switch | IMPLEMENTED | 320ms / 6px content continuity; shell stays still |
+| AI03 | Considering ornament | IMPLEMENTED | Real response pending only; 2.4s alternating ornament, 0/400/800ms offsets; static with reduced motion |
+| AI04 | Context-chip sequence | IMPLEMENTED | Up to five real safe display fields; 400ms / 5px with 100ms stagger; no hidden reasoning |
+| AI05 | Response reveal | IMPLEMENTED | Actual response, 450ms / 8px; stable keys and no character typing |
+| AI06 | Evidence/source reveal | IMPLEMENTED | Real permitted labels, 400ms / 5px and 100ms stagger; no invented live-research claim |
+| AI07 | Conversation row states | IMPLEMENTED | 180ms tonal hover/wine active marker, readable titles |
+| AI08 | Composer and Send | IMPLEMENTED | Shared control language, real pending/disabled state, accepted submission only |
+| AI09 | Mobile conversation panel | IMPLEMENTED | Below 1024px native dialog, 320ms entry, focus containment/Escape/return |
+| RV01 | My Reviews card entrance | IMPLEMENTED | NEW: existing VendorReveal reused, 1200ms / 12px, bounded explicit 150ms card stagger |
+| RV02 | My Reviews star sequence | IMPLEMENTED | NEW: existing fractional VendorStars reused, 700ms / 100ms stagger; real updated date and bilingual text retained |
+| ST01 | Settings save feedback | IMPLEMENTED | NEW: successful avatar action only, shared 650ms toast / 2.8s dismissal; failures retain inline feedback |
+| D01 | Continuous canvas gradient drift | INTENTIONALLY DEFERRED | The owner rejected visible bands and motion shapes; retain stationary broad tonal fields. Optional revisit only during post-approval production performance QA. |
+| D02 | Floating identity/avatar and repeating countdown sparkle | INTENTIONALLY DEFERRED | Optional ZIP ornament; keep the countdown as the primary motion and avoid perpetual identity movement. Future owner-approved decorative calibration only; the separate real Wedding Day sparkle is implemented. |
+| D03 | Ambient financial-bar breathing | INTENTIONALLY DEFERRED | Optional ZIP effect. Keep dense financial views calm and ratios visually stable. Future owner-approved production motion calibration only. |
+| D04 | Unspecified site-wide floating flowers/ornament | INTENTIONALLY DEFERRED | Optional atmosphere, not a required signature. Landing already has finite petals; extra decorative loops risk competing with functional content. Future owner-approved decorative assets/performance pass only. |
+
+**Inventory: 76 checkpoints — 72 implemented and 4 intentionally deferred optional atmospheric effects.** No required signature motion is replaced by a generic fade. The written spec's prototype example values never become stored data. Password changes keep the existing reauthentication confirmation rather than introducing a toast that disappears during the required sign-in redirect.
+
+### Final consistency and responsive corrections
+
+The existing broad radial canvas is retained. Landing's lower blush return is broadened to a 110% × 85% field at 60%/85%, using the existing blush-accent at 24% opacity. This is a small stationary tonal adjustment, with no stripes, narrow stops, new colors or duplicated page recipes. The owner remains the authority for final visual approval.
+
+My Reviews now shares the existing review/star primitives, shows the actual update date in the Israel timezone, preserves fractional rating and bilingual text, and requests an appropriately sized mobile image. Settings uses the existing standard/blush/tonal surfaces and shared destructive button, removes the two internal account/session explanations specified by the DOCX, and adds success-only avatar feedback. The Couple and Vendor native file inputs now have zero minimum width and fill their available container, fixing the newly found 320px overflow. Vendor image upload uses the shared primary CTA; upload/storage behavior is untouched. PlanningReveal now settles on keyboard focus and a live reduced-motion change.
+
+Side-by-side mobile review found that the legacy label/value row rule conflicted with the newer two-column Budget overview: labels could wrap one letter per line without causing document overflow. Below the existing 640px boundary, each metric now stacks its label, fluid-size amount and description within its tile. A dedicated browser assertion checks two-line label readability and amount containment at 320/360/390/480/600/640px. No formulas or values change. Fixture shells also load the real Couple-layout stylesheet and actual logo image rather than an empty image stub.
+
+The canonical illustrated mark remains `public/brand/ever-after-logo-black.webp`; Landing navigation remains logo-free. Existing font families, token roles, meaningful status colors, navigation architecture and all previously implemented motions remain intact.
+
+### Verification and review material
+
+Maintained responsive sweeps cover 320, 360, 390, 430, 480, 540, 600, 620, 639, 640, 700, 767, 768, 820, 900, 1023, 1024, 1080, 1280 and 1440px. Full pages are mounted with synthetic records and closed query/action aliases where authentication is needed. The final fixture also tests real-component Settings success/failure presentation, actual fractional review stars/dates, bilingual text and empty Budget/Guest/Review states. No live records are created.
+
+Run the additional closed fixture with `pnpm exec playwright test --config=e2e/final-design.config.ts`; other fixture commands remain unchanged. Screenshots, contact sheets, recordings and logs are ignored under `.codex-tmp/final-design/`. The final validation results and any environment-only limitations are recorded in the completion report.
+
+Real OpenAI/provider tool-calling/live research, Excel export, Email/SMTP, full JWT/Storage HTTP adversarial production QA and Vercel remain intentionally deferred to their separately authorized functional/production phases. No new provider, tool, dependency, schema or migration is introduced here.
+
+Public progressive enhancement: the previous Marketplace route-level loading boundary left completed server content in React streaming placeholders when JavaScript was disabled. Its one-line `vendors/loading.tsx` export is removed; public listing/profile responses can now complete as ordinary server HTML. Couple/Vendor workspace skeletons, templates, page transitions and all queries/auth rules are retained. This changes loading presentation only and is covered by the existing no-JavaScript public navigation test.
+
+### Final validation outcome
+
+TypeScript, whole-repository ESLint and the production build pass. Full Vitest: 62 files / 826 tests pass. Browser coverage comprises 110 isolated fixture tests (Foundation 7, Auth feedback 2, Budget/Guests 17, Setup 13, Tasks 7, countdown/Timeline 16, discovery 12, Vendor 9, Assistant 22, final-design 5) and 64 maintained Public/Auth/Marketplace/boundary tests. All pass after targeted reruns of corrected test observations: profile navigation must reach its h1 rather than match the previous card heading; lazy images must scroll into view; finite Task motion is observed at animation start rather than after it can expire. The existing no-JavaScript public test passes against the local production server.
+
+The 20-width sweep covers every major visual area. Review material includes 83 page/state screenshots, six desktop/mobile contact sheets, and Landing, booking, countdown/Timeline, Vendor and Assistant recordings under the ignored `.codex-tmp/final-design/` directory. Live public/authentication-route smoke checks are read-only; private-page state coverage uses isolated fixtures, not a newly created account or live record. Existing image assets are unchanged; all 291 Marketplace runtime assets and all 64 dedicated newer-vendor primaries remain tracked. Canonical logo alpha is 0 at each corner, with near-black opaque linework (RGB channels 24–37).

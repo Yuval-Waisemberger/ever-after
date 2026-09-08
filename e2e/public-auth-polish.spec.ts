@@ -1,3 +1,4 @@
+import { designSweep } from "./helpers/design-sweep";
 import { expect, test } from "@playwright/test";
 
 test("Auth and public header use a transparent near-black mark without a wrapper matte", async ({ page }) => {
@@ -241,4 +242,10 @@ test("slow hero loading leaves entry links usable until the real photo is ready"
   await expect(page.locator(".landing-petals")).toHaveCount(0);
   release();
   await expect(page.locator(".landing-hero")).toHaveAttribute("data-image-ready", "true");
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { landing: "/", login: "/auth/couple?mode=login", signup: "/auth/couple?mode=signup" });
 });

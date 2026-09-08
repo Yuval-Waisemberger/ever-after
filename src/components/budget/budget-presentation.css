@@ -19,5 +19,13 @@
 .budget-expense-surface .budget-payment-row[data-paid="true"] { background: linear-gradient(110deg, var(--success-tint), var(--paper)); border-inline-start-color: var(--sage); }
 .budget-expenses > div:first-child { gap: 16px; flex-wrap: wrap; }
 @media (max-width: 1279px) { .budget-metric--available { grid-column: 1 / -1; } }
-@media (max-width: 639px) { .budget-overview { padding: 8px; } .budget-overview .budget-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .budget-metric { padding: 16px 12px; } .budget-metric--available { grid-column: 1 / -1; } .budget-metric > p:nth-child(2) { font-size: 1.4rem; } }
+@media (max-width: 639px) {
+  .budget-overview { padding: 8px; }
+  .budget-overview .budget-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Stack within each tile; the legacy mobile label/value row squeezes labels into letters. */
+  .budget-overview .budget-metrics > .budget-metric { display: block; padding: 16px 12px; }
+  .budget-metric--available { grid-column: 1 / -1; }
+  .budget-overview .budget-metric > p:nth-child(2) { margin-top: 8px; font-size: clamp(1.05rem, 4.7vw, 1.4rem); }
+  .budget-overview .budget-metric > p:last-child { margin-top: 8px; }
+}
 @media (prefers-reduced-motion: reduce) { .budget-impact-progress[data-motion] .budget-impact-track span { transition: none; transform: scaleX(var(--budget-impact)); } }

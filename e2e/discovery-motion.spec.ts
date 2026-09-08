@@ -1,4 +1,18 @@
+import { designSweep } from "./helpers/design-sweep";
 import {expect,test} from "@playwright/test";
+
+test("record the successful booking burst in the closed fixture", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, viewport: { width: 900, height: 700 }, recordVideo: { dir: ".codex-tmp/final-design/motion/raw" } });
+  const page = await context.newPage();
+  await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());
+  await page.goto("/?view=actions");
+  await page.getByRole("button", { name: "Booked", exact: true }).click();
+  await expect(page.getByText("Booked for your day!", { exact: true })).toBeVisible();
+  await expect.poll(() => page.locator(".booking-confetti > span").evaluateAll(els => els.some(el => Number(getComputedStyle(el).opacity) > 0))).toBe(true);
+  await expect.poll(() => page.locator(".booking-confetti > span").evaluateAll(els => els.every(el => getComputedStyle(el).opacity === "0"))).toBe(true);
+  await context.close();
+  await page.video()!.saveAs(".codex-tmp/final-design/motion/booking.webm");
+});
 test.beforeEach(async({page})=>{await page.route("**/*",route=>new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());});
 
 for(const width of [1440,768,390,360]) test(`discovery, profile and Our Vendors at ${width}`,async({page})=>{
@@ -45,4 +59,10 @@ test("a failed booking intent cannot celebrate a later unrelated state update",a
   await page.goto("/?view=actions");await page.getByRole("button",{name:"Toggle failure"}).click();await page.getByRole("button",{name:"Booked",exact:true}).click();
   await page.evaluate(()=>new Promise<void>(resolve=>requestAnimationFrame(()=>requestAnimationFrame(()=>resolve()))));
   await page.getByRole("button",{name:"Receive unrelated booked state"}).click();await expect(page.locator(".booking-celebration")).toHaveCount(0);
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { marketplace: "/", "vendor-profile": "/?view=profile", "our-vendors": "/?view=my&shell" });
 });

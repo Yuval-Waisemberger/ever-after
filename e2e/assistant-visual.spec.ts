@@ -1,3 +1,4 @@
+import { designSweep } from "./helpers/design-sweep";
 import { expect, test } from "@playwright/test";
 import { mkdirSync } from "node:fs";
 
@@ -148,4 +149,10 @@ test.describe("motion review", () => {
     await page.close();
     await page.video()!.saveAs(`${output}/assistant-motion.webm`);
   });
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { assistant: "/?blank&shell" });
 });

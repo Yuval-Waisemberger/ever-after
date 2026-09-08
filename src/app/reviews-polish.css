@@ -1,0 +1,6 @@
+/* Reuse the Vendor review primitives, with the documented My Reviews timing. */
+@media (prefers-reduced-motion: no-preference) {
+  .couple-review-reveal[data-enter=shown] { animation-duration: 1200ms; }
+  .couple-review-reveal[data-enter=shown] .vendor-star,
+  .couple-review-reveal[data-enter=shown] .vendor-star-fill { animation-duration: 700ms; }
+}

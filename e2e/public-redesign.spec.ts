@@ -59,7 +59,9 @@ test("desktop homepage preserves the approved composition and real feature pilla
   const hero = (await page.locator(".landing-hero").boundingBox())!;
   expect(header.height).toBe(64);
   expect(hero.width).toBe(1536);
-  expect(hero.height).toBe(510);
+  // The approved responsive correction uses a content-safe minimum, not a fixed crop.
+  expect(hero.height).toBeGreaterThanOrEqual(510);
+  expect(hero.height).toBeLessThan(560);
   const columns = await page.locator(".pillar").evaluateAll(elements => elements.map(el => Math.round(el.getBoundingClientRect().top)));
   expect(new Set(columns).size).toBe(1);
   for (const name of ["Plan with ease", "Find the perfect vendors", "Stay on track", "AI Wedding Assistant"]) {

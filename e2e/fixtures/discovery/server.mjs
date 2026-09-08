@@ -9,6 +9,7 @@ const server = await createServer({
   cacheDir: fileURLToPath(new URL("../../../.codex-tmp/discovery-vite", import.meta.url)),
   publicDir: fileURLToPath(new URL("../../../public",import.meta.url)),
   resolve: {alias:{
+    "@/lib/actions/auth": fileURLToPath(new URL("../assistant/auth.ts", import.meta.url)),
     "next/link":fileURLToPath(new URL("./link.tsx",import.meta.url)),
     "next/image":fileURLToPath(new URL("./image.tsx",import.meta.url)),
     "next/navigation":fileURLToPath(new URL("./navigation.ts",import.meta.url)),

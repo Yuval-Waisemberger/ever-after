@@ -5,9 +5,28 @@ import { afterEach, expect, it, vi } from "vitest";
 import { AnimatedValue } from "@/components/planning/animated-value";
 import { TimelinePath } from "@/components/wedding/timeline-path";
 import { DetailsSavedToast } from "@/components/wedding/details-saved-toast";
+import { PlanningReveal } from "@/components/planning/reveal";
 import { renderToStaticMarkup } from "react-dom/server";
 
 Object.assign(globalThis, { IS_REACT_ACT_ENVIRONMENT: true });
+it("an unrevealed section settles on keyboard focus or a live reduced-motion change", async () => {
+  let changed = () => {};
+  const media = { matches: false, addEventListener: (_: string, callback: () => void) => { changed = callback; }, removeEventListener: vi.fn() };
+  vi.stubGlobal("matchMedia", () => media);
+  const disconnect = vi.fn();
+  vi.stubGlobal("IntersectionObserver", class { observe() {} disconnect = disconnect; });
+  const host = document.createElement("div"); const root = createRoot(host);
+  await act(async () => root.render(<PlanningReveal><button>Reach this field</button></PlanningReveal>));
+  expect(host.firstElementChild?.getAttribute("data-reveal")).toBe("pending");
+  host.querySelector("button")!.dispatchEvent(new FocusEvent("focusin", { bubbles: true }));
+  expect(host.firstElementChild?.getAttribute("data-reveal")).toBe("shown");
+  await act(async () => root.render(<PlanningReveal key="new"><button>Another field</button></PlanningReveal>));
+  media.matches = true; changed();
+  expect(host.firstElementChild?.getAttribute("data-reveal")).toBe("shown");
+  await act(async () => root.unmount());
+  expect(media.removeEventListener).toHaveBeenCalled();
+  expect(disconnect).toHaveBeenCalled();
+});
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 it("SSR exposes the exact financial value, including negative Available", () => {
   const html = renderToStaticMarkup(<AnimatedValue value={-120000} format="ils" />);

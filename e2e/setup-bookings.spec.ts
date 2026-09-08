@@ -1,3 +1,4 @@
+import { designSweep } from "./helpers/design-sweep";
 import { expect, test } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());
@@ -134,4 +135,10 @@ test("reduced motion keeps setup steps and choice feedback visible without anima
   await wizard.getByRole("button", { name: "Continue", exact: true }).click();
   await wizard.getByRole("checkbox", { name: "Elegant", exact: true }).check();
   await expect(wizard.getByRole("checkbox", { name: "Elegant", exact: true })).toBeChecked();
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { setup: "/?shell", details: "/?view=details&shell" });
 });

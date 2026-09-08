@@ -20,6 +20,7 @@ export function WeddingDateCountdown({ weddingDate, initialNow, previewNow = nul
   const title = phase.key === "DAY_BEFORE" ? "Tomorrow" : phase.key === "FINAL_WEEK" ? `${phase.daysRemaining} days to go` : phase.key === "WEDDING_DAY" ? "Today is the day" : "Just married";
 
   return <div aria-label="Wedding date and countdown" data-phase={phase.key} className="wedding-date-card mx-auto mt-6">
+    {phase.key === "WEDDING_DAY" ? <span className="wedding-day-spark" aria-hidden="true">✦</span> : null}
     <div className="min-w-0 text-center">
       {special ? <>
         {phase.key !== "POST_WEDDING" ? <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-wine">{finalWeek ? "Wedding Week" : "Wedding Day"}</p> : null}

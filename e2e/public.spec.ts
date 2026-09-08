@@ -28,14 +28,9 @@ const representativeSubcategories = [
 ] as const;
 
 async function expectImageDecoded(image: Locator) {
+  // Exercise the real lazy-loading path instead of rewriting src/srcset in the test.
+  await image.scrollIntoViewIfNeeded();
   await expect(image).toBeVisible();
-  await image.evaluate((element: HTMLImageElement) => {
-    if (element.currentSrc) return;
-    const source = element.src;
-    element.loading = "eager";
-    element.removeAttribute("srcset");
-    element.src = source;
-  });
   await expect.poll(
     () => image.evaluate((element: HTMLImageElement) => element.complete && element.naturalWidth > 0).catch(() => false),
     { timeout: 15_000 },
@@ -59,8 +54,8 @@ test("guest can browse the seeded marketplace preview and a vendor profile", asy
 
   const firstCard = page.locator("article.vendor-card").first();
   const businessName = (await firstCard.getByRole("heading").innerText()).trim();
-  await firstCard.locator("a").click();
-  await expect(page.getByRole("heading", { name: businessName, exact: true })).toBeVisible();
+  await firstCard.locator('a[href^="/vendors/"]').click();
+  await expect(page.getByRole("heading", { name: businessName, exact: true, level: 1 })).toBeVisible();
   const cover = page.locator("main img").first();
   await expectImageDecoded(cover);
 });
@@ -95,8 +90,8 @@ test("approved new-vendor covers render on cards and profiles at desktop and mob
       const card = page.locator("article.vendor-card");
       await expect(card).toHaveCount(1);
       await expectImageDecoded(card.getByRole("img", { name: vendor.imageAlt, exact: true }));
-      await card.locator("a").click();
-      await expect(page.getByRole("heading", { name: vendor.businessName, exact: true })).toBeVisible();
+      await card.locator('a[href^="/vendors/"]').click();
+      await expect(page.getByRole("heading", { name: vendor.businessName, exact: true, level: 1 })).toBeVisible();
       await expectImageDecoded(page.locator("main img").first());
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     }
@@ -129,7 +124,7 @@ test("all pooled and approved marketplace images decode successfully", async ({ 
 });
 
 test("all 64 new vendor cards and profiles use their deterministic approved primary", async ({ page }) => {
-  test.setTimeout(300_000);
+  test.setTimeout(600_000);
   const newSubcategories = [
     "wedding-cakes", "dessert-tables", "pastry-patisserie", "custom-sweets",
     "dance-floor-accessories", "glow-accessories", "guest-comfort-accessories", "party-props-giveaways",
@@ -161,7 +156,7 @@ test("all 64 new vendor cards and profiles use their deterministic approved prim
 });
 
 test("targeted cover sequences match the approved mappings on mobile and desktop listing pages", async ({ page }) => {
-  test.setTimeout(180_000);
+  test.setTimeout(300_000); // Scroll each real lazy image into view across 36 result pages.
   const categories = ["social-content", "djs", "photo-booths", "wedding-dresses", "makeup-hair", "event-design", "flowers", "invitations", "preparation-hotels"];
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 1000 });

@@ -1,3 +1,4 @@
+import { AppShell } from "@/components/layout/app-shell";
 import { useEffect, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { TaskForm } from "@/components/tasks/task-form";
@@ -17,7 +18,7 @@ function Fixture() {
   const params = new URLSearchParams(location.search), category = params.get("category") ?? "";
   const status = TASK_STATUSES.find(s => s === params.get("status")) ?? "all";
   const summary = calculateTaskSummary(fixture.tasks.map(t => ({ ...t, dueDate: t.due_date })), new Date());
-  return <main className="mx-auto max-w-6xl px-5 py-8">
+  const content = <main className="mx-auto max-w-6xl px-5 py-8">
     <h1 className="font-display text-4xl">Our Tasks</h1>
     <p>Open: {summary.open} · Due this week: {summary.dueThisWeek} · Completed: {summary.completed}</p>
     <button onClick={() => { fixture.fail = !fixture.fail; }}>Toggle simulated failure</button>
@@ -27,5 +28,6 @@ function Fixture() {
     <section aria-label="Add task" className="tasks-create-panel paper-panel my-6 p-5"><h2 className="mb-5 font-display text-2xl">Add a task</h2><TaskForm /></section>
     <section aria-label="Timeline">{timeline}</section>
   </main>;
+  return params.has("shell") ? <AppShell role="couple" displayName="Alex & Sam">{content}</AppShell> : content;
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

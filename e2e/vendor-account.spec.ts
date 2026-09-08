@@ -1,3 +1,4 @@
+import { designSweep } from "./helpers/design-sweep";
 import { test, expect } from "@playwright/test";
 import { mkdir } from "node:fs/promises";
 const artifacts = ".codex-tmp/phase2d-review";
@@ -97,4 +98,10 @@ test("record finite Vendor motion and real save/publication feedback",async ({br
   await expect(page.getByRole("button",{name:"Save business profile",exact:true})).toBeVisible();
   await context.close();
   await page.video()!.saveAs(`${artifacts}/vendor-motion.webm`);
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { "vendor-dashboard": "/vendor", "business-profile": "/vendor/profile" });
 });

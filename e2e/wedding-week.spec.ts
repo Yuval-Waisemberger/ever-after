@@ -1,6 +1,37 @@
+import { designSweep } from "./helpers/design-sweep";
 import { test, expect } from "@playwright/test";
+
+test("record date-derived countdown and scroll-driven Timeline", async ({ browser, baseURL }) => {
+  const context = await browser.newContext({ baseURL, viewport: { width: 1024, height: 850 }, recordVideo: { dir: ".codex-tmp/final-design/motion/raw" } });
+  const page = await context.newPage();
+  await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());
+  await page.goto("/?previewDaysBefore=8&shell");
+  await expect(page.locator(".countdown-day-value .planning-value > span")).toHaveText("8");
+  await page.goto("/?timeline&shell");
+  await expect(page.locator(".planning-timeline-path")).toBeVisible();
+  await page.locator(".planning-timeline-path > li").nth(4).scrollIntoViewIfNeeded();
+  await page.waitForTimeout(800); // Recording dwell only, to show scroll progression.
+  await page.locator(".timeline-destination").scrollIntoViewIfNeeded();
+  await page.waitForTimeout(1600); // Include the full heart/sparkle reveal in the review clip.
+  await expect(page.locator(".destination-heart")).toHaveCSS("stroke-dashoffset", "0px");
+  await context.close();
+  await page.video()!.saveAs(".codex-tmp/final-design/motion/countdown-timeline.webm");
+});
 const cards = ["Our Tasks", "Upcoming", "Our Vendors", "Budget", "Guest List", "Wedding Assistant"];
 const discarded = ["Tasks needing attention", "Payment deadlines", "Your booked vendors", "Guest confirmations", "Details to check"];
+test("Wedding Day sparkle is date-only, finite and static under reduced motion", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/?previewDaysBefore=0");
+  const spark = page.locator(".wedding-day-spark");
+  await expect(spark).toHaveCount(1);
+  await expect(spark).toHaveCSS("animation-duration", "1.6s");
+  await expect(spark).toHaveCSS("animation-iteration-count", "1");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(spark).toHaveCSS("animation-name", "none");
+  await expect(spark).toBeVisible();
+  await page.goto("/?previewDaysBefore=3");
+  await expect(spark).toHaveCount(0);
+});
 const states = [
   ["previewDaysBefore=8", "NORMAL", "8 days until your celebration"],
   ["previewDaysBefore=7", "FINAL_WEEK", "7 days to go"],
@@ -94,4 +125,10 @@ test("countdown eases to the actual value once, accessible amount stays final", 
   await page.goto("/?details=updated");
   await expect(page.getByRole("status")).toHaveText(/Wedding details saved/);
   await page.clock.runFor(2900); await expect(page.getByRole("status")).toHaveCount(0);
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { dashboard: "/?previewDaysBefore=3&shell", timeline: "/?timeline&shell" });
 });

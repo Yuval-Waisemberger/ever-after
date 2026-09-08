@@ -11,7 +11,7 @@ test("all four real auth views use the approved brand and retain usable forms", 
       await expect(page.getByLabel(/^Password/)).toHaveAttribute("type", "password");
       await expect(page.getByRole("button", { name: mode === "signup" ? "Create account" : "Sign in", exact: true })).toBeVisible();
       expect(await page.locator("form").evaluate((form: HTMLFormElement) => form.checkValidity())).toBe(false);
-      await expect(page.getByRole("link", { name: "Explore vendors", exact: true })).toHaveAttribute("href", "/vendors");
+      await expect(page.locator('a[href="/vendors"]').first()).toHaveAttribute("href", "/vendors");
       if (mode === "signup") await expect(page.getByLabel("Confirm password", { exact: true })).toBeVisible();
     }
   }

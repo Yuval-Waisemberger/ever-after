@@ -7,13 +7,18 @@ export function PlanningReveal({ children, className = "", delay = 0 }: { childr
   const node = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const element = node.current;
-    if (!element || !window.IntersectionObserver || window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const motion = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!element || !window.IntersectionObserver || motion?.matches) return;
     element.dataset.reveal = "pending";
+    const finish = () => { element.dataset.reveal = "shown"; observer.disconnect(); };
     const observer = new IntersectionObserver(entries => {
-      if (entries.some(e => e.isIntersecting)) { element.dataset.reveal = "shown"; observer.disconnect(); }
+      if (entries.some(e => e.isIntersecting)) finish();
     }, { threshold: .08 });
+    const change = () => { if (motion?.matches) finish(); };
     observer.observe(element);
-    return () => observer.disconnect();
+    element.addEventListener("focusin", finish);
+    motion?.addEventListener("change", change);
+    return () => { observer.disconnect(); element.removeEventListener("focusin", finish); motion?.removeEventListener("change", change); };
   }, []);
   return <div ref={node} className={`planning-reveal ${className}`} style={{ "--reveal-delay": `${delay}ms` } as CSSProperties}>{children}</div>;
 }

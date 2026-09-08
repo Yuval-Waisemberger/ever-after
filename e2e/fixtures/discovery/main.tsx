@@ -1,3 +1,5 @@
+import { AppShell } from "@/components/layout/app-shell";
+import "@/app/couple-planning.css";
 import { useEffect, useState, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { VendorCard } from "@/components/vendors/vendor-card";
@@ -18,7 +20,7 @@ function Fixture() {
   const view = new URLSearchParams(location.search).get("view");
   useEffect(() => {const update=()=>render(n=>n+1);window.addEventListener("fixture-refresh",update);return()=>window.removeEventListener("fixture-refresh",update);},[]);
   useEffect(() => { if(view === "profile") void ProfilePage({params:Promise.resolve({slug:vendor.slug}),searchParams:Promise.resolve({})}).then(setPage); if(view === "my") void MyVendorsPage({params:Promise.resolve({}),searchParams:Promise.resolve({})}).then(setPage); },[revision,view]);
-  return <>
+  const content = <>
     <div className="flex flex-wrap gap-3 p-3 text-xs" aria-label="Fixture controls"><span>Isolated synthetic fixture · writes: {fixture.writes}</span><button onClick={()=>{fixture.fail=!fixture.fail;refresh();}}>Toggle failure</button><button onClick={()=>{fixture.hold=!fixture.hold;refresh();}}>Toggle pending</button><button onClick={()=>fixture.pending?.()}>Resolve request</button><button onClick={()=>{fixture.status="booked";refresh();}}>Receive unrelated booked state</button></div>
     {view === "profile" || view === "my" ? page : view === "actions" ? <main className="mx-auto max-w-xl p-6"><h1 className="mb-6 font-display text-3xl">Willow Studio</h1><VendorStatusActions businessName={vendor.businessName} vendorId={vendor.id} currentStatus={fixture.status} isSaved={fixture.saved} returnTo="/" /></main> : <main className="public-theme directory-page mx-auto max-w-7xl p-6">
       <h1 className="mb-8 text-center font-display text-4xl">Find your wedding people</h1><CategoryNavigation selected="photography-content" />
@@ -27,5 +29,6 @@ function Fixture() {
       </section>
     </main>}
   </>;
+  return new URLSearchParams(location.search).has("shell") ? <AppShell role="couple" displayName="Alex & Sam">{content}</AppShell> : content;
 }
 createRoot(document.getElementById("root")!).render(<Fixture />);

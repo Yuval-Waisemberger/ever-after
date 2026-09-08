@@ -1,3 +1,4 @@
+import { designSweep } from "./helpers/design-sweep";
 import { test, expect } from "@playwright/test";
 test.beforeEach(async ({ page }) => {
   await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());
@@ -22,12 +23,16 @@ for (const width of [1440, 768, 390, 360]) test(`workflow and deadline, forms an
   await form.getByRole("button", { name: "Add task", exact: true }).click();
   const created = page.locator("article").filter({ has: page.getByRole("heading", { name: "Photographer contract", exact: true }) });
   await expect(created.locator(".ea-status-pill").filter({ hasText: /^Waiting on vendor$/ })).toBeVisible();
+  // Record finite surface animations at their start; a slow runner may assert after they end.
+  await created.evaluate(element => element.addEventListener("animationstart", event => {
+    if (event.target === element) element.setAttribute("data-observed-motion", (event as AnimationEvent).animationName);
+  }));
   await created.getByRole("button", { name: "Complete Photographer contract" }).click();
   await expect(created.locator(".ea-status-pill")).toHaveText(["Completed"]);
-  await expect(created).toHaveAttribute("data-task-motion", "complete");
+  await expect(created).toHaveAttribute("data-observed-motion", "task-settle");
   await created.getByRole("button", { name: "Reopen Photographer contract" }).click();
   await expect(created.locator(".ea-status-pill").filter({ hasText: /^Not started$/ })).toBeVisible();
-  await expect(created).toHaveAttribute("data-task-motion", "reopen");
+  await expect(created).toHaveAttribute("data-observed-motion", "task-reopen-surface");
   await created.locator("summary").click();
   await created.getByRole("combobox", { name: "Status", exact: true }).selectOption("in_progress");
   await created.getByRole("button", { name: "Save changes" }).click();
@@ -73,4 +78,10 @@ test("bounded list retains every task and reduced motion keeps the final state",
   await expect(last).toHaveAttribute("data-status", "completed");
   expect(await last.locator(".task-title-text").evaluate(element => getComputedStyle(element, "::after").animationName)).toBe("none");
   expect(await last.locator(".task-title-text").evaluate(element => getComputedStyle(element).textDecorationLine)).toBe("line-through");
+});
+
+
+test("final design intermediate-width sweep", async ({ page }) => {
+  test.setTimeout(240000);
+  await designSweep(page, { tasks: "/?shell" });
 });
