@@ -8,6 +8,8 @@ import { AssistantContextUnavailableError } from "@/lib/assistant/context-error"
 import { assistantResponseSchema } from "@/lib/assistant/types";
 import { assistantContext, assistantVendor } from "./fixtures";
 
+vi.mock("next/headers", () => ({}));
+
 const recommendation = { status: "ok" as const, text: "Here is a wedding suggestion.", evidence: [{ kind: "AI_RECOMMENDATION" as const }] };
 afterEach(() => vi.unstubAllEnvs());
 
@@ -20,7 +22,7 @@ describe("provider selection", () => {
     vi.stubEnv("AI_PROVIDER", undefined); vi.stubEnv("NODE_ENV", "production");
     expect(getWeddingAssistantProvider().name).toBe("local");
   });
-  it.each(["openai", "another-provider", "", "LOCAL", " local "])("rejects explicit unsupported configuration %s", (value) => {
+  it.each(["another-provider", "", "LOCAL", " local "])("rejects explicit unsupported configuration %s", (value) => {
     vi.stubEnv("AI_PROVIDER", value);
     expect(() => getWeddingAssistantProvider()).toThrow(UnsupportedAssistantProviderError);
   });

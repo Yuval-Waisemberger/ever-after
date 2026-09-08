@@ -329,9 +329,9 @@ unaffected policy definitions also retained the same fingerprint. No live QA row
 Earlier manual migration history remains non-authoritative; no ledger change or db push was used.
 Full Supabase JWT adversarial and Storage HTTP boundary checks remain Final Production QA.
 
-## Future real-AI admission — local migration only
+## Real-AI admission — applied infrastructure, unconfigured application channel
 
-`202609080001_assistant_real_ai_admission.sql` remains **unapplied to Frankfurt**. It enforces
+`202609080001_assistant_real_ai_admission.sql` was **applied and verified in Frankfurt in Phase 1C**. It enforces
 500 global / 150 per Couple / one active request, with a transaction
 advisory lock and READ COMMITTED snapshots. No short-window AI admission rate limit is enforced.
 No deletion, failure or uncertainty refunds quota. Supabase Auth rate limits are unaffected.
@@ -340,7 +340,7 @@ the unit remains consumed. No redispatch, automatic retry, late completion or ex
 Crash-left admitted/dispatched rows remain fail closed pending separately approved reconciliation.
 
 Browser roles cannot read/write/truncate the ledger or execute its three functions. RLS has no
-policies. The revised unapplied migration grants function execution only to service_role (and owner),
+policies. The approved migration grants function execution only to service_role (and owner),
 revoking direct ledger ACLs even from service_role. Its BYPASSRLS does not bypass those ACLs. No custom
 executor/login is created. A service-role key remains a broader backend credential elsewhere in the
 project; confinement to a server-only, narrow RPC module is essential, not a substitute for key security.
@@ -349,6 +349,25 @@ The default RPC channel is unconfigured and fails closed. Local bypasses it befo
 ledger or connection access. API ownership checks precede admission; client UUID/digest/ownership
 claims cannot grant authority. Only the server hashes normalized request semantics. Fixed errors omit
 SQL/roles/locks/secrets. Explicit Next server dependencies protect the hashing, lifecycle and RPC modules.
-No privileged key, environment configuration, SDK/provider, network research or billing was added.
+No privileged key, live provider configuration, network research or billing was added.
 See [AI admission design](AI_AGENT_SPEC.md#real-ai-phase-1a1b--local-admission-guardrails-2026-09-08)
 for channel comparison, terminal-state semantics and later configuration approval requirements.
+
+### Real AI Phase 2 — isolated OpenAI provider foundation
+
+Only the official OpenAI SDK was installed. Config/client/provider/instructions and selector import
+`next/headers`, which Next rejects in Client Components. Secret names have no public prefix.
+SDK construction is lazy, with zero retries, a 30-second timeout and logging off. Explicit OpenAI
+selection without key/model fails closed. No live key or admission client is configured.
+API/auth/ownership/guardrails are unchanged; Local requires no OpenAI or admission credentials.
+
+One plain Responses call is capped at 1,200 output tokens; final text is at most 10,000 UTF-16 code
+units without truncation. Only question/language are sent, with `store:false`; no database context,
+tool registry or history is exported in Phase 2. Normalization discards reasoning/SDK metadata,
+rejects tools/actions/research annotations and assigns only general-guidance provenance. Provider
+failures return fixed safe non-retryable errors. Arbitrary prose needs later live evaluation;
+mocked instruction tests do not prove model behavior.
+
+Provider tests inject responses and block fetch/HTTP/HTTPS/socket connections, including api.openai.com.
+No live quota, external model, research, billing or prepaid credit is used. Auto Reload must remain
+OFF under the owner's later billing controls. Turn quotas are not a dollar guarantee.

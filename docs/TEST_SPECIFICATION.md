@@ -2,6 +2,26 @@
 
 > Current Assistant foundation coverage and boundaries: see [AI Agent Specification](AI_AGENT_SPEC.md) and tests/assistant/.
 
+## Real AI Phase 2 — mocked OpenAI foundation
+
+`tests/assistant/openai-provider.test.ts` uses injected Responses results, no key/database/client
+connection. Fetch, HTTP, HTTPS and socket guards fail before unexpected network access; a canary
+checks the api.openai.com block itself. An inert SDK constructor verifies retry/timeout settings.
+
+Coverage includes default/explicit Local and no SDK construction, explicit OpenAI configuration,
+missing key/model, English/Hebrew, broad wedding scope, companions, etiquette, Rabbinate guidance,
+balanced advice instructions and unverified current procedures. Obvious coding/stocks questions
+are rejected before SDK invocation. Error cases include timeout, 429, auth, malformed/incomplete
+output, oversize answers, invalid usage, forbidden tools, research annotations and action proposals.
+Tests verify final-only output and disposal of reasoning/raw metadata, and the existing Local/API,
+language, tool, foundation and UI transport regressions remain maintained.
+
+These tests validate policy transport and response normalization, not live model compliance or
+grounding. Live Golden Flow, tool calling, current research and billing remain later approved work.
+Run `pnpm exec vitest run tests/assistant tests/ui/assistant.test.tsx tests/ui/assistant-transport.test.tsx`.
+Phase 1C already verified the admission migration in Frankfurt; Phase 2 does not run any SQL or
+consume admissions. No live accounts or conversations are needed for these tests.
+
 ## Objectives
 
 Testing must demonstrate core correctness, invalid-input handling, important product flows,

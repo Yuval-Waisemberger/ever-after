@@ -1,6 +1,42 @@
 # Ever After AI Agent Specification
 
-Status: Agent foundation Phases 1A, 1B, 1C-A, 1C-B and Phase 2 bilingual UX are complete. Setup booking/declaration semantics, current financial rules, Waiting on vendor and the shared countdown phase model are integrated. This is the authoritative Agent contract. Only the deterministic Local provider exists; external AI, live research and product-write execution remain unimplemented.
+Status: Agent foundation and bilingual visual experience are complete. Real AI Phase 2 adds a server-only OpenAI provider foundation verified with injected mocks. Local remains active/default. Live OpenAI is unconfigured; model tools, live research and product writes remain disabled. The approved admission migration was applied and verified in Frankfurt during Real AI Phase 1C. Earlier phase sections below are historical implementation records.
+
+## Real AI Phase 2 — OpenAI foundation (mocked only)
+
+The official `openai` SDK is the only added dependency. `openai-provider.ts` implements the existing
+`WeddingAssistantProvider`, with an injectable `responses.create` seam in `openai-client.ts`.
+Config, client, instructions, provider and selector import `next/headers`, the project's explicit
+Next.js server-only dependency guard. No Client Component imports these modules.
+
+`OPENAI_API_KEY` and `OPENAI_MODEL` are future server-only configuration names. Local reads neither.
+The planned model example lives in `.env.example`; application code has no hardcoded model/default.
+No real values, admission credential, billing or prepaid configuration were added. Auto Reload must
+remain OFF; any later billing setup belongs to the owner and requires separate approval.
+
+Client policy: `maxRetries: 0`, 30-second timeout, SDK logging off and browser use disabled.
+Each turn makes at most one plain Responses call with a server-owned 1,200 output-token cap,
+`store: false` and no streaming, tools or research. Only the current question and selected language
+are sent. Existing context loading/persistence is unchanged, but the OpenAI foundation does not
+serialize Couple data or conversation/tool history. Selective data grounding belongs to Phase 3.
+
+`openai-instructions.ts` centrally covers wedding-wide guidance, etiquette, traditions, companions,
+family, vendors, general Rabbinate processes and balanced subjective recommendations. Current fees,
+official requirements and market benchmarks must not be presented as verified. Nuanced domain
+decisions belong to instructions; the small existing guard rejects obvious unrelated questions.
+Instructions are policy, not proof that every generated sentence complies: live scope, grounding
+and prompt-injection evaluations remain future Golden Flow work.
+
+Normalization accepts completed assistant text, discards reasoning/SDK metadata, and rejects tool
+items, citation annotations, fabricated evidence/action fields, incomplete/malformed responses and
+answers over 10,000 UTF-16 code units (conservatively below the 12,000-character DB limit). No text
+is truncated. Provenance is server-owned `AI_RECOMMENDATION` only. Safe integer input/output usage
+is optional; invalid usage is omitted. Timeout, 429, authentication and SDK failures share the
+existing safe provider-unavailable error with retryable=false. No raw errors, headers or IDs escape.
+The unchanged guardrail wrapper treats unavailable/error outcomes as terminal uncertain.
+
+Tools, research, writes and live API use are not enabled. Mocked tests prove request/response and
+instruction contracts, not live model quality or actual account/model access.
 
 ## Identity and intended experience
 
@@ -120,9 +156,9 @@ Core invariants:
 
 ## Provider configuration and result contract
 
-`AI_PROVIDER=local` selects `LocalWeddingAssistantProvider`. An absent variable explicitly defaults to local in every environment, including production, so no external service or billable behavior can be activated by omission. An explicitly empty, differently cased, whitespace-padded, or unsupported value throws `UnsupportedAssistantProviderError`. The authenticated API returns a safe 503 explaining that only local is supported, before any conversation writes. There is no silent fallback for explicit unsupported configuration.
+`AI_PROVIDER=local` selects `LocalWeddingAssistantProvider`; omission defaults to Local everywhere. Explicit `openai` requires validated server key/model configuration and fails closed through the existing safe API 503 before writes if either is missing. Empty, differently cased, whitespace-padded or unknown provider values also fail safely. There is no silent fallback. The privileged admission channel remains unconfigured, so the current application cannot dispatch OpenAI requests even if provider configuration is supplied.
 
-`.env.example` documents this behavior; no API-key variable is needed. `.env.local` is untouched. The provider interface is vendor-independent; future adapters (OpenAI or another provider) may implement it only after approval. No adapter is pre-registered under an unsupported name.
+`.env.example` documents Local defaults and the two future OpenAI variable names; no real key is present. `.env.local` is untouched. The provider interface remains vendor-independent, and no additional provider/framework is registered.
 
 `types.ts` defines a Zod result contract with:
 
@@ -400,10 +436,10 @@ clocks never enter Assistant context; there is no new Agent capability or extern
 
 ## Real AI Phase 1A/1B — local admission guardrails (2026-09-08)
 
-`202609080001_assistant_real_ai_admission.sql` is **unapplied to Frankfurt**. Phase 1B revises
-only this new migration. No credential, SDK, provider, research, billing or live connection is
-configured. The selector still accepts only Local; Local answers, tools, UI and persistence
-semantics are preserved. The API now imports a dormant admission boundary that bypasses Local.
+`202609080001_assistant_real_ai_admission.sql` was **applied and verified in Frankfurt in Phase 1C**.
+No privileged credential, live AI, research or billing is configured. Local answers, tools, UI and
+persistence semantics are preserved. The API admission boundary bypasses Local and fails closed
+for an unconfigured external channel.
 
 ### Admission and accounting
 

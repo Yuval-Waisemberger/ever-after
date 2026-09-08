@@ -11,7 +11,8 @@ Next.js 16 App Router, React 19, TypeScript, Supabase PostgreSQL/Auth/Storage/RL
 Vitest and Playwright. Vercel deployment is **pending**. Frankfurt Supabase is the existing live
 backend: wedding-planner-project-eu, eu-central-1. Do not recreate or reseed it for local QA.
 The Assistant currently uses a deterministic Local provider. Real external AI and live research
-are pending; no AI key, paid provider or executable Agent product-write tool is required.
+are pending; a server-only OpenAI foundation is tested with mocks only. No AI key, paid provider or
+executable Agent product-write tool is required for Local operation.
 
 The fictional Marketplace contains **496 vendors, 8 categories, 27 subcategories and 2,727 reviews**.
 Its 291 tracked WebPs comprise 227 pooled images and 64 dedicated newer-vendor primary images.
@@ -33,13 +34,21 @@ Requirements: Node.js 22+ and pnpm 11. Use the package-manager version declared 
 | NEXT_PUBLIC_SUPABASE_URL | Browser-safe project URL |
 | NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | Browser-safe publishable key |
 | NEXT_PUBLIC_SITE_URL | Canonical application origin for Auth callbacks; localhost during development |
-| AI_PROVIDER | Set to local; omission also selects Local, unsupported explicit values fail safely |
+| AI_PROVIDER | Keep local; omission selects Local. Explicit openai requires future configuration and fails closed otherwise |
+| OPENAI_API_KEY | Future server-only API credential; leave empty in this phase |
+| OPENAI_MODEL | Future server-only model selection; planned example in .env.example |
 
 The normal app needs no database password, service-role key or AI key. Configure Supabase Auth's
 Site URL and allowed callback/recovery URLs for the intended application origin. Vercel will require
 its own environment settings when deployment is approved. Source specification/course PDFs and
 local coding-agent guidance are not install/build dependencies. The final Product Specification
 is submitted separately.
+
+Live OpenAI remains unconfigured and blocked by the unconfigured privileged admission channel.
+The SDK foundation uses Responses API plain text only, no tools/research, zero retries, a 30-second
+timeout and 1,200 output-token cap. No billing/prepaid settings are configured; Auto Reload must
+remain OFF if the owner later approves prepaid setup. Run isolated provider coverage with
+`pnpm exec vitest run tests/assistant/openai-provider.test.ts` (no key/network required).
 
 ## Database setup
 

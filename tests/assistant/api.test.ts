@@ -11,6 +11,7 @@ vi.mock("@/lib/queries/assistant", () => ({ getAssistantContext: mocks.context }
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ from: mocks.from }) }));
 import { POST } from "@/app/api/assistant/route";
 import { LocalWeddingAssistantProvider } from "@/lib/assistant/local-provider";
+import { OpenAIWeddingAssistantProvider } from "@/lib/assistant/openai-provider";
 import { AssistantContextUnavailableError } from "@/lib/assistant/context-error";
 
 const threadId = "00000000-0000-4000-8000-000000000001";
@@ -32,6 +33,7 @@ function request(message = "What tasks do we have?", existingThread: string | nu
 }
 beforeEach(() => {
   vi.restoreAllMocks(); vi.clearAllMocks(); vi.stubEnv("AI_PROVIDER", "local");
+  vi.stubEnv("OPENAI_API_KEY", undefined); vi.stubEnv("OPENAI_MODEL", undefined);
   writes.length = 0; scopes.length = 0;
   userInsertFails = false; assistantInsertFails = false; threadReadFails = false; threadExists = true;
   mocks.profile.mockResolvedValue({ id: "couple", role: "couple" });
@@ -113,11 +115,22 @@ describe("Assistant API persistence and permissions", () => {
   it("rejects invalid input before writes", async () => {
     expect((await POST(request(""))).status).toBe(400); expect(writes).toEqual([]);
   });
-  it("rejects unsupported providers clearly before writes", async () => {
+  it("rejects unconfigured OpenAI clearly before writes", async () => {
     vi.stubEnv("AI_PROVIDER", "openai");
     const response = await POST(request());
     expect(response.status).toBe(503); const body = await response.json(); expect(body.errorCode).toBe("PROVIDER_UNAVAILABLE"); expect(body.error).not.toContain("AI_PROVIDER");
     expect(writes).toEqual([]);
+  });
+  it("keeps configured OpenAI behind the unconfigured admission channel before persistence or provider execution", async () => {
+    vi.stubEnv("AI_PROVIDER", "openai"); vi.stubEnv("OPENAI_API_KEY", "unit-test-placeholder"); vi.stubEnv("OPENAI_MODEL", "unit-test-model");
+    mocks.profile.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000003", role: "couple" });
+    mocks.wedding.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000004" });
+    const respond = vi.spyOn(OpenAIWeddingAssistantProvider.prototype, "respond");
+    const response = await POST(new Request("http://localhost/api/assistant", { method: "POST", body: JSON.stringify({
+      requestId: "00000000-0000-4000-8000-000000000002", message: "Plan our wedding", threadId,
+    }) }));
+    expect(response.status).toBe(503); expect((await response.json()).errorCode).toBe("ADMISSION_UNAVAILABLE");
+    expect(writes).toEqual([]); expect(respond).not.toHaveBeenCalled(); expect(admissionChannel).toHaveBeenCalledOnce();
   });
   it("rejects inaccessible threads and fails closed on thread read errors", async () => {
     threadExists = false;

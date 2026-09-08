@@ -41,7 +41,7 @@ export const assistantResponseSchema = z.object({
 });
 export type AssistantResponse = z.infer<typeof assistantResponseSchema>;
 
-// Adapter names are not tied to any vendor. Only local is registered today.
+// Local and the OpenAI foundation share this provider boundary.
 export interface WeddingAssistantProvider {
   readonly name: string;
   respond(request: AssistantRequest): Promise<AssistantResponse>;
