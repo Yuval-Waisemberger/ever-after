@@ -9,6 +9,8 @@ import { getOwnedWedding } from "@/lib/queries/wedding";
 import { createClient } from "@/lib/supabase/server";
 import { assistantRequestSchema } from "@/lib/validation/assistant";
 import { assistantCopy, selectResponseLanguage, type AssistantLanguage } from "@/lib/assistant/language";
+import { readConversationWindow } from "@/lib/assistant/planning/history-server";
+import { buildConversationWindow } from "@/lib/assistant/planning/conversation";
 
 export async function POST(request: Request) {
   let language: AssistantLanguage = "en";
@@ -30,6 +32,17 @@ export async function POST(request: Request) {
       if (error) return NextResponse.json({ error: copy.thread, errorCode: "THREAD_UNAVAILABLE" }, { status: 503 });
       if (!data) return NextResponse.json({ error: copy.thread, errorCode: "THREAD_UNAVAILABLE" }, { status: 404 });
     }
+    // Read owned PRIOR history before persisting this turn. Local keeps its
+    // original path and never reads or receives conversation history.
+    let history: ReturnType<typeof buildConversationWindow> | undefined;
+    if (provider.name === "openai" && provider.respondSelective) {
+      history = buildConversationWindow([]);
+      if (threadId) {
+        const prior = await readConversationWindow(threadId);
+        if (prior.status === "unavailable") return NextResponse.json({ error: copy.thread, errorCode: "THREAD_UNAVAILABLE" }, { status: 503 });
+        history = prior.data;
+      }
+    }
     admission = await prepareAssistantTurn(provider.name, {
       requestId: parsed.data.requestId, coupleId: profile.id, weddingId: wedding.id,
       threadId, message: parsed.data.message, language,
@@ -48,7 +61,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: copy.saveUser, errorCode: "MESSAGE_NOT_SAVED", threadId }, { status: 500 });
     }
 
-    const result = await admission.execute(() => runWeddingAgent({ message: parsed.data.message, provider, loadContext: getAssistantContext, recentLanguage: parsed.data.recentLanguage, requestedLanguage: parsed.data.requestedLanguage }));
+    const result = await admission.execute(() => runWeddingAgent({ message: parsed.data.message, provider, loadContext: getAssistantContext, recentLanguage: parsed.data.recentLanguage, requestedLanguage: parsed.data.requestedLanguage, ...(history ? { history } : {}) }));
     if (result.status === "unavailable" || result.status === "error") {
       return NextResponse.json({ error: result.text, agent: result, threadId }, { status: 503 });
     }

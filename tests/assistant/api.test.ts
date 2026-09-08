@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { assistantContext } from "./fixtures";
-const mocks = vi.hoisted(() => ({ profile: vi.fn(), wedding: vi.fn(), context: vi.fn(), from: vi.fn() }));
+const mocks = vi.hoisted(() => ({ profile: vi.fn(), wedding: vi.fn(), context: vi.fn(), from: vi.fn(), history: vi.fn() }));
+vi.mock("@/lib/assistant/planning/history-server", () => ({ readConversationWindow: mocks.history }));
+import { buildConversationWindow } from "@/lib/assistant/planning/conversation";
 const admissionChannel = vi.hoisted(() => vi.fn(() => { throw new Error("No privileged credential or ledger configured"); }));
 vi.mock("next/headers", () => ({}));
 vi.mock("@/lib/assistant/guardrails/rpc-channel", () => ({ getAdmissionChannel: admissionChannel }));
@@ -39,6 +41,7 @@ beforeEach(() => {
   mocks.profile.mockResolvedValue({ id: "couple", role: "couple" });
   mocks.wedding.mockResolvedValue({ id: "owned-wedding" });
   mocks.context.mockResolvedValue(assistantContext());
+  mocks.history.mockResolvedValue({ status: "empty", data: buildConversationWindow([]) });
   mocks.from.mockImplementation((table: string) => ({
     ...chain({ data: threadExists ? { id: threadId } : null, error: threadReadFails ? { message: "secret DB error" } : null }),
     insert: (values: Record<string, unknown>) => {
@@ -57,6 +60,7 @@ describe("Assistant API persistence and permissions", () => {
     }) }));
     expect(response.status).toBe(200);
     expect(admissionChannel).not.toHaveBeenCalled();
+    expect(mocks.history).not.toHaveBeenCalled();
     expect(writes.map(item => item.values.role)).toEqual(["user", "assistant"]);
     expect(writes.every(item => item.table === "assistant_messages")).toBe(true);
     expect(writes.some(item => "requestId" in item.values || "digest" in item.values)).toBe(false);
@@ -164,7 +168,8 @@ describe("Assistant API persistence and permissions", () => {
   });
   it("has no product mutation or executor dependency in the Agent core", () => {
     for (const file of readdirSync("src/lib/assistant").filter((name) => name.endsWith(".ts"))) {
-      const source = readFileSync(`src/lib/assistant/${file}`, "utf8");
+      // SHA-256 argument fingerprinting is not a database UPDATE.
+      const source = readFileSync(`src/lib/assistant/${file}`, "utf8").replace(/createHash\("sha256"\)\.update\(/g, "hashInput(");
       expect(source).not.toMatch(/\.from\(|\.insert\(|\.update\(|\.delete\(|\.upsert\(|\.rpc\(|@\/lib\/actions/);
     }
   });

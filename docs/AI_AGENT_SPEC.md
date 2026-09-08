@@ -1,8 +1,68 @@
 # Ever After AI Agent Specification
 
-Status: Agent foundation and bilingual visual experience are complete. Real AI Phase 2 adds a server-only OpenAI provider foundation verified with injected mocks. Local remains active/default. Live OpenAI is unconfigured; model tools, live research and product writes remain disabled. The approved admission migration was applied and verified in Frankfurt during Real AI Phase 1C. Earlier phase sections below are historical implementation records.
+Status: Real AI Phase 3 connects the OpenAI provider to ten existing READ tools, verified with injected model responses and an isolated database double. Local remains active/default. Live OpenAI and the privileged admission channel remain unconfigured; research and product writes remain disabled. The approved admission migration was applied and verified in Frankfurt during Real AI Phase 1C. This phase made no live requests or admissions. Earlier phase sections below are historical implementation records.
 
-## Real AI Phase 2 — OpenAI foundation (mocked only)
+## Real AI Phase 3 — bounded selective READ bridge (mocked only)
+
+`openai-tool-bridge.ts` derives exactly ten function definitions from the existing registry using
+Zod 4's built-in JSON Schema conversion: get_wedding_summary, list_tasks, get_timeline_summary,
+get_budget_summary, get_upcoming_payments, get_couple_vendors, search_marketplace_vendors,
+compare_vendors, get_guest_list_summary and get_missing_wedding_details. Strict schemas require
+all properties; optional/defaulted fields accept null on the model wire and are omitted before
+the original Zod input validation. Bounds/enums remain; refinements such as unique comparison IDs
+and ordered prices are always enforced server-side. No package or tool implementation changed.
+
+`openai-tool-loop.ts` owns at most **4 model rounds, 6 requested calls and 30 seconds per turn**.
+Each Responses request uses `tool_choice:auto`, `strict:true` functions, `store:false`, no streaming,
+and 1,200 maximum output tokens. The SDK still has zero retries. The deadline spans all rounds
+and reads; each SDK call gets the remaining timeout and a shared abort signal. A hung read cannot
+hold the response indefinitely. Already-launched reads may finish, but no new work starts after
+expiry. Invalid requests fail closed; no repair/retry loop is added.
+
+All calls in a batch are validated and reserved before sequential execution. Names must exist in
+the registry, arguments must pass its Zod schema, and call IDs must be unique across the turn.
+Reused IDs (even identical) are rejected. Validated name/arguments are canonically hashed for a
+turn-local result cache; repeated calls with new IDs consume the six-call budget but avoid another
+database read. Each actual execution still uses executeAssistantReadTool, fresh auth/role/owned
+wedding resolution, existing bounded queries and output schemas. The original call_id accompanies
+each official function_call_output. No model-selected ownership, SQL, client or arbitrary function
+access exists. This follows the [official Responses function-calling contract](https://developers.openai.com/api/docs/guides/function-calling).
+
+The optional respondSelective provider method avoids loading Local's eager AssistantContext.
+The original respond contract and Local path remain unchanged. The narrowly approved API change
+reads existing bounded history after owned-thread verification and BEFORE inserting the current
+user message. New Chat supplies an empty window; Local neither reads nor receives history.
+The existing reader retains latest-eight selection, 2,000 characters per message, 10,000 total,
+whole-message omission and chronological order. History read failure stops before admission and
+persistence. Outbound history contains only role/text plus omission metadata in a quoted USER
+context; no row IDs, timestamps, evidence objects or system/developer history messages. Both
+historical roles are untrusted. Only fresh tool results establish current data. The current question
+appears exactly once. User-entered conversational text may itself contain voluntarily supplied PII;
+bounded/minimized history is not a general-purpose PII redactor.
+
+A server-only, turn-local execution record retains call ID, approved name, argument fingerprint,
+executed/cached status, result status and allowlisted evidence/vendor IDs. No raw database client,
+errors or hidden reasoning enter that record. The provider builds response evidence/toolUsage from
+this record, not model claims. An in-memory WeakMap attests those exact claims by object identity;
+Agent validation rejects fabricated/cloned/altered tool usage, mismatched names/IDs and evidence.
+The UI receives ordinary safe source metadata, not the internal record or raw results. Marketplace
+IDs may come from a fresh approved read outside Local's context. Verified empty search evidence
+may have no IDs. Unavailable sources contribute no factual evidence and remain distinct from empty.
+
+Plain final text is capped at 10,000 UTF-16 units without truncation. Safe usage is aggregated across
+all model rounds; missing/invalid/overflowing totals are omitted rather than underreported. Usage is
+telemetry, never quota authorization. Raw response fields, annotations, action proposals and external
+evidence are rejected. For stateless reasoning models only opaque encrypted continuation may pass
+between model rounds in memory; plaintext reasoning/summaries are discarded and nothing is persisted.
+
+Instructions allow broad wedding guidance and balanced opinions without mandatory tools, require
+fresh reads for current Couple facts, distinguish unavailable data from empty, and prohibit writes
+and claims of current external verification. Mocked tests prove transport, bounds, ownership and
+provenance contracts; they do not prove live model judgment or sentence-level grounding. Live
+Golden Flow and prompt-injection evaluation require later approval. No API/service-role key,
+billing/prepaid configuration, live research, migration or live quota consumption was added.
+
+## Real AI Phase 2 — OpenAI foundation (historical snapshot, mocked only)
 
 The official `openai` SDK is the only added dependency. `openai-provider.ts` implements the existing
 `WeddingAssistantProvider`, with an injectable `responses.create` seam in `openai-client.ts`.

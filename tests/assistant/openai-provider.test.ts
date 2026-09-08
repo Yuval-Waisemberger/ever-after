@@ -93,7 +93,7 @@ describe("plain Responses API normalization", () => {
       evidence: [{ kind: "AI_RECOMMENDATION" }], usage: { inputTokens: 42, outputTokens: 18 } });
     const payload = h.create.mock.calls[0][0];
     expect(payload).toMatchObject({ model: config.model, max_output_tokens: 1200, store: false, stream: false });
-    expect(Object.keys(payload).sort()).toEqual(["input", "instructions", "max_output_tokens", "model", "store", "stream"]);
+    expect(Object.keys(payload).sort()).toEqual(["include", "input", "instructions", "max_output_tokens", "model", "store", "stream", "tool_choice", "tools"]);
     expect(payload.input).toEqual([{ role: "user", content: "When should wedding invitations go out?" }]);
     expect(JSON.stringify(payload)).not.toContain("weddingDate"); expect(h.create).toHaveBeenCalledTimes(1);
   });
@@ -177,7 +177,7 @@ describe("wedding-wide instruction and scope contract (not live model evaluation
   });
   it("centrally prohibits writes, invented data and hidden reasoning", () => {
     const instructions = openAIWeddingInstructions("en");
-    for (const rule of ["read-only", "do not create, edit, delete", "Do not invent Couple facts", "chain-of-thought", "no tools, database access or research"]) {
+    for (const rule of ["read-only", "do not create, edit, delete", "Do not invent Couple facts", "chain-of-thought", "ten approved read tools"]) {
       expect(instructions).toContain(rule);
     }
   });

@@ -5,7 +5,7 @@ import { OPENAI_TIMEOUT_MS, type OpenAIConfig } from "./openai-config";
 
 // Narrow injectable SDK seam. Unknown output must pass provider validation.
 export interface OpenAIResponsesClient {
-  responses: { create(input: ResponseCreateParamsNonStreaming): Promise<unknown> };
+  responses: { create(input: ResponseCreateParamsNonStreaming, options?: { signal?: AbortSignal; timeout?: number }): Promise<unknown> };
 }
 export function createOpenAIClient(config: OpenAIConfig): OpenAIResponsesClient {
   return new OpenAI({ apiKey: config.apiKey, maxRetries: 0, timeout: OPENAI_TIMEOUT_MS,

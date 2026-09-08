@@ -11,7 +11,8 @@ export const externalSourceSchema = z.object({
 }).strict();
 export const evidenceSchema = z.discriminatedUnion("kind", [
   z.object({ kind: z.literal("COUPLE_DATA"), section: contextSectionSchema }).strict(),
-  z.object({ kind: z.literal("MARKETPLACE_DATA"), vendorIds: z.array(z.string().min(1)).min(1) }).strict(),
+  // Empty IDs are valid only with server-verified evidence of an empty search.
+  z.object({ kind: z.literal("MARKETPLACE_DATA"), vendorIds: z.array(z.string().min(1)) }).strict(),
   z.object({ kind: z.literal("EXTERNAL_CURRENT_EVIDENCE"), sources: z.array(externalSourceSchema).min(1).max(8) }).strict(),
   z.object({ kind: z.literal("AI_RECOMMENDATION") }).strict(),
 ]);

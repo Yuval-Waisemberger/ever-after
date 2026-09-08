@@ -353,7 +353,40 @@ No privileged key, live provider configuration, network research or billing was 
 See [AI admission design](AI_AGENT_SPEC.md#real-ai-phase-1a1b--local-admission-guardrails-2026-09-08)
 for channel comparison, terminal-state semantics and later configuration approval requirements.
 
-### Real AI Phase 2 — isolated OpenAI provider foundation
+### Real AI Phase 3 — selective READ loop security
+
+The current OpenAI adapter is tested only with injected mocks. Exactly ten existing read tools
+are exposed; research, writes, arbitrary server execution and raw database access are absent.
+Strict model-facing schemas supplement, never replace, original server Zod validation. Every
+actual read authenticates and re-resolves the owned wedding through the existing executor.
+Results pass existing output allowlists; Guest data stays aggregate and Task/private notes stay out.
+
+The turn is bounded to four model rounds, six requested calls and one 30-second deadline, including
+tool waits. SDK retries remain zero; exhausted/invalid turns fail safely with no raw SDK/DB error.
+Duplicate call IDs fail closed. New IDs for identical validated arguments reuse a turn-local result
+but still count against limits. Entire batches are validated before any execution. Timeout aborts
+model requests and forbids subsequent launches; existing read promises may finish harmlessly.
+
+History is read only after owned-thread verification and before inserting the current message.
+The reader independently checks ownership. Its 8-message/2,000-per-message/10,000-total bounds
+remain. Only quoted conversation text and omission metadata are sent; historical assistant rows
+are never instructions, authorization or evidence. Local still bypasses history, OpenAI and quota.
+
+Tool evidence and call/name/status metadata are generated from a server-only execution record.
+An object-identity attestation checks exact claims before the Agent accepts them; model JSON,
+history, cloned claims and mutated evidence cannot create that attestation. Fresh Marketplace
+results may establish IDs outside eager Local context; an attested empty search needs no fake IDs.
+No raw tool traces or hidden reasoning are returned/persisted. Optional encrypted reasoning
+continuation remains opaque and ephemeral between Responses rounds with store:false.
+
+Final text stays below persistence bounds (10,000 UTF-16 units); each response is capped at 1,200
+output tokens. Safe aggregate usage is telemetry only. Research annotations, action proposals
+and unknown output types are rejected. Instructions cannot guarantee arbitrary generated prose;
+live grounding/prompt-injection evaluations remain required before claiming model quality.
+The API change is only prior-history wiring. Guardrail policy/SQL, Auth, tools and RLS are unchanged.
+No key, live admission, external API, billing or deployment was used in Phase 3.
+
+### Real AI Phase 2 — isolated OpenAI provider foundation (historical snapshot)
 
 Only the official OpenAI SDK was installed. Config/client/provider/instructions and selector import
 `next/headers`, which Next rejects in Client Components. Secret names have no public prefix.

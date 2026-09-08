@@ -2,7 +2,34 @@
 
 > Current Assistant foundation coverage and boundaries: see [AI Agent Specification](AI_AGENT_SPEC.md) and tests/assistant/.
 
-## Real AI Phase 2 — mocked OpenAI foundation
+## Real AI Phase 3 — mocked READ bridge and prior history
+
+`tests/assistant/openai-tool-loop.test.ts` injects Responses API results while exercising the REAL
+ten-tool executor against the existing in-memory PostgREST double. Fetch/HTTP/HTTPS/socket guards
+fail on unexpected network use. There is no Frankfurt admission, credential or live OpenAI call.
+Fixtures cover all ten tools, English/Hebrew, direct wedding advice without tools, multiple calls,
+multi-round execution, strict schema conversion, original refinements, correlated call IDs, duplicate
+IDs, forbidden/invalid batches, canonical turn-local caching and 4-round/6-call boundaries.
+Fake-clock tests enforce a single 30-second budget across models and hung reads, with no later
+launches/retries. Tests cover aggregate usage, persistence length, private-field filtering, repeated
+authorization, unavailable versus empty, fresh/empty Marketplace evidence and forged/altered claims.
+
+`tests/assistant/api-history.test.ts` exercises the real route/provider with isolated persistence,
+history and admission doubles: owned prior-history read precedes current insert, current question
+appears once, New Chat has no history, foreign threads fail before reading, history failures remain
+safe, and user/assistant persistence failures preserve existing behavior. Local gets no history.
+Existing real history-reader tests continue checking independent auth and ownership, while planning
+tests retain 8/2,000/10,000 bounds and whole-message omission. Outbound tests verify chronological
+role/text minimization, omission metadata and historical assistant text treated as untrusted.
+
+Run `pnpm exec vitest run tests/assistant tests/ui/assistant.test.tsx tests/ui/assistant-transport.test.tsx`.
+Also run TypeScript, whole-repository ESLint, production build and git diff --check. Inspect the
+production browser chunks and Client Component dependency graph for SDK/private config/tool
+executor exposure. No package or migration changes are needed. Tests verify orchestration and
+instruction contracts, not whether a live model selects the right tool or obeys every instruction.
+Live model quality, Golden Flow, research and billing remain separately approved later work.
+
+## Real AI Phase 2 — mocked OpenAI foundation (retained regressions)
 
 `tests/assistant/openai-provider.test.ts` uses injected Responses results, no key/database/client
 connection. Fetch, HTTP, HTTPS and socket guards fail before unexpected network access; a canary
@@ -17,7 +44,7 @@ Tests verify final-only output and disposal of reasoning/raw metadata, and the e
 language, tool, foundation and UI transport regressions remain maintained.
 
 These tests validate policy transport and response normalization, not live model compliance or
-grounding. Live Golden Flow, tool calling, current research and billing remain later approved work.
+grounding. Live Golden Flow, current research and billing remain later approved work.
 Run `pnpm exec vitest run tests/assistant tests/ui/assistant.test.tsx tests/ui/assistant-transport.test.tsx`.
 Phase 1C already verified the admission migration in Frankfurt; Phase 2 does not run any SQL or
 consume admissions. No live accounts or conversations are needed for these tests.
