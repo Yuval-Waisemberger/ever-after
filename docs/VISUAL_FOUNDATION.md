@@ -113,9 +113,9 @@ Sources: final Design/Motion/UX DOCX (including all archive additions), twelve Z
 | Marketplace card lift/image zoom/border depth; save heart sequence + 2–3 particles; category hover | DOCX | 2C | IMPLEMENTED |
 | Recommendations sparkle and Why this match reveal | DOCX | 2C | IMPLEMENTED |
 | Vendor booking check → one 0.8–1.2s confetti burst → rest | DOCX / confetti recording | 2C | IMPLEMENTED |
-| Vendor dashboard completion counter/fill/checklist/tint/rating/section reveals | DOCX / storyboard | 2D | DEFERRED — business account scope |
-| Vendor ratings sequential real stars; Business Profile reveal/focus/explicit save toast; publication check/tint without confetti | DOCX / storyboard | 2D | DEFERRED — business account scope |
-| My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | 2D | DEFERRED — review owning workstream |
+| Vendor dashboard completion counter/fill/checklist/tint/rating/section reveals | DOCX / F08 storyboard | 2D | IMPLEMENTED — detailed choreography below |
+| Vendor ratings sequential real stars; Business Profile reveal/focus/explicit save toast; publication check/tint without confetti | DOCX / F08 storyboard | 2D | IMPLEMENTED — detailed choreography below |
+| Couple My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | Final remaining-page pass | DEFERRED — Couple `/reviews` is outside Vendor Account; Vendor recent-review treatment is implemented in 2D |
 | Assistant ornament, considering state, sequential context chips, response reveal | DOCX | 2E | DEFERRED — chat visual workstream |
 | Mobile lower-density motion and final cross-site reconciliation | DOCX | 2A–2E / 3–4 | IMPLEMENTED per completed workstream; full cross-site QA DEFERRED to 3–4 |
 
@@ -191,3 +191,51 @@ The maintained Public/Auth browser suite now decodes the actual optimized browse
 Landing-only follow-up: the solid ivory `hero-wave` SVG and separately positioned feature-section canvas created a pale strip at their join. The same curve now masks only the hero media/contrast layer, revealing the uninterrupted page wash beneath. Hero height, content, scroll control and page-level petals are unchanged. The Landing canvas adds one broad lower-right blush field (`--blush-accent` at 22%, fading across a 95% × 65% ellipse) to the shared wash; this is a Landing-only atmosphere variant, not a second palette or an animated background. Auth, logos and other pages remain unchanged by this follow-up. Review screenshots are local/ignored under `.codex-tmp/landing-wash-refinement/` at 1440/768/390/360. Changes remain uncommitted and unstaged.
 
 Landing/global rich-canvas refinement remains visually open for the final cross-site consistency pass.
+
+
+## Phase 2D — Vendor Account
+
+The canvas checkpoint is `a350d94` (`Refine landing rich canvas`). Landing/global rich-canvas refinement remains visually open for the final cross-site consistency pass. No further Landing/Auth/canvas changes belong to Phase 2D.
+
+References: final Design/Motion/UX DOCX, archive F08 supplier storyboard and review/save references; all five supplied recordings were inspected through their extracted frame sequences (confetti, countdown, general decoration, guest list, wedding timeline). There is no Vendor-specific recording. F08 and DOCX sections 17–20 therefore define Vendor choreography. Booking confetti is deliberately not reused.
+
+The existing Vendor shell and canonical transparent black logo remain. Vendor-scoped CSS reuses `--surface-standard`, `--surface-blush`, `--surface-tonal`, `--surface-champagne`, shared wine/rose/gold/success/line/shadow tokens and `--ease-soft`. Completion uses blush, ratings and gallery use champagne, matching details use mushroom/stone, and basic/pricing/contact sections use controlled ivory. The current global canvas is unchanged.
+
+`calculateVendorProfileCompletion` remains the only completion calculation, with all eight saved requirements unchanged. The presentation maps its existing next-step labels to distinct icons and actual profile anchors. Hash navigation focuses the appropriate control. Dashboard publication is a saved-state summary plus a link to the existing profile visibility switch; the explicit profile save remains the sole publication edit operation. No second mutation or optimistic live state is introduced.
+
+| Vendor motion | Status | Trigger → choreography / timing / rest |
+| --- | --- | --- |
+| Profile completion counter | IMPLEMENTED | First viewport reveal, 0 → actual saved percentage, 1700ms quartic ease-out, tabular numerals. Later values update directly, no rerender replay. |
+| Completion bar | IMPLEMENTED | First panel reveal, scale 0 → actual width over 1400ms soft ease-out; subsequent actual percentage changes transition width. |
+| Checklist completion | IMPLEMENTED | Compare real saved next steps with the last observed snapshot for that profile in this browser's in-memory App Router lifetime. Newly satisfied requirement draws check (550ms), reveals completed label treatment (700ms), and settles into success tint (750ms). Already-complete first arrivals are final, without success replay. No local/session storage, no database state or fake progress. A hard reload has no trusted prior snapshot and deliberately does not celebrate. |
+| Completion milestones | IMPLEMENTED | Saved percentage crosses presentation ranges 50/75/100. Restrained inline encouragement; at 100: “Your profile is ready to shine ✦”. No stored milestone or confetti. |
+| Rating entrance | IMPLEMENTED | First visible rating, 0.0 → actual aggregate rounded for display, 1500ms. Accessible/SSR value is final immediately. |
+| Star fill | IMPLEMENTED | Actual fractional/unfilled star widths, 650ms opacity/scale and clipped fill reveal, 100ms per-star offsets. No fabricated fifth star. |
+| Review card entrance | IMPLEMENTED | First viewport entry, 12px rise + fade over 1000ms, 100ms card stagger. |
+| Review-star entrance | IMPLEMENTED | Same accurate 650ms / 100ms sequential fill inside the revealed card; real reviewer display name, date, text and RTL support retained. |
+| Business section reveals | IMPLEMENTED | Once on viewport entry, 12px rise over 700ms. Offscreen content is only slightly subdued, not hidden. Keyboard focus immediately reveals the section. |
+| Input-focus draw | IMPLEMENTED | Burgundy underline expands from field centre to full width over 240ms; shared visible focus outline retained. |
+| Save pending/success | IMPLEMENTED | Existing server action, explicit Save → Saving… → Saved ✓. Shimmer exists only during real pending. Further field edits return the button to Save. Errors display without success. |
+| Save toast | IMPLEMENTED | Successful server result only, check + “Business profile saved”, 12px rise/fade over 600ms; manual dismissal or 4500ms display lifetime. No artificial request delay. |
+| Publication success | IMPLEMENTED | Previously private + explicit publish submission + successful server result only; 500ms check and 800ms soft reveal, “Your profile is live”, contact guidance and public-profile link when available. No confetti/modal. |
+
+Every animation disables under reduced motion, leaving final values, partial stars, fields and feedback visible. Changing reduced-motion preference during a running counter finishes it immediately. Section focus is usable before animation ends. The existing grid of up to four recent reviews is retained: it lets vendors scan feedback without carousel controls or additional query/state logic. Empty ratings have a restrained star and first-review message.
+
+The upload action already stores the original file without client downsampling. Gallery `sizes="33vw"` underestimated mobile display width; it now declares full-width mobile, half-width tablet and a bounded desktop image size. Original file quality, 5MB validation, storage paths, ownership and image mutations are unchanged. Low-resolution originals cannot be recovered through CSS; inspection of any particular real upload remains read-only follow-up when an authenticated Vendor session is available.
+
+No schema, migrations, RLS, authorization, query, publication semantics, action implementation, matching rule, review data or AI change. There is no new dependency. The available local browser has no authenticated Vendor session; `/vendor` safely redirects to Vendor authentication. No account was created.
+
+Validation commands:
+
+```sh
+pnpm exec tsc --noEmit
+pnpm exec eslint . --max-warnings=0
+pnpm exec vitest run tests/ui/vendor-account.test.tsx tests/domain/vendor-profile.test.ts tests/application/vendor-onboarding.test.ts tests/application/security-boundaries.test.ts
+pnpm exec playwright test --config=e2e/vendor-account.config.ts
+pnpm exec next build --webpack
+```
+
+The Vendor fixture serves actual presentation components with in-memory synthetic records and actions on port 3110. It loads no environment files; Storage and auth operations throw, and external browser requests are blocked. Screenshots at 1440/768/390/360 plus populated/empty/private/publish-success states and a finite-motion recording are ignored under `.codex-tmp/phase2d-review/`. Review media are not runtime assets. Assistant visual work remains deferred to Phase 2E; remaining cross-site motion requirements retain their future ownership.
+
+
+Phase 2D validation: TypeScript, whole-repository ESLint, 52 focused Vitest checks (presentation, completion, onboarding and role boundaries), eight isolated Vendor Playwright checks, production build and `git diff --check` passed. The first cold Vite startup exceeded the original 30-second browser timeout; the fixture timeout is now 60 seconds and the full responsive/state set passed unchanged. Motion capture additionally verifies focused underline draw and edited-after-save button feedback. No live Vendor session was available; authenticated publication and uploads were not exercised against Frankfurt.

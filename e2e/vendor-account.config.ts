@@ -1,0 +1,2 @@
+import { defineConfig, devices } from "@playwright/test";
+export default defineConfig({testDir:".",timeout:60000,testMatch:"vendor-account.spec.ts",workers:1,reporter:"list",outputDir:"../test-results/vendor-account",use:{baseURL:"http://127.0.0.1:3110",trace:"retain-on-failure"},webServer:{cwd:process.cwd(),command:`"${process.execPath}" e2e/fixtures/vendor-account/server.mjs`,url:"http://127.0.0.1:3110",reuseExistingServer:false},projects:[{name:"chromium",use:{...devices["Desktop Chrome"]}}]});

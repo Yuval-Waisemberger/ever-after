@@ -1,0 +1,61 @@
+/* Vendor-only presentation; all colors/surfaces/easing belong to the shared foundation. */
+.vendor-panel { padding: clamp(1.25rem, 2.4vw, 2rem); box-shadow: var(--shadow-soft), inset 0 1px 0 var(--paper); }
+.vendor-publication-summary { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.2rem; margin-top: 1.5rem; font-size: .8125rem; color: var(--ink-soft); }
+.vendor-publication-summary .ea-text-action { margin-left: auto; }
+.vendor-publication-pill { display: inline-flex; align-items: center; gap: .5rem; padding: .55rem .85rem; border: 1px solid var(--line); border-radius: 999px; background: var(--surface-tonal); color: var(--ink); font-size: .75rem; font-weight: 600; }
+.vendor-progress { height: 7px; overflow: hidden; border-radius: 999px; background: var(--line); margin: 1.5rem 0; }
+.vendor-progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--wine), var(--rose)); border-radius: inherit; transform-origin: left; transition: width 1400ms var(--ease-soft); }
+.vendor-checklist { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: .5rem; }
+.vendor-checklist a { display: flex; align-items: center; gap: .6rem; min-height: 54px; height: 100%; padding: .6rem .7rem; border: 1px solid transparent; border-radius: var(--control-radius); font-size: .75rem; line-height: 1.5; transition: background var(--motion-hover), border-color var(--motion-hover); }
+.vendor-checklist a:hover { background: var(--paper); border-color: var(--rose); }
+.vendor-check { display: grid; place-items: center; flex-shrink: 0; width: 1.4rem; height: 1.4rem; color: var(--wine); }
+.vendor-check svg { width: 17px; height: 17px; }
+.vendor-checklist [data-complete=true] a { background: color-mix(in srgb, var(--success-tint) 55%, transparent); color: var(--success); }
+.vendor-checklist [data-complete=true] .vendor-check { color: var(--success); }
+.vendor-checklist [data-complete=true] .vendor-check-label { text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--success) 40%, transparent); }
+.vendor-milestone { display: flex; align-items: center; gap: .6rem; margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .8125rem; color: var(--wine); }
+.vendor-empty-rating { display: grid; gap: 1.2rem; place-items: center; text-align: center; padding: 2.5rem 0 1rem; }
+.vendor-empty-rating p { font-size: .8125rem; color: var(--ink-soft); line-height: 1.7; }
+.vendor-stars { display: inline-flex; gap: 3px; color: var(--gold); vertical-align: middle; }
+.vendor-star { position: relative; display: block; width: 22px; height: 22px; }
+.vendor-star svg { width: 22px; height: 22px; fill: transparent; stroke: currentColor; stroke-width: 1.1; }
+.vendor-star-fill { position: absolute; inset: 0 auto 0 0; overflow: hidden; }
+.vendor-star-fill svg { fill: currentColor; }
+.vendor-review { background: linear-gradient(145deg, var(--paper), color-mix(in srgb, var(--blush) 40%, var(--paper))); }
+
+.vendor-business-form :is(section, fieldset, input, textarea, select), .vendor-account #gallery { scroll-margin-top: 6rem; }
+.vendor-business-form :is(input:not([type=checkbox],[type=hidden]), textarea, select) { background-image: linear-gradient(var(--wine), var(--wine)); background-repeat: no-repeat; background-position: bottom center; background-size: 0 2px; transition: background-size 240ms var(--ease-soft), border-color 240ms var(--ease-standard), box-shadow 240ms var(--ease-standard); }
+.vendor-business-form :is(input, textarea, select):focus { background-size: 100% 2px; box-shadow: none; }
+.vendor-choice { display: flex; align-items: center; gap: .7rem; min-height: 48px; border: 1px solid var(--line); border-radius: var(--control-radius); background: color-mix(in srgb, var(--paper) 65%, transparent); padding: .8rem; font-size: .7rem; letter-spacing: .04em; cursor: pointer; }
+.vendor-choice:has(:checked) { border-color: var(--rose); background: var(--surface-blush); color: var(--wine); }
+.vendor-save-toast { display: flex; align-items: center; gap: .65rem; position: fixed; z-index: 50; right: 1.25rem; bottom: 1.25rem; width: min(360px, calc(100vw - 2.5rem)); border: 1px solid var(--line); border-radius: var(--surface-radius); padding: .65rem 1rem; font-size: .8125rem; }
+.vendor-save-toast[hidden] { display: none; }
+.vendor-publish-success { display: flex; align-items: center; gap: 1rem; padding: 1.5rem; }
+.vendor-success-check { display: grid; flex-shrink: 0; place-items: center; width: 44px; height: 44px; border-radius: 50%; background: var(--success-tint); color: var(--success); }
+.vendor-account .ea-text-action { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; }
+.vendor-reveal { min-width: 0; }
+@media (prefers-reduced-motion: no-preference) {
+  .vendor-reveal[data-enter=pending] { opacity: .65; transform: translateY(10px); }
+  .vendor-reveal[data-enter=shown] { animation: vendor-section-enter 700ms var(--ease-soft) var(--vendor-delay, 0ms) both; }
+  .vendor-review-reveal[data-enter=shown] { animation-duration: 1000ms; }
+  .vendor-reveal[data-enter=shown] .vendor-progress > span { animation: vendor-progress-enter 1400ms var(--ease-soft) both; }
+  .vendor-reveal[data-enter=shown] .vendor-star { animation: vendor-star-enter 650ms var(--ease-soft) calc(var(--vendor-delay, 0ms) + var(--star-delay)) both; }
+  .vendor-reveal[data-enter=shown] .vendor-star-fill { animation: vendor-star-fill 650ms var(--ease-soft) calc(var(--vendor-delay, 0ms) + var(--star-delay)) both; }
+  .vendor-checklist [data-just-completed=true] a { animation: vendor-check-surface 750ms var(--ease-soft); }
+  .vendor-checklist [data-just-completed=true] .vendor-check svg { stroke-dasharray: 30; animation: vendor-check-draw 550ms var(--ease-soft); }
+  .vendor-checklist [data-just-completed=true] .vendor-check-label { animation: vendor-check-label 700ms var(--ease-soft); }
+  .vendor-business-form [aria-busy=true], .vendor-business-form[aria-busy=true] button[type=submit] { background-size: 200% 100%; background-image: linear-gradient(110deg, var(--wine) 30%, var(--rose) 50%, var(--wine) 70%); animation: vendor-saving 1500ms var(--ease-standard) infinite; }
+  .vendor-save-toast { animation: vendor-section-enter 600ms var(--ease-soft); }
+  .vendor-publish-success { animation: vendor-section-enter 800ms var(--ease-soft); }
+  .vendor-publish-success .vendor-success-check svg { stroke-dasharray: 30; animation: vendor-check-draw 500ms var(--ease-soft); }
+}
+@keyframes vendor-section-enter { from { opacity: .35; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+@keyframes vendor-progress-enter { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes vendor-star-enter { from { opacity: .25; transform: scale(.92); } to { opacity: 1; transform: scale(1); } }
+@keyframes vendor-star-fill { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes vendor-check-draw { from { stroke-dashoffset: 30; } to { stroke-dashoffset: 0; } }
+@keyframes vendor-check-surface { from { background: transparent; } to { background: color-mix(in srgb, var(--success-tint) 55%, transparent); } }
+@keyframes vendor-check-label { 0%, 35% { text-decoration-color: transparent; } to { text-decoration-color: color-mix(in srgb, var(--success) 40%, transparent); } }
+@keyframes vendor-saving { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (max-width: 639px) { .vendor-checklist { grid-template-columns: 1fr; } .vendor-publication-summary .ea-text-action { margin-left: 0; } .vendor-save-toast { bottom: 5rem; } }
+@media (prefers-reduced-motion: reduce) { .vendor-account *, .vendor-account *::before, .vendor-account *::after { animation: none !important; transition: none !important; } .vendor-reveal[data-enter] { opacity: 1; transform: none; } }

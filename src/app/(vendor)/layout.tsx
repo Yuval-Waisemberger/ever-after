@@ -1,3 +1,4 @@
+import "@/app/vendor-account.css";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/user";
 
