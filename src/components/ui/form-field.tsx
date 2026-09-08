@@ -8,9 +8,10 @@ type FormFieldProps = ComponentProps<"input"> & {
   label: string;
   error?: string;
   hint?: ReactNode;
+  leadingIcon?: ReactNode;
 };
 
-export function FormField({ label, error, hint, id, className = "", ...props }: FormFieldProps) {
+export function FormField({ label, error, hint, leadingIcon, id, className = "", ...props }: FormFieldProps) {
   const inputId = id ?? props.name;
   const errorId = error ? `${inputId}-error` : undefined;
   const hintId = hint ? `${inputId}-hint` : undefined;
@@ -24,10 +25,11 @@ export function FormField({ label, error, hint, id, className = "", ...props }: 
           id={inputId}
           aria-invalid={Boolean(error)}
           aria-describedby={[errorId, hintId].filter(Boolean).join(" ") || undefined}
-          className={`ea-input min-h-11 rounded-xl border bg-paper px-3.5 py-2.5 text-base font-normal text-ink transition disabled:opacity-60 ${isPassword ? "pr-12" : ""} ${className}`}
+          className={`ea-input min-h-11 rounded-xl border bg-paper px-3.5 py-2.5 text-base font-normal text-ink transition disabled:opacity-60 ${isPassword ? "pr-12" : ""} ${leadingIcon ? "ea-input--leading" : ""} ${className}`}
           {...props}
           type={isPassword && passwordVisible ? "text" : props.type}
         />
+        {leadingIcon ? <span className="ea-field-leading" aria-hidden="true">{leadingIcon}</span> : null}
         {isPassword ? (
           <button
             type="button"

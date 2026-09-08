@@ -55,7 +55,7 @@ export function LandingHero() {
         <p className="hero-tagline">Everything before your ever after</p>
         <p className="hero-description">Plan your wedding, discover the right vendors,<br className="desktop-break" /> and keep every detail in one beautiful place.</p>
         <div className="hero-actions">
-          <Link href="/auth/couple" className="public-button hero-primary">Plan our wedding <ArrowRight size={18} aria-hidden="true" /></Link>
+          <Link href="/auth/couple" className="public-button hero-primary ea-brand-cta">Plan our wedding <ArrowRight size={18} aria-hidden="true" /></Link>
           <Link href="/vendors" className="public-button hero-secondary">Explore vendors <ArrowRight size={18} aria-hidden="true" /></Link>
         </div>
         <p className="hero-vendor">Are you a vendor? <Link href="/auth/vendor">Join Vendor <span aria-hidden="true">→</span></Link></p>

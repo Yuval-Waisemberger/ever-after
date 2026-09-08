@@ -52,6 +52,8 @@ describe("Public/Auth visual boundaries", () => {
     expect(doc.querySelector('[name="password"]')?.getAttribute("type")).toBe("password");
     expect(doc.querySelector('[name="password"]')?.getAttribute("autocomplete")).toBe(mode === "login" ? "current-password" : "new-password");
     expect(doc.querySelector('[name="email"]')?.hasAttribute("required")).toBe(true);
+    expect(doc.querySelectorAll(".ea-field-leading")).toHaveLength(mode === "login" ? 2 : 4);
+    expect(doc.querySelector("button[type=submit]")?.classList.contains("ea-brand-cta")).toBe(true);
     expect(doc.querySelector(".auth-support-strip")?.textContent).toContain("Planning with Ever After AI");
     if (mode === "signup") {
       expect([...doc.querySelectorAll("input[name]")].map(el => el.getAttribute("name"))).toEqual(["partnerOneName", "partnerTwoName", "displayName", "partnerOnePhone", "partnerTwoPhone", "email", "secondEmail", "password", "confirmPassword"]);

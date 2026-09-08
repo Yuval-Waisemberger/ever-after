@@ -1,5 +1,5 @@
 /* Couple Planning presentation only. The Phase 1 palette/motion tokens remain canonical. */
-.planning-dashboard, .planning-timeline { background: linear-gradient(150deg, var(--canvas), color-mix(in srgb, var(--blush) 32%, var(--canvas)) 55%, var(--canvas)); }
+.planning-dashboard, .planning-timeline { background: transparent; }
 .planning-dashboard .wedding-dashboard-hero { padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: linear-gradient(135deg, var(--paper), var(--canvas), var(--blush)); box-shadow: var(--shadow-soft), inset 0 1px 0 var(--paper); }
 .planning-dashboard .wedding-dashboard-hero h1 { font-size: clamp(32px, 3.6vw, 48px); }
 .planning-dashboard .wedding-date-card { max-width: none; padding: 24px 20px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(100deg, var(--blush), var(--paper), var(--blush)); box-shadow: inset 0 1px 2px rgb(73 62 56 / 3%); }

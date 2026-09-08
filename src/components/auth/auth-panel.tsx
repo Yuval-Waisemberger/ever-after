@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight, Sparkles, Mail, LockKeyhole } from "lucide-react";
 import { signIn, signUpCouple, signUpVendor } from "@/lib/actions/auth";
 import { initialAuthState } from "@/lib/actions/auth-state";
 import { FormField } from "@/components/ui/form-field";
@@ -81,21 +81,21 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
           </>
         ) : null}
 
-        <FormField name="email" type="email" label="Primary email" autoComplete="email" error={error("email")} required />
+        <FormField leadingIcon={audience === "couple" ? <Mail size={19} strokeWidth={1.5} /> : undefined} name="email" type="email" label="Primary email" autoComplete="email" error={error("email")} required />
         {mode === "signup" && audience === "couple" ? (
-          <FormField name="secondEmail" type="email" label="Second email (optional)" autoComplete="email" error={error("secondEmail")} />
+          <FormField leadingIcon={<Mail size={19} strokeWidth={1.5} />} name="secondEmail" type="email" label="Second email (optional)" autoComplete="email" error={error("secondEmail")} />
         ) : null}
-        <FormField name="password" type="password" label="Password" autoComplete={mode === "login" ? "current-password" : "new-password"} error={error("password")} hint={mode === "signup" ? "At least 8 characters" : undefined} required />
+        <FormField leadingIcon={audience === "couple" ? <LockKeyhole size={19} strokeWidth={1.5} /> : undefined} name="password" type="password" label="Password" autoComplete={mode === "login" ? "current-password" : "new-password"} error={error("password")} hint={mode === "signup" ? "At least 8 characters" : undefined} required />
         {mode === "login" ? (
           <Link className="-mt-3 justify-self-end text-sm text-wine underline-offset-4 hover:underline" href={`/auth/forgot-password?audience=${audience}`}>
             Forgot password?
           </Link>
         ) : null}
         {mode === "signup" ? (
-          <FormField name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
+          <FormField leadingIcon={audience === "couple" ? <LockKeyhole size={19} strokeWidth={1.5} /> : undefined} name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
         ) : null}
 
-        <SubmitButton className={audience === "couple" ? "couple-auth-submit" : undefined} pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>
+        <SubmitButton className={audience === "couple" ? "couple-auth-submit ea-brand-cta" : undefined} pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>
           {mode === "login" ? "Sign in" : "Create account"}
           {audience === "couple" ? <ArrowRight size={17} aria-hidden="true" /> : null}
         </SubmitButton>

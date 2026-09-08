@@ -1,6 +1,7 @@
 @import "tailwindcss";
 /* Imported here so the application and isolated UI fixtures share primitives. */
 @import "./foundation.css";
+@import "./rich-canvas.css";
 
 :root {
   --canvas: #fcf9f6;

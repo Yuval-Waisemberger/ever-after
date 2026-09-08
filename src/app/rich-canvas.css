@@ -1,0 +1,31 @@
+/* One stationary, responsive canvas. Elliptical tonal bands suggest flowing fabric;
+   no raster wallpaper, animation, fixed overlay, or pointer-intercepting layer. */
+:root {
+  --rich-canvas:
+    radial-gradient(ellipse 105% 72% at -24% -18%, transparent 61%, color-mix(in srgb, var(--rose) 10%, transparent) 62%, color-mix(in srgb, var(--blush-accent) 13%, transparent) 72%, transparent 73%),
+    radial-gradient(ellipse 112% 88% at 123% 12%, transparent 58%, color-mix(in srgb, var(--champagne) 11%, transparent) 59%, color-mix(in srgb, var(--taupe) 9%, transparent) 68%, transparent 69%),
+    radial-gradient(ellipse 110% 83% at -30% 115%, transparent 53%, color-mix(in srgb, var(--rose) 9%, transparent) 54%, color-mix(in srgb, var(--champagne) 10%, transparent) 67%, transparent 68%),
+    radial-gradient(ellipse at 82% 80%, color-mix(in srgb, var(--blush-accent) 12%, transparent), transparent 58%),
+    linear-gradient(125deg, var(--canvas), color-mix(in srgb, var(--cream) 28%, var(--canvas)) 48%, var(--canvas));
+}
+html body, .ea-rich-canvas, .public-theme.public-theme, .auth-page.auth-page,
+.workspace-shell.workspace-shell, .vendor-profile-page.vendor-profile-page {
+  background: var(--rich-canvas);
+  background-size: 100% max(100%, 1000px);
+}
+/* Local contained cards keep their surfaces; page canvases reveal the shared layer. */
+.workspace-shell .planning-dashboard, .workspace-shell .planning-timeline {
+  background: transparent;
+}
+.public-header.public-theme, .public-theme .public-header, .landing-page .landing-pillars, .landing-page .landing-about {
+  background: transparent;
+}
+.landing-page .landing-pillars {
+  background: var(--rich-canvas);
+  background-size: 100% 1000px;
+  background-position: center 55%;
+}
+/* A single CTA identity for Landing and Auth, including dimensions and typography. */
+.ea-brand-cta { min-height: 50px; padding: 13px 28px; border-radius: var(--control-radius); font-size: 12px; font-weight: 500; letter-spacing: .14em; text-transform: uppercase; gap: 20px; }
+.ea-field-leading { position: absolute; inset-inline-start: 14px; top: 50%; transform: translateY(-50%); color: var(--ink-soft); pointer-events: none; display: flex; }
+.ea-input.ea-input--leading { padding-inline-start: 44px; }

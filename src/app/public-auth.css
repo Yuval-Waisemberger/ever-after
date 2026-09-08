@@ -42,7 +42,7 @@
 .landing-petal { position: absolute; left: var(--petal-left); top: var(--petal-top); width: var(--petal-size); height: calc(var(--petal-size) * .74); opacity: 0; --petal-travel: 1; }
 .petal-body { width: 100%; height: 100%; overflow: visible; filter: blur(var(--petal-blur)); }
 .petal-fold { fill: none; stroke: var(--stone); stroke-width: .7; opacity: .6; }
-.landing-page .landing-pillars { padding: 0 5% 20px; background: var(--canvas); scroll-margin-top: 28px; }
+.landing-page .landing-pillars { padding: 0 5% 20px; scroll-margin-top: 28px; }
 .landing-page .landing-pillars h2 { margin: 5px 0 15px; font-size: 30px; line-height: 1.15; }
 .landing-page .pillar { padding-inline: 26px; }
 .landing-page .pillar + .pillar { border-color: var(--line); }
@@ -50,7 +50,7 @@
 .feature-icon svg { overflow: visible; }
 .landing-page .pillar h3 { font-size: 20px; margin-bottom: 7px; }
 .landing-page .pillar p { color: var(--ink-soft); font-size: 13px; line-height: 1.6; }
-.landing-about { text-align: center; padding: 64px 24px 72px; border-top: 1px solid var(--line); background: var(--surface-tonal); scroll-margin-top: 24px; }
+.landing-about { text-align: center; padding: 64px 24px 72px; border-top: 1px solid var(--line); background: transparent; scroll-margin-top: 24px; }
 .landing-about h2 { margin-block: 16px; font-size: clamp(30px, 3vw, 42px); }
 .landing-about > p:not(.public-eyebrow) { max-width: 540px; margin: 0 auto 24px; color: var(--ink-soft); line-height: 1.85; font-size: 15px; }
 .landing-about > a { display: inline-flex; align-items: center; gap: 12px; min-height: 44px; font-size: 14px; }
