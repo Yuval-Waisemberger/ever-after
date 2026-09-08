@@ -61,7 +61,6 @@ export function LandingHero() {
         <p className="hero-vendor">Are you a vendor? <Link href="/auth/vendor">Join Vendor <span aria-hidden="true">→</span></Link></p>
       </div>
       <a href="#how-it-works" className="hero-scroll" aria-label="Discover how Ever After works"><ChevronDown size={25} strokeWidth={1} /></a>
-      <svg className="hero-wave" viewBox="0 0 1440 64" preserveAspectRatio="none" aria-hidden="true"><path d="M0 12C260 87 409 21 720 42S1180 76 1440 8V64H0Z" /></svg>
     </section>
     {petalHost ? createPortal(<LandingPetals finished={petalsFinished} onFinish={() => setPetalsFinished(true)} />, petalHost) : null}
     </>

@@ -1,5 +1,35 @@
 import { expect, test } from "@playwright/test";
 
+test("Auth and public header use a transparent near-black mark without a wrapper matte", async ({ page }) => {
+  for (const route of ["/auth/couple?mode=login", "/vendors"]) {
+    await page.goto(route);
+    const logo = page.locator("header img[alt='Ever After']");
+    await expect(logo).toBeVisible();
+    expect(decodeURIComponent(await logo.getAttribute("src") ?? "")).toContain("/brand/ever-after-logo-black.webp");
+    await expect(logo).toHaveCSS("object-fit", "contain");
+    await expect(logo).toHaveCSS("filter", "none");
+    const pixels = await logo.evaluate(async (element: HTMLImageElement) => {
+      await element.decode();
+      const canvas = document.createElement("canvas");
+      canvas.width = element.naturalWidth; canvas.height = element.naturalHeight;
+      const context = canvas.getContext("2d")!; context.drawImage(element, 0, 0);
+      const { data } = context.getImageData(0, 0, canvas.width, canvas.height);
+      let opaque = 0, maxLineChannel = 0;
+      for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 240) {
+        opaque++; maxLineChannel = Math.max(maxLineChannel, data[i], data[i + 1], data[i + 2]);
+      }
+      return { corners: [3, canvas.width * 4 - 1, (canvas.height - 1) * canvas.width * 4 + 3, data.length - 1].map(i => data[i]), opaque, maxLineChannel,
+        wrapperBackground: getComputedStyle(element.parentElement!).backgroundColor,
+        wrapperShadow: getComputedStyle(element.parentElement!).boxShadow };
+    });
+    expect(pixels.corners).toEqual([0, 0, 0, 0]);
+    expect(pixels.opaque).toBeGreaterThan(0);
+    expect(pixels.maxLineChannel).toBeLessThan(80);
+    expect(pixels.wrapperBackground).toBe("rgba(0, 0, 0, 0)");
+    expect(pixels.wrapperShadow).toBe("none");
+  }
+});
+
 for (const width of [1440, 768, 390, 360]) {
   test(`Public/Auth visual calibration at ${width}px`, async ({ page }) => {
     test.setTimeout(90_000);
@@ -18,6 +48,13 @@ for (const width of [1440, 768, 390, 360]) {
         expect(await page.locator("h1").evaluate(el => getComputedStyle(el).textShadow)).toBe("none");
         await expect.poll(() => page.locator(".landing-petal").evaluateAll(els => els.every(el => getComputedStyle(el).opacity === "0"))).toBe(true);
         await expect(page.locator("header img, header .public-brand")).toHaveCount(0);
+        await expect(page.locator(".hero-wave")).toHaveCount(0);
+        await expect(page.locator(".hero-media")).toHaveCSS("mask-image", /data:image\/svg\+xml/);
+        await expect(page.locator(".landing-hero")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        for (const section of [".landing-pillars", ".landing-about"]) {
+          await expect(page.locator(section)).toHaveCSS("background-image", "none");
+          await expect(page.locator(section)).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+        }
         await expect(page.locator(".pillar")).toHaveCount(4);
         const rows = await page.locator(".pillar").evaluateAll(els => els.map(el => Math.round(el.getBoundingClientRect().top)));
         expect(new Set(rows).size).toBe(width === 1440 ? 1 : 2);

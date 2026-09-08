@@ -8,7 +8,7 @@ export function Wordmark({ href = "/" }: { href?: string }) {
       className="public-brand ea-wordmark"
       aria-label="Ever After home"
     >
-      <Image src="/brand/ever-after-approved.png" alt="Ever After" width={1536} height={1024} sizes="280px" priority />
+      <Image src="/brand/ever-after-logo-black.webp" alt="Ever After" width={2172} height={724} sizes="196px" priority />
     </Link>
   );
 }

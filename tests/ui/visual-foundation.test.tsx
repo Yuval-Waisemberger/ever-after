@@ -3,10 +3,19 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { PageTransition } from "@/components/layout/page-transition";
 import { PageLoading } from "@/components/ui/page-loading";
 import { LinkButton } from "@/components/ui/link-button";
+import { Wordmark } from "@/components/brand/wordmark";
 
 const parse = (markup: string) => new DOMParser().parseFromString(markup, "text/html");
 
 describe("shared visual foundation", () => {
+  it("uses the transparent canonical mark at its true aspect ratio", () => {
+    const document = parse(renderToStaticMarkup(<Wordmark href="/vendor" />));
+    const image = document.querySelector("img")!;
+    expect(decodeURIComponent(image.getAttribute("src")!)).toContain("/brand/ever-after-logo-black.webp");
+    expect(image.getAttribute("width")).toBe("2172");
+    expect(image.getAttribute("height")).toBe("724");
+    expect(document.querySelector("a")?.getAttribute("href")).toBe("/vendor");
+  });
   it("server-renders final route content without a hidden or inert state", () => {
     const document = parse(renderToStaticMarkup(<PageTransition><main><h1>Budget</h1><a href="/tasks">Tasks</a></main></PageTransition>));
     expect(document.querySelector("main")?.textContent).toBe("BudgetTasks");

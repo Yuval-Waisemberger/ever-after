@@ -1,4 +1,4 @@
-import Image from "next/image";
+import { Wordmark } from "@/components/brand/wordmark";
 import Link from "next/link";
 import { PublicMobileMenu } from "./public-mobile-menu";
 import { getPublicHeaderLinks } from "./public-header-links";
@@ -11,9 +11,7 @@ export async function PublicHeader() {
     <header className={`public-theme public-header ${profile ? "public-header--authenticated" : ""}`}>
       <a className="public-skip-link" href="#main-content">Skip to content</a>
       <div className="public-header-inner">
-        <Link href="/" className="public-brand" aria-label="Ever After home">
-          <Image src="/brand/ever-after-approved.png" alt="Ever After" width={1536} height={1024} sizes="280px" priority />
-        </Link>
+        <Wordmark />
         <nav className="public-desktop-nav" aria-label="Public navigation">
           <div className="public-nav-pages">{navigationLinks.map((link) => <Link key={link.href} href={link.href}>{link.label}</Link>)}</div>
           <div className="public-nav-account">

@@ -23,9 +23,9 @@
 }
 .public-header { position: relative; z-index: 20; border-bottom: 1px solid var(--public-blush-accent); background: var(--public-ivory); }
 .public-header-inner { height: 75px; max-width: 1680px; margin: auto; padding: 0 4.7%; display: flex; align-items: center; gap: 32px; }
-.public-brand { display: block; flex: 0 0 196px; height: 55px; overflow: hidden; position: relative; border-radius: 2px; }
-/* Frame the supplied artwork in CSS; the original logo file is preserved intact. */
-.public-brand img { position: absolute; width: 252px; max-width: none; height: auto; left: -29px; top: -45px; mix-blend-mode: multiply; filter: grayscale(1) brightness(.75) contrast(5); }
+.public-brand { display: block; flex: 0 0 196px; height: 55px; position: relative; background: transparent; border: 0; box-shadow: none; }
+/* The canonical mark has real alpha; contain the full artwork without filters. */
+.public-brand img { width: 100%; height: 100%; object-fit: contain; position: static; background: transparent; mix-blend-mode: normal; filter: none; }
 .public-desktop-nav { display: flex; flex: 1; align-items: center; justify-content: space-between; }
 .public-nav-pages, .public-nav-account { display: flex; align-items: center; gap: 32px; }
 .public-nav-pages { margin: 0 auto; padding-left: 36px; gap: 46px; }
@@ -116,7 +116,6 @@
 @media (max-width: 700px) {
   .public-header-inner { height: 69px; padding: 0 20px; justify-content: space-between; }
   .public-brand { flex-basis: 178px; height: 50px; }
-  .public-brand img { width: 230px; left: -26px; top: -42px; }
   .public-desktop-nav { display: none; }
   .public-mobile-menu { display: block; }
   .public-mobile-menu summary { display: grid; place-items: center; width: 44px; height: 44px; border: 1px solid var(--public-line); border-radius: 4px; list-style: none; cursor: pointer; }
