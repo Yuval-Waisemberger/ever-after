@@ -21,7 +21,7 @@ const asyncSql = async input => {
 };
 const uid = n => `${String(n).padStart(8, "0")}-0000-4000-8000-000000000001`;
 const digest = "a".repeat(64), otherDigest = "b".repeat(64);
-const executor = "assistant_admission_executor";
+const executor = "service_role";
 const as = (statement, role = executor) => sql(`set session authorization ${role}; begin; ${statement}; commit;`);
 const admission = (request, couple, fingerprint = digest, wedding = couple) => `select public.admit_assistant_real_ai_turn('${uid(request)}','${uid(couple)}','${uid(wedding)}','${fingerprint}')`;
 const claim = (request, couple) => `select public.claim_assistant_real_ai_dispatch('${uid(request)}','${uid(couple)}')`;
@@ -36,7 +36,9 @@ const reset = () => sql("truncate public.assistant_real_ai_admissions"); // ONLY
 const count = () => Number(sql("select count(*) from public.assistant_real_ai_admissions"));
 const waitReady = async () => {
   for (let i = 0; i < 40; i++) {
-    try { docker("exec", name, "pg_isready", "-U", "postgres"); return; }
+    // Docker's temporary init server accepts Unix sockets before final startup.
+    // Probe container-local TCP so tests cannot race its shutdown/restart.
+    try { docker("exec", name, "pg_isready", "-h", "127.0.0.1", "-U", "postgres"); return; }
     catch { await new Promise(resolve => setTimeout(resolve, 250)); }
   }
   throw new Error("Disposable database did not become ready");
@@ -93,7 +95,7 @@ try {
   equal(sql("select count(*) from public.weddings"), before);
   equal(count(), 0);
 
-  // Actual grants, not only catalog/string assertions. Even service_role cannot use it.
+  // Actual grants, not only catalog/string assertions. Service role has RPC access only.
   const direct = [
     "select * from public.assistant_real_ai_admissions",
     `insert into public.assistant_real_ai_admissions(request_id,couple_id,wedding_id,request_digest) values ('${uid(1)}','${uid(1)}','${uid(1)}','${digest}')`,
@@ -101,25 +103,29 @@ try {
     "delete from public.assistant_real_ai_admissions",
     "truncate public.assistant_real_ai_admissions",
   ];
-  for (const role of ["anon", "authenticated", "service_role", executor]) for (const statement of direct) denied(statement, role);
-  for (const role of ["anon", "authenticated", "service_role"]) {
+  for (const role of ["anon", "authenticated", executor]) for (const statement of direct) denied(statement, role);
+  for (const role of ["anon", "authenticated"]) {
     for (const statement of [admission(1,1), claim(1,1), finish(1,1)]) denied(statement, role);
     denied(`set role ${executor}`, role);
   }
   equal(sql("select relrowsecurity from pg_class where oid='public.assistant_real_ai_admissions'::regclass"), "t");
   equal(sql("select count(*) from pg_policies where tablename='assistant_real_ai_admissions'"), "0");
-  equal(sql("select rolcanlogin or rolsuper or rolcreaterole or rolcreatedb or rolbypassrls or rolreplication from pg_roles where rolname='assistant_admission_executor'"), "f");
-  equal(sql("select count(*) from pg_auth_members where roleid='assistant_admission_executor'::regrole"), "0");
+  equal(sql("select count(*) from pg_roles where rolname='assistant_admission_executor'"), "0");
+  for (const signature of ["admit_assistant_real_ai_turn(uuid,uuid,uuid,text)", "claim_assistant_real_ai_dispatch(uuid,uuid)", "finish_assistant_real_ai_turn(uuid,uuid,text)"]) {
+    equal(sql(`select prosecdef and proconfig=array['search_path=""'] from pg_proc where oid='public.${signature}'::regprocedure`), "t");
+    equal(sql(`select count(*) from pg_proc p, lateral aclexplode(p.proacl) a where p.oid='public.${signature}'::regprocedure and a.privilege_type='EXECUTE' and a.grantee not in (p.proowner,'service_role'::regrole)`), "0");
+  }
   equal(sql("select count(*) from pg_constraint where conrelid='public.assistant_real_ai_admissions'::regclass and contype='f'"), "0");
   for (const statement of [admission(1,90), admission(1,1,digest,2), admission(1,99)]) equal(result(statement).code, "NOT_AUTHORIZED");
   equal(result(admission(1,1,"not-a-digest")).code, "INVALID_INPUT");
   equal(JSON.parse(as("select public.admit_assistant_real_ai_turn(null,null,null,null)")).code, "INVALID_INPUT");
-  console.log("PASS: migration atomicity, live-owner checks, RLS and actual denied browser/service-role/table permissions.");
+  console.log("PASS: migration atomicity, live-owner checks, RLS and denied browser/table permissions; service-role-only RPC execution.");
 
   // Global 1..499, then exactly #500; terminal failures retain their units.
   fillGlobal(499); equal(count(),499);
   equal(result(admission(500,50)).status,"admitted");
-  equal(result(finish(500,50,"PRE_DISPATCH_FAILED")).status,"finished");
+  equal(result(claim(500,50)).status,"dispatch_claimed");
+  equal(result(finish(500,50,"EXECUTION_UNCERTAIN")).state,"uncertain");
   equal(count(),500); equal(result(admission(501,51)).code,"GLOBAL_QUOTA_EXHAUSTED");
   equal(result(admission(500,50)).status,"existing"); equal(count(),500);
   equal(result(admission(500,50,otherDigest)).code,"REQUEST_CONFLICT");
@@ -142,8 +148,11 @@ try {
   // Move ONLY isolated fixture timestamps; no clock changes or client time inputs.
   for (let batch = 0; batch < 15; batch++) {
     if (batch) sql("update public.assistant_real_ai_admissions set admitted_at=clock_timestamp()-interval '6 minutes'");
-    fillCouple(batch*10+1,10);
+    fillCouple(batch*10+1,batch === 14 ? 9 : 10);
   }
+  equal(result(admission(150,1)).status,"admitted");
+  equal(result(claim(150,1)).status,"dispatch_claimed");
+  equal(result(finish(150,1,"EXECUTION_UNCERTAIN")).state,"uncertain");
   equal(count(),150); equal(result(admission(151,1)).code,"COUPLE_QUOTA_EXHAUSTED");
   sql(`insert into public.assistant_threads(id,wedding_id) values ('${uid(8000)}','${uid(1)}');
     insert into public.assistant_messages(thread_id,role,content) values ('${uid(8000)}','user','Disposable quota deletion fixture');`);
@@ -195,12 +204,15 @@ try {
   equal(result(admission(4,1)).status,"admitted"); equal(result(claim(4,1)).status,"dispatch_claimed");
   equal(result(finish(4,1,"EXECUTION_UNCERTAIN")).state,"uncertain");
   equal(result(admission(4,1)).state,"uncertain");
-  equal(result(admission(5,1)).code,"REQUEST_ACTIVE");
+  equal(count(),4); // Terminal uncertain keeps its unit. No retry/refund.
+  equal(result(admission(5,1)).status,"admitted");
+  equal(count(),5); // A genuinely new ID consumes one more unit.
   equal(result(claim(4,1)).code,"INVALID_TRANSITION");
   equal(result(finish(4,1)).code,"INVALID_TRANSITION");
-  equal(result(finish(4,1,"raw provider error")).code,"INVALID_INPUT"); equal(count(),4);
-  equal(sql("select count(*) from public.assistant_real_ai_admissions where state='uncertain' and completed_at is null"),"1");
-  console.log("PASS: concurrent idempotency/dispatch, conflicting identity, one active slot, completed/failed replay denial and uncertain fail-closed slot.");
+  equal(result(finish(4,1,"raw provider error")).code,"INVALID_INPUT"); equal(count(),5);
+  for (const role of ["anon", "authenticated"]) denied(finish(4,1),role);
+  equal(sql("select count(*) from public.assistant_real_ai_admissions where state='uncertain' and completed_at is not null"),"1");
+  console.log("PASS: concurrent idempotency/dispatch, conflicting identity, one active slot, completed/failed replay denial and terminal uncertain releases slot without retry/refund; browser cannot complete it.");
 
   reset();
   const activeRace = await Promise.all(Array.from({ length: 6 }, (_, i) => asyncSql(`begin; set local role ${executor}; ${admission(i+1,1)}; commit;`).then(JSON.parse)));

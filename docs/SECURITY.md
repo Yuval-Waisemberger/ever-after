@@ -331,23 +331,23 @@ Full Supabase JWT adversarial and Storage HTTP boundary checks remain Final Prod
 
 ## Future real-AI admission — local migration only
 
-`202609080001_assistant_real_ai_admission.sql` has **not** been applied to Frankfurt. It adds an
-independent, non-cascading ledger with fixed atomic limits (500 global, 150 per Couple, ten per
-sliding five minutes, one active request). Conversation deletion cannot refund usage. Admission
-uses a transaction advisory lock and database time at READ COMMITTED; stale-snapshot isolation
-is rejected. Single-use dispatch claims and explicit terminal transitions prevent redispatch.
-Uncertain external execution permanently consumes quota and keeps its active slot blocked;
-there is no automatic refund, expiry or retry. This is deliberately conservative.
+`202609080001_assistant_real_ai_admission.sql` remains **unapplied to Frankfurt**. It enforces
+500 global / 150 per Couple / ten per sliding five minutes / one active request, with a transaction
+advisory lock and READ COMMITTED snapshots. No deletion, failure or uncertainty refunds quota.
+Phase 1B makes uncertain terminal: its completed timestamp is set and active slot released, while
+the unit remains consumed. No redispatch, automatic retry, late completion or expiry is permitted.
+Crash-left admitted/dispatched rows remain fail closed pending separately approved reconciliation.
 
-Browser roles cannot SELECT/INSERT/UPDATE/DELETE/TRUNCATE the ledger or execute its three privileged
-functions. RLS is enabled without owner policies. Even service_role is explicitly excluded from
-the new grants. The new NOLOGIN `assistant_admission_executor` can execute only the narrow functions,
-not directly change the ledger. No memberships/login/credentials are configured. A separately
-approved dedicated backend database channel must authenticate and resolve Couple ownership before
-calling it; the existing public-key/user-session client and product READ tools remain unchanged.
-See [AI Agent admission contract](AI_AGENT_SPEC.md#real-ai-phase-1a--isolated-admission-guardrails-2026-09-08)
-for states, request minimization, failure semantics and the future credential approval boundary.
+Browser roles cannot read/write/truncate the ledger or execute its three functions. RLS has no
+policies. The revised unapplied migration grants function execution only to service_role (and owner),
+revoking direct ledger ACLs even from service_role. Its BYPASSRLS does not bypass those ACLs. No custom
+executor/login is created. A service-role key remains a broader backend credential elsewhere in the
+project; confinement to a server-only, narrow RPC module is essential, not a substitute for key security.
 
-The TypeScript guardrails are unwired and explicitly exempt Local. Request hashing avoids storing
-prompt text in accounting; it does not anonymize arbitrary personal input. No AI SDK/provider/key,
-network research, live ledger or billing integration is introduced.
+The default RPC channel is unconfigured and fails closed. Local bypasses it before any credential,
+ledger or connection access. API ownership checks precede admission; client UUID/digest/ownership
+claims cannot grant authority. Only the server hashes normalized request semantics. Fixed errors omit
+SQL/roles/locks/secrets. Explicit Next server dependencies protect the hashing, lifecycle and RPC modules.
+No privileged key, environment configuration, SDK/provider, network research or billing was added.
+See [AI admission design](AI_AGENT_SPEC.md#real-ai-phase-1a1b--local-admission-guardrails-2026-09-08)
+for channel comparison, terminal-state semantics and later configuration approval requirements.

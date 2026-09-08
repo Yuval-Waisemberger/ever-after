@@ -4,8 +4,8 @@ import { createHash } from "node:crypto";
 import { z } from "zod";
 import { admissionIdentitySchema, admitResultSchema, dispatchResultSchema, finishResultSchema, realAiTurnSchema, terminalOutcome, type guardrailCode } from "./contracts";
 
-// No connection/credential implementation exists in Phase 1A. Later this channel
-// must return ONLY AFTER its narrow database transaction has committed.
+// The server-only RPC adapter must return ONLY AFTER its transaction has committed.
+// No live channel/credential is configured in Phase 1B.
 export interface AdmissionChannel {
   admit(input: { requestId: string; coupleId: string; weddingId: string; digest: string }): Promise<unknown>;
   claimDispatch(input: z.output<typeof admissionIdentitySchema>): Promise<unknown>;

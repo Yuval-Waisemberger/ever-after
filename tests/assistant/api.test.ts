@@ -2,6 +2,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
 import { assistantContext } from "./fixtures";
 const mocks = vi.hoisted(() => ({ profile: vi.fn(), wedding: vi.fn(), context: vi.fn(), from: vi.fn() }));
+const admissionChannel = vi.hoisted(() => vi.fn(() => { throw new Error("No privileged credential or ledger configured"); }));
+vi.mock("next/headers", () => ({}));
+vi.mock("@/lib/assistant/guardrails/rpc-channel", () => ({ getAdmissionChannel: admissionChannel }));
 vi.mock("@/lib/auth/user", () => ({ getCurrentProfile: mocks.profile }));
 vi.mock("@/lib/queries/wedding", () => ({ getOwnedWedding: mocks.wedding }));
 vi.mock("@/lib/queries/assistant", () => ({ getAssistantContext: mocks.context }));
@@ -46,6 +49,20 @@ beforeEach(() => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 describe("Assistant API persistence and permissions", () => {
+  it("bypasses privileged admission entirely for Local with a transported request ID", async () => {
+    const response = await POST(new Request("http://localhost/api/assistant", { method: "POST", body: JSON.stringify({
+      requestId: crypto.randomUUID(), message: "What tasks do we have?", threadId, digest: "untrusted", coupleId: "forged",
+    }) }));
+    expect(response.status).toBe(200);
+    expect(admissionChannel).not.toHaveBeenCalled();
+    expect(writes.map(item => item.values.role)).toEqual(["user", "assistant"]);
+    expect(writes.every(item => item.table === "assistant_messages")).toBe(true);
+    expect(writes.some(item => "requestId" in item.values || "digest" in item.values)).toBe(false);
+  });
+  it("rejects a malformed transported ID without persistence or admission access", async () => {
+    const response = await POST(new Request("http://localhost/api/assistant", { method: "POST", body: JSON.stringify({ requestId: "bad", message: "Our budget?" }) }));
+    expect(response.status).toBe(400); expect(writes).toEqual([]); expect(admissionChannel).not.toHaveBeenCalled();
+  });
   it("returns Hebrew language metadata without adding persistence columns", async () => {
     const response = await POST(request("מה המשימות שלי השבוע?"));
     const body = await response.json();

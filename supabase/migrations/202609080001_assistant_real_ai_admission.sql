@@ -1,8 +1,6 @@
 -- Future real-provider admission only. LOCAL/ISOLATED until separately approved.
--- No credential, login, role membership, provider or application wiring is created.
+-- Unapplied migration, revised in Phase 1B. No credential/login/provider is created.
 begin;
-
-create role assistant_admission_executor nologin noinherit nosuperuser nocreatedb nocreaterole noreplication nobypassrls;
 
 create table public.assistant_real_ai_admissions (
   request_id uuid primary key,
@@ -24,17 +22,17 @@ create table public.assistant_real_ai_admissions (
     or (state = 'failed' and completed_at is not null and
       ((dispatched_at is null and outcome_code = 'PRE_DISPATCH_FAILED')
        or (dispatched_at is not null and outcome_code = 'PROVIDER_FAILED')))
-    or (state = 'uncertain' and dispatched_at is not null and completed_at is null and outcome_code = 'EXECUTION_UNCERTAIN')
+    or (state = 'uncertain' and dispatched_at is not null and completed_at is not null and outcome_code = 'EXECUTION_UNCERTAIN')
   ) is true),
   check (dispatched_at is null or dispatched_at >= admitted_at),
   check (completed_at is null or completed_at >= coalesce(dispatched_at, admitted_at))
 );
 create index assistant_admissions_couple_time_idx on public.assistant_real_ai_admissions(couple_id, admitted_at);
 create unique index assistant_admissions_one_active_idx on public.assistant_real_ai_admissions(couple_id)
-  where state in ('admitted', 'dispatched', 'uncertain');
+  where state in ('admitted', 'dispatched');
 alter table public.assistant_real_ai_admissions enable row level security;
 -- No owner-access policies: this is accounting, not Couple-editable content.
-revoke all on public.assistant_real_ai_admissions from public, anon, authenticated, service_role, assistant_admission_executor;
+revoke all on public.assistant_real_ai_admissions from public, anon, authenticated, service_role;
 
 create function public.admit_assistant_real_ai_turn(p_request_id uuid, p_couple_id uuid, p_wedding_id uuid, p_request_digest text)
 returns jsonb language plpgsql volatile security definer set search_path = '' as $$
@@ -81,7 +79,7 @@ begin
     return jsonb_build_object('status', 'rejected', 'code', 'RATE_LIMITED');
   end if;
   if exists (select 1 from public.assistant_real_ai_admissions
-    where couple_id = p_couple_id and state in ('admitted', 'dispatched', 'uncertain')) then
+    where couple_id = p_couple_id and state in ('admitted', 'dispatched')) then
     return jsonb_build_object('status', 'rejected', 'code', 'REQUEST_ACTIVE');
   end if;
   insert into public.assistant_real_ai_admissions(request_id, couple_id, wedding_id, request_digest, admitted_at)
@@ -111,11 +109,12 @@ begin
   final_state := case p_outcome_code when 'SUCCEEDED' then 'completed' when 'EXECUTION_UNCERTAIN' then 'uncertain' else 'failed' end;
   update public.assistant_real_ai_admissions
     set state = final_state, outcome_code = p_outcome_code,
-      completed_at = case when final_state = 'uncertain' then null else clock_timestamp() end
+      completed_at = clock_timestamp()
     where request_id = p_request_id and couple_id = p_couple_id
       and state = case when p_outcome_code = 'PRE_DISPATCH_FAILED' then 'admitted' else 'dispatched' end;
   if not found then return jsonb_build_object('status', 'rejected', 'code', 'INVALID_TRANSITION'); end if;
-  -- No release/refund/retry/expiry operation. Uncertain remains active, fail closed.
+  -- Terminal uncertain releases the active slot, NEVER its consumed quota unit.
+  -- No refund, redispatch, automatic retry or reopening operation exists.
   return jsonb_build_object('status', 'finished', 'requestId', p_request_id, 'state', final_state);
 end;
 $$;
@@ -123,8 +122,10 @@ $$;
 revoke all on function public.admit_assistant_real_ai_turn(uuid, uuid, uuid, text) from public, anon, authenticated, service_role;
 revoke all on function public.claim_assistant_real_ai_dispatch(uuid, uuid) from public, anon, authenticated, service_role;
 revoke all on function public.finish_assistant_real_ai_turn(uuid, uuid, text) from public, anon, authenticated, service_role;
-grant usage on schema public to assistant_admission_executor;
-grant execute on function public.admit_assistant_real_ai_turn(uuid, uuid, uuid, text) to assistant_admission_executor;
-grant execute on function public.claim_assistant_real_ai_dispatch(uuid, uuid) to assistant_admission_executor;
-grant execute on function public.finish_assistant_real_ai_turn(uuid, uuid, text) to assistant_admission_executor;
+-- Only the trusted server channel may call these RPCs. BYPASSRLS does not bypass
+-- table ACLs: service_role still has no direct access to this ledger.
+grant usage on schema public to service_role;
+grant execute on function public.admit_assistant_real_ai_turn(uuid, uuid, uuid, text) to service_role;
+grant execute on function public.claim_assistant_real_ai_dispatch(uuid, uuid) to service_role;
+grant execute on function public.finish_assistant_real_ai_turn(uuid, uuid, text) to service_role;
 commit;

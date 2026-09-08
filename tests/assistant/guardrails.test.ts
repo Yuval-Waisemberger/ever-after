@@ -78,7 +78,7 @@ describe("future real AI admission contract", () => {
     const response = await runWeddingAgent({ message: "Which vendors have we booked?", provider: getWeddingAssistantProvider("local"), loadContext: async () => assistantContext() });
     expect(response.status).toBe("ok");
     expect(db.admit).not.toHaveBeenCalled(); expect(db.claimDispatch).not.toHaveBeenCalled(); expect(db.finish).not.toHaveBeenCalled();
-    for (const file of ["src/app/api/assistant/route.ts", "src/lib/assistant/provider.ts", "src/lib/assistant/agent.ts", "src/lib/assistant/local-provider.ts"]) {
+    for (const file of ["src/lib/assistant/provider.ts", "src/lib/assistant/agent.ts", "src/lib/assistant/local-provider.ts"]) {
       expect(readFileSync(file, "utf8")).not.toContain("guardrails");
     }
   });

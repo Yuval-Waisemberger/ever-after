@@ -499,23 +499,24 @@ HTTP boundaries. Later cleanup retains narrow Upcoming titles, normal Budget ove
 and older non-security bookmark/review/media feedback. The isolated Task runner's transient startup
 readiness race is documented for future test-runner maintenance; no runner redesign was made here.
 
-## Real AI Phase 1A admission tests
+## Real AI Phase 1A/1B admission tests
 
-Run `pnpm exec vitest run tests/assistant tests/ui/assistant.test.tsx` for the new guardrail contracts
-and existing Local/provider/context/history/privacy/tool regressions. No real provider is involved.
-`tests/assistant/guardrails.test.ts` verifies deterministic minimized digests, strict request/result
-validation, safe errors, no automatic retries, identity/outcome checks and zero Local channel calls.
+Run `pnpm exec vitest run tests/assistant tests/ui/assistant.test.tsx tests/ui/assistant-transport.test.tsx`.
+This retains Local/provider/context/history/privacy/tool regressions and adds deterministic digests,
+request UUID validation, safe errors, dormant lifecycle sequencing, Local channel bypass, RPC argument
+minimization and server-module boundaries. Browser-like composer tests verify manual retry identity,
+new-turn IDs, no double dispatch, pending-input preservation and no automatic retry of ambiguous failures.
+No real provider is used. These tests do not claim live Supabase JWT/PostgREST verification.
 
-Run `node tests/database/assistant-admission-postgres.mjs` with Docker available and the existing
-`postgres:17` image. It uses `--pull=never --network none`, publishes no ports, loads the exact repository
-migrations into a disposable database and removes its container/volume in `finally`. It does not
-read environment secrets, run seed or contact Frankfurt. Auth/Storage SQL scaffolding is local;
-this does not claim live JWT/HTTP integration.
+Run `node tests/database/assistant-admission-postgres.mjs` with Docker and an existing `postgres:17`
+image. It uses `--pull=never --network none`, publishes no ports, loads the exact migrations into a
+disposable database and removes its container/volume in finally. It reads no secrets, runs no seed,
+and never contacts Frankfurt. Readiness checks container-local TCP to avoid Docker's temporary init server.
 
-The runner proves admissions 1–500, rejection of 501, two independent eight-connection races for
-the last slot, the 150/151 Couple boundary, ten/eleven sliding-window boundary and expiry, active-
-request and dispatch races, idempotent duplicate/conflicting submissions, controlled terminal states,
-uncertain fail-closed behavior, deletion/restart durability, transaction rollback and isolation.
-Actual non-owner sessions test table/function permissions for anon/authenticated/service_role and
-the NOLOGIN executor. Fixture timestamps are moved only inside the disposable database to test
-window expiry; the system clock and application data are never changed.
+Coverage includes 1–500/501, two eight-connection final-slot races, 150/151 per Couple, ten/eleven sliding
+window and expiry, active/dispatch races, idempotency/conflicts, deletion/restart durability, rollback and
+isolation. Terminal uncertain retains global/per-Couple units, cannot redispatch/complete again, releases
+the active slot and permits a new counted UUID. Known pre-dispatch failures remain counted. Actual
+non-owner sessions test browser function denial, service-role RPC execution, direct ledger denial even
+for service_role, role escalation denial and hardened function definitions. Only disposable fixture
+row timestamps move for expiry tests; no system clock or application data changes.

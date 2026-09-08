@@ -7,7 +7,7 @@ export const terminalOutcome = z.enum(["SUCCEEDED", "PRE_DISPATCH_FAILED", "PROV
 export const guardrailCode = z.enum(["INVALID_INPUT", "NOT_AUTHORIZED", "REQUEST_CONFLICT", "GLOBAL_QUOTA_EXHAUSTED", "COUPLE_QUOTA_EXHAUSTED", "RATE_LIMITED", "REQUEST_ACTIVE", "INVALID_TRANSITION", "UNSUPPORTED_TRANSACTION", "ADMISSION_UNAVAILABLE"]);
 
 // Future server boundary supplies identities + resolved language, not client authority.
-// Keep this envelope stable across retries, including the original nullable thread ID.
+// An admitted ID never authorizes redispatch, even after a thread was created.
 export const realAiTurnSchema = z.object({
   requestId: z.uuid(), coupleId: z.uuid(), weddingId: z.uuid(), threadId: z.uuid().nullable(),
   message: z.string().trim().min(1).max(3000), language: z.enum(["en", "he"]),

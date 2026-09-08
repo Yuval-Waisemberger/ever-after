@@ -398,93 +398,105 @@ and final-month contracts. Operational Task IDs/selection added for the discarde
 removed. Existing deterministic planning signals and ten READ tools remain unchanged. Preview
 clocks never enter Assistant context; there is no new Agent capability or external AI work.
 
-## Real AI Phase 1A — isolated admission guardrails (2026-09-08)
+## Real AI Phase 1A/1B — local admission guardrails (2026-09-08)
 
-`202609080001_assistant_real_ai_admission.sql` is local-only, **not applied to Frankfurt**.
-No OpenAI provider, SDK, key, credential, live connection or research is enabled. The provider
-selector, Local answers, UI, API persistence and ten READ tools are unchanged. The new
-`src/lib/assistant/guardrails` modules are not imported by the current request path.
+`202609080001_assistant_real_ai_admission.sql` is **unapplied to Frankfurt**. Phase 1B revises
+only this new migration. No credential, SDK, provider, research, billing or live connection is
+configured. The selector still accepts only Local; Local answers, tools, UI and persistence
+semantics are preserved. The API now imports a dormant admission boundary that bypasses Local.
 
-### Admission and data minimization
+### Admission and accounting
 
-One ledger row means one permanently consumed logical real-OpenAI turn, reserved before dispatch.
-SQL enforces fixed limits: 500 deployment-wide, 150 per Couple/profile, ten per Couple in a sliding
-five-minute window, and one active turn per Couple. There is no client/provider argument that can
-raise them. All rows count, including pre-dispatch failures and uncertain results. Local turns
-never enter the ledger. These turn caps do not independently guarantee a monetary spending cap;
-output/context/iteration/tool/retry budgets must be bounded before real-provider enablement.
+One ledger row reserves one logical externally billed turn before dispatch. Fixed SQL limits:
+500 deployment-wide, 150 per Couple/profile, ten per Couple per sliding five minutes, one active
+request per Couple. All admitted rows count permanently, including failed and uncertain turns.
+Local never enters the ledger and requires neither the migration nor privileged credentials.
 
-`assistant_real_ai_admissions` stores request UUID, Couple/profile UUID, wedding UUID, SHA-256
-request digest, state, admitted/dispatched/completed timestamps and a closed safe outcome code.
-It contains no prompts, responses, model payloads, credentials or reasoning. No product foreign
-key cascades into the ledger: message/thread/wedding deletion cannot restore capacity. Couple
-limits use profile identity so recreating a wedding does not reset that account's usage.
+Known pre-dispatch failures still consume a unit. Reclaiming rare failed admissions adds refund,
+race and abuse complexity without enough benefit for this demo. There is no credit/refund model.
+Turn caps alone are not a monetary cap: output, history, tool, iteration and timeout limits remain
+required before enabling a real provider. Prepaid credit and auto-reload OFF remain owner-controlled.
 
-Admission validates current Couple role and ownership from the live profiles/weddings, then
-takes a fixed transaction-level advisory lock before checking duplicate identity, global usage,
-Couple usage, rate and active state, and inserting. READ COMMITTED is required; repeatable-read
-and serializable transactions are safely rejected to prevent a stale count snapshot. Database
-`clock_timestamp()` after the lock is the rate authority, not caller time or transaction start.
-A partial unique index independently enforces one active row per Couple. The database transaction
-is short and must commit before returning admission/dispatch permission; never hold it open
-across a provider request. At most 500 retained rows makes indexed counts sufficient without a
-separate counter table.
+The ledger stores request UUID, Couple/profile UUID, wedding UUID, SHA-256 digest, lifecycle state,
+admitted/dispatched/completed timestamps and a closed outcome code. No prompts, responses, secrets,
+reasoning or product FK cascades. Conversation/wedding deletion cannot restore capacity; profile
+identity prevents wedding recreation from resetting the Couple cap.
 
-### State machine and uncertain delivery
+Admission verifies current Couple role/wedding ownership, takes a fixed transaction advisory lock,
+then checks idempotency, quotas, sliding rate and active state before insertion. READ COMMITTED is
+required; stale-snapshot isolation is rejected. Database time after the lock is authoritative.
+The indexed bounded ledger (at most 500 rows) needs no duplicate counter table. Transactions must
+commit before dispatch permission is used, and never span a provider call.
 
-| Current state | Allowed operation / result |
+### State machine
+
+| State | Allowed transition |
 | --- | --- |
-| No admission | Admit → `admitted` |
-| `admitted` | Atomic dispatch claim → `dispatched`; known pre-dispatch failure → `failed` |
-| `dispatched` | `SUCCEEDED` → `completed`; definitive `PROVIDER_FAILED` → `failed`; ambiguous execution → `uncertain` |
-| `completed`, `failed` | No redispatch, reopen, refund or further transition |
-| `uncertain` | Remains active; no automatic timeout release, retry or further transition |
+| No admission | Admit → admitted |
+| admitted | Claim → dispatched; known pre-dispatch failure → failed |
+| dispatched | SUCCEEDED → completed; PROVIDER_FAILED → failed; EXECUTION_UNCERTAIN → uncertain |
+| completed / failed / uncertain | Terminal: no redispatch, reopen, refund or later completion |
 
-Only a caller receiving a **committed** `dispatch_claimed` result may contact the future provider.
-A lost/ambiguous database reply is not permission to dispatch. Repeated claims cannot succeed.
-Provider timeouts/disconnects that leave execution uncertain must use `EXECUTION_UNCERTAIN`, not
-the definitive failure code. The active slot remains blocked even after five minutes or restart.
-Crash-left admitted/dispatched rows also remain active: this intentionally favors spending safety
-over automatic recovery. Operator reconciliation, if needed, requires a separately reviewed
-procedure; no expiry, refund or recovery endpoint is provided now. Never treat a possibly running
-request as a known failure merely to free the slot.
+Phase 1A kept uncertain active indefinitely. Phase 1B makes it terminal with completed_at set,
+removing it from both active checks and the partial unique index. Its quota unit stays consumed;
+a NEW UUID can admit afterward within remaining limits. No automatic retry or refund occurs.
 
-### Request identity and unwired server contract
+A lost claim response never authorizes execution. Crash-left admitted/dispatched rows remain active
+until a separately reviewed reconciliation; this phase adds no lease expiry or recovery endpoint.
+If finishing uncertain fails, release is not assumed. Only a successful committed transition proves
+release. Unknown provider/orchestration outcomes are conservatively marked uncertain, not refunded.
 
-`realAiTurnSchema` defines a future stable logical UUID plus server-resolved Couple/wedding identity,
-original nullable thread ID, message and resolved `he`/`en` language. `fingerprintRealAiTurn()` hashes
-a versioned fixed-order serialization of those semantic fields (excluding request UUID). Leading/
-trailing message whitespace follows existing request trimming. Unicode/internal whitespace is
-preserved. Keep the original envelope stable if the first submission creates a thread. Same UUID
-and digest returns `existing` without consuming again; changed digest/owner/wedding returns a safe
-conflict without disclosing another request. Hashing is not authorization or PII anonymization.
+### Transport and dormant application boundary
 
-`createRealAiGuardrails()` accepts an injected, currently unimplemented `AdmissionChannel`, validates
-results/identities and normalizes exceptions without retry. Only minimized fields reach the channel.
-`admit('local', ...)` returns `not_required` before any channel call. Provider choice is future
-trusted server configuration, never a client switch. No composer/schema/API transport was changed:
-the stable contract is prepared, but end-to-end transport/idempotent message persistence remains
-later wiring work. Existing completed admission identity/state supports a future verified saved-
-result lookup; no response replay or message-reference storage is implemented in Phase 1A.
+AssistantChat generates one UUID per logical submission and sends it with the existing message,
+thread and language fields. The existing manual Try again control retains that UUID and language
+envelope only after MESSAGE_NOT_SAVED. It reuses the server-returned thread, preserving Local
+conversation behavior. A new submission gets a new UUID, even for identical text. No automatic retry
+is added and request IDs are invisible. Legacy Local callers may omit the ID; billed admission may not.
 
-### Later credential/channel approval boundary
+The server strips client digest/ownership fields and derives its own digest from a versioned
+fixed-order array of server-resolved Couple/wedding, incoming nullable thread, trimmed message and
+resolved language. Internal whitespace/Unicode are preserved. UUID is excluded from the digest.
+IDs/digests are not authorization. An already admitted ID is never replayed or taken over; a changed
+thread/envelope conflicts safely. If a future billed pre-dispatch failure creates a thread, retrying
+the same UUID cannot redispatch even though Local's safe retry remains available. A new logical turn
+would be required; conversation replay/idempotent persistence is not implemented here.
 
-The migration creates `assistant_admission_executor` as NOLOGIN, NOINHERIT, without superuser,
-database/role creation, replication or RLS-bypass privileges, and grants no memberships. Its only
-new capabilities are execution of three SECURITY DEFINER functions with an empty search path:
+API order: authenticate Couple → resolve owned wedding → validate existing thread → prepare admission
+→ existing thread/user-message persistence → claim dispatch → existing Agent → terminal outcome
+→ existing assistant-message persistence. Local admission/claim/finish are no-ops and do not load a
+channel. Current valid configuration cannot enter the external branch. Even a future provider alone
+cannot enable it: the default channel getter fails closed until separately configured.
+
+`guardrails/execution.ts` owns this small lifecycle wrapper and safe HTTP outcomes (quota/rate 429,
+identity/active conflict 409, invalid request 400, authorization 403, infrastructure 503). Fixed messages
+contain no SQL, ledger, role, lock or secret details. Existing bilingual UI/error presentation is
+unchanged; specialized quota presentation/localization can be considered during provider enablement.
+No provider interface, Local answer implementation, Agent tool or research contract was changed.
+
+### Server channel selection
+
+| Option | Tradeoff |
+| --- | --- |
+| Dedicated PostgreSQL login + executor role | Stronger credential-level least privilege, but new login provisioning, password, driver/pool and serverless connection management. |
+| Server-only Supabase service-role RPC | Reuses the installed Supabase client and stateless HTTPS RPCs; fewer deployment/configuration components. The key is broader than this ledger capability and requires strict server confinement. |
+
+**Selected: service-role RPC.** It is the smallest practical channel for this Next.js/Supabase demo.
+The migration no longer creates a custom executor role. It revokes all ledger access from PUBLIC,
+anon, authenticated and service_role, enables RLS without policies, and grants only service_role
+(plus the database owner/admin's inherent access) execution of these three SECURITY DEFINER functions:
 `admit_assistant_real_ai_turn`, `claim_assistant_real_ai_dispatch`, `finish_assistant_real_ai_turn`.
-The ledger has RLS with no policies and no direct privileges for PUBLIC, anon, authenticated,
-service_role or the executor. Browser roles and service_role cannot execute these functions.
+All use an empty search_path. Browser roles cannot execute them. BYPASSRLS does not bypass table ACLs.
+This does not claim the service-role credential is restricted to these three functions project-wide.
 
-Later, separately approve a dedicated server-only PostgreSQL login/channel allowed to SET ROLE to
-this executor, with no direct ledger/product-table grants or public-schema creation rights. Keep
-its credential in server environment configuration only; do not reuse the browser JWT client or
-give the model this channel. The application must freshly authenticate/authorize the Couple before
-supplying these function arguments. The role is a trusted backend capability, not an end-user
-ownership token. Verify actual Frankfurt role-creation/grant compatibility in a future preflight.
-No login, role membership, password, service-role key, driver or connection was configured now.
+`guardrails/rpc-channel.ts` takes an injected server client and exposes only these named RPCs with
+minimized arguments. No raw client reaches the model/UI. Next's `next/headers` server-only dependency
+protects the RPC/execution/hash modules against Client Component imports. No environment variable,
+credential/client construction, login, membership, package or live connection is added. The configured
+channel getter deliberately fails closed; it never falls back to the public/user-session client.
 
-Before enabling an SDK: explicitly bound transport retries, tool calls, agent iterations, output
-tokens and total turn time. Multiple model/tool steps remain one admission; SDK retries must never
-create another admission. Ambiguous dispatch must not trigger an automatic replacement request.
-Manual prepaid credit and auto-reload OFF remain owner-controlled; no billing setting was accessed.
+Later approval must configure a dedicated server-only client with session persistence/refresh disabled,
+using a server-only key (never NEXT_PUBLIC), then verify real PostgREST permissions and request
+lifecycle before enablement. The key must never be logged, returned or imported into browser code.
+SDK retries, tool/iteration counts, output and total timeout budgets still need explicit limits.
+No OpenAI API or billing setting was accessed in this phase.

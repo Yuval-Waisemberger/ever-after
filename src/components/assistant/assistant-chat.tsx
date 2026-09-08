@@ -25,7 +25,7 @@ export function AssistantChat({ initialThreadId, initialMessages, initialLoadErr
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const [failure, setFailure] = useState<{ text: string; language: AssistantLanguage; intent?: z.output<typeof clarificationSchema> }>();
-  const [retryMessage, setRetryMessage] = useState<string>();
+  const [retryMessage, setRetryMessage] = useState<{ message: string; requestId: string; recentLanguage: AssistantLanguage; requestedLanguage?: AssistantLanguage }>();
   const [threads, setThreads] = useState<ConversationSummary[]>(initialHistory?.threads ?? []);
   const [hasMoreThreads, setHasMoreThreads] = useState(initialHistory?.hasMore ?? false);
   const [hasOlder, setHasOlder] = useState(false);
@@ -106,17 +106,19 @@ export function AssistantChat({ initialThreadId, initialMessages, initialLoadErr
     finally { if (request === selection.current) setHistoryBusy(false); }
   }
 
-  async function send(event?: FormEvent, suggested?: string) {
+  async function send(event?: FormEvent, retry?: typeof retryMessage) {
     event?.preventDefault();
-    const message = (suggested ?? input).trim();
+    const message = (retry?.message ?? input).trim();
     if (!message || inFlight.current || historyBusy || initialLoadError) return;
     inFlight.current = true;
+    // A manual safe retry retains the logical identity/language, not a new turn.
+    const submission = retry ?? { message, requestId: crypto.randomUUID(), recentLanguage, requestedLanguage: preference === "auto" ? undefined : preference };
     const responseLanguage = selectResponseLanguage(message, recentLanguage, preference === "auto" ? undefined : preference).language;
     const labels = assistantCopy[responseLanguage];
-    const optimistic: AssistantMessage = { id: crypto.randomUUID(), role: "user", content: message, source_labels: [], created_at: new Date().toISOString() };
+    const optimistic: AssistantMessage = { id: submission.requestId, role: "user", content: message, source_labels: [], created_at: new Date().toISOString() };
     setMessages((current) => [...current, optimistic]); setInput(message); setSending(true); setFailure(undefined); setRetryMessage(undefined); setRecentLanguage(responseLanguage);
     try {
-      const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message, threadId, recentLanguage, ...(preference !== "auto" ? { requestedLanguage: preference } : {}) }) });
+      const response = await fetch("/api/assistant", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ ...submission, threadId }) });
       const body = await response.json();
       if (z.uuid().safeParse(body?.threadId).success) {
         setThreadId(body.threadId);
@@ -129,7 +131,7 @@ export function AssistantChat({ initialThreadId, initialMessages, initialLoadErr
         const text = code === "RESEARCH_UNAVAILABLE" ? labels.research : code === "CONTEXT_UNAVAILABLE" ? (responseLanguage === "he" ? "לא הצלחתי לגשת לנתוני החתונה כרגע. נסו שוב." : "I couldn't access your wedding information right now. Please try again.") : code === "PROVIDER_UNAVAILABLE" ? labels.provider : code === "MESSAGE_NOT_SAVED" ? labels.saveUser : code === "ANSWER_NOT_SAVED" ? labels.saveAnswer : code === "AUTH_REQUIRED" ? labels.auth : labels.error;
         setFailure({ text, language: responseLanguage, intent: agent?.clarificationIntent });
         // Only an explicit failed user insert is safe to retry without duplicating persisted history.
-        if (code === "MESSAGE_NOT_SAVED") { setMessages((current) => current.filter((item) => item.id !== optimistic.id)); setRetryMessage(message); setInput(message); }
+        if (code === "MESSAGE_NOT_SAVED") { setMessages((current) => current.filter((item) => item.id !== optimistic.id)); setRetryMessage(submission); setInput(message); }
         return;
       }
       const result = replySchema.parse(body);
