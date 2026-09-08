@@ -7,7 +7,11 @@ const { createServer } = await import(pathToFileURL(require.resolve("vite")).hre
 const server = await createServer({
   configFile: false, envFile: false, root: fileURLToPath(new URL("./", import.meta.url)),
   cacheDir: fileURLToPath(new URL("../../../.codex-tmp/assistant-vite", import.meta.url)),
-  resolve: { alias: { "@": fileURLToPath(new URL("../../../src", import.meta.url)) } },
+  publicDir: fileURLToPath(new URL("../../../public", import.meta.url)),
+  resolve: { alias: {
+    "next/link": fileURLToPath(new URL("../vendor-account/link.tsx", import.meta.url)),
+    "next/image": fileURLToPath(new URL("../discovery/image.tsx", import.meta.url)),
+    "@/lib/actions/auth": fileURLToPath(new URL("./auth.ts", import.meta.url)), "@": fileURLToPath(new URL("../../../src", import.meta.url)) } },
   esbuild: { jsx: "automatic" }, css: { postcss: { plugins: [tailwind()] } },
   server: { host: "127.0.0.1", port: 3101, strictPort: true },
 });

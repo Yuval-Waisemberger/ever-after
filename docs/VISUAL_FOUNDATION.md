@@ -116,7 +116,7 @@ Sources: final Design/Motion/UX DOCX (including all archive additions), twelve Z
 | Vendor dashboard completion counter/fill/checklist/tint/rating/section reveals | DOCX / F08 storyboard | 2D | IMPLEMENTED — detailed choreography below |
 | Vendor ratings sequential real stars; Business Profile reveal/focus/explicit save toast; publication check/tint without confetti | DOCX / F08 storyboard | 2D | IMPLEMENTED — detailed choreography below |
 | Couple My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | Final remaining-page pass | DEFERRED — Couple `/reviews` is outside Vendor Account; Vendor recent-review treatment is implemented in 2D |
-| Assistant ornament, considering state, sequential context chips, response reveal | DOCX | 2E | DEFERRED — chat visual workstream |
+| Assistant blank/history transitions, considering ornament, context/evidence chips, response reveal and composer | DOCX §15 / F19 | 2E | IMPLEMENTED — precise score and protected boundaries below |
 | Mobile lower-density motion and final cross-site reconciliation | DOCX | 2A–2E / 3–4 | IMPLEMENTED per completed workstream; full cross-site QA DEFERRED to 3–4 |
 
 Optional identity ornament movement and tonal financial-bar breathing remain deferred to Phase 3 calibration: the primary countdown/path/ring motions establish the hierarchy first. No required signature motion is replaced with an unrelated pulse. Excel export, provider integration, SMTP and deployment are separate functional work.
@@ -239,3 +239,31 @@ The Vendor fixture serves actual presentation components with in-memory syntheti
 
 
 Phase 2D validation: TypeScript, whole-repository ESLint, 52 focused Vitest checks (presentation, completion, onboarding and role boundaries), eight isolated Vendor Playwright checks, production build and `git diff --check` passed. The first cold Vite startup exceeded the original 30-second browser timeout; the fixture timeout is now 60 seconds and the full responsive/state set passed unchanged. Motion capture additionally verifies focused underline draw and edited-after-save button feedback. No live Vendor session was available; authenticated publication and uploads were not exercised against Frankfurt.
+
+
+### Phase 2E — Wedding Assistant presentation
+
+The Assistant uses the existing rich canvas and typography with a mushroom conversation rail, ivory reading panel, blush user messages, warm-neutral assistant messages, champagne composer and alternating blush/champagne suggestions/context chips. `assistant.css` is scoped to this experience; shared navigation, palette and prior motion are unchanged. Landing/global rich-canvas refinement remains visually open for the final cross-site consistency pass.
+
+Opening `/assistant` starts blank in Automatic/English. New chat resets the view without deleting or creating database records. Suggestions fill the composer for review; explicit Send (or Ctrl/Cmd+Enter) uses the unchanged POST endpoint. The existing title-from-first-question and message persistence remain authoritative. The composer holds submitted text while pending, clears on acknowledged acceptance, restores focus after becoming enabled and preserves safe unsaved-message retry. Explicit Hebrew selection and automatic bilingual detection remain unchanged.
+
+New read-only history Server Actions reuse `getOwnedWedding` (authenticated Couple guard), scope threads to its wedding ID and verify selected-thread ownership before reading messages. Thread pages contain 30 records, message pages 50, each with one lookahead; older history remains accessible. Failed/forged reads return the same safe unavailable result. Stale selection responses cannot replace a new view. These are application presentation readers, not new Agent tools; they do not change provider history/context or executable capabilities. The page sends only bounded display strings for saved styles, area, guest count, total budget and first priority. Missing data produces no invented chips; these describe current Wedding Details, not reasoning or historical evidence.
+
+| Motion | Status | Trigger / score |
+| --- | --- | --- |
+| Blank-state entrance | IMPLEMENTED | First/new blank view: 550ms, opacity .5 → 1 and 8px rise; final content never depends on a timer. |
+| New chat / conversation switch | IMPLEMENTED | Successful view selection or New chat: 320ms, opacity .6 → 1 / 6px rise. Only the conversation view moves. |
+| Considering ornament | IMPLEMENTED | Real POST pending only: `✦ ❦ ✦`, 2.4s soft alternating opacity/3px movement, 0/400/800ms offsets. Unmounted immediately at completion. |
+| Considering your wedding | IMPLEMENTED | Visible status text through actual request pending; static and understandable without motion. |
+| Context-chip sequence | IMPLEMENTED | Up to five real display chips; 400ms / 5px rise, 100ms stagger on availability. No provider planning is exposed. |
+| Response reveal | IMPLEMENTED | Actual new message: 450ms / 8px rise, no character typing or fake streaming. Stable keys prevent replay during typing. |
+| Evidence-chip sequence | IMPLEMENTED | Actual existing source labels: 400ms / 5px, 100ms stagger. Unknown labels remain hidden; no research claim is fabricated. |
+| Conversation-row hover/active | IMPLEMENTED | Shared 180ms tonal hover, wine active edge and accessible current-page state. |
+| Composer / Send | IMPLEMENTED | Shared wine CTA, 100ms press, 180ms focus depth; disabled only for real pending/unavailable states. |
+| Mobile conversation panel | IMPLEMENTED | Below 1024px, native modal dialog with contained focus, Escape/close and focus return; 320ms entry. |
+
+Reduced motion disables all of the above animation/transition styles and shows final chips/messages/static ornament immediately. The five supplied recordings were inspected; none is an Assistant recording. The DOCX §15/F19 therefore controls this phase; ZIP loading/transition examples inform timing only, with their simulated waits excluded.
+
+Validation uses the closed Assistant fixture (port 3101), with synthetic histories, real presentation components and optional actual Couple shell. Auth is stubbed to deny operations; environment files are not loaded and browser external requests are blocked. No live conversations are created. The sweep covers 320/360/390/430/480/540/600/640/700/768/820/1023/1024/1280/1440, including both sides of collapse. Review screenshots/recording stay ignored under `.codex-tmp/phase2e-review/` and `test-results/`.
+
+Real OpenAI, live research and provider tool-calling remain NOT STARTED for the later functional phase. Agent READ tools, local deterministic answers, provider abstraction, evidence/privacy rules, ownership, database schema and writes are unchanged. Final cross-site consistency/motion QA remains separate.
