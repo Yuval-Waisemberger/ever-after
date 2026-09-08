@@ -27,7 +27,7 @@ create table public.assistant_real_ai_admissions (
   check (dispatched_at is null or dispatched_at >= admitted_at),
   check (completed_at is null or completed_at >= coalesce(dispatched_at, admitted_at))
 );
-create index assistant_admissions_couple_time_idx on public.assistant_real_ai_admissions(couple_id, admitted_at);
+create index assistant_admissions_couple_idx on public.assistant_real_ai_admissions(couple_id);
 create unique index assistant_admissions_one_active_idx on public.assistant_real_ai_admissions(couple_id)
   where state in ('admitted', 'dispatched');
 alter table public.assistant_real_ai_admissions enable row level security;
@@ -38,7 +38,6 @@ create function public.admit_assistant_real_ai_turn(p_request_id uuid, p_couple_
 returns jsonb language plpgsql volatile security definer set search_path = '' as $$
 declare
   previous public.assistant_real_ai_admissions%rowtype;
-  decision_time timestamptz;
 begin
   -- At READ COMMITTED each SQL statement after the lock sees the latest commits.
   -- Reject stale-snapshot isolation rather than allowing count/insert write skew.
@@ -73,17 +72,12 @@ begin
   if (select count(*) from public.assistant_real_ai_admissions where couple_id = p_couple_id) >= 150 then
     return jsonb_build_object('status', 'rejected', 'code', 'COUPLE_QUOTA_EXHAUSTED');
   end if;
-  decision_time := clock_timestamp(); -- measured AFTER waiting, never client/transaction start time
-  if (select count(*) from public.assistant_real_ai_admissions
-    where couple_id = p_couple_id and admitted_at > decision_time - interval '5 minutes') >= 10 then
-    return jsonb_build_object('status', 'rejected', 'code', 'RATE_LIMITED');
-  end if;
   if exists (select 1 from public.assistant_real_ai_admissions
     where couple_id = p_couple_id and state in ('admitted', 'dispatched')) then
     return jsonb_build_object('status', 'rejected', 'code', 'REQUEST_ACTIVE');
   end if;
-  insert into public.assistant_real_ai_admissions(request_id, couple_id, wedding_id, request_digest, admitted_at)
-    values (p_request_id, p_couple_id, p_wedding_id, p_request_digest, decision_time);
+  insert into public.assistant_real_ai_admissions(request_id, couple_id, wedding_id, request_digest)
+    values (p_request_id, p_couple_id, p_wedding_id, p_request_digest);
   return jsonb_build_object('status', 'admitted', 'requestId', p_request_id, 'state', 'admitted');
 end;
 $$;

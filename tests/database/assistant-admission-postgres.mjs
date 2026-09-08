@@ -44,7 +44,7 @@ const waitReady = async () => {
   throw new Error("Disposable database did not become ready");
 };
 // Actually admit and safely fail each turn through the privileged functions.
-// Ten requests per synthetic Couple avoids bypassing either approved limit.
+// Spread global fixtures across Couples to stay below the cumulative Couple cap.
 function fillGlobal(amount) {
   as(`do $$ declare i int; c uuid; r uuid; answer jsonb; begin
     for i in 1..${amount} loop
@@ -145,11 +145,8 @@ try {
   console.log("PASS: two eight-connection boundary races each admitted exactly one; stale-snapshot isolation rejected.");
 
   reset();
-  // Move ONLY isolated fixture timestamps; no clock changes or client time inputs.
-  for (let batch = 0; batch < 15; batch++) {
-    if (batch) sql("update public.assistant_real_ai_admissions set admitted_at=clock_timestamp()-interval '6 minutes'");
-    fillCouple(batch*10+1,batch === 14 ? 9 : 10);
-  }
+  // All 150 admissions run in succession, without shifting timestamps or waiting.
+  fillCouple(1,149);
   equal(result(admission(150,1)).status,"admitted");
   equal(result(claim(150,1)).status,"dispatch_claimed");
   equal(result(finish(150,1,"EXECUTION_UNCERTAIN")).state,"uncertain");
@@ -166,17 +163,15 @@ try {
   equal(count(),150); equal(result(admission(151,1)).code,"COUPLE_QUOTA_EXHAUSTED");
   console.log("PASS: #150 accepted/#151 rejected across conversation deletion, wedding recreation, separate sessions and PostgreSQL restart.");
 
-  reset(); fillCouple(1,10);
-  equal(result(admission(11,1)).code,"RATE_LIMITED");
-  // Sliding window: only the oldest expires, leaving nine recent admissions.
-  sql(`update public.assistant_real_ai_admissions set admitted_at=clock_timestamp()-interval '5 minutes' where request_id='${uid(1)}'`);
-  equal(result(admission(11,1)).status,"admitted");
-  equal(result(finish(11,1,"PRE_DISPATCH_FAILED")).status,"finished");
-  equal(result(admission(12,1)).code,"RATE_LIMITED");
-  sql("update public.assistant_real_ai_admissions set admitted_at=clock_timestamp()-interval '6 minutes'");
-  equal(result(admission(12,1)).status,"admitted");
+  reset();
+  // Valid sequential turns are not throttled by recent admission timestamps.
+  for (let request = 1; request <= 12; request++) {
+    equal(result(admission(request,1)).status,"admitted");
+    equal(result(claim(request,1)).status,"dispatch_claimed");
+    equal(result(finish(request,1)).state,"completed");
+  }
   equal(count(),12);
-  console.log("PASS: 10-per-sliding-five-minute limit, #11 rejected, expiration admits later turns without refunding usage.");
+  console.log("PASS: twelve successive completed turns admitted without waits or timestamp changes.");
 
   reset();
   const identityRace = await Promise.all(Array.from({ length: 8 }, () => asyncSql(`begin; set local role ${executor}; ${admission(1,1)}; commit;`).then(JSON.parse)));

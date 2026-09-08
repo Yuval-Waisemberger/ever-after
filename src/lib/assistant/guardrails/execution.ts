@@ -13,7 +13,7 @@ export class AssistantAdmissionError extends Error {
     const safeCode = code.success ? code.data : "ADMISSION_UNAVAILABLE";
     super(guardrailMessages[safeCode]);
     this.code = safeCode;
-    this.httpStatus = ["GLOBAL_QUOTA_EXHAUSTED", "COUPLE_QUOTA_EXHAUSTED", "RATE_LIMITED"].includes(safeCode) ? 429
+    this.httpStatus = ["GLOBAL_QUOTA_EXHAUSTED", "COUPLE_QUOTA_EXHAUSTED"].includes(safeCode) ? 429
       : ["REQUEST_ACTIVE", "REQUEST_CONFLICT", "INVALID_TRANSITION"].includes(safeCode) ? 409
       : safeCode === "INVALID_INPUT" ? 400 : safeCode === "NOT_AUTHORIZED" ? 403 : 503;
   }

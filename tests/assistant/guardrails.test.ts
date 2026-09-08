@@ -14,7 +14,7 @@ const channel = () => ({ admit: vi.fn(), claimDispatch: vi.fn(), finish: vi.fn()
 
 describe("future real AI admission contract", () => {
   it("retains the approved fixed policy", () => {
-    expect(REAL_AI_LIMITS).toEqual({ globalTurns: 500, coupleTurns: 150, windowTurns: 10, windowSeconds: 300, activePerCouple: 1 });
+    expect(REAL_AI_LIMITS).toEqual({ globalTurns: 500, coupleTurns: 150, activePerCouple: 1 });
     expect(Object.isFrozen(REAL_AI_LIMITS)).toBe(true);
   });
   it("fingerprints canonical semantics without depending on object order or request UUID", () => {
@@ -57,7 +57,7 @@ describe("future real AI admission contract", () => {
   });
   it("normalizes database errors, invalid results and mismatched identities without retry", async () => {
     const db = channel(), guard = createRealAiGuardrails(db), identity = { requestId, coupleId: turn.coupleId };
-    for (const value of [null, { status: "admitted", requestId, state: "completed" }, { status: "admitted", requestId: turn.coupleId, state: "admitted" }, { status: "rejected", code: "RATE_LIMITED", rawError: "secret" }]) {
+    for (const value of [null, { status: "admitted", requestId, state: "completed" }, { status: "admitted", requestId: turn.coupleId, state: "admitted" }, { status: "rejected", code: "COUPLE_QUOTA_EXHAUSTED", rawError: "secret" }]) {
       db.admit.mockResolvedValue(value);
       expect(await guard.admit("openai", turn)).toEqual({ status: "rejected", code: "ADMISSION_UNAVAILABLE" });
     }

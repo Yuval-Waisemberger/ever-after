@@ -92,7 +92,7 @@ describe("dormant admission execution boundary", () => {
   });
   it("maps unknown errors to safe application copy/status", () => {
     expect(new AssistantAdmissionError("private SQL details")).toMatchObject({ code: "ADMISSION_UNAVAILABLE", httpStatus: 503, message: guardrailMessages.ADMISSION_UNAVAILABLE });
-    expect(new AssistantAdmissionError("RATE_LIMITED").httpStatus).toBe(429);
+    expect(new AssistantAdmissionError("COUPLE_QUOTA_EXHAUSTED").httpStatus).toBe(429);
     expect(new AssistantAdmissionError("REQUEST_CONFLICT").httpStatus).toBe(409);
   });
 });

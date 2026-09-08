@@ -247,7 +247,7 @@ Prefer multiple relevant, current sources when practical. One commercial article
 
 `normalizeResearchRequest` parses strict local input and builds a second strict adapter payload from allowlisted attributes. It drops the free-form offer description, excludes names, contacts, auth/wedding IDs, Guest identities and all private notes, coarsens guest count to a 50-person band and wedding date to month, and omits event-specific context entirely for procedural questions. Unknown private fields are rejected. Currency/quoted amount is retained only when explicitly supplied for comparison. No arbitrary query, raw message, raw records or free-form notes can be passed through these contracts. Broad planning attributes may still be personal context; disclosure/retention review is required before any external adapter is enabled. No lexical redaction guarantee is claimed for future added free text.
 
-Normalization sorts/deduplicates package features and uses a server-provided as-of date; `researchRequestKey` supports deduplication of equivalent requests within one answer. An as-of request date is not a claim that research occurred. `FUTURE_RESEARCH_COST_POLICY` documents proposed ceilings of two calls per user message, eight sources per call and a 15-second timeout, with no automatic provider fallback. Result contracts enforce eight sources, twelve findings/factors, twelve assumptions/limitations, and bounded text (generally 500 characters), while answer provenance caps thirty statements/ten references each. Future orchestration must actually enforce call/time limits, cancellation, deduplication, account/session rate limits, aggregate context limits and explicit cost budgets before enablement. No billing, rate API, scheduler, automatic retry, paid fallback or live cache is implemented now.
+Normalization sorts/deduplicates package features and uses a server-provided as-of date; `researchRequestKey` supports deduplication of equivalent requests within one answer. An as-of request date is not a claim that research occurred. `FUTURE_RESEARCH_COST_POLICY` documents proposed ceilings of two calls per user message, eight sources per call and a 15-second timeout, with no automatic provider fallback. Result contracts enforce eight sources, twelve findings/factors, twelve assumptions/limitations, and bounded text (generally 500 characters), while answer provenance caps thirty statements/ten references each. Future orchestration must actually enforce call/time limits, cancellation, deduplication, per-account usage/concurrency limits, aggregate context limits and explicit cost budgets before enablement. No billing, rate API, scheduler, automatic retry, paid fallback or live cache is implemented now.
 
 Future flow: wedding intent/domain check → select necessary internal facts → determine whether a current external claim requires research → normalize/minimize request and deduplicate → enforce future account/call/time/cost controls → approved adapter/retrieval → validate output against trusted source receipt and request → evaluate freshness/quality → assemble statements with explicit evidence references → validate provenance → natural-language response. The model never owns source verification, authorization, authoritative calculations or write execution.
 
@@ -316,7 +316,7 @@ A future write must follow: proposal → explicit UI confirmation → separate a
 
 Hebrew input receives Hebrew by default; English input receives English by default in the supported Local summary intents. The Phase 2 language contract below governs explicit preferences and ambiguous mixed messages. Proper vendor/business names remain unchanged. Message/result schemas accept Unicode. Local remains deterministic and does not offer full natural-language reasoning.
 
-Ever After must own future per-user rate limits, concurrency limits, bounded tool calls, timeouts, token/context budgets, spending ceilings and safe cancellation. Input/output/metadata schemas already bound string and metadata sizes, but this is not a complete rate-control implementation. Local invokes no billable service. External adapters must not be enabled until rate/cost controls, privacy, scope/grounding evaluations and explicit approval are in place.
+Ever After must own future per-user cumulative quotas, concurrency limits, bounded tool calls, timeouts, token/context budgets, spending ceilings and safe cancellation. Input/output/metadata schemas already bound string and metadata sizes, but this is not a complete cost-control implementation. Local invokes no billable service. External adapters must not be enabled until quota/cost controls, privacy, scope/grounding evaluations and explicit approval are in place.
 
 ## Phase 1A validation
 
@@ -408,8 +408,9 @@ semantics are preserved. The API now imports a dormant admission boundary that b
 ### Admission and accounting
 
 One ledger row reserves one logical externally billed turn before dispatch. Fixed SQL limits:
-500 deployment-wide, 150 per Couple/profile, ten per Couple per sliding five minutes, one active
-request per Couple. All admitted rows count permanently, including failed and uncertain turns.
+500 deployment-wide, 150 per Couple/profile, and one active request per Couple.
+There is no short-window admission throttle; valid sequential turns may proceed until a cumulative
+cap. All admitted rows count permanently, including failed and uncertain turns.
 Local never enters the ledger and requires neither the migration nor privileged credentials.
 
 Known pre-dispatch failures still consume a unit. Reclaiming rare failed admissions adds refund,
@@ -423,8 +424,9 @@ reasoning or product FK cascades. Conversation/wedding deletion cannot restore c
 identity prevents wedding recreation from resetting the Couple cap.
 
 Admission verifies current Couple role/wedding ownership, takes a fixed transaction advisory lock,
-then checks idempotency, quotas, sliding rate and active state before insertion. READ COMMITTED is
-required; stale-snapshot isolation is rejected. Database time after the lock is authoritative.
+then checks idempotency, cumulative quotas and active state before insertion. READ COMMITTED is
+required; stale-snapshot isolation is rejected. Admission timestamps use the database clock for
+lifecycle accounting, not throttling.
 The indexed bounded ledger (at most 500 rows) needs no duplicate counter table. Transactions must
 commit before dispatch permission is used, and never span a provider call.
 
@@ -468,7 +470,7 @@ API order: authenticate Couple → resolve owned wedding → validate existing t
 channel. Current valid configuration cannot enter the external branch. Even a future provider alone
 cannot enable it: the default channel getter fails closed until separately configured.
 
-`guardrails/execution.ts` owns this small lifecycle wrapper and safe HTTP outcomes (quota/rate 429,
+`guardrails/execution.ts` owns this small lifecycle wrapper and safe HTTP outcomes (quota 429,
 identity/active conflict 409, invalid request 400, authorization 403, infrastructure 503). Fixed messages
 contain no SQL, ledger, role, lock or secret details. Existing bilingual UI/error presentation is
 unchanged; specialized quota presentation/localization can be considered during provider enablement.

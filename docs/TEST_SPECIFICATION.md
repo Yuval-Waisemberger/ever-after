@@ -513,10 +513,10 @@ image. It uses `--pull=never --network none`, publishes no ports, loads the exac
 disposable database and removes its container/volume in finally. It reads no secrets, runs no seed,
 and never contacts Frankfurt. Readiness checks container-local TCP to avoid Docker's temporary init server.
 
-Coverage includes 1–500/501, two eight-connection final-slot races, 150/151 per Couple, ten/eleven sliding
-window and expiry, active/dispatch races, idempotency/conflicts, deletion/restart durability, rollback and
+Coverage includes 1–500/501, two eight-connection final-slot races, 150/151 per Couple without waits
+or timestamp changes, successive completed turns without throttling, active/dispatch races, idempotency/conflicts, deletion/restart durability, rollback and
 isolation. Terminal uncertain retains global/per-Couple units, cannot redispatch/complete again, releases
 the active slot and permits a new counted UUID. Known pre-dispatch failures remain counted. Actual
 non-owner sessions test browser function denial, service-role RPC execution, direct ledger denial even
-for service_role, role escalation denial and hardened function definitions. Only disposable fixture
-row timestamps move for expiry tests; no system clock or application data changes.
+for service_role, role escalation denial and hardened function definitions. No fixture timestamp manipulation,
+system clock changes or live application data changes are required.

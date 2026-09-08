@@ -128,11 +128,11 @@ tokens or keys enter tool output. Future vendor-contact access needs a separate 
 tool and reviewed planning use case.
 
 Tool bounds limit each invocation, not aggregate use across a future conversation. Authentication
-and output filtering do not replace future scope, prompt-injection, rate/call-count, cancellation
+and output filtering do not replace future scope, prompt-injection, quota/call-count, cancellation
 and cost controls. Mocked tests cover query scoping/privacy/error behavior; no live RLS verification
 or Supabase data mutation is claimed for this phase. No migration/schema/RLS/seed file changed.
 
-- Add rate limiting for auth, reviews, search, uploads, and Assistant endpoints at production scale.
+- Add rate limiting for auth, reviews, search, and uploads at production scale.
 - Add malware/image decoding checks and server-side resizing for uploaded media.
 - Add security headers/CSP tuned to Supabase and approved image domains.
 - Add audit records for sensitive mutations and confirmed Assistant actions.
@@ -332,8 +332,9 @@ Full Supabase JWT adversarial and Storage HTTP boundary checks remain Final Prod
 ## Future real-AI admission — local migration only
 
 `202609080001_assistant_real_ai_admission.sql` remains **unapplied to Frankfurt**. It enforces
-500 global / 150 per Couple / ten per sliding five minutes / one active request, with a transaction
-advisory lock and READ COMMITTED snapshots. No deletion, failure or uncertainty refunds quota.
+500 global / 150 per Couple / one active request, with a transaction
+advisory lock and READ COMMITTED snapshots. No short-window AI admission rate limit is enforced.
+No deletion, failure or uncertainty refunds quota. Supabase Auth rate limits are unaffected.
 Phase 1B makes uncertain terminal: its completed timestamp is set and active slot released, while
 the unit remains consumed. No redispatch, automatic retry, late completion or expiry is permitted.
 Crash-left admitted/dispatched rows remain fail closed pending separately approved reconciliation.
