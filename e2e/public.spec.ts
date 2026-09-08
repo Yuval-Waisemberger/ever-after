@@ -46,7 +46,7 @@ test("landing page exposes the three entry paths", async ({ page }) => {
   await page.goto("/");
   await expect(page.getByRole("heading", { name: "EVER AFTER", exact: true })).toBeVisible();
   await expect(page.getByRole("link", { name: "Plan our wedding", exact: true })).toHaveAttribute("href", "/auth/couple");
-  await expect(page.getByRole("link", { name: "Join Ever After", exact: false }).last()).toHaveAttribute("href", "/auth/vendor");
+  await expect(page.locator(".hero-vendor a")).toHaveAttribute("href", "/auth/vendor");
   await expect(page.getByRole("link", { name: "Explore vendors", exact: true })).toHaveAttribute("href", "/vendors");
 });
 

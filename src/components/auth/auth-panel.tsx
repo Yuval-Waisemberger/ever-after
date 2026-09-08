@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
+import { ArrowRight, Sparkles } from "lucide-react";
 import { signIn, signUpCouple, signUpVendor } from "@/lib/actions/auth";
 import { initialAuthState } from "@/lib/actions/auth-state";
 import { FormField } from "@/components/ui/form-field";
@@ -94,8 +95,9 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
           <FormField name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
         ) : null}
 
-        <SubmitButton pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>
+        <SubmitButton className={audience === "couple" ? "couple-auth-submit" : undefined} pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>
           {mode === "login" ? "Sign in" : "Create account"}
+          {audience === "couple" ? <ArrowRight size={17} aria-hidden="true" /> : null}
         </SubmitButton>
       </form>
 
@@ -107,6 +109,10 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
           {audience === "couple" ? "I’m a vendor" : "We’re a couple"}
         </Link>
       </div>
+      {audience === "couple" ? <div className="auth-support-strip">
+        <Sparkles size={23} strokeWidth={1.2} aria-hidden="true" />
+        <div><p>Planning with Ever After AI</p><small>Get personalized recommendations after login.</small></div>
+      </div> : null}
     </div>
   );
 }

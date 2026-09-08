@@ -53,12 +53,12 @@ for (const viewport of viewports) {
         else expect(imageBox!.x + imageBox!.width).toBeLessThan(formBox!.x);
       }
       if (route === "/auth/couple") {
-        const image = page.getByRole("img", { name: "Newlyweds sharing a kiss beneath falling ivory petals" });
+        const image = page.getByRole("img", { name: "Wedding rings on two hands resting together on ivory fabric" });
         await expect(image).toBeVisible();
-        expect(decodeURIComponent((await image.getAttribute("src"))!)).toContain("/images/auth/couple-petals.webp");
+        expect(decodeURIComponent((await image.getAttribute("src"))!)).toContain("/images/auth/hands-and-rings.webp");
         expect(await image.evaluate(el => getComputedStyle(el).filter)).toBe("none");
-        await expect(page.getByText("Everything before your happily ever after", { exact: true })).toBeVisible();
-        await expect(page.getByRole("heading", { name: "Your Next Chapter Starts Here.", exact: true })).toBeVisible();
+        await expect(page.getByText("Everything before your ever after", { exact: true })).toBeVisible();
+        await expect(page.getByText("Your Next Chapter Starts Here.", { exact: true })).toBeVisible();
         for (const [label, name] of [["First Partner's Name", "partnerOneName"], ["Second Partner's Name", "partnerTwoName"], ["First Partner's Phone (optional)", "partnerOnePhone"], ["Second Partner's Phone (optional)", "partnerTwoPhone"]]) {
           await expect(page.getByLabel(label, { exact: true })).toHaveAttribute("name", name);
         }

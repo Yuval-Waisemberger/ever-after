@@ -1,9 +1,9 @@
 "use client";
 
 import { Menu, X } from "lucide-react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
-export function PublicMobileMenu({ links, authenticated }: { links: Array<{ href: string; label: string }>; authenticated: boolean }) {
+export function PublicMobileMenu({ links, authenticated, children }: { links: Array<{ href: string; label: string }>; authenticated: boolean; children?: ReactNode }) {
   const disclosure = useRef<HTMLDetailsElement>(null);
   const summary = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -25,6 +25,7 @@ export function PublicMobileMenu({ links, authenticated }: { links: Array<{ href
       }}>
         {/* Native navigation intentionally survives closing this disclosure before routing. */}
         {links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
+        {children}
         {!authenticated ? <>
           <a href="/auth/couple?mode=login">Log in</a>
           <a href="/auth/couple">Sign up</a>

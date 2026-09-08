@@ -41,7 +41,7 @@ Preserve the handoff's scroll-driven Timeline line/reveals and Wedding Day desti
 
 Design examples must not override existing financial calculations, task persistence, recommendation scores, booking identity, explicit save behavior, privacy or language policies. Functional change requests embedded in the handoff require a separate scoped decision; no such logic changes are included here.
 
-## Later workstreams (not started)
+## Page workstream ownership
 
 | Owner | Primary files/routes | Shared coordination |
 | --- | --- | --- |
@@ -62,3 +62,35 @@ pnpm exec playwright test --config=e2e/foundation.config.ts
 ```
 
 It checks field value retention, checkbox/password behavior, shared CTA appearance, focus treatment, actual Suspense completion, reduced-motion visibility, and 1440/768/390/360px layouts. Screenshots go only to ignored `test-results/`. Existing fixture suites remain available. Live smoke testing is read-only with existing sessions; missing sessions must be reported rather than bypassed.
+
+## Phase 2A — Public / Couple Auth calibration
+
+Landing uses the final wide source as `public/images/landing/hero-wide-final.webp`: 2098×749, 207,976 bytes. The conversion preserves dimensions/aspect ratio; no image regeneration or artificial extension is used. The superseded unused portrait WIP asset has been removed. Couple Auth retains `public/images/auth/hands-and-rings.webp`: 1000×1499, 59,488 bytes. Auth uses the final transparent near-black illustrated source as public/brand/ever-after-logo-black.webp: 2172×724, 246,528 bytes, lossless WebP with alpha preserved. It is rendered with contain and no color filters/background. The obsolete beige rectangular WIP logo was removed after reference verification. Existing unrelated brand assets and handoff originals remain intact. Couple/Vendor brand surfaces should reuse this canonical black asset when their owning workstreams touch them; Landing remains logo-free. Next Image supplies responsive output. No runtime reference points into `project-docs/`.
+
+`public-auth.css` contains page-scoped art direction using the existing palette, fonts, CTA, focus and motion tokens. Global foundation files are unchanged. The only shared navigation extension is an optional content slot on `PublicMobileMenu`, allowing Landing to reuse its native disclosure and Escape behavior. Other callers retain their existing links and presentation. Auth components restrict the new photo/surface/support strip to the Couple audience; fields, actions, validation and verification flow remain unchanged.
+
+Landing uses centered logo-free navigation, existing signup/login/vendor routes, `#how-it-works`, and a concise `#about-us` section. The locked Assistant link opens a native dialog with keyboard focus containment/return; without JavaScript it remains a signup link. It does not enable AI or change authorization. The protected homepage's existing authenticated redirect is preserved.
+
+F03 and F04 are composition targets, not general inspiration. At 1440px, Landing retains its 64px logo-free header, controlled 510px hero, 72px matte lettering, approved buttons and compact four-feature section. The new wide photograph fills the image bounds with ordinary `object-fit: cover`; desktop positioning is centered, with almost the entire supplied composition visible. Tablet/mobile use 62%/64% horizontal positioning within the existing 470px/550px hero containers. Responsive image sizes account for the full rendered cover width (1317px/1541px) rather than requesting a tiny viewport-width thumbnail that becomes blurry when cropped. The former masks, background-image continuation and narrow portrait frame are removed. No stretching, mirroring, blur or synthesized side panels remain.
+
+The real hero-image load starts one overlapping entrance. Twelve curated SVG petals (eight on small screens) retain their independent trajectories, irregular launches over 0–720ms, individual durations of 1.8–2.42 seconds, varied tumble and three depth planes. The overlay is portaled directly into `.landing-page`, beside header/main and outside hero clipping or main-route transforms. Its absolute 100svh bounds cover the opening viewport, including header, wave and visible feature surfaces; it never captures pointers or accessibility focus. The last petal's animation-end event hides the overlay at 2.82 seconds. Scrolling dismisses it without replay; no fixed timer or particle dependency is needed. Reduced motion skips petals. Slow/failed images and no-JS retain usable content; focus within the hero exposes actions immediately.
+
+Feature icons have a separate repeating score while their section is visible. Every cycle lasts 10 seconds, with roughly two seconds of restrained activity and the rest settled. Plan starts at 0s (outline activation, checks drawing 180ms apart); Vendors at 2.4s (outline/accent fill, maximum 1.05 scale); Budget at 4.8s (outline activation and a 3px card movement); Assistant at 7.2s (small sparks at 7.2/7.38s, larger final spark at 7.56s). CSS animations pause when the section leaves the viewport or the tab is hidden, and resume rather than restarting the score. The section reveal remains one-time. Reduced motion disables all loops and leaves finished icons visible. These ambient cycles are intentionally distinct from finite opening petals.
+
+Couple login/signup retain F04's three-part desktop arrangement. At 1440px the roughly 410×615px image and 492px-wide form panel share a 128px top edge; Login has nearly matching vertical presence. Registration continues below the photograph without stretching it. The illustrated Auth logo is 250px wide on desktop and 180px on mobile; Landing remains logo-free. Tablet keeps the smaller photo beside the introduction, then the form below; mobile retains the 135px photo and puts supplementary benefits after the form. All fields, actions, password behavior and real pending/error handling are unchanged. Vendor Auth remains outside this scoped presentation.
+
+Landing/Auth harmony reuses `--canvas`, `--paper`, `--blush`, `--line`, `--wine`, `--surface-blush`, `--surface-champagne`, `--shadow-soft` and `--shadow-raised`. Auth no longer has a yellow/champagne radial background or a beige panel endpoint. Its page is ivory with a 25% blush/ivory mix; the near-white panel ends in a 28% blush/white mix, controls are ivory, and champagne is limited to the small support strip. Feature-icon surfaces combine blush gradients, tonal borders and soft inset/elevation shadows. No new palette/global token edits are included.
+
+**Carry forward to later workstreams:** richer surfaces, not new colors. Use layered ivory/blush, tonal neutral surfaces, small champagne accents, controlled shadows and purposeful hover depth. Avoid flat white-on-white layers, added pink, glow or glass effects. Translate signature motion into explicit start/active/rest states, timings, triggers, repeats and reduced-motion behavior; do not substitute a generic pulse for documented choreography. Workstreams B–E still require owner approval before starting.
+
+Public/Auth verification:
+
+```sh
+pnpm exec vitest run tests/ui/public-auth-visual.test.tsx tests/ui/public-navigation.test.tsx tests/ui/visual-foundation.test.tsx tests/ui/product-primitives.test.tsx tests/auth
+pnpm exec playwright test e2e/public-auth-polish.spec.ts e2e/public-redesign.spec.ts e2e/responsive-auth.spec.ts
+pnpm exec playwright test --config=e2e/public-auth.config.ts
+```
+
+The last command runs an isolated Auth fixture whose pending promise is explicitly resolved by the test. No credentials, environment files or Supabase client are loaded. Real application checks only browse/fill controls; they do not submit live auth forms or create accounts. The targeted suite covers full-width image bounds, absence of continuation masks, image/panel top alignment, logo aspect ratio, whole-opening overlay bounds, repeated icon states, offscreen pauses and reduced motion. Current four-width screenshots and full desktop/mobile opening-plus-icon recordings are local/ignored under `.codex-tmp/public-auth-correction/`. Earlier review artifacts remain preserved. The phase remains uncommitted pending owner visual review.
+
+Deferred findings: the existing JavaScript-disabled Marketplace result-visibility assertion also fails at the protected Phase 1 checkpoint because its streamed content remains hidden. The wider responsive suite also encountered a Marketplace image-load timeout at 768px; all dedicated Public/Auth viewport checks pass. These Marketplace checks are retained, not weakened or removed. Authenticated How It Works routing and other functional handoff requests remain later scoped work; Workstream A preserves existing authenticated redirects and does not modify Marketplace rendering.
