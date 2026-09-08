@@ -69,6 +69,9 @@ for (const width of [1440, 768, 390, 360]) test(`booking controls fit ${width}px
   await section.locator('[role="option"]').first().click();
   await expect(section.getByRole("status").filter({ hasText: "Selected:" })).toBeVisible();
   await expect(page.getByLabel("Booking creates")).toHaveText("0");
+  await page.goto("/?view=details");
+  await page.screenshot({ path: test.info().outputPath(`wedding-details-${width}.png`), fullPage: true });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test("autocomplete ignores stale results, handles empty results and closes with Escape", async ({ page }) => {
@@ -99,4 +102,36 @@ test("touch selection keeps booking explicit", async ({ browser }) => {
   await expect(page.getByLabel("Booking creates")).toHaveText("0");
   await expect(section.getByRole("button", { name: "Confirm booking" })).toBeEnabled();
   await context.close();
+});
+
+test("setup progress follows entered details, not navigation or repeated choice clicks", async ({ page }) => {
+  const wizard = page.locator(".setup-wizard");
+  const progress = wizard.getByRole("progressbar", { name: "Setup details added" });
+  await expect(progress).toHaveAttribute("aria-valuenow", "0");
+  await wizard.getByRole("button", { name: "Continue", exact: true }).click();
+  await expect(progress).toHaveAttribute("aria-valuenow", "0");
+  await wizard.getByRole("button", { name: "Continue", exact: true }).click();
+  await wizard.getByRole("checkbox", { name: "Elegant", exact: true }).check();
+  await expect(progress).toHaveAttribute("aria-valuenow", "1");
+  await wizard.getByRole("checkbox", { name: "Romantic", exact: true }).check();
+  await expect(progress).toHaveAttribute("aria-valuenow", "1");
+  await wizard.getByRole("checkbox", { name: "Elegant", exact: true }).uncheck();
+  await wizard.getByRole("checkbox", { name: "Romantic", exact: true }).uncheck();
+  await expect(progress).toHaveAttribute("aria-valuenow", "0");
+  await wizard.getByRole("button", { name: "Back", exact: true }).click();
+  await wizard.getByRole("button", { name: "Back", exact: true }).click();
+  await wizard.getByLabel("Wedding date").fill("2027-04-16");
+  await expect(progress).toHaveAttribute("aria-valuenow", "1");
+});
+
+test("reduced motion keeps setup steps and choice feedback visible without animation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  const wizard = page.locator(".setup-wizard");
+  await expect(wizard.getByRole("heading", { name: "Let’s begin with your plans" })).toBeVisible();
+  expect(await wizard.locator(".setup-step-intro").evaluate(node => getComputedStyle(node).animationName)).toBe("none");
+  expect(await wizard.locator(".setup-progress__fill").evaluate(node => getComputedStyle(node).transitionDuration)).toBe("0s");
+  await wizard.getByRole("button", { name: "Continue", exact: true }).click();
+  await wizard.getByRole("button", { name: "Continue", exact: true }).click();
+  await wizard.getByRole("checkbox", { name: "Elegant", exact: true }).check();
+  await expect(wizard.getByRole("checkbox", { name: "Elegant", exact: true })).toBeChecked();
 });

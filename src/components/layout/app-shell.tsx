@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import type { ReactNode } from "react";
 import { useState } from "react";
 import {
@@ -84,6 +85,7 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
   avatarPhotoUrl?: string | null;
   children: ReactNode;
 }) {
+  const brand = role === "couple" ? <Link href="/wedding" className="couple-canonical-logo" aria-label="Ever After home"><Image src="/brand/ever-after-logo-black.webp" alt="Ever After" width={2172} height={724} sizes="170px" /></Link> : <Wordmark href="/vendor" />;
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({});
   const navigation = (role === "couple" ? coupleNavigation : vendorNavigation).map((item) => ({
@@ -97,7 +99,7 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
         <div className="workspace-sidebar-brand flex items-center justify-between gap-2">
           {sidebarCollapsed ? (
             <Link href={role === "couple" ? "/wedding" : "/vendor"} className="grid size-10 place-items-center text-wine" aria-label="Ever After home"><Heart className="size-5" /></Link>
-          ) : <Wordmark href={role === "couple" ? "/wedding" : "/vendor"} />}
+          ) : brand}
           <button type="button" className="grid size-10 place-items-center text-ink-soft hover:text-wine" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} aria-label={sidebarCollapsed ? "Expand side navigation" : "Collapse side navigation"}>
             {sidebarCollapsed ? <PanelLeftOpen className="size-4.5" /> : <PanelLeftClose className="size-4.5" />}
           </button>
@@ -141,7 +143,7 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
 
       <div className="min-w-0">
         <header className="workspace-mobile-header flex items-center justify-between gap-3 border-b px-5 py-3 lg:hidden">
-          <Wordmark href={role === "couple" ? "/wedding" : "/vendor"} />
+          {brand}
           <details className="workspace-menu">
             <summary aria-label="Workspace menu"><Menu size={22} strokeWidth={1.4} /></summary>
             <div>

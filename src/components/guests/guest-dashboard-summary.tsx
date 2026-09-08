@@ -1,3 +1,4 @@
+import { AnimatedValue } from "@/components/planning/animated-value";
 import { CheckCircle2, Clock3, MailOpen, UsersRound, XCircle } from "lucide-react";
 import type { GuestSummary } from "@/lib/domain/guests";
 
@@ -27,7 +28,7 @@ export function GuestDashboardSummary({ summary }: { summary: GuestSummary }) {
           <span className={`mx-auto grid size-9 place-items-center rounded-full ${surface} ${color}`}>
             <Icon className="size-4.5" aria-hidden="true" />
           </span>
-          <strong className="mt-1.5 block text-xl leading-none text-ink">{value}</strong>
+          <strong className="mt-1.5 block text-xl leading-none text-ink"><AnimatedValue value={value} /></strong>
           <span className="mt-1 block text-[0.7rem] leading-tight text-ink-soft">{label}</span>
         </div>
       ))}

@@ -1,3 +1,4 @@
+import { PlanningReveal } from "@/components/planning/reveal";
 import type { ReactNode } from "react";
 
 export function DashboardCard({
@@ -14,11 +15,11 @@ export function DashboardCard({
   className?: string;
 }) {
   return (
-    <section className={`ea-surface ea-dashboard-card rounded-2xl border bg-paper p-5 ${className}`}>
+    <PlanningReveal className="dashboard-reveal"><section className={`ea-surface ea-dashboard-card rounded-2xl border bg-paper p-5 ${className}`}>
       {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
       <h2 className="font-display mt-1 text-2xl">{title}</h2>
       <div className="mt-5">{children}</div>
       {footer ? <div className="mt-5 border-t pt-4 text-sm">{footer}</div> : null}
-    </section>
+    </section></PlanningReveal>
   );
 }

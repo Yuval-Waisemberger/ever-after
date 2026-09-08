@@ -3,9 +3,9 @@ import { StatusPill, type StatusTone } from "@/components/ui/status-pill";
 
 const statusTone: Record<GuestRsvpStatus, StatusTone> = {
   not_invited: "neutral",
-  invited: "waiting",
+  invited: "warning",
   attending: "success",
-  not_attending: "danger",
+  not_attending: "progress",
 };
 
 export function GuestStatusPill({ status }: { status: GuestRsvpStatus }) {

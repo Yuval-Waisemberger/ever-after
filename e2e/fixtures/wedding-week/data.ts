@@ -1,7 +1,7 @@
 import { calculateTaskSummary } from "@/lib/domain/tasks";
 import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { calculateGuestSummary } from "@/lib/domain/guests";
-export async function getCoupleIdentity() { return { avatarChoice: "initials", photoUrl: null }; }
+export async function getCoupleIdentity() { return { avatarChoice: "heart", photoUrl: null }; }
 export async function getGuestSummary() {
   return calculateGuestSummary(new URLSearchParams(location.search).has("empty") ? [] : [
     { rsvpStatus: "attending", invitedCount: 60, attendingCount: 58 },
@@ -33,4 +33,9 @@ export async function getWeddingDashboard(now = new Date()) {
     tasks, taskSummary: calculateTaskSummary(tasks, now), relationships,
     budget: calculateBudgetSummary(17000000, budgetItems), budgetItems,
   };
+}
+
+export async function getOwnedWedding() { return { wedding_date: new URLSearchParams(location.search).has("noDate") ? null : "2026-09-12" }; }
+export async function getTasks() {
+  return Array.from({ length: 16 }, (_, i) => ({ id: `timeline-${i}`, title: `Planning milestone ${i + 1}`, due_date: i === 15 ? null : `2026-${String(Math.min(9, Math.floor(i / 2) + 1)).padStart(2, "0")}-05`, status: (["open", "in_progress", "waiting_on_vendor", "completed"] as const)[i % 4] }));
 }

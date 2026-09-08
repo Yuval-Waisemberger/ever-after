@@ -9,6 +9,9 @@ const server = await createServer({
   cacheDir: fileURLToPath(new URL("../../../.codex-tmp/budget-vite", import.meta.url)),
   resolve: { alias: {
     "next/link": fileURLToPath(new URL("./link.tsx", import.meta.url)),
+    "@/lib/queries/budget": fileURLToPath(new URL("./page-data.ts", import.meta.url)),
+    "@/lib/queries/guests": fileURLToPath(new URL("./page-data.ts", import.meta.url)),
+    "@/lib/actions/guests": fileURLToPath(new URL("./actions.ts", import.meta.url)),
     "@/lib/actions/budget": fileURLToPath(new URL("./actions.ts", import.meta.url)),
     "@": fileURLToPath(new URL("../../../src", import.meta.url)),
   } },

@@ -1,4 +1,7 @@
-import { Pencil } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Check, Pencil } from "lucide-react";
 import { TaskQuickActions } from "./task-quick-actions";
 import type { TaskStatus } from "@/lib/domain/task-status";
 import { TaskForm } from "./task-form";
@@ -18,12 +21,21 @@ type TaskRowProps = {
 };
 
 export function TaskRow({ task, defaultOpen = false }: TaskRowProps & { defaultOpen?: boolean }) {
+  // Only changed, server-confirmed props earn motion. Pending/failed writes do not.
+  const [previousStatus, setPreviousStatus] = useState(task.status);
+  const [motion, setMotion] = useState<"complete" | "reopen" | undefined>();
+  if (previousStatus !== task.status) {
+    setPreviousStatus(task.status);
+    setMotion(task.status === "completed" ? "complete" : previousStatus === "completed" ? "reopen" : undefined);
+  }
   return (
-    <article data-status={task.status} data-priority={task.priority} className="task-row rounded-2xl border bg-paper px-4 py-4 sm:px-5">
+    <article data-status={task.status} data-priority={task.priority} data-task-motion={motion} onAnimationEnd={event => {
+      if (event.target === event.currentTarget && (event.animationName === "task-settle" || event.animationName === "task-reopen-surface")) setMotion(undefined);
+    }} className="task-row rounded-2xl border bg-paper px-4 py-4 sm:px-5">
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <h2 className={`font-semibold ${task.status === "completed" ? "text-ink-soft line-through" : "text-ink"}`}>{task.title}</h2>
+            <h2 className={`task-title font-semibold ${task.status === "completed" ? "text-ink-soft" : "text-ink"}`}><span className="task-title-text">{task.title}</span><Check aria-hidden="true" className="task-success-check" /></h2>
             <span className={`rounded-full px-2 py-0.5 text-[0.68rem] font-bold uppercase tracking-wide ${task.priority === "high" ? "bg-red-900/8 text-red-800" : task.priority === "low" ? "bg-sage/10 text-sage" : "bg-gold/12 text-[#77571f]"}`}>{task.priority}</span>
             <TaskStatusPill status={task.status} dueDate={task.due_date} />
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { WeddingDraft } from "./wedding-draft";
+import "./setup-visual.css";
 import { useActionState, useState } from "react";
 import { saveWeddingDetails } from "@/lib/actions/wedding";
 import { initialActionState } from "@/lib/actions/state";
@@ -27,7 +28,7 @@ export function WeddingDetailsForm({
   const [revision] = useState(values.revision);
   const [state, action] = useActionState(saveWeddingDetails, initialActionState);
   return (
-    <WeddingDraft values={values} names={{ partnerOneName, partnerTwoName }}><form noValidate onReset={e => e.preventDefault()} action={action} className="mt-8 space-y-5">
+    <WeddingDraft values={values} names={{ partnerOneName, partnerTwoName }}><form noValidate onReset={e => e.preventDefault()} action={action} className="wedding-details-form mt-8 space-y-5">
       <input type="hidden" name="revision" value={revision ?? ""} />
       {state.status === "error" && !state.message ? <p role="alert">Check the field errors and try again.</p> : null}
       {revision !== values.revision ? <p role="status">Saved details changed. Reload before saving this form; unsaved entries will need to be re-entered.</p> : null}

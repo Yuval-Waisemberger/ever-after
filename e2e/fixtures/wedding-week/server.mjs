@@ -12,6 +12,7 @@ const server = await createServer({
     "next/headers": fileURLToPath(new URL("./headers.ts", import.meta.url)),
     "next/image": fileURLToPath(new URL("./image.tsx", import.meta.url)),
     "@/lib/queries/wedding": fileURLToPath(new URL("./data.ts", import.meta.url)),
+    "@/lib/queries/tasks": fileURLToPath(new URL("./data.ts", import.meta.url)),
     "@/lib/queries/guests": fileURLToPath(new URL("./data.ts", import.meta.url)),
     "@/lib/queries/couple-identity": fileURLToPath(new URL("./data.ts", import.meta.url)),
     "@": fileURLToPath(new URL("../../../src", import.meta.url)),

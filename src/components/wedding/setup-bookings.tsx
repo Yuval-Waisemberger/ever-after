@@ -1,5 +1,6 @@
 "use client";
 import { useState } from "react";
+import "./setup-visual.css";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { BOOKING_CATEGORIES, type BookingCategory } from "@/lib/domain/booking-state";
@@ -9,7 +10,7 @@ import { bookSetupVendor, saveBookingDeclaration, type BookingResult } from "@/l
 
 const labels = { CONFIRMED_BOOKED: "Booked", REPORTED_ARRANGED_DETAILS_LATER: "Already arranged — vendor details not added yet", NOT_RECORDED_AS_BOOKED: "No booking added", UNKNOWN_NEEDS_REVIEW: "Review booking details" };
 export function SetupBookingsPanel({ data }: { data: SetupBookings }) {
-  return <section className="mt-6 rounded-2xl border bg-paper p-5 sm:p-7" aria-label="Arranged vendors">
+  return <section className="setup-bookings-panel mt-6 rounded-2xl border bg-paper p-5 sm:p-7" aria-label="Arranged vendors">
     <h2 className="font-display text-2xl">Who have you already arranged?</h2>
     <p className="mt-2 text-sm text-ink-soft">Optional — add vendors now or come back later.</p>
     {!data.complete ? <p role="alert">We couldn’t load all your bookings. Please refresh before making changes.</p> : null}

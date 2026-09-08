@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarHeart } from "lucide-react";
+import { AnimatedValue } from "@/components/planning/animated-value";
 import { getWeddingPhase, weddingDayCountdown } from "@/lib/domain/wedding-week";
 
 export function WeddingDateCountdown({ weddingDate, initialNow, previewNow = null }: { weddingDate: string | null; initialNow: number; previewNow?: number | null }) {
@@ -19,17 +19,16 @@ export function WeddingDateCountdown({ weddingDate, initialNow, previewNow = nul
   const fine = finalWeek && weddingDate ? weddingDayCountdown(weddingDate, now) : null;
   const title = phase.key === "DAY_BEFORE" ? "Tomorrow" : phase.key === "FINAL_WEEK" ? `${phase.daysRemaining} days to go` : phase.key === "WEDDING_DAY" ? "Today is the day" : "Just married";
 
-  return <div aria-label="Wedding date and countdown" data-phase={phase.key} className="wedding-date-card mx-auto mt-6 flex max-w-2xl flex-col items-center justify-center gap-3 border-y px-5 py-5 sm:flex-row sm:gap-5">
-    <CalendarHeart className="size-6 shrink-0 text-gold" strokeWidth={1.35} aria-hidden="true" />
-    <div className="min-w-0 text-center sm:text-left">
+  return <div aria-label="Wedding date and countdown" data-phase={phase.key} className="wedding-date-card mx-auto mt-6">
+    <div className="min-w-0 text-center">
       {special ? <>
         {phase.key !== "POST_WEDDING" ? <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-wine">{finalWeek ? "Wedding Week" : "Wedding Day"}</p> : null}
-        <p className="font-display text-3xl text-wine">{title}</p>
+        <p className="font-display countdown-special-title text-wine">{phase.key === "FINAL_WEEK" ? <><AnimatedValue value={phase.daysRemaining!} duration={2000} countdown /> days to go</> : title}</p>
         <p className="mt-2 text-sm text-ink-soft">{dateLabel}</p>
         {fine ? <p className="mt-2 text-sm tabular-nums text-ink-soft"><span dir="ltr">{String(fine.hours).padStart(2, "0")}h {String(fine.minutes).padStart(2, "0")}m</span> until your wedding day</p> : null}
       </> : <>
         <p className="font-display text-2xl text-wine">{dateLabel}</p>
-        <p className="mt-1 text-sm text-ink-soft">{weddingDate ? `${phase.daysRemaining} days until your celebration` : "Choose it whenever the moment feels right."}</p>
+        {weddingDate ? <p className="countdown-day-value" aria-label={`${phase.daysRemaining} days until your celebration`}><AnimatedValue value={phase.daysRemaining!} duration={2200} countdown /><span className="countdown-caption">days until your celebration <span aria-hidden="true">✧</span></span></p> : <p className="mt-2 text-sm text-ink-soft">Choose it whenever the moment feels right.</p>}
       </>}
       {previewNow !== null ? <p className="mt-2 text-xs text-ink-soft">Development preview · date area only</p> : null}
     </div>

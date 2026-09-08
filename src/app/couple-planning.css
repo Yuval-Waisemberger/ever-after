@@ -1,0 +1,67 @@
+/* Couple Planning presentation only. The Phase 1 palette/motion tokens remain canonical. */
+.planning-dashboard, .planning-timeline { background: linear-gradient(150deg, var(--canvas), color-mix(in srgb, var(--blush) 32%, var(--canvas)) 55%, var(--canvas)); }
+.planning-dashboard .wedding-dashboard-hero { padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: 24px; background: linear-gradient(135deg, var(--paper), var(--canvas), var(--blush)); box-shadow: var(--shadow-soft), inset 0 1px 0 var(--paper); }
+.planning-dashboard .wedding-dashboard-hero h1 { font-size: clamp(32px, 3.6vw, 48px); }
+.planning-dashboard .wedding-date-card { max-width: none; padding: 24px 20px; border: 1px solid var(--line); border-radius: 18px; background: linear-gradient(100deg, var(--blush), var(--paper), var(--blush)); box-shadow: inset 0 1px 2px rgb(73 62 56 / 3%); }
+.planning-dashboard .countdown-day-value { margin-top: 10px; color: var(--wine); font-family: var(--font-editorial); font-size: clamp(48px, 5vw, 70px); line-height: 1.1; }
+.planning-dashboard .countdown-caption { display: block; margin-top: 10px; color: var(--ink-soft); font: 14px/1.7 var(--font-body); }
+.planning-dashboard .countdown-special-title { font-size: clamp(28px, 3vw, 42px); }
+.planning-value { font-variant-numeric: tabular-nums; }
+.planning-dashboard .wedding-overview { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; }
+.dashboard-reveal { min-width: 0; }
+.planning-dashboard .ea-dashboard-card { height: 100%; border-radius: 18px; border: 1px solid var(--line); padding: clamp(20px, 2.4vw, 28px); box-shadow: var(--shadow-soft), inset 0 1px 0 var(--paper); background: var(--surface-standard); transition: box-shadow var(--motion-hover) var(--ease-soft), border-color var(--motion-hover); }
+.planning-dashboard .ea-dashboard-card:hover { box-shadow: var(--shadow-raised); border-color: color-mix(in srgb, var(--rose) 35%, var(--line)); }
+.planning-dashboard .dashboard-tasks-card { background: var(--surface-blush); }
+.planning-dashboard .dashboard-upcoming-card { background: var(--surface-tonal); }
+.planning-dashboard .dashboard-budget-card { background: linear-gradient(150deg, var(--paper), var(--canvas), var(--cream)); }
+.planning-dashboard .dashboard-guests-card { background: linear-gradient(140deg, var(--cream), var(--blush)); }
+.planning-dashboard .dashboard-assistant-card { background: var(--surface-champagne); }
+.planning-dashboard .task-summary-grid + div > div { background: linear-gradient(90deg, var(--wine), var(--rose), var(--champagne)); transform-origin: left; animation: planning-bar-fill 1100ms var(--ease-soft) both; }
+.planning-reveal[data-reveal="pending"] { opacity: .55; transform: translateY(8px); }
+.planning-reveal[data-reveal="shown"] { animation: planning-reveal 650ms var(--ease-soft) var(--reveal-delay, 0ms) both; }
+.wedding-overview > .dashboard-reveal:nth-child(2) { --reveal-delay: 100ms !important; }
+.wedding-overview > .dashboard-reveal:nth-child(3) { --reveal-delay: 200ms !important; }
+.wedding-overview > .dashboard-reveal:nth-child(4) { --reveal-delay: 300ms !important; }
+.wedding-overview > .dashboard-reveal:nth-child(5) { --reveal-delay: 400ms !important; }
+.wedding-overview > .dashboard-reveal:nth-child(6) { --reveal-delay: 500ms !important; }
+@keyframes planning-reveal { from { opacity: .55; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes planning-bar-fill { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+.planning-timeline-path { --timeline-progress: 1; position: relative; padding: 28px 26px 28px 0; border-radius: 20px; background: linear-gradient(140deg, var(--paper), var(--canvas), var(--blush)); box-shadow: var(--shadow-soft); }
+.planning-timeline-path::before, .planning-timeline-path::after { content: ""; position: absolute; top: 36px; bottom: 38px; left: 22px; width: 2px; background: var(--line); }
+.planning-timeline-path::after { background: linear-gradient(var(--wine), var(--rose), var(--champagne)); transform: scaleY(var(--timeline-progress)); transform-origin: top; }
+.planning-timeline-path > li { margin-left: 12px; padding-left: 42px; position: relative; z-index: 1; }
+.planning-timeline-path > li + li { margin-top: 32px; }
+.timeline-milestone > .planning-reveal { position: relative; }
+.timeline-milestone > .planning-reveal > span { width: 14px; height: 14px; left: -38px; top: 9px; border: 2px solid var(--rose); background: var(--paper); }
+.planning-timeline .timeline-milestone h2 { color: var(--ink); font-size: 24px; }
+.planning-timeline .timeline-entry { background: var(--surface-standard); border-color: var(--line); box-shadow: inset 0 1px 0 var(--paper); transition: background var(--motion-hover), box-shadow var(--motion-hover), transform var(--motion-hover) var(--ease-soft); }
+.planning-timeline .timeline-entry:hover { transform: translateX(3px); box-shadow: var(--shadow-soft); }
+.planning-timeline .timeline-entry[data-workflow="in_progress"] { border-left: 3px solid var(--rose); }
+.planning-timeline .timeline-entry[data-workflow="waiting_on_vendor"] { border-left: 3px solid var(--status-waiting); }
+.planning-timeline .timeline-entry[data-workflow="completed"] { background: color-mix(in srgb, var(--success-tint) 55%, var(--paper)); }
+.timeline-destination-surface { position: relative; padding: 22px; padding-right: 110px; border: 1px solid color-mix(in srgb, var(--rose) 40%, var(--line)); border-radius: 16px; background: linear-gradient(130deg, var(--blush), var(--cream)); box-shadow: inset 0 1px 0 var(--paper); }
+.timeline-destination .planning-reveal { position: static; }
+.timeline-destination-surface > span { left: -42px; }
+.wedding-destination-art { position: absolute; right: 15px; top: 22px; width: 90px; height: 64px; stroke: var(--wine); stroke-width: 1.4; }
+.destination-spark { stroke: var(--gold); opacity: .55; }
+.planning-reveal[data-reveal="shown"] .destination-heart { animation: destination-heart 1000ms var(--ease-soft) both; }
+.planning-reveal[data-reveal="shown"] .destination-spark { animation: destination-spark 800ms var(--ease-soft) 700ms both; transform-origin: center; }
+.planning-reveal[data-reveal="shown"] .destination-spark:nth-of-type(3) { animation-delay: 850ms; }
+.planning-reveal[data-reveal="shown"] .destination-spark:nth-of-type(4) { animation-delay: 1000ms; }
+@keyframes destination-heart { from { stroke-dasharray: 1; stroke-dashoffset: 1; } to { stroke-dasharray: 1; stroke-dashoffset: 0; } }
+@keyframes destination-spark { 0% { opacity: 0; transform: scale(.85); } 65% { opacity: 1; } 100% { opacity: .55; transform: scale(1); } }
+.planning-save-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); z-index: 60; display: flex; align-items: center; gap: 12px; width: max-content; max-width: calc(100vw - 32px); padding: 14px 18px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-champagne); color: var(--wine); box-shadow: var(--shadow-raised); animation: planning-toast 650ms var(--ease-soft) both; }
+.planning-save-toast a { display: block; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; }
+.planning-save-toast button { display: grid; place-items: center; min-width: 44px; min-height: 44px; }
+@keyframes planning-toast { from { opacity: 0; translate: 0 12px; } to { opacity: 1; translate: 0 0; } }
+.couple-canonical-logo { display: inline-flex; width: 170px; max-width: 100%; flex-shrink: 1; align-items: center; }
+.couple-canonical-logo img { width: 100%; height: 58px; object-fit: contain; }
+@media(max-width: 900px) { .planning-dashboard .wedding-overview { grid-template-columns: minmax(0, 1fr); } }
+@media(max-width: 600px) { .planning-dashboard .wedding-dashboard-hero { padding: 24px 16px; } .planning-dashboard .wedding-date-card { padding: 20px 10px; } .planning-timeline-path { padding-right: 14px; } .planning-timeline-path > li { padding-left: 32px; } .timeline-destination-surface { padding: 20px; padding-top: 76px; } .wedding-destination-art { left: 16px; top: 10px; width: 72px; } .couple-canonical-logo { width: 158px; } }
+@media(prefers-reduced-motion: reduce) {
+  .planning-reveal[data-reveal], .planning-reveal[data-reveal] .destination-heart, .planning-reveal[data-reveal] .destination-spark, .planning-dashboard .task-summary-grid + div > div, .planning-save-toast { animation: none; opacity: 1; transform: none; }
+  .planning-save-toast { transform: translateX(-50%); }
+  .planning-timeline-path::after { transform: scaleY(1); }
+  .planning-timeline .timeline-entry { transition: none; }
+  .planning-timeline .timeline-entry:hover { transform: none; }
+}

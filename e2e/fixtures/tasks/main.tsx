@@ -3,11 +3,13 @@ import { createRoot } from "react-dom/client";
 import { TaskForm } from "@/components/tasks/task-form";
 import { TaskRow } from "@/components/tasks/task-row";
 import { TaskFilters } from "@/components/tasks/task-filters";
+import { TaskListPanel } from "@/components/tasks/task-list-panel";
 import { filterTasks, TASK_STATUSES, calculateTaskSummary } from "@/lib/domain/tasks";
 import TimelinePage from "@/app/(couple)/wedding/timeline/page";
 import { fixture } from "./actions";
 import "@/app/globals.css";
 import "@/app/product.css";
+import "@/components/tasks/tasks-visual.css";
 function Fixture() {
   const [revision, render] = useState(0), [timeline, setTimeline] = useState<ReactNode>(null);
   useEffect(() => { const update = () => render(n => n + 1); window.addEventListener("fixture-refresh", update); return () => window.removeEventListener("fixture-refresh", update); }, []);
@@ -19,9 +21,10 @@ function Fixture() {
     <h1 className="font-display text-4xl">Our Tasks</h1>
     <p>Open: {summary.open} · Due this week: {summary.dueThisWeek} · Completed: {summary.completed}</p>
     <button onClick={() => { fixture.fail = !fixture.fail; }}>Toggle simulated failure</button>
-    <TaskFilters category={category} status={status} />
-    <section aria-label="Add task" className="paper-panel my-6 p-5"><TaskForm /></section>
-    <section aria-label="Task list" className="space-y-3">{filterTasks(fixture.tasks, status, category).map(task => <TaskRow key={task.id} task={task} />)}</section>
+    <TaskListPanel count={filterTasks(fixture.tasks, status, category).length} filters={<TaskFilters category={category} status={status} />}>
+      {filterTasks(fixture.tasks, status, category).map(task => <TaskRow key={task.id} task={task} />)}
+    </TaskListPanel>
+    <section aria-label="Add task" className="tasks-create-panel paper-panel my-6 p-5"><h2 className="mb-5 font-display text-2xl">Add a task</h2><TaskForm /></section>
     <section aria-label="Timeline">{timeline}</section>
   </main>;
 }

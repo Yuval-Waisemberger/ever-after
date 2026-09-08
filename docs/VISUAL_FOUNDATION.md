@@ -94,3 +94,54 @@ pnpm exec playwright test --config=e2e/public-auth.config.ts
 The last command runs an isolated Auth fixture whose pending promise is explicitly resolved by the test. No credentials, environment files or Supabase client are loaded. Real application checks only browse/fill controls; they do not submit live auth forms or create accounts. The targeted suite covers full-width image bounds, absence of continuation masks, image/panel top alignment, logo aspect ratio, whole-opening overlay bounds, repeated icon states, offscreen pauses and reduced motion. Current four-width screenshots and full desktop/mobile opening-plus-icon recordings are local/ignored under `.codex-tmp/public-auth-correction/`. Earlier review artifacts remain preserved. The phase remains uncommitted pending owner visual review.
 
 Deferred findings: the existing JavaScript-disabled Marketplace result-visibility assertion also fails at the protected Phase 1 checkpoint because its streamed content remains hidden. The wider responsive suite also encountered a Marketplace image-load timeout at 768px; all dedicated Public/Auth viewport checks pass. These Marketplace checks are retained, not weakened or removed. Authenticated How It Works routing and other functional handoff requests remain later scoped work; Workstream A preserves existing authenticated redirects and does not modify Marketplace rendering.
+
+## Motion coverage — Phase 2B execution
+
+Sources: final Design/Motion/UX DOCX (including all archive additions), twelve ZIP prototypes, and five local recordings inspected at beginning/intermediate/end frames: `conffetti.mov`, `countdown.mov`, `general decoration.mov`, `gust list.mov`, `wedding timeline.mov`. Recorded visual composition takes precedence; prototype sample data and looping Timeline behavior are not production requirements. Reference media remain ignored and local.
+
+| Area / required motion | Source | Owner phase | Current status |
+| --- | --- | --- | --- |
+| Global route continuity 300–450ms, genuine skeleton shimmer, reduced motion, hover depth | DOCX / ZIP 01,02 / decoration recording | 1 | IMPLEMENTED |
+| Landing finite page-level petals, overlapping entrance, living staggered icon cycles | DOCX / ZIP / imagery | 2A | IMPLEMENTED |
+| Auth focus, password control, real pending shimmer and error feedback | DOCX / ZIP 03 | 2A | IMPLEMENTED |
+| Our Wedding layered six-card stagger, real counters, countdown interpolation | DOCX / ZIP 07 / countdown recording + image | 2B | IMPLEMENTED |
+| Timeline scroll path, milestone reveals, Wedding Day heart and restrained sparkles | DOCX / ZIP 08 / Timeline recording | 2B | IMPLEMENTED |
+| Tasks category feedback, successful check → 0.6s strike → surface settle, reopen reverse | DOCX / ZIP 12 | 2B | IMPLEMENTED |
+| Budget real metric entrance, fixed-value bar fill, real booking-change highlight | DOCX / ZIP 06,13 | 2B | IMPLEMENTED |
+| Guest confirmed/invited ring scale/fade and semantic rows | DOCX / ZIP 16 / Guest recording | 2B | IMPLEMENTED |
+| Setup step fade/slide, selected choices, completed-step progress, actual save toast | DOCX / ZIP 04,09 | 2B | IMPLEMENTED |
+| Marketplace card lift/image zoom/border depth; save heart sequence + 2–3 particles; category hover | DOCX | 2C | DEFERRED — outside Couple Planning scope |
+| Recommendations sparkle and Why this match reveal | DOCX | 2C | DEFERRED — owning workstream not started |
+| Vendor booking check → one 0.8–1.2s confetti burst → rest | DOCX / confetti recording | 2C | DEFERRED — booking UI belongs to Marketplace |
+| Vendor dashboard completion counter/fill/checklist/tint/rating/section reveals | DOCX / storyboard | 2D | DEFERRED — business account scope |
+| Vendor ratings sequential real stars; Business Profile reveal/focus/explicit save toast; publication check/tint without confetti | DOCX / storyboard | 2D | DEFERRED — business account scope |
+| My Reviews card fade/rise/stagger and actual star fill | DOCX / ZIP 15 | 2D | DEFERRED — review owning workstream |
+| Assistant ornament, considering state, sequential context chips, response reveal | DOCX | 2E | DEFERRED — chat visual workstream |
+| Mobile lower-density motion and final cross-site reconciliation | DOCX | 2A–2E / 3–4 | IMPLEMENTED per completed workstream; full cross-site QA DEFERRED to 3–4 |
+
+Optional identity ornament movement and tonal financial-bar breathing remain deferred to Phase 3 calibration: the primary countdown/path/ring motions establish the hierarchy first. No required signature motion is replaced with an unrelated pulse. Excel export, provider integration, SMTP and deployment are separate functional work.
+
+
+### Phase 2B choreography and boundaries
+
+The six existing Dashboard summaries remain exactly once, in two columns on desktop and one on smaller screens. Scoped Couple styles reuse the Phase 1 palette: blush Tasks, mushroom Upcoming, ivory Vendors, wine/champagne Budget, champagne/blush Guests and champagne Assistant. The existing identity/menu control is retained. The canonical transparent black logo is reused on Couple brand surfaces; Vendor navigation remains unchanged.
+
+| Motion | Trigger → initial / active / rest | Timing, repeat, reduced motion |
+| --- | --- | --- |
+| Dashboard cards | First meaningful viewport entry; opacity .55 + 8px rise → resting card | 650ms shared soft easing, 100ms card stagger; once per mount. Reduced motion immediately final. |
+| Real metric values | First viewport entry; decorative interpolation → actual count/money | 1.5s default, Budget 1.8s, quartic ease-out; no rerender replay. SSR and accessible label always contain the actual final value. Later server values display directly. |
+| Wedding countdown | Real Israel-calendar days, first reveal; softly counts from a date-derived multiple toward the actual days | 2.2s normal / 2s final week, quartic ease-out; once. Existing day-before/day-of/post-date and development-only previews remain. No ceremony time or negative countdown. |
+| Timeline | Passive scroll + resize measurement; wine/rose/champagne line extends to the reading position | Progress follows scroll, retains furthest revealed position; no timer/loop. Milestones reveal once with 8px rise/650ms. Reduced motion shows full line/content. |
+| Wedding Day destination | First destination reveal; heart draws, then three small sparkles settle | Heart 1s; sparkles 800ms with 700/850/1000ms offsets; finite, no confetti. |
+| Tasks | Changed server-confirmed status only; check → strike → softened semantic surface; reopen reverses | Check 220ms, strike 600ms after 200ms, settle by 1.25s; no pending/failed success. Reduced motion final status. All real filtered tasks remain in the touch/keyboard-scrollable panel; query ordering unchanged. |
+| Budget | First reveal fills real budget-impact bar; width then stable | 1.8s fill. Money formula and all payment records/actions unchanged. Canonical expense highlights only when a mounted component observes a changed committed amount from refreshed server props: 1.2s finite blush, no initial-arrival success inference. |
+| Guest ring | First reveal; real attending / invited ratio, scale .92 + opacity .5 → 1 | 2s once. Zero invitations have an explicit empty state. Existing household/RSVP semantics and independent estimate remain. |
+| Setup | Current step enters from 18px horizontally; actual populated sections drive Details added progress | 1.1s desktop / 800ms mobile; choices 500ms; progress 800ms. Navigation clicks do not inflate progress. This visual progress does not replace persisted completion semantics or make optional fields mandatory. |
+| Details save | Existing successful save redirect mounts a compact check / saved / View details toast | 650ms rise/fade; dismisses at 2.8s or manually. No persistence/action changes. Reduced motion preserves feedback. |
+
+No schema, RLS, ownership, auth, query, persistence, financial formula, booking writer or provider/tool change belongs to this work. Shared effects live in `src/components/planning/`; page-specific CSS stays with its owning components. All new fixture actions/queries use synthetic local data and block external requests. The ignored review media live in `.codex-tmp/phase2b-review/`.
+
+Known limits: a first arrival at Budget has no trustworthy previous canonical amount, so it does not fabricate sync feedback; a later mounted server refresh can highlight the changed item. Full signed-in Frankfurt smoke testing needs an existing authenticated session (the available browser was signed out during this pass). No test accounts or live rows were created. Optional identity float and bar breathing remain deferred to Phase 3, and Phases 2C–2E remain untouched.
+
+
+Phase 2B validation: TypeScript and whole-repository ESLint passed; all 791 Vitest tests passed in 59 files with bounded concurrency; 48 Couple fixture Playwright tests passed (Setup 12, Tasks 6, Budget/Guests 17, Countdown/Timeline 13); production build passed. Screenshots cover all six planning areas at 1440/768/390/360. Countdown and Timeline review videos are local only. The six normal local routes safely redirected the available signed-out session to Couple authentication with no 500 errors; populated application states were tested through isolated fixtures. One earlier asset-test timeout and two multi-state screenshot timeouts were resolved by bounded concurrency/appropriate test timeout, without changing product behavior or assertions. Existing mock Supabase multi-client warnings are test-environment logging, not a new runtime error.

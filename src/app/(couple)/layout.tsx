@@ -1,3 +1,4 @@
+import "@/app/couple-planning.css";
 import { AppShell } from "@/components/layout/app-shell";
 import { requireRole } from "@/lib/auth/user";
 import { getOwnedWedding } from "@/lib/queries/wedding";

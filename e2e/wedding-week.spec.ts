@@ -11,9 +11,11 @@ const states = [
 ] as const;
 test.beforeEach(async ({ page }) => {
   await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.clock.install({ time: new Date("2026-09-07T12:00:00Z") });
 });
 for (const width of [1440, 1280, 1024, 768, 390, 375, 360]) test(`date-only celebration at ${width}`, async ({ page }) => {
+  test.setTimeout(90000); // Six complete state navigations and screenshots per viewport.
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
   await page.setViewportSize({ width, height: 1000 });
   let originalCards = "";
@@ -21,7 +23,8 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 360]) test(`date-only cele
     await page.goto(`/?${query}`);
     const date = page.getByLabel("Wedding date and countdown");
     await expect(date).toHaveAttribute("data-phase", phase);
-    await expect(date.getByText(label, { exact: true })).toBeVisible();
+    if (phase === "NORMAL") await expect(date.getByLabel(label, { exact: true })).toBeVisible();
+    else await expect(date.getByText(label, { exact: true })).toBeVisible();
     await expect(date.getByText(/Development preview/)).toBeVisible();
     for (const name of cards) await expect(page.getByRole("heading", { name, exact: true })).toHaveCount(1);
     for (const name of discarded) await expect(page.getByText(name, { exact: true })).toHaveCount(0);
@@ -53,4 +56,42 @@ test("no-date ignores preview; minute clock crosses wedding-day boundary without
   await expect(date.getByText("Today is the day")).toBeVisible();
   await expect(date.getByText(/until your wedding day/)).toHaveCount(0);
   for (const name of cards) await expect(page.getByRole("heading", { name, exact: true })).toHaveCount(1);
+});
+
+for (const width of [1440, 768, 390, 360]) test(`Timeline follows scroll at ${width}`, async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.setViewportSize({ width, height: 900 });
+  await page.goto("/?timeline=1");
+  const path = page.locator(".planning-timeline-path");
+  await expect(path).toBeVisible();
+  const progress = () => path.evaluate(el => Number((el as HTMLElement).style.getPropertyValue("--timeline-progress")));
+  const start = await progress();
+  expect(start).toBeLessThan(1);
+  await page.locator(".timeline-destination").scrollIntoViewIfNeeded();
+  await page.clock.runFor(1400);
+  expect(await progress()).toBeGreaterThan(start);
+  await expect(page.locator(".timeline-destination .planning-reveal")).toHaveAttribute("data-reveal", "shown");
+  await expect(page.getByRole("heading", { name: "Your Wedding Day", exact: true })).toHaveCount(1);
+  await expect(page.getByText("Waiting on vendor").first()).toHaveCount(1);
+  const reached = await progress();
+  await page.evaluate(() => scrollTo(0, 0)); await page.clock.runFor(300);
+  expect(await progress()).toBe(reached);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.clock.runFor(200);
+  await page.screenshot({ path: test.info().outputPath(`timeline-${width}.png`), fullPage: true });
+});
+test("countdown eases to the actual value once, accessible amount stays final", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "no-preference" });
+  await page.goto("/?previewDaysBefore=8");
+  const count = page.locator(".countdown-day-value .planning-value");
+  await expect(count).toHaveAttribute("aria-label", "8");
+  await page.clock.runFor(2500);
+  await expect(count).toHaveText("8");
+  await page.evaluate(() => scrollTo(0, document.body.scrollHeight));
+  await page.evaluate(() => scrollTo(0, 0)); await page.clock.runFor(200);
+  await expect(count).toHaveText("8");
+  await page.goto("/?details=updated");
+  await expect(page.getByRole("status")).toHaveText(/Wedding details saved/);
+  await page.clock.runFor(2900); await expect(page.getByRole("status")).toHaveCount(0);
 });

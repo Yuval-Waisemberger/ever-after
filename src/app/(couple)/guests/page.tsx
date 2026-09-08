@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react";
 import { GuestForm } from "@/components/guests/guest-form";
+import { GuestSummary } from "@/components/guests/guest-summary";
 import { GuestList } from "@/components/guests/guest-list";
 import { PageHeader } from "@/components/layout/page-header";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -47,27 +48,12 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
   const hasFilters = Boolean(search || rsvp || group || side);
   const estimate = wedding.guest_count == null ? null : Number(wedding.guest_count);
 
-  const summaryCards = [
-    ["Invited", summary.invited],
-    ["Attending", summary.attending],
-    ["Awaiting response", summary.awaitingResponse],
-    ["Not attending", summary.notAttending],
-    ["Not yet invited", summary.notYetInvited],
-  ] as const;
-
   return (
-    <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="guest-planning-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Plan your invitations" title="Your Guest List" description="Keep invitation parties, household counts, and replies together." action={<Link href="/guests?add=1#guest-form" className="ea-button ea-button--primary"><UserPlus className="size-4" aria-hidden="true" />Add guest / household</Link>} />
       {one(raw.guest) === "added" ? <p className="ea-feedback ea-feedback--success mt-5" role="status">Guest added.</p> : one(raw.guest) === "updated" ? <p className="ea-feedback ea-feedback--success mt-5" role="status">Guest updated.</p> : null}
 
-      <section className="mt-7" aria-labelledby="guest-summary-heading">
-        <h2 id="guest-summary-heading" className="sr-only">Guest List summary</h2>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 xl:grid-cols-6">
-          {summaryCards.map(([label, value]) => <div key={label} className="rounded-xl border bg-paper p-4"><p className="text-xs font-semibold text-ink-soft">{label}</p><p className="font-display mt-2 text-3xl text-wine">{value}</p></div>)}
-          <div className="rounded-xl border border-gold/40 bg-[#F8F1E6] p-4"><p className="text-xs font-semibold text-ink-soft">Wedding guest estimate</p><p className="font-display mt-2 text-3xl text-wine">{estimate == null ? "Not set" : `~${estimate}`}</p></div>
-        </div>
-        {estimate != null ? <p className="mt-3 text-sm text-ink-soft">{summary.invited} invited of ~{estimate} planned guests. Your Wedding Details estimate stays separate from Guest List totals.</p> : null}
-      </section>
+      <GuestSummary summary={summary} estimate={estimate} />
 
       <details id="guest-form" className="mt-8 scroll-mt-6 rounded-xl border bg-paper p-5 sm:p-7" open={Boolean(editGuest) || adding || summary.invitationParties === 0}>
         <summary className="cursor-pointer font-display text-2xl text-wine">{editGuest ? `Edit ${editGuest.full_name}` : "Add guest / household"}</summary>

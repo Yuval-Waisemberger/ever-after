@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { createRoot } from "react-dom/client";
 import { BudgetItemForm, PaymentForm } from "@/components/budget/budget-forms";
+import { BudgetMetrics, BudgetExpenseSurface } from "@/components/budget/budget-presentation";
+import { GuestSummary } from "@/components/guests/guest-summary";
 import { BudgetBookingNotice } from "@/components/budget/booking-notice";
 import { calculateBudgetSummary, formatIls } from "@/lib/domain/budget";
 import "@/app/globals.css";
@@ -15,6 +17,9 @@ function Fixture() {
     <h1 className="font-display text-3xl">Budget &amp; Payments</h1>
     <p>Isolated test fixture — no database connection.</p>
     <div className="my-5 flex flex-wrap gap-3">{[["booked", "Book / rebook"], ["unbooked", "Unbook"], ["reduced", "Reduce price"]].map(([value,label]) => <button className="ea-button ea-button--secondary" key={value} onClick={() => setState(value)}>{label}</button>)}</div>
+    <BudgetMetrics summary={summary} />
+    <BudgetExpenseSurface canonical committedMinor={item.committedAmountMinor}><p>Canonical expense presentation</p></BudgetExpenseSurface>
+    <GuestSummary estimate={300} summary={{ invitationParties: 5, invited: 10, attending: 6, awaitingResponse: 3, notAttending: 1, notYetInvited: 2 }} />
     <p>Committed <output data-testid="committed">{formatIls(summary.committedMinor)}</output></p>
     <p>Paid <output data-testid="paid">{formatIls(summary.paidMinor)}</output></p>
     <p>Available <output data-testid="available">{formatIls(summary.availableMinor)}</output></p>

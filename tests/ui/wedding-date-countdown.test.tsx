@@ -10,7 +10,7 @@ it("retains the normal date area outside the final week and when no date exists"
   expect(render(null)).toContain("Wedding date not set yet"); expect(render(null)).not.toContain("days to go");
 });
 it.each([["2026-09-14", "7 days to go"], ["2026-09-10", "3 days to go"], ["2026-09-08", "Tomorrow"], ["2026-09-07", "Today is the day"], ["2026-09-06", "Just married"]])("renders %s inside a single date area", (date, label) => {
-  const html = render(date); expect(html).toContain(label);
+  const html = render(date); expect(new DOMParser().parseFromString(html, "text/html").body.textContent).toContain(label);
   expect(html).not.toMatch(/-\d+ days|ceremony|Tasks needing attention|Payment deadlines|Your booked vendors|Guest confirmations|Details to check/);
   const doc = new DOMParser().parseFromString(html, "text/html");
   expect(doc.querySelectorAll(".wedding-date-card")).toHaveLength(1);

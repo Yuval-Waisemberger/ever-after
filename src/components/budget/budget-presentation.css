@@ -1,0 +1,23 @@
+.budget-overview { padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: var(--surface-standard); box-shadow: var(--shadow-soft); }
+.budget-overview .budget-metrics { gap: 10px; }
+.budget-metric { min-width: 0; padding: 20px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-standard); }
+.budget-metric--total { background: var(--surface-tonal); }
+.budget-metric--estimated { background: var(--surface-standard); }
+.budget-metric--committed { background: var(--surface-blush); border-color: color-mix(in srgb, var(--rose) 38%, var(--line)); }
+.budget-metric--paid { background: linear-gradient(145deg, var(--paper), var(--success-tint)); }
+.budget-metric--available { background: var(--surface-champagne); }
+.budget-impact-progress { padding: 20px 8px 10px; }
+.budget-impact-track { height: 8px; margin-top: 12px; overflow: hidden; border-radius: 999px; background: var(--mushroom); }
+.budget-impact-track span { display: block; width: 100%; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--wine), var(--rose), var(--champagne)); transform: scaleX(var(--budget-impact)); transform-origin: left; }
+.budget-impact-progress[data-motion="ready"] .budget-impact-track span { transform: scaleX(0); }
+.budget-impact-progress[data-motion="revealed"] .budget-impact-track span { transition: transform 1800ms var(--ease-soft); }
+.budget-planning-page .budget-form-surface { background: var(--surface-standard); box-shadow: var(--shadow-soft); border-top-color: color-mix(in srgb, var(--champagne) 55%, var(--line)); }
+.budget-planning-page .budget-form-surface:first-child { background: var(--surface-champagne); }
+.budget-expense-surface { background-image: linear-gradient(145deg, color-mix(in srgb, var(--paper) 92%, transparent), color-mix(in srgb, var(--cream) 55%, transparent)); box-shadow: var(--shadow-soft); }
+.budget-expense-surface details { border-color: var(--line); }
+.budget-expense-surface .budget-payment-row { background: var(--surface-standard); border-inline-start: 3px solid var(--champagne); }
+.budget-expense-surface .budget-payment-row[data-paid="true"] { background: linear-gradient(110deg, var(--success-tint), var(--paper)); border-inline-start-color: var(--sage); }
+.budget-expenses > div:first-child { gap: 16px; flex-wrap: wrap; }
+@media (max-width: 1279px) { .budget-metric--available { grid-column: 1 / -1; } }
+@media (max-width: 639px) { .budget-overview { padding: 8px; } .budget-overview .budget-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } .budget-metric { padding: 16px 12px; } .budget-metric--available { grid-column: 1 / -1; } .budget-metric > p:nth-child(2) { font-size: 1.4rem; } }
+@media (prefers-reduced-motion: reduce) { .budget-impact-progress[data-motion] .budget-impact-track span { transition: none; transform: scaleX(var(--budget-impact)); } }

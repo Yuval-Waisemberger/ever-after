@@ -1,6 +1,7 @@
 "use client";
 
-import { WeddingDraft } from "./wedding-draft";
+import { WeddingDraft, useWeddingDraft } from "./wedding-draft";
+import "./setup-visual.css";
 import { useActionState, useState, useEffect, useRef } from "react";
 import { completeWeddingSetup, skipWeddingSetup } from "@/lib/actions/wedding";
 import { initialActionState } from "@/lib/actions/state";
@@ -22,6 +23,30 @@ const steps = [
   { title: "What matters most?", subtitle: "Choose up to four priorities." },
   { title: "Budget", subtitle: "This is optional and always editable." },
 ];
+
+/** A presentation of supplied details, separate from the persisted setup status. */
+export function SetupProgress({ step }: { step: number }) {
+  const draft = useWeddingDraft()?.values ?? {};
+  const guests = Number(draft.guestCount);
+  const budget = Number(draft.totalBudgetShekels);
+  const sections = [
+    Boolean(draft.weddingDate),
+    guests >= 1 && guests <= 5000 && Boolean(draft.preferredArea && draft.eventType),
+    Array.isArray(draft.styles) && draft.styles.length > 0,
+    Array.isArray(draft.priorities) && draft.priorities.length > 0 && draft.priorities.length <= 4,
+    draft.totalBudgetShekels !== undefined && draft.totalBudgetShekels !== "" && Number.isFinite(budget) && budget >= 0,
+  ];
+  const added = sections.filter(Boolean).length;
+  return <div className="setup-progress border-b px-5 py-4 sm:px-8">
+    <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-bold uppercase tracking-[0.14em] text-ink-soft">
+      <span>Step {step + 1} of {steps.length}</span>
+      <span>Details added · {added} of {steps.length}</span>
+    </div>
+    <div className="setup-progress__track mt-3" role="progressbar" aria-label="Setup details added" aria-valuemin={0} aria-valuemax={steps.length} aria-valuenow={added} aria-valuetext={`${added} of ${steps.length} sections with details. Date and budget remain optional.`}>
+      <div className="setup-progress__fill" style={{ width: `${added / steps.length * 100}%` }} />
+    </div>
+  </div>;
+}
 
 export function SetupWizard({ values }: { values: WeddingFieldValues }) {
   const formRef = useRef<HTMLFormElement>(null);
@@ -45,27 +70,19 @@ export function SetupWizard({ values }: { values: WeddingFieldValues }) {
   return (
     <WeddingDraft values={values}><form ref={formRef} noValidate onReset={e => e.preventDefault()} action={action} className="setup-wizard paper-panel mt-8 overflow-hidden">
       <input type="hidden" name="revision" value={revision ?? ""} />
-      <div className="border-b bg-paper-muted px-5 py-4 sm:px-8">
-        <div className="flex items-center justify-between text-xs font-bold uppercase tracking-[0.14em] text-ink-soft">
-          <span>Step {step + 1} of {steps.length}</span>
-          <span>{Math.round(((step + 1) / steps.length) * 100)}%</span>
-        </div>
-        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-line/60">
-          <div className="h-full rounded-full bg-wine transition-all" style={{ width: `${((step + 1) / steps.length) * 100}%` }} />
-        </div>
-      </div>
+      <SetupProgress step={step} />
       <div className="p-5 sm:p-8">
-        <h2 className="font-display text-3xl">{steps[step].title}</h2>
-        <p className="mt-2 text-sm leading-6 text-ink-soft">{steps[step].subtitle}</p>
+        <div key={step} className="setup-step-intro"><h2 className="font-display text-3xl">{steps[step].title}</h2>
+        <p className="mt-2 text-sm leading-6 text-ink-soft">{steps[step].subtitle}</p></div>
         {skipState.message ? <p role="alert">{skipState.message}</p> : null}
         {state.status === "error" ? <p className="mt-4 rounded-xl bg-red-900/5 px-4 py-3 text-sm text-red-800" role="alert">{state.message ?? "Check the field errors and try again."}</p> : null}
 
         {revision !== values.revision ? <p role="status" className="mt-3 text-sm">Saved details changed. Reload this page before saving preferences; unsaved entries will need to be re-entered.</p> : null}
-        <div className={step === 0 ? "mt-7" : "hidden"}><WeddingBasicsFields values={values} errors={state.errors} /></div>
-        <div className={step === 1 ? "mt-7" : "hidden"}><WeddingCharacteristicsFields values={values} errors={state.errors} /></div>
-        <div className={step === 2 ? "mt-7" : "hidden"}><WeddingStyleFields values={values} errors={state.errors} /></div>
-        <div className={step === 3 ? "mt-7" : "hidden"}><WeddingPriorityFields values={values} errors={state.errors} /></div>
-        <div className={step === 4 ? "mt-7" : "hidden"}><WeddingBudgetFields values={values} errors={state.errors} /></div>
+        <div className={step === 0 ? "setup-step-fields mt-7" : "hidden"}><WeddingBasicsFields values={values} errors={state.errors} /></div>
+        <div className={step === 1 ? "setup-step-fields mt-7" : "hidden"}><WeddingCharacteristicsFields values={values} errors={state.errors} /></div>
+        <div className={step === 2 ? "setup-step-fields mt-7" : "hidden"}><WeddingStyleFields values={values} errors={state.errors} /></div>
+        <div className={step === 3 ? "setup-step-fields mt-7" : "hidden"}><WeddingPriorityFields values={values} errors={state.errors} /></div>
+        <div className={step === 4 ? "setup-step-fields mt-7" : "hidden"}><WeddingBudgetFields values={values} errors={state.errors} /></div>
 
         <div className="mt-9 flex flex-wrap items-center justify-between gap-3 border-t pt-5">
           <button type="button" onClick={() => setStep(Math.max(0, step - 1))} disabled={step === 0} className="min-h-11 rounded-full px-4 text-sm font-semibold text-ink-soft hover:text-wine disabled:invisible">Back</button>
