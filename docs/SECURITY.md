@@ -328,3 +328,26 @@ were identical before/after, with no wrong-role parents or invalid references. S
 unaffected policy definitions also retained the same fingerprint. No live QA rows were created.
 Earlier manual migration history remains non-authoritative; no ledger change or db push was used.
 Full Supabase JWT adversarial and Storage HTTP boundary checks remain Final Production QA.
+
+## Future real-AI admission — local migration only
+
+`202609080001_assistant_real_ai_admission.sql` has **not** been applied to Frankfurt. It adds an
+independent, non-cascading ledger with fixed atomic limits (500 global, 150 per Couple, ten per
+sliding five minutes, one active request). Conversation deletion cannot refund usage. Admission
+uses a transaction advisory lock and database time at READ COMMITTED; stale-snapshot isolation
+is rejected. Single-use dispatch claims and explicit terminal transitions prevent redispatch.
+Uncertain external execution permanently consumes quota and keeps its active slot blocked;
+there is no automatic refund, expiry or retry. This is deliberately conservative.
+
+Browser roles cannot SELECT/INSERT/UPDATE/DELETE/TRUNCATE the ledger or execute its three privileged
+functions. RLS is enabled without owner policies. Even service_role is explicitly excluded from
+the new grants. The new NOLOGIN `assistant_admission_executor` can execute only the narrow functions,
+not directly change the ledger. No memberships/login/credentials are configured. A separately
+approved dedicated backend database channel must authenticate and resolve Couple ownership before
+calling it; the existing public-key/user-session client and product READ tools remain unchanged.
+See [AI Agent admission contract](AI_AGENT_SPEC.md#real-ai-phase-1a--isolated-admission-guardrails-2026-09-08)
+for states, request minimization, failure semantics and the future credential approval boundary.
+
+The TypeScript guardrails are unwired and explicitly exempt Local. Request hashing avoids storing
+prompt text in accounting; it does not anonymize arbitrary personal input. No AI SDK/provider/key,
+network research, live ledger or billing integration is introduced.

@@ -397,3 +397,94 @@ phase adapter reuses the small shared getWeddingPhase helper, preserving existin
 and final-month contracts. Operational Task IDs/selection added for the discarded Dashboard were
 removed. Existing deterministic planning signals and ten READ tools remain unchanged. Preview
 clocks never enter Assistant context; there is no new Agent capability or external AI work.
+
+## Real AI Phase 1A — isolated admission guardrails (2026-09-08)
+
+`202609080001_assistant_real_ai_admission.sql` is local-only, **not applied to Frankfurt**.
+No OpenAI provider, SDK, key, credential, live connection or research is enabled. The provider
+selector, Local answers, UI, API persistence and ten READ tools are unchanged. The new
+`src/lib/assistant/guardrails` modules are not imported by the current request path.
+
+### Admission and data minimization
+
+One ledger row means one permanently consumed logical real-OpenAI turn, reserved before dispatch.
+SQL enforces fixed limits: 500 deployment-wide, 150 per Couple/profile, ten per Couple in a sliding
+five-minute window, and one active turn per Couple. There is no client/provider argument that can
+raise them. All rows count, including pre-dispatch failures and uncertain results. Local turns
+never enter the ledger. These turn caps do not independently guarantee a monetary spending cap;
+output/context/iteration/tool/retry budgets must be bounded before real-provider enablement.
+
+`assistant_real_ai_admissions` stores request UUID, Couple/profile UUID, wedding UUID, SHA-256
+request digest, state, admitted/dispatched/completed timestamps and a closed safe outcome code.
+It contains no prompts, responses, model payloads, credentials or reasoning. No product foreign
+key cascades into the ledger: message/thread/wedding deletion cannot restore capacity. Couple
+limits use profile identity so recreating a wedding does not reset that account's usage.
+
+Admission validates current Couple role and ownership from the live profiles/weddings, then
+takes a fixed transaction-level advisory lock before checking duplicate identity, global usage,
+Couple usage, rate and active state, and inserting. READ COMMITTED is required; repeatable-read
+and serializable transactions are safely rejected to prevent a stale count snapshot. Database
+`clock_timestamp()` after the lock is the rate authority, not caller time or transaction start.
+A partial unique index independently enforces one active row per Couple. The database transaction
+is short and must commit before returning admission/dispatch permission; never hold it open
+across a provider request. At most 500 retained rows makes indexed counts sufficient without a
+separate counter table.
+
+### State machine and uncertain delivery
+
+| Current state | Allowed operation / result |
+| --- | --- |
+| No admission | Admit → `admitted` |
+| `admitted` | Atomic dispatch claim → `dispatched`; known pre-dispatch failure → `failed` |
+| `dispatched` | `SUCCEEDED` → `completed`; definitive `PROVIDER_FAILED` → `failed`; ambiguous execution → `uncertain` |
+| `completed`, `failed` | No redispatch, reopen, refund or further transition |
+| `uncertain` | Remains active; no automatic timeout release, retry or further transition |
+
+Only a caller receiving a **committed** `dispatch_claimed` result may contact the future provider.
+A lost/ambiguous database reply is not permission to dispatch. Repeated claims cannot succeed.
+Provider timeouts/disconnects that leave execution uncertain must use `EXECUTION_UNCERTAIN`, not
+the definitive failure code. The active slot remains blocked even after five minutes or restart.
+Crash-left admitted/dispatched rows also remain active: this intentionally favors spending safety
+over automatic recovery. Operator reconciliation, if needed, requires a separately reviewed
+procedure; no expiry, refund or recovery endpoint is provided now. Never treat a possibly running
+request as a known failure merely to free the slot.
+
+### Request identity and unwired server contract
+
+`realAiTurnSchema` defines a future stable logical UUID plus server-resolved Couple/wedding identity,
+original nullable thread ID, message and resolved `he`/`en` language. `fingerprintRealAiTurn()` hashes
+a versioned fixed-order serialization of those semantic fields (excluding request UUID). Leading/
+trailing message whitespace follows existing request trimming. Unicode/internal whitespace is
+preserved. Keep the original envelope stable if the first submission creates a thread. Same UUID
+and digest returns `existing` without consuming again; changed digest/owner/wedding returns a safe
+conflict without disclosing another request. Hashing is not authorization or PII anonymization.
+
+`createRealAiGuardrails()` accepts an injected, currently unimplemented `AdmissionChannel`, validates
+results/identities and normalizes exceptions without retry. Only minimized fields reach the channel.
+`admit('local', ...)` returns `not_required` before any channel call. Provider choice is future
+trusted server configuration, never a client switch. No composer/schema/API transport was changed:
+the stable contract is prepared, but end-to-end transport/idempotent message persistence remains
+later wiring work. Existing completed admission identity/state supports a future verified saved-
+result lookup; no response replay or message-reference storage is implemented in Phase 1A.
+
+### Later credential/channel approval boundary
+
+The migration creates `assistant_admission_executor` as NOLOGIN, NOINHERIT, without superuser,
+database/role creation, replication or RLS-bypass privileges, and grants no memberships. Its only
+new capabilities are execution of three SECURITY DEFINER functions with an empty search path:
+`admit_assistant_real_ai_turn`, `claim_assistant_real_ai_dispatch`, `finish_assistant_real_ai_turn`.
+The ledger has RLS with no policies and no direct privileges for PUBLIC, anon, authenticated,
+service_role or the executor. Browser roles and service_role cannot execute these functions.
+
+Later, separately approve a dedicated server-only PostgreSQL login/channel allowed to SET ROLE to
+this executor, with no direct ledger/product-table grants or public-schema creation rights. Keep
+its credential in server environment configuration only; do not reuse the browser JWT client or
+give the model this channel. The application must freshly authenticate/authorize the Couple before
+supplying these function arguments. The role is a trusted backend capability, not an end-user
+ownership token. Verify actual Frankfurt role-creation/grant compatibility in a future preflight.
+No login, role membership, password, service-role key, driver or connection was configured now.
+
+Before enabling an SDK: explicitly bound transport retries, tool calls, agent iterations, output
+tokens and total turn time. Multiple model/tool steps remain one admission; SDK retries must never
+create another admission. Ambiguous dispatch must not trigger an automatic replacement request.
+Manual prepaid credit and auto-reload OFF remain owner-controlled; no billing setting was accessed.
