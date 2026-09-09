@@ -3,6 +3,23 @@ import type { AssistantResponse } from "../types";
 import { guardrailCode, guardrailMessages, realAiTurnSchema } from "./contracts";
 import { createRealAiGuardrails, type AdmissionChannel } from "./server";
 import { getAdmissionChannel } from "./rpc-channel";
+import { logAssistantDiagnostic as diagnostic } from "../diagnostics";
+
+async function observe<T extends { status: string }>(stage: "admission" | "dispatch_claim" | "admission_finish", run: () => Promise<T>): Promise<T> {
+  diagnostic({ stage, outcome: "start" });
+  try {
+    const result = await run();
+    const code = guardrailCode.safeParse("code" in result ? result.code : undefined);
+    const state = "state" in result ? result.state : undefined;
+    diagnostic({ stage, outcome: result.status === "rejected" || (stage === "admission" && result.status !== "admitted") ? "failure" : "success",
+      ...(["completed", "uncertain", "failed"].includes(String(state)) ? { status: state as "completed" | "uncertain" | "failed" } : {}),
+      ...(code.success ? { code: code.data } : {}) });
+    return result;
+  } catch (error) {
+    diagnostic({ stage, outcome: "failure", code: "ADMISSION_UNAVAILABLE" });
+    throw error;
+  }
+}
 
 type Code = keyof typeof guardrailMessages;
 export class AssistantAdmissionError extends Error {
@@ -36,9 +53,12 @@ export async function prepareAssistantTurn(
   const parsed = realAiTurnSchema.safeParse(raw);
   if (!parsed.success) throw new AssistantAdmissionError("INVALID_INPUT");
   let channel: AdmissionChannel;
-  try { channel = loadChannel(); } catch { throw new AssistantAdmissionError("ADMISSION_UNAVAILABLE"); }
+  try { channel = loadChannel(); } catch {
+    diagnostic({ stage: "admission", outcome: "failure", code: "ADMISSION_UNAVAILABLE" });
+    throw new AssistantAdmissionError("ADMISSION_UNAVAILABLE");
+  }
   const guard = createRealAiGuardrails(channel);
-  const admitted = await guard.admit("openai", parsed.data);
+  const admitted = await observe("admission", () => guard.admit("openai", parsed.data));
   if (admitted.status === "rejected") throw new AssistantAdmissionError(admitted.code);
   // No takeover/replay, even if an earlier caller left an admitted row behind.
   if (admitted.status !== "admitted") throw new AssistantAdmissionError("INVALID_TRANSITION");
@@ -48,25 +68,25 @@ export async function prepareAssistantTurn(
     async failBeforeDispatch() {
       if (!canClaim) return;
       canClaim = false;
-      const result = await guard.finish({ ...identity, outcome: "PRE_DISPATCH_FAILED" });
+      const result = await observe("admission_finish", () => guard.finish({ ...identity, outcome: "PRE_DISPATCH_FAILED" }));
       if (result.status === "rejected") throw new AssistantAdmissionError(result.code);
     },
     async execute(run) {
       if (!canClaim) throw new AssistantAdmissionError("INVALID_TRANSITION");
       canClaim = false;
-      const claim = await guard.claimDispatch(identity);
+      const claim = await observe("dispatch_claim", () => guard.claimDispatch(identity));
       // A lost claim reply never authorizes dispatch; no automatic RPC retry.
       if (claim.status === "rejected") throw new AssistantAdmissionError(claim.code);
       let response: AssistantResponse;
       try { response = await run(); }
       catch {
-        await guard.finish({ ...identity, outcome: "EXECUTION_UNCERTAIN" });
+        await observe("admission_finish", () => guard.finish({ ...identity, outcome: "EXECUTION_UNCERTAIN" }));
         throw new AssistantAdmissionError("ADMISSION_UNAVAILABLE");
       }
       // Existing orchestration normalizes provider failures. Without trustworthy
       // dispatch metadata, conservatively count them as terminal uncertain.
       const outcome = response.status === "error" || response.status === "unavailable" ? "EXECUTION_UNCERTAIN" : "SUCCEEDED";
-      const finished = await guard.finish({ ...identity, outcome });
+      const finished = await observe("admission_finish", () => guard.finish({ ...identity, outcome }));
       if (finished.status === "rejected") throw new AssistantAdmissionError(finished.code);
       return response;
     },

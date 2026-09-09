@@ -54,6 +54,46 @@ beforeEach(() => {
 afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 describe("Assistant API persistence and permissions", () => {
+  it("records answer persistence failure separately without logging saved content", async () => {
+    const events: Record<string, unknown>[] = [];
+    vi.spyOn(console, "info").mockImplementation((_tag, event) => { events.push(event); });
+    assistantInsertFails = true;
+    const response = await POST(request());
+    expect(response.status).toBe(500);
+    expect(events).toContainEqual(expect.objectContaining({ stage: "assistant_persist", outcome: "failure", code: "ANSWER_NOT_SAVED" }));
+    expect(events.at(-1)).toMatchObject({ stage: "route", outcome: "failure" });
+    expect(JSON.stringify(events)).not.toMatch(/secret insert failure|What tasks|owned-wedding|couple/);
+  });
+  it("preserves a successful Local API response when the diagnostic sink throws", async () => {
+    vi.spyOn(console, "info").mockImplementation(() => { throw new Error("log unavailable"); });
+    expect((await POST(request())).status).toBe(200);
+    expect(writes.map(item => item.values.role)).toEqual(["user", "assistant"]);
+  });
+  it("distinguishes answer persistence failure after successful OpenAI validation and admission finalization", async () => {
+    const requestId = "00000000-0000-4000-8000-000000000090";
+    const events: Record<string, unknown>[] = [];
+    vi.spyOn(console, "info").mockImplementation((_tag, event) => { events.push(event); });
+    vi.stubEnv("AI_PROVIDER", "openai"); vi.stubEnv("OPENAI_API_KEY", "test-placeholder"); vi.stubEnv("OPENAI_MODEL", "test-model");
+    mocks.profile.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000091", role: "couple" });
+    mocks.wedding.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000092" });
+    admissionChannel.mockImplementation(() => ({
+      admit: async () => ({ status: "admitted", requestId, state: "admitted" }),
+      claimDispatch: async () => ({ status: "dispatch_claimed", requestId, state: "dispatched" }),
+      finish: async () => ({ status: "finished", requestId, state: "completed" }),
+    }) as never);
+    vi.spyOn(OpenAIWeddingAssistantProvider.prototype, "respondSelective").mockResolvedValue({ status: "ok", text: "Wedding advice", evidence: [{ kind: "AI_RECOMMENDATION" }] });
+    assistantInsertFails = true;
+    try {
+      const response = await POST(new Request("http://localhost/api/assistant", { method: "POST", body: JSON.stringify({ requestId, threadId, message: "Wedding advice please" }) }));
+      expect(response.status).toBe(500);
+      const index = (stage: string, outcome: string) => events.findIndex(event => event.stage === stage && event.outcome === outcome);
+      expect(index("response_validation", "success")).toBeGreaterThanOrEqual(0);
+      expect(index("admission_finish", "success")).toBeGreaterThan(index("response_validation", "success"));
+      expect(index("assistant_persist", "failure")).toBeGreaterThan(index("admission_finish", "success"));
+      expect(events.every(event => event.requestId === requestId)).toBe(true);
+      expect(JSON.stringify(events)).not.toMatch(/000000000091|000000000092|Wedding advice|test-placeholder|secret insert/);
+    } finally { admissionChannel.mockImplementation(() => { throw new Error("No privileged credential or ledger configured"); }); }
+  });
   it("bypasses privileged admission entirely for Local with a transported request ID", async () => {
     const response = await POST(new Request("http://localhost/api/assistant", { method: "POST", body: JSON.stringify({
       requestId: crypto.randomUUID(), message: "What tasks do we have?", threadId, digest: "untrusted", coupleId: "forged",

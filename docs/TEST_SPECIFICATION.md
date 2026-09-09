@@ -1,5 +1,21 @@
 # Test Specification
 
+## Phase 5.3 server diagnostics
+
+`tests/assistant/diagnostics.test.ts` covers ordered general/tool response stages,
+success/empty/unavailable tool status, malformed response/arguments, deadline,
+raw upstream error suppression, attestation and response-validation failures,
+admission rejection, finalization failure, concurrent request correlation, private
+content exclusion and throwing-log-sink resilience. Providers and database access
+are mocked; network access is blocked. API tests separately prove persistence
+failure after completed validation/finalization, and unchanged Local behavior with
+a broken sink. No live requests are needed.
+
+The seven Phase 5.2 cases remain in `openai-tool-loop.test.ts`: production-shaped
+photographer search/history, strict null handling, wrong taxonomy, search misuse,
+39,886-byte synthetic result, forged evidence and altered attested IDs. They do not
+claim to reproduce the original live failure or validate live latency/prose claims.
+
 > Current Assistant foundation coverage and boundaries: see [AI Agent Specification](AI_AGENT_SPEC.md) and tests/assistant/.
 
 ## Real AI Phase 4B — mocked dedicated admission client

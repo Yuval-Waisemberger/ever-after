@@ -3,6 +3,7 @@ import { assessWeddingDomain, WEDDING_DOMAIN_POLICY } from "./domain-policy";
 import { prepareAssistantContext } from "./privacy";
 import { assistantResponseSchema, type AssistantContext, type AssistantResponse, type SelectiveAssistantRequest, type WeddingAssistantProvider } from "./types";
 import { hasVerifiedToolClaims } from "./openai-tool-trust";
+import { logAssistantDiagnostic as diagnostic } from "./diagnostics";
 import { assistantCopy, contextUnavailableText, selectResponseLanguage, type AssistantLanguage } from "./language";
 
 export function validateAgentResponse(input: unknown, context?: AssistantContext): AssistantResponse {
@@ -33,7 +34,13 @@ export async function runWeddingAgent({ message, provider, loadContext, recentLa
     try { response = await provider.respondSelective({ message, language, history }); } catch {
       return { status: "unavailable", text: copy.error, evidence: [], language, error: { code: "PROVIDER_UNAVAILABLE", retryable: false } };
     }
-    try { return { ...validateAgentResponse(response), language }; } catch {
+    diagnostic({ stage: "response_validation", outcome: "start" });
+    try {
+      const result = { ...validateAgentResponse(response), language };
+      diagnostic({ stage: "response_validation", outcome: "success", status: result.status, evidenceCount: result.evidence.length });
+      return result;
+    } catch {
+      diagnostic({ stage: "response_validation", outcome: "failure", code: "INVALID_PROVIDER_RESULT" });
       return { status: "error", text: copy.verify, evidence: [], language, error: { code: "INVALID_PROVIDER_RESULT", retryable: false } };
     }
   }

@@ -4,7 +4,7 @@ import http from "node:http";
 import https from "node:https";
 import net from "node:net";
 import type { ResponseCreateParamsNonStreaming } from "openai/resources/responses/responses";
-import { database, task, otherWedding, expense, payment, relation, uuid, vendorId, vendorTwo, owner, weddingId } from "./tools/database-double";
+import { database, task, otherWedding, expense, payment, relation, vendor, review, uuid, vendorId, vendorTwo, owner, weddingId } from "./tools/database-double";
 import { assistantContext } from "./fixtures";
 import { OpenAIWeddingAssistantProvider } from "@/lib/assistant/openai-provider";
 import { openAIReadTools, validateToolCall } from "@/lib/assistant/openai-tool-bridge";
@@ -47,6 +47,119 @@ function outputs(h: ReturnType<typeof harness>, round = 1) {
     return { callId: item.call_id, result: JSON.parse(item.output) };
   });
 }
+
+describe("Phase 5 Marketplace reproduction — synthetic production-shaped boundary", () => {
+  const prompt = "Find up to three photographers from the Ever After Marketplace that could be relevant for us, and explain briefly why each one may fit.";
+  const ids = [vendorId, vendorTwo, uuid(102)];
+  const names = ["Fixture Amber Studio", "Fixture Birch Studio", "Fixture Cedar Studio"];
+  const strictArgs = {
+    page: 1, limit: 3, search: null, category: "photography-content", subcategory: "wedding-photographers",
+    city: null, area: null, minPriceMinor: null, maxPriceMinor: null, style: null,
+    eventType: null, guestCount: null, minRating: null, fridayAvailable: null,
+  };
+  // Synthetic summaries of the four preceding topics, not copied private/live rows.
+  const history = () => buildConversationWindow([
+    "What should we focus on from our saved tasks?", "Prioritize invitations and photographer outreach; the DJ task is complete.",
+    "Which vendors are saved or booked?", "Three saved and four booked vendors were discussed. Reconcile the photographer task with the booking.",
+    "Summarize our saved guest list.", "All five saved guest totals are zero; the wedding estimate is separate.",
+    "What wedding details are missing?", "No tracked profile gaps were reported.",
+  ].map((content, i) => ({ id: uuid(900 + i), role: i % 2 ? "assistant" : "user", content, created_at: `2026-09-09T10:00:0${i}Z` })));
+  beforeEach(() => {
+    db.state.tables.vendor_subcategories[0].slug = "wedding-photographers";
+    db.state.tables.vendor_subcategories[0].name = "Wedding Photographers";
+    db.state.tables.vendor_profiles = ids.map((id, i) => vendor({ id, business_name: names[i],
+      location_city: ["Tel Aviv", "Herzliya", null][i], service_areas: ["central_israel"],
+      min_price_minor: i === 2 ? null : 250000 + i * 100000, max_price_minor: i === 2 ? null : 500000,
+      services: [["Stills", "Albums"], ["Stills", "Second photographer"], ["Stills"]][i],
+      styles: i === 1 ? ["Elegant"] : ["Romantic"], event_types: ["evening"],
+      min_guest_capacity: null, max_guest_capacity: null, friday_available: [true, false, null][i],
+    }));
+    db.state.tables.reviews = [review(700), review(701, { vendor_id: vendorTwo, professionalism: 4, punctuality: 4, service_attitude: 4, value_for_money: 4 })];
+  });
+  const finalText = () => `${names[0]} offers stills and albums with Romantic styling. ${names[1]} offers a second photographer and Elegant styling. ${names[2]} lists Romantic styling but no price. These are Marketplace options, not verified availability or the best photographers in Israel.`;
+  async function run(args: unknown = strictArgs, final: unknown = textResponse(finalText())) {
+    const h = harness(calls(call("get_wedding_summary", "p5_wedding", {})),
+      calls(call("search_marketplace_vendors", "p5_search", args)), final);
+    const loadContext = vi.fn().mockRejectedValue(new Error("Local eager context forbidden"));
+    const result = await runWeddingAgent({ message: prompt, provider: h.provider, loadContext, history: history() });
+    expect(loadContext).not.toHaveBeenCalled();
+    return { h, result, search: outputs(h, 2).find(item => item.callId === "p5_search")!.result };
+  }
+  it("passes the exact prompt, prior topics, production taxonomy, three real tool results and final agent validation", async () => {
+    const { h, result, search } = await run();
+    expect(result.status).toBe("ok"); expect(result.text).toBe(finalText()); expect(result.text.length).toBeLessThanOrEqual(10000);
+    expect(search.status).toBe("success"); expect(search.data.vendors.map((v: { id: string }) => v.id)).toEqual(ids);
+    expect(search.data.vendors.map((v: { businessName: string }) => v.businessName)).toEqual(names);
+    for (const name of names) expect(result.text).toContain(name);
+    expect(search.data.vendors.map((v: { ratingAverage: number | null }) => v.ratingAverage)).toEqual([5, 4, null]);
+    expect(search.data.vendors.map((v: { reviewCount: number }) => v.reviewCount)).toEqual([1, 1, 0]);
+    expect(search.data.vendors[2]).toMatchObject({ minPriceMinor: null, maxPriceMinor: null, minGuestCapacity: null, maxGuestCapacity: null, fridayAvailable: null });
+    expect(search.data.pagination).toEqual({ page: 1, limit: 3, hasMore: false });
+    expect(outputs(h, 2).map(item => item.callId)).toEqual(["p5_wedding", "p5_search"]);
+    expect(result.toolUsage).toEqual([
+      { name: "get_wedding_summary", callId: "p5_wedding", status: "succeeded" },
+      { name: "search_marketplace_vendors", callId: "p5_search", status: "succeeded" },
+    ]);
+    expect(result.evidence).toEqual([{ kind: "AI_RECOMMENDATION" }, { kind: "COUPLE_DATA", section: "wedding" }, { kind: "MARKETPLACE_DATA", vendorIds: ids }]);
+    expect(result).not.toHaveProperty("actionProposal"); expect(h.create).toHaveBeenCalledTimes(3); expect(db.state.authCalls).toBe(2);
+    const input = h.create.mock.calls[0][0].input;
+    expect(JSON.stringify(input).split(prompt)).toHaveLength(2);
+    expect(history().messages).toHaveLength(8); expect(history().characterCount).toBeLessThan(10000);
+    const vendorQuery = db.state.calls.find(item => item.table === "vendor_profiles")!;
+    expect(vendorQuery.operations).toContainEqual(["eq", "vendor_subcategories.slug", "wedding-photographers"]);
+    expect(vendorQuery.operations).toContainEqual(["eq", "is_public", true]);
+    // The agent already validates the original attested object. Reattestation is
+    // not fabricated here: runWeddingAgent's returned spread intentionally loses identity.
+  });
+  it("accepts all fourteen strict properties and normalizes nulls to authoritative defaults/omissions", () => {
+    const schema = openAIReadTools.find(item => item.name === "search_marketplace_vendors")!.parameters!;
+    const properties = schema.properties as Record<string, { anyOf: unknown[] }>;
+    expect(schema.required).toEqual(Object.keys(strictArgs)); expect(Object.keys(properties)).toHaveLength(14);
+    expect(schema.additionalProperties).toBe(false);
+    for (const property of Object.values(properties)) expect(property.anyOf).toContainEqual({ type: "null" });
+    expect(validateToolCall(call("search_marketplace_vendors", "strict", strictArgs)).input)
+      .toEqual({ page: 1, limit: 3, category: "photography-content", subcategory: "wedding-photographers" });
+    expect(validateToolCall(call("search_marketplace_vendors", "defaults", Object.fromEntries(Object.keys(strictArgs).map(key => [key, null])))).input)
+      .toEqual({ page: 1, limit: 12 });
+  });
+  it.each([
+    ["wrong taxonomy", { ...strictArgs, subcategory: "photographers" }],
+    ["search-string misuse", { ...strictArgs, category: null, subcategory: null, search: "photographers" }],
+  ])("returns valid empty evidence for %s, not an orchestration failure", async (_label, args) => {
+    expect(() => validateToolCall(call("search_marketplace_vendors", "valid_slug", args))).not.toThrow();
+    const { result, search } = await run(args, textResponse("No matching Marketplace listings were returned by this search; broader or corrected filters may help."));
+    expect(search.status).toBe("empty"); expect(search.data.vendors).toEqual([]); expect(result.status).toBe("ok");
+    expect(result.evidence).toContainEqual({ kind: "MARKETPLACE_DATA", vendorIds: [] });
+  });
+  it("serializes three large valid listings and completes without changing limits", async () => {
+    const strings = (count: number, length: number) => Array.from({ length: count }, (_, i) => `${i}`.padEnd(length, "x"));
+    for (const row of db.state.tables.vendor_profiles) Object.assign(row, {
+      service_areas: strings(20, 160), services: strings(40, 100), styles: strings(20, 100), event_types: strings(20, 160),
+    });
+    const { h, result, search } = await run(strictArgs, textResponse("Three Marketplace listings were returned. Their long service lists need a careful portfolio comparison; availability is not verified."));
+    const payload = (h.create.mock.calls[2][0].input as Array<{ type?: string; call_id?: string; output?: string }>).find(item => item.type === "function_call_output" && item.call_id === "p5_search")!.output!;
+    const bytes = Buffer.byteLength(payload, "utf8");
+    expect(bytes).toBeGreaterThan(39000); expect(bytes).toBeLessThan(45000);
+    console.info(`Phase 5 synthetic three-vendor function_call_output: ${bytes} UTF-8 bytes`);
+    expect(JSON.parse(payload)).toEqual(search); expect(search.data.vendors).toHaveLength(3); expect(result.status).toBe("ok");
+    expect(h.create.mock.calls.every(([request]) => request.max_output_tokens === 1200)).toBe(true);
+  });
+  it("rejects forged structured model vendor evidence after successful reads", async () => {
+    const { result, search } = await run(strictArgs, { ...textResponse(finalText()), evidence: [{ kind: "MARKETPLACE_DATA", vendorIds: [uuid(999)] }] });
+    expect(search.status).toBe("success"); expect(result.status).toBe("error"); expect(result.error?.code).toBe("INVALID_PROVIDER_RESULT");
+    expect(result.evidence).toEqual([]);
+  });
+  it("rejects an altered vendor ID on the original server-attested response", async () => {
+    const h = harness(calls(call("search_marketplace_vendors", "attested", strictArgs)), textResponse(finalText()));
+    const result = await h.ask(prompt, history());
+    expect(() => validateAgentResponse(result)).not.toThrow();
+    const evidence = result.evidence.find(item => item.kind === "MARKETPLACE_DATA");
+    if (evidence?.kind !== "MARKETPLACE_DATA") throw new Error("Missing Marketplace evidence");
+    evidence.vendorIds[0] = uuid(999);
+    expect(() => validateAgentResponse(result)).toThrow("Agent capability is disabled.");
+    // Structured trust only: this does not claim semantic verification of prose.
+  });
+});
 
 describe("strict schema bridge", () => {
   it("exposes precisely the registry's ten READ tools and preserves strict object schemas", () => {

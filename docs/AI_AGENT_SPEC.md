@@ -1,5 +1,29 @@
 # Ever After AI Agent Specification
 
+## Phase 5.3 — safe server diagnostics (offline validated)
+
+`diagnostics.ts` uses server-only AsyncLocalStorage for one request scope. The API
+binds the existing validated logical request UUID and selected provider; it never
+binds Couple/Wedding IDs or content. Server console events use the fixed
+`assistant_diagnostic` tag and runtime-allowlisted metadata. Stage/outcome ordering
+separates admission, dispatch, provider/model rounds, model response validation,
+tool arguments/execution/serialization, normalization, attestation, agent validation,
+admission finalization and assistant persistence. A tool result of unavailable is
+logged as such with its existing safe code; it is not treated as empty.
+
+Events include elapsed milliseconds, bounded round/count metadata, approved tool
+names, safe status/code, response length, evidence count and already-returned token
+counts. No prompts, history, arguments/results, vendor names, financial values,
+upstream errors, credentials or reasoning are logged. Correlation is not authorization.
+Logging is best effort and cannot retry or replace the application operation.
+
+This adds no DB/external telemetry, changes no provider/tool/guardrail behavior,
+and makes no live request. The seven Phase 5.2 synthetic Marketplace cases remain.
+The original live Marketplace failure is still undetermined; taxonomy, monetary
+formatting and stale footer changes remain separate work. A future live diagnostic
+retest requires separate owner approval. Console retention is host-dependent;
+missing logs alone cannot prove that an operation did not happen.
+
 Status: Real AI Phase 4B wires lazy server-only admission client construction, verified with mocks only. Phase 3's ten-tool OpenAI bridge remains unchanged. Local remains active/default; real credentials and live OpenAI remain unconfigured/untested. Research and product writes remain disabled. The approved admission migration was applied and verified in Frankfurt during Real AI Phase 1C. No live request or admission was made in Phase 4B. Earlier phase sections below are historical implementation records.
 
 ## Real AI Phase 4B — dedicated admission channel (mocked only)

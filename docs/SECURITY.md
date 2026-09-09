@@ -1,5 +1,21 @@
 # Security Design
 
+## Phase 5.3 diagnostic privacy boundary
+
+The server-only `assistant/diagnostics.ts` console sink accepts fixed stage, outcome,
+provider, tool and error-code enums; bounded numeric counts; and the existing
+validated request UUID. Unknown properties are stripped, invalid enum values are
+dropped, and serialization/log-sink exceptions are swallowed. AsyncLocalStorage
+isolates concurrent requests without changing provider contracts or authorization.
+There is no environment lookup, external sink, database write or logging SDK.
+
+Never pass prompts, history, Couple/Wedding/user IDs, tool arguments/results,
+financial values, guest details, raw upstream errors, headers or credentials to
+diagnostics. Tests use synthetic private sentinels, network blockers, a throwing
+sink, concurrent scopes and mocked failures. The request UUID correlates events
+only; it grants no access. Console availability/retention is not guaranteed, so
+absence of a diagnostic event is not proof of absence of spend or execution.
+
 > Agent privacy, grounding, scope, persistence and future write controls: see [AI Agent Specification](AI_AGENT_SPEC.md).
 
 ## Security objectives

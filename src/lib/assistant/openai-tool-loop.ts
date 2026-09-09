@@ -1,5 +1,6 @@
 import "next/headers";
 import { z } from "zod";
+import { logAssistantDiagnostic as diagnostic, type DiagnosticStage } from "./diagnostics";
 import type { ResponseInput } from "openai/resources/responses/responses";
 import type { OpenAIResponsesClient } from "./openai-client";
 import { OPENAI_MAX_OUTPUT_TOKENS, OPENAI_MAX_TEXT_CHARACTERS, OPENAI_TIMEOUT_MS, type OpenAIConfig } from "./openai-config";
@@ -45,8 +46,9 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
   const deadline = Date.now() + OPENAI_TIMEOUT_MS;
   const controller = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
+  let stage: DiagnosticStage = "history_input", roundNumber = 1, timedOut = false;
   const expired = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => { controller.abort(); reject(new Error("Provider deadline.")); }, OPENAI_TIMEOUT_MS);
+    timer = setTimeout(() => { timedOut = true; controller.abort(); reject(new Error("Provider deadline.")); }, OPENAI_TIMEOUT_MS);
   });
   const remaining = () => {
     const duration = deadline - Date.now();
@@ -61,6 +63,8 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
   try {
     input.push(...priorHistoryInput(request.history), { role: "user", content: request.message });
     for (let round = 0; round < OPENAI_TURN_LIMITS.rounds; round++) {
+      roundNumber = round + 1; stage = "model_round";
+      diagnostic({ stage, outcome: "start", round: roundNumber });
       const timeout = remaining();
       const raw = await Promise.race([client.responses.create({ model: config.model,
         instructions: openAIWeddingInstructions(language), input: [...input],
@@ -68,20 +72,35 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
         max_output_tokens: OPENAI_MAX_OUTPUT_TOKENS, store: false, stream: false,
       }, { signal: controller.signal, timeout }), expired]);
       remaining();
+      diagnostic({ stage, outcome: "success", round: roundNumber });
+      stage = "model_response_validation";
       const parsed = envelope.safeParse(raw);
       if (!parsed.success) throw new InvalidOpenAIResult();
+      diagnostic({ stage, outcome: "success", round: roundNumber });
       const usage = usageSchema.safeParse(parsed.data.usage);
       if (usage.success) {
         sawUsage = true; inputTokens += usage.data.input_tokens; outputTokens += usage.data.output_tokens;
         if (!Number.isSafeInteger(inputTokens) || !Number.isSafeInteger(outputTokens)) completeUsage = false;
       } else completeUsage = false;
       const requested = parsed.data.output.filter(item => item.type === "function_call");
+      diagnostic({ stage: "tool_requested", outcome: "success", round: roundNumber, toolCount: requested.length });
+      for (const item of requested) diagnostic({ stage: "tool_requested", outcome: "success", round: roundNumber,
+        tool: item.name as Parameters<typeof diagnostic>[0]["tool"] });
       if (!requested.length) {
+        diagnostic({ stage: "final_model_response", outcome: "success", round: roundNumber });
+        stage = "provider_normalization";
         const text = parsed.data.output.flatMap(item => item.type === "message" ? item.content.map(part => part.text) : []).join("\n").trim();
         if (!text || text.length > OPENAI_MAX_TEXT_CHARACTERS) throw new InvalidOpenAIResult();
-        return attestToolResponse(assistantResponseSchema.parse({ status: "ok", text, language, evidence: [{ kind: "AI_RECOMMENDATION" }],
-          ...(sawUsage && completeUsage ? { usage: { inputTokens, outputTokens } } : {}) }), ledger);
+        const normalized = assistantResponseSchema.parse({ status: "ok", text, language, evidence: [{ kind: "AI_RECOMMENDATION" }],
+          ...(sawUsage && completeUsage ? { usage: { inputTokens, outputTokens } } : {}) });
+        diagnostic({ stage, outcome: "success", round: roundNumber, responseCharacters: text.length,
+          ...(normalized.usage ?? {}) });
+        stage = "attestation";
+        const attested = attestToolResponse(normalized, ledger);
+        diagnostic({ stage, outcome: "success", evidenceCount: attested.evidence.length });
+        return attested;
       }
+      stage = "tool_arguments";
       if (round === OPENAI_TURN_LIMITS.rounds - 1 || calls + requested.length > OPENAI_TURN_LIMITS.calls) throw new InvalidOpenAIResult();
       // Reserve and validate the COMPLETE batch before any database execution.
       const prepared = requested.map(call => {
@@ -97,18 +116,28 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
         });
       }
       for (const call of prepared) {
+        stage = "tool_execution";
+        diagnostic({ stage, outcome: "start", round: roundNumber, tool: call.name });
         remaining();
         const cached = cache.get(call.fingerprint);
         let result: ValidatedToolResult;
         try { result = cached ?? await Promise.race([executeValidatedCall(call), expired]); }
         catch (error) { remaining(); if (error instanceof z.ZodError) throw new InvalidOpenAIResult(); throw error; }
         remaining();
+        diagnostic({ stage, outcome: "success", round: roundNumber, tool: call.name, status: result.status,
+          ...(result.status === "unavailable" ? { code: result.error.code } : {}) });
         cache.set(call.fingerprint, result);
         ledger.push(toolRecord(call, result, Boolean(cached)));
+        stage = "tool_serialization";
         input.push({ type: "function_call_output", call_id: call.call.call_id, output: JSON.stringify(result) });
+        diagnostic({ stage, outcome: "success", round: roundNumber, tool: call.name });
       }
     }
     throw new InvalidOpenAIResult();
+  } catch (error) {
+    diagnostic({ stage, outcome: "failure", round: roundNumber,
+      code: timedOut || Date.now() >= deadline ? "TIMEOUT" : error instanceof InvalidOpenAIResult || error instanceof z.ZodError ? "INVALID_PROVIDER_RESULT" : "PROVIDER_UNAVAILABLE" });
+    throw error;
   } finally {
     clearTimeout(timer);
     controller.abort();
