@@ -1,5 +1,24 @@
 # Ever After AI Agent Specification
 
+## Phase 5.5 — selective context and currency guidance
+
+Central OpenAI instructions restrict Couple reads to answers that actually need
+current saved Couple information. General Rabbinate documents/process, etiquette,
+bridesmaid and photographer-advice questions do not warrant personalization reads.
+"Currently" does not turn a general procedure into a Couple-data question. Saved
+wedding dates may support personalized timing when needed; budget/tasks/vendors
+and personalized Marketplace queries retain their appropriate selective tools.
+Rabbinate remains in scope; changing official requirements must still be qualified
+and checked with the relevant official source. Research remains disabled.
+
+Documented monetary Minor/agorot values use 100 units per shekel. Answers should
+show ₪2,500 / ₪3,100 / ₪100,000 for 250000 / 310000 / 10000000 minor units, preserving
+fractions and unknown values. Non-money integers and amounts already in shekels
+must not be divided. Only instructions changed: storage, tool values/arithmetic,
+the tool loop, source attestation, Local behavior and UI are unchanged. This is
+model guidance, not a deterministic tool gate or output currency formatter; live
+compliance is not established by mocked tests. Known admitted live usage remains 13.
+
 ## Phase 5.4 — bounded final answer (offline validated)
 
 Rounds 1–3 retain `tool_choice: auto`; round 4 uses `tool_choice: none` and appends

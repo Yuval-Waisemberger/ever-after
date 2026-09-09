@@ -50,6 +50,61 @@ function outputs(h: ReturnType<typeof harness>, round = 1) {
   });
 }
 
+describe("Phase 5.5 guidance contracts (mocked model choices, not live compliance)", () => {
+  it.each([
+    "What documents do we currently need to open a marriage file with the Rabbinate in Israel?",
+    "How does the Rabbinate process generally work?",
+    "What is normal wedding invitation etiquette?",
+    "How many bridesmaids are common?",
+    "What should we ask a wedding photographer?",
+  ])("delivers the no-unnecessary-read policy and accepts a direct answer: %s", async question => {
+    const h = harness(textResponse("General wedding guidance; current official requirements should be verified with the relevant religious council."));
+    const result = await h.ask(question);
+    const instructions = h.create.mock.calls[0][0].instructions!;
+    expect(instructions).toContain("Use Couple READ tools only when the answer actually requires current saved Couple-specific information.");
+    expect(instructions).toContain("do not require get_wedding_summary or other Couple reads");
+    expect(instructions).toContain('The word "currently" in a general official-procedure question');
+    expect(instructions).toContain("Current research is unavailable. Never claim current verification");
+    expect(result.status).toBe("ok"); expect(h.create).toHaveBeenCalledOnce();
+    expect(db.state.authCalls).toBe(0); expect(result.toolUsage ?? []).toEqual([]);
+    expect(result.evidence).toEqual([{ kind: "AI_RECOMMENDATION" }]);
+  });
+  it.each([
+    ["Based on our saved wedding date, when should we begin the Rabbinate process?", "get_wedding_summary"],
+    ["How much budget do we have left?", "get_budget_summary"],
+    ["Based on our saved tasks, what should we do next?", "list_tasks"],
+    ["What is on our wedding timeline?", "get_timeline_summary"],
+    ["Which vendors have we booked?", "get_couple_vendors"],
+    ["Find Marketplace photographers relevant to our wedding.", "search_marketplace_vendors"],
+  ])("preserves appropriate selective reads: %s", async (question, name) => {
+    const h = harness(calls(call(name)), textResponse());
+    const result = await h.ask(question);
+    expect(result.status).toBe("ok"); expect(result.toolUsage?.map(item => item.name)).toEqual([name]);
+    expect(db.state.authCalls).toBe(1);
+    expect(h.create.mock.calls[0][0].instructions).toContain("read the saved wedding date only if needed and not already supplied by the user");
+    expect(openAIReadTools.some(tool => /research|benchmark|web_search/.test(tool.name))).toBe(false);
+  });
+  it.each([[250000, "₪2,500"], [310000, "₪3,100"], [10000000, "₪100,000"]] as const)("preserves %i agorot through tools and accepts the instructed %s display", async (minor, display) => {
+    db.state.tables.couple_vendors = [relation(850, { status: "booked", agreed_price_minor: minor })];
+    const before = JSON.stringify(db.state.tables);
+    const answer = `The agreed vendor price is ${display}. A group of 300 guests remains 300 guests, and a rating of 4.5 remains 4.5.`;
+    const h = harness(calls(call("get_couple_vendors")), textResponse(answer));
+    const result = await h.ask("What is our booked vendor's agreed price?");
+    const instructions = h.create.mock.calls[0][0].instructions!;
+    expect(instructions).toContain(`${minor} minor units = ${display}`);
+    expect(instructions).toContain("100 minor units = ₪1");
+    expect(instructions).toContain("Never label raw minor-unit integers as shekel amounts");
+    expect(instructions).toContain("Do not divide guest counts, review counts, ratings, dates, percentages, IDs");
+    expect(instructions).toContain("Do not convert amounts already expressed in shekels again");
+    expect(outputs(h)[0].result.data.vendors[0].agreedPriceMinor).toBe(minor);
+    expect(JSON.stringify(db.state.tables)).toBe(before);
+    expect(result.status).toBe("ok"); expect(result.text).toBe(answer);
+    expect(result.text).not.toContain(`₪${minor}`); expect(result.text).not.toContain(`₪${minor.toLocaleString("en-US")}`);
+    expect(result.text).toContain("300 guests"); expect(result.text).toContain("4.5");
+    expect(validateAgentResponse(result)).toEqual(result);
+  });
+});
+
 describe("Phase 5.4 answer-only final round and taxonomy", () => {
   it("derives known taxonomy from the canonical mapping without changing server validation", () => {
     const definition = openAIReadTools.find(tool => tool.name === "search_marketplace_vendors")!;

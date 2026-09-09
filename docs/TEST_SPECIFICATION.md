@@ -1,5 +1,17 @@
 # Test Specification
 
+## Phase 5.5 guidance contracts
+
+Fourteen network-blocked cases in `openai-tool-loop.test.ts` inspect the actual
+outbound central instructions and simulate five direct general answers, six
+appropriate selective reads, and three agorot-to-shekel answer examples. They
+verify no Couple read for the simulated general answers, retained reads for saved
+data questions, no research registration, unchanged monetary values in tool
+outputs/in-memory storage, and preservation of non-monetary numbers in answers.
+Model choices/text are injected fixtures: these tests do not prove a live model
+will always avoid unnecessary reads or format every amount correctly. Existing
+Local, evidence, diagnostics, bounded-loop and seven Phase 5.2 cases remain.
+
 ## Phase 5.4 final-round and taxonomy regression
 
 Eight additional mocked cases in `openai-tool-loop.test.ts` cover canonical
