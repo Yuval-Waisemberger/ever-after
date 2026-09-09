@@ -16,6 +16,8 @@ const eventSchema = z.object({
   tool: z.enum(["get_wedding_summary", "list_tasks", "get_timeline_summary", "get_budget_summary", "get_upcoming_payments",
     "get_couple_vendors", "search_marketplace_vendors", "compare_vendors", "get_guest_list_summary", "get_missing_wedding_details", "research_current_wedding_info", "get_market_benchmark"]).optional(),
   status: z.enum(["partial", "insufficient_evidence", "success", "empty", "unavailable", "ok", "error", "out_of_scope", "completed", "uncertain", "failed"]).optional(),
+  adapterStage: z.enum(["request", "response_received", "structured_output", "source_extraction", "result_validation", "source_validation", "completed"]).optional(),
+  processedWebSearchCalls: count.optional(), returnedSourceCount: count.optional(), validatedSourceCount: count.optional(),
   sourceCount: count.optional(), findingCount: count.optional(), responseCharacters: count.optional(), evidenceCount: count.optional(), inputTokens: count.optional(), outputTokens: count.optional(),
 });
 type Event = z.input<typeof eventSchema>;

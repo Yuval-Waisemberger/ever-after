@@ -704,3 +704,12 @@ using a server-only key (never NEXT_PUBLIC), then verify real PostgREST permissi
 lifecycle before enablement. The key must never be logged, returned or imported into browser code.
 SDK retries, tool/iteration counts, output and total timeout budgets still need explicit limits.
 No OpenAI API or billing setting was accessed in this phase.
+
+
+### Focused research structured-output correction
+
+The server-only adapter requests strict Responses `text.format` JSON Schema plus `include: ["web_search_call.action.sources"]`. The bounded content payload contains findings (or benchmark factors/ranges), quality, limitations and an optional insufficient-evidence reason; it does not reproduce source metadata. Its `sourceIds` entries are exact returned URLs on the adapter wire, mapped to server-issued IDs before existing contract validation. Sources are derived from returned search-action sources and URL citation annotations; annotation titles are used when present, otherwise the domain is the label. Authority is classified by the unchanged server policy. Unknown publication/update dates remain absent. Invented/altered references and unsafe URLs fail closed.
+
+Ordinary prose is no longer requested as an implicit JSON protocol. If the provider ignores the explicit structured format, decoding/validation still fails safely without repair or retry. Results remain conservative partial/insufficient evidence. Benchmark ranges lacking independently established source package context remain insufficient (`INCOMPARABLE_PACKAGES`); no package metadata is fabricated to pass validation. Existing research contracts and policy are unchanged.
+
+Adapter diagnostics add only an allowlisted stage and processed-search/returned-source/validated-source counts. No query, URL, title, finding, raw response or private data is logged. One request, one built-in search, low search context, 1,200 output tokens, no retries and the existing 15-second/remaining-turn deadline remain unchanged. Offline mocks validate the contract; live revalidation is separately authorized and is not implied by these tests.

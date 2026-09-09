@@ -35,11 +35,10 @@ const call = (name = "get_budget_summary", id = "call_1", args: unknown = {}) =>
 const calls = (...items: unknown[]) => ({ status: "completed", output: items, usage: { input_tokens: 12, output_tokens: 3 } });
 
 function researchOutput() {
-  const date = new Date().toISOString();
-  const value = { status: "success", researchedAt: date, sources: [{ sourceId: "official", origin: "external_research", url: "https://www.gov.il/synthetic", domain: "www.gov.il", title: "Synthetic official fixture", retrievedAt: date, sourceType: "official", relevance: "Synthetic procedure" }], data: {
-    topic: "marriage_registration", countryCode: "IL", findings: [{ text: "Synthetic general timing; confirm current applicability.", sourceIds: ["official"] }], quality: { confidence: "medium", explanation: "Synthetic only" }, limitations: [],
-  } };
-  return { status: "completed", output: [{ type: "web_search_call", status: "completed" }, { type: "message", role: "assistant", status: "completed", content: [{ type: "output_text", text: JSON.stringify(value), annotations: [{ type: "url_citation", url: value.sources[0].url }] }] }], usage: { input_tokens: 15, output_tokens: 5 } };
+  const url = "https://www.gov.il/synthetic";
+  const value = { reason: null, findings: [{ text: "Synthetic general timing; confirm current applicability.", sourceIds: [url] }],
+    quality: { confidence: "medium", explanation: "Synthetic only" }, limitations: [] };
+  return { status: "completed", output: [{ type: "web_search_call", status: "completed", action: { type: "search", sources: [{ type: "url", url }] } }, { type: "message", role: "assistant", status: "completed", content: [{ type: "output_text", text: JSON.stringify(value), annotations: [{ type: "url_citation", url, title: "Synthetic official fixture" }] }] }], usage: { input_tokens: 15, output_tokens: 5 } };
 }
 function harness(...rounds: unknown[]) {
   const create = vi.fn<(input: ResponseCreateParamsNonStreaming, options?: { signal?: AbortSignal; timeout?: number }) => Promise<unknown>>();

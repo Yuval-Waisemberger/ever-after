@@ -63,6 +63,15 @@ describe("safe Assistant diagnostic stages", () => {
       requestId, provider: "openai", elapsedMs: expect.any(Number) });
     for (const id of [701, 702, 703, 704]) expect(retained.join()).not.toContain(uuid(id));
   });
+  it("retains bounded adapter metadata without widening the content allowlist", () => {
+    scope(() => logAssistantDiagnostic({ stage: "research", outcome: "success", adapterStage: "source_extraction",
+      processedWebSearchCalls: 1, returnedSourceCount: 2, validatedSourceCount: 1,
+      query: secret, url: secret, title: secret, findings: secret, payload: secret,
+    } as Parameters<typeof logAssistantDiagnostic>[0]));
+    expect(events[0]).toEqual({ stage: "research", outcome: "success", adapterStage: "source_extraction", processedWebSearchCalls: 1,
+      returnedSourceCount: 2, validatedSourceCount: 1, requestId, provider: "openai", elapsedMs: expect.any(Number) });
+    expect(retained.join()).not.toContain(secret);
+  });
   it("swallows serialization failure without replacing or replaying the response", async () => {
     const stringify = vi.spyOn(JSON, "stringify").mockImplementation(() => { throw new Error(secret); });
     const answer = { status: "ok", text: "Unchanged" };
