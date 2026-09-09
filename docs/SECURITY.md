@@ -329,7 +329,7 @@ unaffected policy definitions also retained the same fingerprint. No live QA row
 Earlier manual migration history remains non-authoritative; no ledger change or db push was used.
 Full Supabase JWT adversarial and Storage HTTP boundary checks remain Final Production QA.
 
-## Real-AI admission — applied infrastructure, unconfigured application channel
+## Real-AI admission — applied infrastructure, private configuration still required
 
 `202609080001_assistant_real_ai_admission.sql` was **applied and verified in Frankfurt in Phase 1C**. It enforces
 500 global / 150 per Couple / one active request, with a transaction
@@ -345,13 +345,33 @@ revoking direct ledger ACLs even from service_role. Its BYPASSRLS does not bypas
 executor/login is created. A service-role key remains a broader backend credential elsewhere in the
 project; confinement to a server-only, narrow RPC module is essential, not a substitute for key security.
 
-The default RPC channel is unconfigured and fails closed. Local bypasses it before any credential,
+The RPC channel is constructed lazily and fails closed without private configuration. Local bypasses it before any credential,
 ledger or connection access. API ownership checks precede admission; client UUID/digest/ownership
 claims cannot grant authority. Only the server hashes normalized request semantics. Fixed errors omit
 SQL/roles/locks/secrets. Explicit Next server dependencies protect the hashing, lifecycle and RPC modules.
 No privileged key, live provider configuration, network research or billing was added.
 See [AI admission design](AI_AGENT_SPEC.md#real-ai-phase-1a1b--local-admission-guardrails-2026-09-08)
 for channel comparison, terminal-state semantics and later configuration approval requirements.
+
+### Real AI Phase 4B — server-only admission client
+
+The existing RPC module imports `next/headers` to enforce Next's server-only boundary and now
+constructs a dedicated Supabase JS client only inside getAdmissionChannel(). It reads the existing
+NEXT_PUBLIC_SUPABASE_URL and private SUPABASE_SERVICE_ROLE_KEY. The key must never have a
+public prefix, enter props/browser code, or be committed/logged. URL checks require an HTTPS origin
+without credentials/path/query/fragment; key checks validate shape only, not live credential validity.
+
+No user-session/cookie client is reused. Auth persistence, refresh and URL detection are false.
+PostgREST retries are explicitly false. The client remains enclosed by the existing adapter exposing
+only admit/claimDispatch/finish; no generic RPC, table method or direct ledger CRUD is available.
+Both returned and thrown RPC failures, including construction/configuration failures, become fixed
+safe errors with no raw cause/headers/key. The execution boundary retains ADMISSION_UNAVAILABLE.
+
+The underlying service-role secret is broadly privileged within Supabase; the narrow adapter is an
+application boundary, not a claim that the secret is restricted project-wide. Existing ledger ACLs,
+RPC grants and RLS remain unchanged. Local never requests the channel or secret. Missing private
+configuration still blocks OpenAI dispatch. No credential, migration, live RPC, quota use, OpenAI
+call or billing/deployment change was made. Validation uses mocked clients and fake HTTP only.
 
 ### Real AI Phase 3 — selective READ loop security
 

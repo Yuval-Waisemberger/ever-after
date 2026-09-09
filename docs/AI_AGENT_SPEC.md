@@ -1,6 +1,34 @@
 # Ever After AI Agent Specification
 
-Status: Real AI Phase 3 connects the OpenAI provider to ten existing READ tools, verified with injected model responses and an isolated database double. Local remains active/default. Live OpenAI and the privileged admission channel remain unconfigured; research and product writes remain disabled. The approved admission migration was applied and verified in Frankfurt during Real AI Phase 1C. This phase made no live requests or admissions. Earlier phase sections below are historical implementation records.
+Status: Real AI Phase 4B wires lazy server-only admission client construction, verified with mocks only. Phase 3's ten-tool OpenAI bridge remains unchanged. Local remains active/default; real credentials and live OpenAI remain unconfigured/untested. Research and product writes remain disabled. The approved admission migration was applied and verified in Frankfurt during Real AI Phase 1C. No live request or admission was made in Phase 4B. Earlier phase sections below are historical implementation records.
+
+## Real AI Phase 4B — dedicated admission channel (mocked only)
+
+`guardrails/rpc-channel.ts:getAdmissionChannel()` validates `NEXT_PUBLIC_SUPABASE_URL` and private
+`SUPABASE_SERVICE_ROLE_KEY` only when explicitly requested. It creates a dedicated installed
+Supabase JS client, then returns the existing `createAdmissionRpcChannel()` adapter. There is no
+module-time construction, client singleton, cookie handling or fallback to the normal session client.
+URL validation requires an HTTPS origin without embedded credentials, path, query or fragment.
+Key validation checks a bounded nonblank token without whitespace; it does not prove that a
+credential is authentic or has service-role permissions. That requires later approved setup/testing.
+
+Client options disable `persistSession`, `autoRefreshToken`, `detectSessionInUrl` and explicitly
+set `db.retry:false` because the installed PostgREST client otherwise enables transient retries.
+Only admit, claimDispatch and finish are exposed, mapped to the three existing admission RPCs.
+No raw client, generic RPC/table access or direct ledger CRUD is exposed. Configuration, constructor,
+returned RPC errors and thrown transport errors use fixed safe errors; the existing execution layer
+maps failures to ADMISSION_UNAVAILABLE. No raw error cause, key or auth header is returned/logged.
+
+Local exits the existing execution boundary before requesting this channel, so it neither reads
+the secret nor constructs a privileged client. Explicit OpenAI remains blocked without valid admission
+configuration. No route, provider/tool-loop, SQL, quota, digest, uncertain or persistence-order changes
+were made. The service-role credential is powerful elsewhere in Supabase: this narrow application
+interface does not make the credential itself project-wide least-privileged.
+
+`.env.example` contains the empty private variable name only. Real values must be entered manually
+on the local/server host after separate owner approval, never with a public prefix or in Git/chat.
+No real service-role/API key, dependency, migration, live RPC, OpenAI request, quota consumption,
+billing setup or deployment was added. Credential setup and first live testing remain unapproved.
 
 ## Real AI Phase 3 — bounded selective READ bridge (mocked only)
 
@@ -216,7 +244,7 @@ Core invariants:
 
 ## Provider configuration and result contract
 
-`AI_PROVIDER=local` selects `LocalWeddingAssistantProvider`; omission defaults to Local everywhere. Explicit `openai` requires validated server key/model configuration and fails closed through the existing safe API 503 before writes if either is missing. Empty, differently cased, whitespace-padded or unknown provider values also fail safely. There is no silent fallback. The privileged admission channel remains unconfigured, so the current application cannot dispatch OpenAI requests even if provider configuration is supplied.
+`AI_PROVIDER=local` selects `LocalWeddingAssistantProvider`; omission defaults to Local everywhere. Explicit `openai` requires validated server key/model configuration and fails closed through the existing safe API 503 before writes if either is missing. Empty, differently cased, whitespace-padded or unknown provider values also fail safely. There is no silent fallback. Phase 4B supplies admission-channel construction, but dispatch remains blocked until its separate private service-role configuration is supplied after owner approval.
 
 `.env.example` documents Local defaults and the two future OpenAI variable names; no real key is present. `.env.local` is untouched. The provider interface remains vendor-independent, and no additional provider/framework is registered.
 

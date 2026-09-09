@@ -1,6 +1,6 @@
 // @vitest-environment node
 import { readFileSync } from "node:fs";
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 vi.mock("next/headers", () => ({}));
 import { AssistantAdmissionError, prepareAssistantTurn } from "@/lib/assistant/guardrails/execution";
 import { createAdmissionRpcChannel, getAdmissionChannel } from "@/lib/assistant/guardrails/rpc-channel";
@@ -12,13 +12,15 @@ import type { AssistantResponse } from "@/lib/assistant/types";
 const turn = { requestId: "10000000-0000-4000-8000-000000000001", coupleId: "20000000-0000-4000-8000-000000000001", weddingId: "30000000-0000-4000-8000-000000000001", threadId: null, message: "Our wedding budget?", language: "en" };
 const identity = { requestId: turn.requestId, coupleId: turn.coupleId };
 const answer: AssistantResponse = { status: "ok", text: "A safe answer", evidence: [{ kind: "AI_RECOMMENDATION" }] };
+beforeEach(() => { vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", undefined); vi.stubEnv("NEXT_PUBLIC_SUPABASE_URL", undefined); });
+afterEach(() => { vi.unstubAllEnvs(); });
 const database = () => ({
   admit: vi.fn().mockResolvedValue({ status: "admitted", requestId: turn.requestId, state: "admitted" }),
   claimDispatch: vi.fn().mockResolvedValue({ status: "dispatch_claimed", requestId: turn.requestId, state: "dispatched" }),
   finish: vi.fn().mockImplementation(async ({ outcome }: { outcome: string }) => ({ status: "finished", requestId: turn.requestId, state: outcome === "SUCCEEDED" ? "completed" : outcome === "EXECUTION_UNCERTAIN" ? "uncertain" : "failed" })),
 });
 
-describe("dormant admission execution boundary", () => {
+describe("admission execution boundary", () => {
   it("does not even load a channel for Local, including legacy requests", async () => {
     const load = vi.fn(() => { throw new Error("No credentials"); });
     const local = await prepareAssistantTurn("local", null, load);
@@ -120,7 +122,7 @@ describe("request transport and server-only RPC contract", () => {
     for (const file of ["server", "rpc-channel", "execution"]) {
       const source = readFileSync(`src/lib/assistant/guardrails/${file}.ts`, "utf8");
       expect(source).toContain('import "next/headers"');
-      expect(source).not.toContain("process.env");
+      if (file !== "rpc-channel") expect(source).not.toContain("process.env");
     }
     for (const file of ["src/components/assistant/assistant-chat.tsx", "src/lib/validation/assistant.ts", "src/lib/assistant/guardrails/contracts.ts"]) {
       const source = readFileSync(file, "utf8");

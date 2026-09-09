@@ -2,6 +2,27 @@
 
 > Current Assistant foundation coverage and boundaries: see [AI Agent Specification](AI_AGENT_SPEC.md) and tests/assistant/.
 
+## Real AI Phase 4B — mocked dedicated admission client
+
+`tests/assistant/admission-rpc-channel.test.ts` verifies fresh-import laziness, Local bypass without
+reading privileged configuration, missing/invalid URL/key failures, private constructor options,
+the exact three-operation adapter and minimized RPC arguments. It checks safe constructor/returned/
+thrown errors, no retries, one admission/claim/finish sequence, unchanged server digest, quota/active/
+conflict rejection propagation and terminal uncertain handling. No table/client/auth/key capability
+is exposed by the channel. The installed SDK is exercised once with an injected fake fetch returning
+503 to prove a single HTTP attempt; no actual external HTTP request is made.
+
+Fetch/HTTP/HTTPS/socket guards block accidental network access. Credentials and URLs are synthetic
+fixtures; no local secrets or Frankfurt records are required. Existing guardrail execution tests
+explicitly unset privileged configuration. Existing 500/150/one-active SQL definitions are inspected
+read-only; SQL and migration permissions remain unchanged. Previously established isolated PostgreSQL
+boundary coverage is retained; Phase 4B does not run live SQL or claim new live verification.
+
+Run `pnpm exec vitest run tests/assistant tests/ui/assistant.test.tsx tests/ui/assistant-transport.test.tsx`,
+TypeScript, whole-repository ESLint, production build and git diff --check. Inspect Client Component
+dependency paths and production browser chunks for SUPABASE_SERVICE_ROLE_KEY and privileged client
+code. No new dependency, actual credential, live admission or OpenAI/billing interaction is involved.
+
 ## Real AI Phase 3 — mocked READ bridge and prior history
 
 `tests/assistant/openai-tool-loop.test.ts` injects Responses API results while exercising the REAL
