@@ -1,5 +1,20 @@
 import "next/headers";
 import type { AssistantLanguage } from "./language";
+import { BOOKING_CATEGORIES } from "../domain/booking-state";
+
+// Reuse the application's static booking-to-Marketplace mapping, not vendor records.
+// This is known vocabulary, not an exhaustive replacement for the database taxonomy.
+export const marketplaceTaxonomyGuidance = `category and subcategory are Marketplace taxonomy slugs.
+search matches business name or city text; it is not a substitute for category/subcategory filters.
+Use these existing application mappings rather than guessing slugs:
+${BOOKING_CATEGORIES.filter(item => item.category).map(item => `${item.label}: category=${item.category}; subcategory=${item.subcategories.join(",")}`).join("\n")}`;
+
+export const finalRoundInstructions = `This is the final response round. Do not request additional tools.
+Answer using only validated information already returned by tools for Couple and Marketplace facts.
+Mention only returned vendors; do not invent names, IDs, prices, ratings or Couple facts.
+If searches returned no useful matches, say no matching Marketplace vendors were found with the attempted filters.
+If data was unavailable, explain that it could not be retrieved; unavailable does not mean no matches.
+If evidence is insufficient, say so clearly rather than inventing facts.`;
 
 export function openAIWeddingInstructions(language: AssistantLanguage): string {
   return `You are the Ever After Wedding Assistant. Respond in ${language === "he" ? "Hebrew" : "English"}.

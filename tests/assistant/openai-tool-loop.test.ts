@@ -12,6 +12,8 @@ import { assistantReadTools } from "@/lib/assistant/tools/registry";
 import { validateAgentResponse, runWeddingAgent } from "@/lib/assistant/agent";
 import { buildConversationWindow } from "@/lib/assistant/planning/conversation";
 import type { AssistantResponse } from "@/lib/assistant/types";
+import { BOOKING_CATEGORIES } from "@/lib/domain/booking-state";
+import { finalRoundInstructions, openAIWeddingInstructions } from "@/lib/assistant/openai-instructions";
 
 const mocks = vi.hoisted(() => ({ client: vi.fn() }));
 vi.mock("next/headers", () => ({}));
@@ -47,6 +49,62 @@ function outputs(h: ReturnType<typeof harness>, round = 1) {
     return { callId: item.call_id, result: JSON.parse(item.output) };
   });
 }
+
+describe("Phase 5.4 answer-only final round and taxonomy", () => {
+  it("derives known taxonomy from the canonical mapping without changing server validation", () => {
+    const definition = openAIReadTools.find(tool => tool.name === "search_marketplace_vendors")!;
+    for (const item of BOOKING_CATEGORIES.filter(item => item.category)) {
+      expect(definition.description).toContain(`${item.label}: category=${item.category}; subcategory=${item.subcategories.join(",")}`);
+    }
+    expect(definition.description).toContain("Photographer: category=photography-content; subcategory=wedding-photographers");
+    expect(definition.description).toContain("search matches business name or city text; it is not a substitute");
+    expect(definition.description).not.toMatch(/coupleId|weddingId|business_name|@|00000000-/);
+    for (const input of [{ category: "photography-content", subcategory: "wedding-photographers", limit: 3 }, { category: "unknown", search: "photographers" }]) {
+      expect(validateToolCall(call("search_marketplace_vendors", "taxonomy", input)).input)
+        .toEqual(assistantReadTools.search_marketplace_vendors.inputSchema.parse(input));
+    }
+  });
+  it.each(["success", "empty", "unavailable"])("synthesizes a bounded round-four %s answer from prior validated results", async status => {
+    db.state.tables.vendor_subcategories[0].slug = "wedding-photographers";
+    if (status === "unavailable") db.state.errors.add("vendor_profiles");
+    const search = (id: string, subcategory: string) => calls(call("search_marketplace_vendors", id, { category: "photography-content", subcategory, limit: 3 }));
+    const answer = status === "success" ? "Original Studio is a returned Marketplace option; confirm availability."
+      : status === "empty" ? "No matching Marketplace vendors were found with the attempted filters."
+      : "The requested Marketplace data could not be retrieved; this does not mean no vendors exist.";
+    const h = harness(search("first", "missing-one"), search("second", "missing-two"),
+      search("third", status === "empty" ? "missing-three" : "wedding-photographers"));
+    h.create.mockImplementationOnce(async input => {
+      expect(input.tool_choice).toBe("none");
+      expect(input.instructions).toBe(`${openAIWeddingInstructions("en")}\n${finalRoundInstructions}`);
+      return textResponse(answer);
+    });
+    const result = await h.ask("Find wedding photographers for us.");
+    expect(h.create.mock.calls.map(([input]) => input.tool_choice)).toEqual(["auto", "auto", "auto", "none"]);
+    expect(h.create.mock.calls.slice(0, 3).every(([input]) => input.instructions === openAIWeddingInstructions("en"))).toBe(true);
+    expect(h.create).toHaveBeenCalledTimes(4);
+    expect(result).toMatchObject({ status: "ok", text: answer, usage: { inputTokens: 56, outputTokens: 19 } });
+    expect(result.toolUsage).toHaveLength(3);
+    const results = outputs(h, 3).map(item => item.result);
+    expect(results.map(item => item.status)).toEqual(status === "unavailable" ? [status, status, status] : ["empty", "empty", status]);
+    expect(validateAgentResponse(result)).toEqual(result);
+    const ids = results.flatMap(item => item.evidence.flatMap((e: { kind: string; vendorIds?: string[] }) => e.vendorIds ?? []));
+    const evidenceIds = result.evidence.flatMap(e => e.kind === "MARKETPLACE_DATA" ? e.vendorIds : []);
+    expect(evidenceIds.every(id => ids.includes(id))).toBe(true);
+    if (status === "success") {
+      expect(evidenceIds.length).toBeGreaterThan(0);
+      expect(results[2].data.vendors.some((v: { businessName: string }) => v.businessName === "Original Studio")).toBe(true);
+    }
+    expect(h.create.mock.calls.every(([input, options]) => input.max_output_tokens === 1200 && options!.timeout! <= 30000)).toBe(true);
+  });
+  it.each(["search_marketplace_vendors", "create_task", "research_current_wedding_info", "get_market_benchmark"])("rejects a noncompliant final-round %s call without executing it or starting round five", async name => {
+    const h = harness(calls(call("list_tasks", "one")), calls(call("list_tasks", "two")), calls(call("list_tasks", "three")),
+      calls(call(name, "forbidden_final")), textResponse());
+    const result = await h.ask();
+    expect(result.status).toBe("error"); expect(h.create).toHaveBeenCalledTimes(4);
+    expect(h.create.mock.calls[3][0].tool_choice).toBe("none");
+    expect(db.state.authCalls).toBe(1); // Only the initial task read; repeats use the existing cache.
+  });
+});
 
 describe("Phase 5 Marketplace reproduction — synthetic production-shaped boundary", () => {
   const prompt = "Find up to three photographers from the Ever After Marketplace that could be relevant for us, and explain briefly why each one may fit.";

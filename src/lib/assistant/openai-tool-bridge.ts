@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { FunctionTool } from "openai/resources/responses/responses";
 import { assistantReadTools, executeAssistantReadTool, type AssistantReadToolName } from "./tools/registry";
 import type { TurnToolRecord } from "./openai-tool-trust";
+import { marketplaceTaxonomyGuidance } from "./openai-instructions";
 
 type JsonSchema = { [key: string]: unknown; properties?: Record<string, JsonSchema>; required?: string[] };
 // Zod 4 retains bounds/enums. OpenAI strict mode requires every property:
@@ -25,7 +26,7 @@ function strictSchema(schema: JsonSchema): JsonSchema {
   return result;
 }
 export const openAIReadTools: FunctionTool[] = Object.entries(assistantReadTools).map(([name, tool]) => ({
-  type: "function", name, description: tool.description, strict: true,
+  type: "function", name, description: tool.description + (name === "search_marketplace_vendors" ? `\n${marketplaceTaxonomyGuidance}` : ""), strict: true,
   parameters: strictSchema(z.toJSONSchema(tool.inputSchema, { io: "input" }) as JsonSchema),
 }));
 

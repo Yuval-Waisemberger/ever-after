@@ -4,7 +4,7 @@ import { logAssistantDiagnostic as diagnostic, type DiagnosticStage } from "./di
 import type { ResponseInput } from "openai/resources/responses/responses";
 import type { OpenAIResponsesClient } from "./openai-client";
 import { OPENAI_MAX_OUTPUT_TOKENS, OPENAI_MAX_TEXT_CHARACTERS, OPENAI_TIMEOUT_MS, type OpenAIConfig } from "./openai-config";
-import { openAIWeddingInstructions } from "./openai-instructions";
+import { openAIWeddingInstructions, finalRoundInstructions } from "./openai-instructions";
 import { assistantResponseSchema, type SelectiveAssistantRequest } from "./types";
 import type { AssistantLanguage } from "./language";
 import { buildConversationWindow } from "./planning/conversation";
@@ -66,9 +66,10 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
       roundNumber = round + 1; stage = "model_round";
       diagnostic({ stage, outcome: "start", round: roundNumber });
       const timeout = remaining();
+      const finalRound = round === OPENAI_TURN_LIMITS.rounds - 1;
       const raw = await Promise.race([client.responses.create({ model: config.model,
-        instructions: openAIWeddingInstructions(language), input: [...input],
-        tools: openAIReadTools, tool_choice: "auto", include: ["reasoning.encrypted_content"],
+        instructions: openAIWeddingInstructions(language) + (finalRound ? `\n${finalRoundInstructions}` : ""), input: [...input],
+        tools: openAIReadTools, tool_choice: finalRound ? "none" : "auto", include: ["reasoning.encrypted_content"],
         max_output_tokens: OPENAI_MAX_OUTPUT_TOKENS, store: false, stream: false,
       }, { signal: controller.signal, timeout }), expired]);
       remaining();

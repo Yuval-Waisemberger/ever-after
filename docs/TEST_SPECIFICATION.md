@@ -1,5 +1,17 @@
 # Test Specification
 
+## Phase 5.4 final-round and taxonomy regression
+
+Eight additional mocked cases in `openai-tool-loop.test.ts` cover canonical
+taxonomy guidance and unchanged input validation; empty/empty/success, all-empty,
+and unavailable evidence followed by a fourth-round answer; and rejection of
+noncompliant final-round read/write/research calls without a fifth round. They
+assert auto/auto/auto/none, unchanged base instructions, usage aggregation, bounds,
+and server-attested evidence. All seven Phase 5.2 cases remain, alongside existing
+six-call, deadline, forged-evidence, Local and diagnostic tests. Network is blocked.
+Mocked answer text proves transport/validation behavior, not live model compliance
+or semantic detection of every unsupported claim in free-form prose.
+
 ## Phase 5.3 server diagnostics
 
 `tests/assistant/diagnostics.test.ts` covers ordered general/tool response stages,

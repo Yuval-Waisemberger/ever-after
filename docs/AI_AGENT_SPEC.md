@@ -1,5 +1,22 @@
 # Ever After AI Agent Specification
 
+## Phase 5.4 — bounded final answer (offline validated)
+
+Rounds 1–3 retain `tool_choice: auto`; round 4 uses `tool_choice: none` and appends
+a server-owned reminder to synthesize only validated evidence, distinguish empty
+searches from unavailable data, and never invent vendors or Couple facts. The
+existing rejection of any noncompliant final-round tool call remains. Limits stay
+4 rounds, 6 requested calls, 30 seconds, zero SDK retries, 1,200 output tokens per
+round and 10,000 final characters. Attestation and response validation are unchanged.
+
+The model-facing Marketplace description derives known category/subcategory slugs
+from `BOOKING_CATEGORIES` in `src/lib/domain/booking-state.ts`, without importing
+vendor records or creating another taxonomy. This mapping is a known subset, not
+an exhaustive database taxonomy. Photography uses `photography-content` /
+`wedding-photographers`; `search` matches business name/city text, not categories.
+No Marketplace query/schema behavior changed. Live revalidation remains separately
+authorized; money formatting and the stale footer remain outside this correction.
+
 ## Phase 5.3 — safe server diagnostics (offline validated)
 
 `diagnostics.ts` uses server-only AsyncLocalStorage for one request scope. The API
