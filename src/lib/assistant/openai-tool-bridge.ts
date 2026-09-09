@@ -4,12 +4,13 @@ import { z } from "zod";
 import type { FunctionTool } from "openai/resources/responses/responses";
 import { assistantReadTools, executeAssistantReadTool, type AssistantReadToolName } from "./tools/registry";
 import type { TurnToolRecord } from "./openai-tool-trust";
+import { futureResearchContracts, researchToolName } from "./research/contracts";
 import { marketplaceTaxonomyGuidance } from "./openai-instructions";
 
 type JsonSchema = { [key: string]: unknown; properties?: Record<string, JsonSchema>; required?: string[] };
 // Zod 4 retains bounds/enums. OpenAI strict mode requires every property:
 // optional/defaulted inputs become nullable on the wire, then omitted for Zod.
-function strictSchema(schema: JsonSchema): JsonSchema {
+export function strictSchema(schema: JsonSchema): JsonSchema {
   const { $schema: _dialect, default: _default, ...result } = schema;
   void _dialect; void _default;
   if (result.properties) {
@@ -67,4 +68,19 @@ export function toolRecord(prepared: ValidatedCall, result: ValidatedToolResult,
     evidence: result.evidence.map(item => item.kind === "MARKETPLACE_DATA"
       ? { kind: item.kind, vendorIds: [...item.vendorIds] } : { kind: item.kind, section: item.section }),
   };
+}
+
+export const openAIResearchTools: FunctionTool[] = Object.entries(futureResearchContracts).map(([name, tool]) => ({
+  type: "function", name, strict: true,
+  description: "External current wedding research, not Couple records or Ever After Marketplace. Controlled public attributes only; one research invocation per turn.",
+  parameters: strictSchema(z.toJSONSchema(tool.inputSchema, { io: "input" }) as JsonSchema),
+}));
+export function validateResearchCall(call: ModelFunctionCall) {
+  const name = researchToolName.parse(call.name);
+  const schema = futureResearchContracts[name].inputSchema;
+  const raw: unknown = JSON.parse(call.arguments);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Invalid research arguments.");
+  const shape: Record<string, z.ZodType> = schema.shape;
+  const args = Object.fromEntries(Object.entries(raw).filter(([key, value]) => !(value === null && Object.hasOwn(shape, key) && shape[key].safeParse(undefined).success)));
+  return { call, name, input: schema.parse(args) };
 }

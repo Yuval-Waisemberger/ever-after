@@ -1,3 +1,13 @@
+## Phase 6B mocked research validation
+
+Validation: 18 Assistant test files / 624 tests passed, TypeScript passed, whole-repository ESLint passed, and git diff --check passed. The production webpack build passed with external HTTP/fetch requests blocked and telemetry disabled; the default Turbopack attempt stalled and was stopped. No application source workaround or dependency change was needed. The network guard is an ignored local validation artifact.
+
+`tests/assistant/research-adapter.test.ts` tests actual SDK HTTP-body serialization through an injected in-memory transport: max_tool_calls=1, only web_search, no retry on 429, and no real network. It covers controlled aspects, source authority/URL/date checks, conflicts, independent publishers and package/currency comparability, invocation reservation, deadline abort, receipt mutation/forgery, final citation rejection and safe diagnostics. Existing research contract/provenance tests remain, with the approved one-call policy and aspect default updated.
+
+`tests/assistant/openai-tool-loop.test.ts` adds mixed internal/research evidence, aggregated usage, separate dispatch, unavailable fallback, repeated research denial across both names, six-call batch limits and answer-only round four. Four main rounds plus at most one adapter Responses request are explicit, not an unlimited nested loop. Existing Phase 5 Marketplace, Local, privacy, history, API, diagnostics, guardrail and presentation regressions remain required.
+
+Mocked model choices test plumbing and policy delivery, not live model compliance. Recent/undated source results intentionally remain partial; live usefulness, citation quality and researched factual accuracy still need owner-approved Phase 6C QA. No live provider, web search, admission or Frankfurt test is part of this phase. Known admitted live usage remains 13.
+
 # Test Specification
 
 ## Phase 5.5 guidance contracts

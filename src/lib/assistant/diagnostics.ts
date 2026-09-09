@@ -3,7 +3,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 import { z } from "zod";
 import { guardrailCode } from "./guardrails/contracts";
 
-const stages = z.enum(["route", "admission", "dispatch_claim", "provider", "history_input", "model_round",
+const stages = z.enum(["research", "route", "admission", "dispatch_claim", "provider", "history_input", "model_round",
   "model_response_validation", "tool_requested", "tool_arguments", "tool_execution", "tool_serialization",
   "final_model_response", "provider_normalization", "attestation", "response_validation", "admission_finish", "assistant_persist"]);
 export type DiagnosticStage = z.infer<typeof stages>;
@@ -14,9 +14,9 @@ const eventSchema = z.object({
     "UNKNOWN_TOOL", "SOURCE_UNAVAILABLE", "INVALID_SOURCE_DATA", "READ_LIMIT_EXCEEDED"])]).optional(),
   round: z.number().int().min(1).max(4).optional(), toolCount: count.optional(),
   tool: z.enum(["get_wedding_summary", "list_tasks", "get_timeline_summary", "get_budget_summary", "get_upcoming_payments",
-    "get_couple_vendors", "search_marketplace_vendors", "compare_vendors", "get_guest_list_summary", "get_missing_wedding_details"]).optional(),
-  status: z.enum(["success", "empty", "unavailable", "ok", "error", "out_of_scope", "completed", "uncertain", "failed"]).optional(),
-  responseCharacters: count.optional(), evidenceCount: count.optional(), inputTokens: count.optional(), outputTokens: count.optional(),
+    "get_couple_vendors", "search_marketplace_vendors", "compare_vendors", "get_guest_list_summary", "get_missing_wedding_details", "research_current_wedding_info", "get_market_benchmark"]).optional(),
+  status: z.enum(["partial", "insufficient_evidence", "success", "empty", "unavailable", "ok", "error", "out_of_scope", "completed", "uncertain", "failed"]).optional(),
+  sourceCount: count.optional(), findingCount: count.optional(), responseCharacters: count.optional(), evidenceCount: count.optional(), inputTokens: count.optional(), outputTokens: count.optional(),
 });
 type Event = z.input<typeof eventSchema>;
 type Scope = { started: number; requestId?: string; provider?: "local" | "openai" };

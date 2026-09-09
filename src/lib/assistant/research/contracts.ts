@@ -28,12 +28,17 @@ export const benchmarkInputSchema = z.object({
 }).strict().superRefine((input, ctx) => {
   if (input.purpose !== "overall_budget" && !input.category) ctx.addIssue({ code: "custom", path: ["category"], message: "A wedding service is required for a service benchmark." });
 });
-export const currentInfoInputSchema = z.object({ topic: researchTopic, ...planning }).strict();
+export const researchAspect = z.enum(["general", "required_documents", "fees", "timing", "registration_steps", "eligibility", "procedure"]);
+export const currentInfoInputSchema = z.object({ topic: researchTopic, aspect: researchAspect.default("general"), ...planning }).strict();
 export const researchToolName = z.enum(["get_market_benchmark", "research_current_wedding_info"]);
 
 export const researchSourceSchema = externalSourceSchema.extend({
   sourceId: reference, origin: z.literal("external_research"), domain: z.string().min(1).max(253),
   sourceType: externalSourceSchema.shape.sourceType.unwrap(), relevance: text,
+  benchmarkContext: z.object({ category: researchService, currency, region: area.optional(),
+    packageFeatures: z.array(packageFeature).max(14), coverageHours: z.number().min(0.5).max(24).optional(),
+    numberOfProfessionals: z.number().int().min(1).max(50).optional(), videoIncluded: z.boolean().optional(),
+  }).strict().optional(),
 }).superRefine((source, ctx) => {
   if (!URL.canParse(source.url)) return; // The URL schema already reports malformed input.
   const url = new URL(source.url);
@@ -92,7 +97,7 @@ function researchResultSchema(data: typeof benchmarkDataSchema | typeof currentI
 export const benchmarkResultSchema = researchResultSchema(benchmarkDataSchema);
 export const currentInfoResultSchema = researchResultSchema(currentInfoDataSchema);
 
-// Definitions only, deliberately separate from the executable internal READ registry.
+// Contracts remain separate from the internal READ registry. Live QA is not yet performed.
 export const futureResearchContracts = Object.freeze({
   get_market_benchmark: { live: false, inputSchema: benchmarkInputSchema, outputSchema: benchmarkResultSchema },
   research_current_wedding_info: { live: false, inputSchema: currentInfoInputSchema, outputSchema: currentInfoResultSchema },
@@ -101,8 +106,8 @@ export function unavailableResearchResult() {
   return researchUnavailableSchema.parse({ status: "unavailable", reason: "RESEARCH_DISABLED", message: "Current wedding-market information cannot be verified because live research is not enabled. General guidance can still be offered separately.", retryable: false });
 }
 
-// Future server adapters receive ONLY normalized requests and return untrusted
-// output. This interface has no implementation, registration or factory.
+// Server adapters receive ONLY normalized requests and an abort signal. Their
+// result/usage envelope is validated by the separate research executor.
 export interface ResearchAdapter {
   research(request: import("./policy").NormalizedResearchRequest, signal: AbortSignal): Promise<unknown>;
 }

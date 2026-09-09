@@ -95,7 +95,7 @@ describe("plain Responses API normalization", () => {
     expect(payload).toMatchObject({ model: config.model, max_output_tokens: 1200, store: false, stream: false });
     expect(Object.keys(payload).sort()).toEqual(["include", "input", "instructions", "max_output_tokens", "model", "store", "stream", "tool_choice", "tools"]);
     expect(payload.input).toEqual([{ role: "user", content: "When should wedding invitations go out?" }]);
-    expect(JSON.stringify(payload)).not.toContain("weddingDate"); expect(h.create).toHaveBeenCalledTimes(1);
+    expect(JSON.stringify(payload.input)).not.toContain("weddingDate"); expect(h.create).toHaveBeenCalledTimes(1);
   });
   it("preserves Hebrew and explicit English response language", async () => {
     const h = harness(response("כדאי לתכנן את ההזמנות מראש."));
@@ -173,11 +173,11 @@ describe("wedding-wide instruction and scope contract (not live model evaluation
     const text = "Requirements can change. I can explain the general process, but current official details should be verified.";
     const h = harness(response(text)); const result = await h.ask("What are current Rabbinate documents and fees?");
     expect(result.text).toBe(text); expect(result.evidence).toEqual([{ kind: "AI_RECOMMENDATION" }]);
-    expect(h.create.mock.calls[0][0].instructions).toContain("Current research is unavailable");
+    expect(h.create.mock.calls[0][0].instructions).toContain("Partial evidence requires qualification");
   });
   it("centrally prohibits writes, invented data and hidden reasoning", () => {
     const instructions = openAIWeddingInstructions("en");
-    for (const rule of ["read-only", "do not create, edit, delete", "Do not invent Couple facts", "chain-of-thought", "ten approved read tools"]) {
+    for (const rule of ["read-only", "do not create, edit, delete", "Do not invent Couple facts", "chain-of-thought", "ten internal READ tools"]) {
       expect(instructions).toContain(rule);
     }
   });

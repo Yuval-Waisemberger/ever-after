@@ -1,3 +1,11 @@
+## Phase 6B research boundary
+
+Research is separate from the unchanged internal READ executor. Only two closed-schema research functions are admitted, with privacy normalization before the adapter. The adapter cannot receive ToolContext, database clients, identity, raw prompts or history. One invocation is reserved before execution per turn; failures do not refund it. The existing admission and 4-round/6-call/30-second bounds remain, with a 15-second/remaining-deadline abort for the single research request. No retry, alternate-provider fallback, WRITE capability or short-window throttle was added.
+
+The server-only adapter uses the existing zero-retry SDK client and exposes only web_search with HTTP max_tool_calls=1. Citations must match retrieved SDK annotations; URL credentials, non-HTTPS URLs, malformed domains and custom ports fail. Authority and publisher independence come from server policy, never model claims. Unknown sites cannot become official sources. Package mismatch and insufficient independent evidence prevent typical ranges. Provider-extracted dates alone do not certify freshness: usable material remains qualified/partial, stale material insufficient.
+
+Turn-local receipts are identity-bound and mutation-detected. Response evidence and text are attested; altered source URLs and forged evidence fail. This validates provenance, not the truth of every generated sentence. Safe diagnostic events omit all queries, source text/URLs and private content. No UI, secrets, migrations, RLS, quotas or business data changed. Validation uses blocked network and injected transport; live research is not yet QA-approved.
+
 # Security Design
 
 ## Phase 5.3 diagnostic privacy boundary

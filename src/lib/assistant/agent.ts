@@ -11,7 +11,7 @@ export function validateAgentResponse(input: unknown, context?: AssistantContext
   const trusted = hasVerifiedToolClaims(input);
   if ((response.toolUsage?.length && !trusted) || response.actionProposal) throw new Error("Agent capability is disabled.");
   for (const evidence of response.evidence) {
-    if (evidence.kind === "EXTERNAL_CURRENT_EVIDENCE") throw new Error("Research is disabled.");
+    if (evidence.kind === "EXTERNAL_CURRENT_EVIDENCE" && !trusted) throw new Error("Research is disabled.");
     if (!trusted && !context && evidence.kind !== "AI_RECOMMENDATION") throw new Error("Unverified selective evidence.");
     if (evidence.kind === "MARKETPLACE_DATA" && !trusted && (!evidence.vendorIds.length || evidence.vendorIds.some((id) =>
       !context?.vendors.some((vendor) => vendor.id === id && vendor.source === "marketplace")))) {

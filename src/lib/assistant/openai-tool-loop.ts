@@ -9,7 +9,10 @@ import { assistantResponseSchema, type SelectiveAssistantRequest } from "./types
 import type { AssistantLanguage } from "./language";
 import { buildConversationWindow } from "./planning/conversation";
 import { attestToolResponse, type TurnToolRecord } from "./openai-tool-trust";
-import { openAIReadTools, functionCallSchema, validateToolCall, executeValidatedCall, toolRecord, type ValidatedToolResult } from "./openai-tool-bridge";
+import { createResearchExecutor, type ResearchReceipt } from "./research/server";
+import { OpenAIResearchAdapter } from "./research/openai-adapter";
+import { researchToolName } from "./research/contracts";
+import { openAIResearchTools, validateResearchCall, openAIReadTools, functionCallSchema, validateToolCall, executeValidatedCall, toolRecord, type ValidatedToolResult } from "./openai-tool-bridge";
 
 export const OPENAI_TURN_LIMITS = { rounds: 4, calls: 6 } as const;
 export class InvalidOpenAIResult extends Error {}
@@ -55,6 +58,8 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
     if (duration <= 0 || controller.signal.aborted) throw new Error("Provider deadline.");
     return duration;
   };
+  const research = createResearchExecutor(new OpenAIResearchAdapter(client, config.model), deadline, controller.signal);
+  const receipts: ResearchReceipt[] = [];
   const ledger: TurnToolRecord[] = [];
   const ids = new Set<string>();
   const cache = new Map<string, ValidatedToolResult>();
@@ -69,7 +74,7 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
       const finalRound = round === OPENAI_TURN_LIMITS.rounds - 1;
       const raw = await Promise.race([client.responses.create({ model: config.model,
         instructions: openAIWeddingInstructions(language) + (finalRound ? `\n${finalRoundInstructions}` : ""), input: [...input],
-        tools: openAIReadTools, tool_choice: finalRound ? "none" : "auto", include: ["reasoning.encrypted_content"],
+        tools: [...openAIReadTools, ...openAIResearchTools], tool_choice: finalRound ? "none" : "auto", include: ["reasoning.encrypted_content"],
         max_output_tokens: OPENAI_MAX_OUTPUT_TOKENS, store: false, stream: false,
       }, { signal: controller.signal, timeout }), expired]);
       remaining();
@@ -97,7 +102,7 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
         diagnostic({ stage, outcome: "success", round: roundNumber, responseCharacters: text.length,
           ...(normalized.usage ?? {}) });
         stage = "attestation";
-        const attested = attestToolResponse(normalized, ledger);
+        const attested = attestToolResponse(normalized, ledger, receipts);
         diagnostic({ stage, outcome: "success", evidenceCount: attested.evidence.length });
         return attested;
       }
@@ -107,7 +112,7 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
       const prepared = requested.map(call => {
         if (ids.has(call.call_id)) throw new InvalidOpenAIResult();
         ids.add(call.call_id);
-        try { return validateToolCall(call); } catch { throw new InvalidOpenAIResult(); }
+        try { return researchToolName.safeParse(call.name).success ? { kind: "research" as const, value: validateResearchCall(call) } : { kind: "internal" as const, value: validateToolCall(call) }; } catch { throw new InvalidOpenAIResult(); }
       });
       calls += prepared.length;
       for (const item of parsed.data.output) {
@@ -116,7 +121,19 @@ export async function runOpenAIToolLoop(request: SelectiveAssistantRequest, lang
           type: "reasoning", id: item.id, encrypted_content: item.encrypted_content, summary: [],
         });
       }
-      for (const call of prepared) {
+      for (const preparedCall of prepared) {
+        if (preparedCall.kind === "research") {
+          const call = preparedCall.value;
+          const { receipt, usage } = await Promise.race([research(call.name, call.input), expired]);
+          remaining(); receipts.push(receipt);
+          if (usage) { sawUsage = true; inputTokens += usage.inputTokens; outputTokens += usage.outputTokens;
+            if (!Number.isSafeInteger(inputTokens) || !Number.isSafeInteger(outputTokens)) completeUsage = false;
+          } else completeUsage = false;
+          ledger.push({ name: call.name, callId: call.call.call_id, fingerprint: receipt.fingerprint, execution: "executed", resultStatus: receipt.result.status, evidence: [] });
+          input.push({ type: "function_call_output", call_id: call.call.call_id, output: JSON.stringify(receipt.result) });
+          continue;
+        }
+        const call = preparedCall.value;
         stage = "tool_execution";
         diagnostic({ stage, outcome: "start", round: roundNumber, tool: call.name });
         remaining();

@@ -57,7 +57,7 @@ export const normalizedResearchRequestSchema = z.discriminatedUnion("tool", [
     packageFeatures: benchmarkInputSchema.shape.packageFeatures, quotedPrice: benchmarkInputSchema.shape.quotedPrice,
     coverageHours: benchmarkInputSchema.shape.coverageHours, numberOfProfessionals: benchmarkInputSchema.shape.numberOfProfessionals, videoIncluded: benchmarkInputSchema.shape.videoIncluded,
   }).strict() }).strict(),
-  z.object({ tool: z.literal("research_current_wedding_info"), attributes: z.object({ ...normalizedPlanningFields, topic: currentInfoInputSchema.shape.topic }).strict() }).strict(),
+  z.object({ tool: z.literal("research_current_wedding_info"), attributes: z.object({ ...normalizedPlanningFields, topic: currentInfoInputSchema.shape.topic, aspect: currentInfoInputSchema.shape.aspect }).strict() }).strict(),
 ]);
 // This emits attributes, not an arbitrary search string. No names, IDs, contacts,
 // exact wedding day or user-authored offer/notes text can enter the adapter payload.
@@ -79,7 +79,7 @@ export function normalizeResearchRequest(toolName: unknown, raw: unknown, now = 
   // Procedural queries do not need a Couple's event scale or event date.
   const eventRelevant = input.topic === "wedding_industry_norms" || input.topic === "wedding_logistics";
   const context = eventRelevant ? input : { countryCode: input.countryCode, region: input.region };
-  return normalizedResearchRequestSchema.parse({ tool, attributes: { ...normalizedPlanning({ ...context, purpose: "overall_budget", packageFeatures: [] }, now), topic: input.topic } });
+  return normalizedResearchRequestSchema.parse({ tool, attributes: { ...normalizedPlanning({ ...context, purpose: "overall_budget", packageFeatures: [] }, now), topic: input.topic, aspect: input.aspect } });
 }
 export type NormalizedResearchRequest = ReturnType<typeof normalizeResearchRequest>;
 export function researchRequestKey(request: NormalizedResearchRequest) {
@@ -88,7 +88,7 @@ export function researchRequestKey(request: NormalizedResearchRequest) {
 }
 
 export const FUTURE_RESEARCH_COST_POLICY = Object.freeze({
-  maxCallsPerMessage: 2, maxSourcesPerCall: 8, timeoutMs: 15000,
+  maxCallsPerMessage: 1, maxSourcesPerCall: 8, timeoutMs: 15000,
   deduplicateWithinAnswer: true, automaticProviderFallback: false,
-  accountSessionRateLimitsRequiredBeforeEnablement: true,
+  accountSessionRateLimitsRequiredBeforeEnablement: false,
 });

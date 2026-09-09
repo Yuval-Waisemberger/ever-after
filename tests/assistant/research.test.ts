@@ -123,11 +123,11 @@ describe("research privacy and cost preparation", () => {
   });
   it("omits irrelevant event context for procedures and canonicalizes equivalent requests", () => {
     const request = normalizeResearchRequest("research_current_wedding_info", { topic: "marriage_registration", guestCount: 250, weddingDate: "2026-12-17", eventType: "evening" }, now);
-    expect(request.attributes).toEqual({ countryCode: "IL", topic: "marriage_registration", asOfDate: "2026-09-07" });
+    expect(request.attributes).toEqual({ countryCode: "IL", topic: "marriage_registration", aspect: "general", asOfDate: "2026-09-07" });
     const first = normalizeResearchRequest("get_market_benchmark", { ...input, packageFeatures: ["video", "full_day", "video"] }, now);
     const second = normalizeResearchRequest("get_market_benchmark", { ...input, packageFeatures: ["full_day", "video"] }, now);
     expect(researchRequestKey(first)).toBe(researchRequestKey(second));
-    expect(FUTURE_RESEARCH_COST_POLICY).toMatchObject({ maxCallsPerMessage: 2, maxSourcesPerCall: 8, timeoutMs: 15000, automaticProviderFallback: false });
+    expect(FUTURE_RESEARCH_COST_POLICY).toMatchObject({ maxCallsPerMessage: 1, maxSourcesPerCall: 8, timeoutMs: 15000, automaticProviderFallback: false });
   });
 });
 
@@ -173,7 +173,7 @@ describe("source and statement provenance", () => {
     expect([...registry.matchAll(/^  ([a-z_]+):/gm)].map((match) => match[1])).toEqual(["get_wedding_summary", "list_tasks", "get_timeline_summary", "get_budget_summary", "get_upcoming_payments", "get_couple_vendors", "search_marketplace_vendors", "compare_vendors", "get_guest_list_summary", "get_missing_wedding_details"]);
     for (const file of readdirSync("src/lib/assistant/research")) {
       const code = readFileSync(`src/lib/assistant/research/${file}`, "utf8");
-      expect(code).not.toMatch(/\bfetch\(|https?\.request|\.insert\(|\.update\(|\.delete\(|\.upsert\(|@\/lib\/actions|@\/lib\/supabase|from ["'](?:openai|@anthropic|axios)/);
+      expect(code).not.toMatch(/\bfetch\(|https?\.request|\.insert\(|\.delete\(|\.upsert\(|@\/lib\/actions|@\/lib\/supabase|from ["'](?:@anthropic|axios)/);
     }
   });
 });

@@ -33,6 +33,14 @@ const textResponse = (text = "Here is your wedding guidance.") => ({ status: "co
   content: [{ type: "output_text", text, annotations: [] }] }], usage: { input_tokens: 20, output_tokens: 10 } });
 const call = (name = "get_budget_summary", id = "call_1", args: unknown = {}) => ({ type: "function_call" as const, name, call_id: id, arguments: JSON.stringify(args) });
 const calls = (...items: unknown[]) => ({ status: "completed", output: items, usage: { input_tokens: 12, output_tokens: 3 } });
+
+function researchOutput() {
+  const date = new Date().toISOString();
+  const value = { status: "success", researchedAt: date, sources: [{ sourceId: "official", origin: "external_research", url: "https://www.gov.il/synthetic", domain: "www.gov.il", title: "Synthetic official fixture", retrievedAt: date, sourceType: "official", relevance: "Synthetic procedure" }], data: {
+    topic: "marriage_registration", countryCode: "IL", findings: [{ text: "Synthetic general timing; confirm current applicability.", sourceIds: ["official"] }], quality: { confidence: "medium", explanation: "Synthetic only" }, limitations: [],
+  } };
+  return { status: "completed", output: [{ type: "web_search_call", status: "completed" }, { type: "message", role: "assistant", status: "completed", content: [{ type: "output_text", text: JSON.stringify(value), annotations: [{ type: "url_citation", url: value.sources[0].url }] }] }], usage: { input_tokens: 15, output_tokens: 5 } };
+}
 function harness(...rounds: unknown[]) {
   const create = vi.fn<(input: ResponseCreateParamsNonStreaming, options?: { signal?: AbortSignal; timeout?: number }) => Promise<unknown>>();
   for (const round of rounds) create.mockResolvedValueOnce(round);
@@ -50,6 +58,45 @@ function outputs(h: ReturnType<typeof harness>, round = 1) {
   });
 }
 
+describe("Phase 6B separate bounded research bridge", () => {
+  it("mixes owned Couple and validated external evidence; counts adapter usage without another admission", async () => {
+    const h = harness(calls(call("get_wedding_summary"), call("research_current_wedding_info", "research", { topic: "marriage_registration", aspect: "timing" })), researchOutput(), textResponse("Confirm current timing and applicability. [Official fixture](https://www.gov.il/synthetic)"));
+    const result = await h.ask("Based on our saved date and current official timing, when should we register?");
+    expect(result.status).toBe("ok"); expect(h.create).toHaveBeenCalledTimes(3); expect(db.state.authCalls).toBe(1);
+    expect(result.usage).toEqual({ inputTokens: 47, outputTokens: 18 });
+    expect(result.evidence.map(item => item.kind)).toEqual(["AI_RECOMMENDATION", "COUPLE_DATA", "EXTERNAL_CURRENT_EVIDENCE"]);
+    expect(validateAgentResponse(result)).toEqual(result);
+    expect(h.create.mock.calls[0][0].tools).toHaveLength(12);
+    expect(h.create.mock.calls[1][0].input).not.toContain("Based on our saved date");
+  });
+  it("does not launch a second research invocation, including across tool names, and keeps round four answer-only", async () => {
+    const h = harness(calls(call("research_current_wedding_info", "research1", { topic: "marriage_registration" })), researchOutput(),
+      calls(call("get_market_benchmark", "research2", { purpose: "market_range", category: "photography" })),
+      calls(call("research_current_wedding_info", "research3", { topic: "marriage_registration", aspect: "fees" })),
+      textResponse("Current applicability could not be fully verified. Check the official source."));
+    const result = await h.ask("What are the current wedding registration requirements?");
+    expect(result.status).toBe("ok"); expect(h.create).toHaveBeenCalledTimes(5); // Four main rounds plus ONE adapter request.
+    expect(h.create.mock.calls.filter(([body]) => body.tools?.some(tool => tool.type === "web_search"))).toHaveLength(1);
+    expect(h.create.mock.calls[4][0].tool_choice).toBe("none");
+    expect(result.toolUsage?.map(item => item.status)).toEqual(["succeeded", "unavailable", "unavailable"]);
+    expect(db.state.authCalls).toBe(0);
+  });
+  it("allows a qualified final answer after research failure without retrying", async () => {
+    const h = harness(calls(call("research_current_wedding_info", "research", { topic: "marriage_registration" })), { status: "failed" }, textResponse("I could not verify current requirements. Check the relevant official council; general guidance can help."));
+    const result = await h.ask("What documents are currently required for marriage registration?");
+    expect(result.status).toBe("ok"); expect(result.evidence).toEqual([{ kind: "AI_RECOMMENDATION" }]);
+    expect(result.toolUsage?.[0].status).toBe("unavailable"); expect(h.create).toHaveBeenCalledTimes(3);
+  });
+  it("rejects forged final citation URLs even after valid research", async () => {
+    const h = harness(calls(call("research_current_wedding_info", "research", { topic: "marriage_registration" })), researchOutput(), textResponse("[Forged source](https://forged.example/current)"));
+    expect((await h.ask("What documents are currently required for a wedding?")).status).not.toBe("ok");
+  });
+  it("counts research requests toward the unchanged six-call budget before any execution", async () => {
+    const h = harness(calls(...Array.from({ length: 7 }, (_, i) => call("research_current_wedding_info", `research_${i}`, { topic: "marriage_registration" }))));
+    expect((await h.ask()).status).toBe("error"); expect(h.create).toHaveBeenCalledOnce(); expect(db.state.authCalls).toBe(0);
+  });
+});
+
 describe("Phase 5.5 guidance contracts (mocked model choices, not live compliance)", () => {
   it.each([
     "What documents do we currently need to open a marriage file with the Rabbinate in Israel?",
@@ -64,7 +111,7 @@ describe("Phase 5.5 guidance contracts (mocked model choices, not live complianc
     expect(instructions).toContain("Use Couple READ tools only when the answer actually requires current saved Couple-specific information.");
     expect(instructions).toContain("do not require get_wedding_summary or other Couple reads");
     expect(instructions).toContain('The word "currently" in a general official-procedure question');
-    expect(instructions).toContain("Current research is unavailable. Never claim current verification");
+    expect(instructions).toContain("Partial evidence requires qualification. Unavailable/insufficient research");
     expect(result.status).toBe("ok"); expect(h.create).toHaveBeenCalledOnce();
     expect(db.state.authCalls).toBe(0); expect(result.toolUsage ?? []).toEqual([]);
     expect(result.evidence).toEqual([{ kind: "AI_RECOMMENDATION" }]);
