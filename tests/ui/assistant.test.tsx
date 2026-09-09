@@ -4,10 +4,10 @@ import { AssistantChat, type AssistantMessage } from "@/components/assistant/ass
 import { Clarification, MessageContent } from "@/components/assistant/message-content";
 const message: AssistantMessage = { id: "1", role: "assistant", content: "נשארו 2,000 ₪ עבור Maya Photography.\nYour next payment is 2026-09-12.", source_labels: ["Couple data", "Internal vendor database", "General guidance"], created_at: "2026-09-07" };
 describe("Assistant bilingual presentation", () => {
-  it("uses per-paragraph auto direction and isolated business names/currency", () => {
+  it("uses explicit Hebrew direction for the message", () => {
     const html = renderToStaticMarkup(<MessageContent text={message.content} />);
-    expect(html.match(/dir="auto"/g)).toHaveLength(2); expect(html).toContain('<bdi dir="ltr">'); expect(html).toContain("Maya Photography");
-    expect(html).toContain('lang="he"'); expect(html).toContain('lang="en"');
+    expect(html).toContain('dir="rtl"'); expect(html).toContain('lang="he"');
+    expect(html).toContain("Maya Photography");
   });
   it("keeps role alignment, auto-direction composer and readable source lists", () => {
     const html = renderToStaticMarkup(<AssistantChat initialThreadId={null} initialMessages={[message]} />);

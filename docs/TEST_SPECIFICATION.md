@@ -628,3 +628,12 @@ the active slot and permits a new counted UUID. Known pre-dispatch failures rema
 non-owner sessions test browser function denial, service-role RPC execution, direct ledger denial even
 for service_role, role escalation denial and hardened function definitions. No fixture timestamp manipulation,
 system clock changes or live application data changes are required.
+
+
+### Phase 5.6 — Assistant presentation
+
+Safe react-markdown rendering supports paragraphs, emphasis, lists, restrained headings and protocol-limited links. Raw HTML and images are excluded. Message direction follows the first language-bearing text, independently of role alignment. The Assistant page reuses the cached existing Couple identity reader and passes only avatar choice and photo URL, never profile IDs, names or storage paths. The existing photo/error fallback component is reused. Assistant sparkle and Couple avatar accompany warm editorial surfaces; pending dots stop with the existing request state and become static under reduced motion. Existing suggestions also fill the composer in active conversations without submitting. Source labels retain existing evidence semantics. No semantic callout engine or new source type is introduced.
+
+The footer now reads “Answers can use your wedding profile, tasks, vendors, and budget.” Formatting guidance changes presentation only; Phase 5.5 scope/tool-selection and agorot rules remain intact. History titles and active selection are preserved; no history dates are invented because the existing summary contract supplies no timestamps. Message timestamps use existing created_at.
+
+Validation uses the isolated Assistant fixture host (external browser traffic blocked), bilingual Markdown fixtures, responsive desktop/intermediate/mobile screenshots, reduced-motion and transport regressions. Review artifacts remain ignored under .codex-tmp/phase2e-review and test-results/assistant-visual. No live Assistant turn is used for this review. Owner visual acceptance remains pending.

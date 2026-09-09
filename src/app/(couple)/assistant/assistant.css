@@ -43,7 +43,7 @@
 .assistant-avatar { width:18px; height:18px; flex-shrink:0; margin-top:16px; color:var(--wine); }
 .assistant-message [data-bubble] { min-width:0; max-width:88%; padding:16px 19px; border:1px solid var(--line); border-radius:4px 14px 14px 14px; background:var(--surface-tonal); color:var(--ink); font-size:14px; line-height:1.85; }
 .assistant-message[data-role=user] [data-bubble] { background:var(--surface-blush); border-radius:14px 4px 14px 14px; }
-.assistant-message p { overflow-wrap:anywhere; white-space:pre-wrap; }
+.assistant-message p { overflow-wrap:anywhere; }
 .assistant-sources { margin-top:14px; padding-top:12px; border-top:1px solid var(--line); }
 .assistant-sources li { background:var(--surface-standard); }
 .assistant-pending { display:flex; flex-wrap:wrap; align-items:center; gap:12px; padding:12px 0 24px; color:var(--ink-soft); font-size:13px; }
@@ -91,3 +91,46 @@
 @media(prefers-reduced-motion:reduce) {
  .assistant-experience *, .assistant-drawer { animation:none!important; transition:none!important; }
 }
+
+/* Editorial conversation polish: scoped to the Assistant. */
+.assistant-heading { margin-bottom:22px; }
+.assistant-chat-toolbar > span { font-family:var(--font-editorial); font-size:22px; color:var(--ink); }
+.assistant-ready { display:flex; align-items:center; gap:7px; font-family:var(--font-sans); font-size:11px; color:var(--ink-soft); margin-top:4px; }
+.assistant-ready::before { content:""; width:5px; height:5px; border-radius:50%; background:#733343; }
+.assistant-message-log { padding:22px clamp(12px,2vw,28px); }
+.assistant-message { margin-bottom:16px; gap:10px; }
+.assistant-avatar,.assistant-couple-avatar { display:grid; place-items:center; width:36px; height:36px; flex-shrink:0; margin-top:3px; border-radius:50%; background:var(--surface-blush); color:#733343; }
+.assistant-message [data-bubble] { max-width:min(88%,720px); padding:14px 18px; border-radius:11px; line-height:1.7; background:#f6f1eb; }
+.assistant-message[data-role=user] [data-bubble] { border-radius:11px; border-color:color-mix(in srgb,#733343 28%,var(--line)); }
+.assistant-markdown { text-align:start; overflow-wrap:anywhere; min-width:0; }
+.assistant-markdown > * + * { margin-top:.8em; }
+.assistant-markdown strong { font-weight:650; }
+.assistant-markdown ul,.assistant-markdown ol { padding-inline-start:1.5em; }
+.assistant-markdown ul { list-style:disc; }
+.assistant-markdown ol { list-style:decimal; }
+.assistant-markdown li + li { margin-top:.35em; }
+.assistant-markdown li::marker { color:#733343; }
+.assistant-markdown li > p + p { margin-top:.5em; }
+.assistant-markdown h1,.assistant-markdown h2,.assistant-markdown h3,.assistant-markdown h4,.assistant-markdown h5,.assistant-markdown h6 { font-size:1.06em; font-weight:600; line-height:1.45; }
+.assistant-markdown a { text-decoration:underline; text-underline-offset:3px; color:#733343; }
+.assistant-message-time { display:block; font-size:10px; color:var(--ink-soft); margin-top:8px; text-align:end; }
+.assistant-sources { margin-top:10px; padding-top:10px; }
+.assistant-pending { padding:4px 0 16px; }
+.assistant-pending-ornament span { width:5px; height:5px; border-radius:50%; background:#733343; }
+.assistant-pending-ornament span:nth-child(2) { font-size:inherit; }
+.assistant-followups { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:12px; }
+.assistant-followups button { border:1px solid var(--line); border-radius:20px; padding:8px 12px; background:var(--surface-standard); color:var(--ink-soft); font-size:11px; text-align:start; }
+.assistant-followups button:hover { border-color:#733343; color:#733343; }
+.assistant-send { background:#733343; border-color:#733343; }
+.assistant-thread:focus-visible,.assistant-followups button:focus-visible,.assistant-markdown a:focus-visible { outline:2px solid #733343; outline-offset:3px; }
+.assistant-blank { margin:8px auto 20px; }
+@media(max-width:600px) {
+ .assistant-avatar,.assistant-couple-avatar { width:28px; height:28px; }
+ .assistant-avatar svg { width:16px; height:16px; }
+ .assistant-message { gap:7px; }
+ .assistant-message [data-bubble] { max-width:calc(100% - 35px); padding:11px; font-size:13px; }
+ .assistant-chat-toolbar > span { font-size:19px; }
+ .assistant-followups button { min-height:44px; }
+}
+
+.assistant-composer textarea:focus-visible { outline:none; }

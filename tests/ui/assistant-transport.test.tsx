@@ -63,3 +63,13 @@ describe("Assistant logical request transport", () => {
     expect(container.querySelector('[role="alert"]')).not.toBeNull();
   });
 });
+
+it("follow-up suggestions only fill the existing composer", async () => {
+  fetchMock.mockResolvedValueOnce(reply());
+  await submitSuggestion();
+  const count = fetchMock.mock.calls.length;
+  await act(async () => { (container.querySelector(".assistant-followups button") as HTMLButtonElement).click(); });
+  expect(fetchMock).toHaveBeenCalledTimes(count);
+  expect(container.querySelector("textarea")!.value).toBeTruthy();
+  expect(document.activeElement).toBe(container.querySelector("textarea"));
+});

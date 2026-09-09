@@ -40,7 +40,7 @@ test("real pending ornament, context, accepted send and response reveal", async 
   });
   await page.locator("textarea").fill("How much budget do we have left?");
   await page.getByRole("button", { name: "Send message", exact: true }).click();
-  await expect(page.getByRole("status")).toHaveText("✦❦✦Considering your wedding…");
+  await expect(page.getByRole("status")).toHaveText("Considering your wedding…");
   await expect(page.locator("textarea")).toHaveValue("How much budget do we have left?");
   await expect(page.locator("textarea")).toBeDisabled();
   await expect(page.locator(".assistant-context li")).toHaveCount(5);

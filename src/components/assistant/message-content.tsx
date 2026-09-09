@@ -1,10 +1,15 @@
-import { Fragment } from "react";
+import ReactMarkdown from "react-markdown";
 import type { z } from "zod";
 import type { clarificationSchema } from "@/lib/assistant/planning/policy";
 import { assistantCopy, type AssistantLanguage } from "@/lib/assistant/language";
 
 export function MessageContent({ text }: { text: string }) {
-  return <>{text.split("\n").map((paragraph, index) => <p key={index} dir="auto" lang={/^[^a-zא-ת]*[א-ת]/i.test(paragraph) ? "he" : "en"} className="min-w-0 whitespace-pre-wrap text-start [overflow-wrap:anywhere]">{paragraph.split(/([A-Za-z][A-Za-z0-9]*(?:[ .:/?=&_%+#@'-]+[A-Za-z0-9]+)*|(?:₪\s*)?\d+(?:[.,/-]\d+)*(?:\s*₪)?)/g).map((part, i) => /[A-Za-z0-9]/.test(part) ? <bdi key={i} dir="ltr" className={!/[A-Za-z]/.test(part) && part.length <= 24 ? "whitespace-nowrap" : undefined}>{part}</bdi> : <Fragment key={i}>{part}</Fragment>)}</p>)}</>;
+  const hebrew = /^[^a-zא-ת]*[א-ת]/i.test(text);
+  return <div className="assistant-markdown" dir={hebrew ? "rtl" : "ltr"} lang={hebrew ? "he" : "en"}>
+    <ReactMarkdown skipHtml allowedElements={["p", "strong", "em", "ul", "ol", "li", "h1", "h2", "h3", "h4", "h5", "h6", "a", "br"]} unwrapDisallowed components={{
+      a: ({ href, children }) => href && /^(https?:\/\/|mailto:)/i.test(href) ? <a href={href} target="_blank" rel="noopener noreferrer">{children}</a> : <span>{children}</span>,
+    }}>{text}</ReactMarkdown>
+  </div>;
 }
 const questions = {
   he: { category: "באיזה שירות מדובר?", quotedPrice: "מה הסכום והמטבע של ההצעה?", coverageHours: "כמה שעות צילום כלולות?", videoIncluded: "האם ההצעה כוללת גם וידאו?", region: "באיזה אזור יתקיים האירוע?", weddingDate: "מה תאריך החתונה?", guestCount: "כמה מוזמנים צפויים?", totalBudgetMinor: "מה התקציב הכולל שלכם?" },

@@ -16,10 +16,10 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 360]) for (const language 
     await input.fill(text); await expect(input).toHaveCSS("direction", language === "he" ? "rtl" : "ltr");
     await expect(page.locator('[data-role="assistant"]').first()).toHaveCSS("justify-content", "flex-start");
     await expect(page.locator('[data-role="user"]').first()).toHaveCSS("justify-content", "flex-end");
-    const paragraphs = page.locator("[data-bubble] > p");
+    const paragraphs = page.locator(".assistant-markdown");
     const directions = await paragraphs.evaluateAll((elements) => elements.map((element) => ({ text: element.textContent, direction: getComputedStyle(element).direction })));
     expect(directions.some((item) => /[א-ת]/.test(item.text ?? "") && item.direction === "rtl")).toBe(true);
-    expect(directions.some((item) => /These are|You have/.test(item.text ?? "") && item.direction === "ltr")).toBe(true);
+    expect(directions.some((item) => /These are|You have|Questions for/.test(item.text ?? "") && item.direction === "ltr")).toBe(true);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     expect(await page.locator("[data-bubble], textarea, select, button, [data-bubble] li").evaluateAll((elements) => elements.filter((element) => { const r = element.getBoundingClientRect(); return r.left < -1 || r.right > innerWidth + 1 || element.scrollWidth > element.clientWidth + 2; }).map((element) => element.tagName))).toEqual([]);
     await page.getByRole("log").evaluate((element) => { element.scrollTop = 0; });

@@ -1,12 +1,14 @@
 "use client";
 
 import { CSSProperties, FormEvent, useEffect, useRef, useState } from "react";
-import { ArrowUp, MessageSquare, Plus, Sparkles, UserRound, X, History } from "lucide-react";
+import { ArrowUp, MessageSquare, Plus, Sparkles, X, History } from "lucide-react";
 import { z } from "zod";
 import { assistantCopy, selectResponseLanguage, sourceDisplayLabel, type AssistantLanguage } from "@/lib/assistant/language";
 import { assistantResponseSchema } from "@/lib/assistant/types";
 import { clarificationSchema } from "@/lib/assistant/planning/policy";
 import type { ConversationReader, ConversationSummary, HistoryPage, HistoryReader } from "./presentation";
+import { CoupleAvatar } from "@/components/couple/couple-avatar";
+import type { ComponentProps } from "react";
 import { Clarification, MessageContent } from "./message-content";
 
 const messageSchema = z.object({ id: z.string().min(1), role: z.enum(["user", "assistant"]), content: z.string().trim().min(1).max(16000), source_labels: z.array(z.string().max(100)).max(4), created_at: z.string(), clarificationIntent: clarificationSchema.optional() });
@@ -14,10 +16,11 @@ export type AssistantMessage = z.output<typeof messageSchema>;
 const replySchema = z.object({ threadId: z.uuid(), message: messageSchema, agent: assistantResponseSchema.optional() });
 
 type Props = {
+  coupleAvatar?: Pick<ComponentProps<typeof CoupleAvatar>, "choice" | "photoUrl">;
   initialThreadId: string | null; initialMessages: AssistantMessage[]; initialLoadError?: boolean;
   initialHistory?: HistoryPage; readHistory?: HistoryReader; readConversation?: ConversationReader; contextChips?: string[];
 };
-export function AssistantChat({ initialThreadId, initialMessages, initialLoadError = false, initialHistory, readHistory, readConversation, contextChips = [] }: Props) {
+export function AssistantChat({ initialThreadId, initialMessages, initialLoadError = false, initialHistory, readHistory, readConversation, contextChips = [], coupleAvatar }: Props) {
   const [threadId, setThreadId] = useState(initialThreadId);
   const [messages, setMessages] = useState(initialMessages);
   const [recentLanguage, setRecentLanguage] = useState<AssistantLanguage>(() => initialMessages.reduce<AssistantLanguage>((language, message) => selectResponseLanguage(message.content, language).language, "en"));
@@ -157,7 +160,7 @@ export function AssistantChat({ initialThreadId, initialMessages, initialLoadErr
       <section className="assistant-chat-panel">
         <div className="assistant-chat-toolbar">
           <button ref={historyTrigger} className="ea-icon-button assistant-history-trigger" aria-label={historyLabel} aria-haspopup="dialog" onClick={() => setDrawerOpen(true)}><History size={19} aria-hidden="true" /></button>
-          <span dir="auto">{threads.find((thread) => thread.id === threadId)?.title || newLabel}</span>
+          <span dir="auto">{threads.find((thread) => thread.id === threadId)?.title || newLabel}<small className="assistant-ready">{english ? "Ready to help" : "כאן לעזור"}</small></span>
           <button className="ea-icon-button assistant-mobile-new" aria-label={newLabel} onClick={newChat} disabled={sending}><Plus size={20} aria-hidden="true" /></button>
         </div>
         {historyBusy ? <p className="assistant-read-status" role="status">{english ? "Opening your conversations…" : "טוען את השיחות שלכם…"}</p> : null}
@@ -166,7 +169,7 @@ export function AssistantChat({ initialThreadId, initialMessages, initialLoadErr
           <div role="log" aria-label={copy.title} aria-live="polite" aria-relevant="additions text" className="assistant-message-log">
             {hasOlder ? <button type="button" className="ea-text-action assistant-more" onClick={olderMessages} disabled={historyBusy || sending}>{english ? "Earlier messages" : "הודעות קודמות"}</button> : null}
             {!messages.length ? <div className="assistant-blank" dir="auto">
-              <div className="assistant-identity" aria-hidden="true">✦ <span>❦</span> ✦</div>
+              <div className="assistant-identity" aria-hidden="true"><Sparkles size={32} /></div>
               <p className="eyebrow">{english ? "A MOMENT OF CLARITY" : "רגע של בהירות"}</p>
               <h2>{copy.emptyTitle}</h2><p>{english ? "Bring your questions. Let’s make a little more room for the joy of planning." : "הביאו את השאלות שלכם. נפנה יחד קצת יותר מקום לשמחה שבתכנון."}</p>
               <div className="assistant-suggestions">{copy.prompts.map((prompt) => <button key={prompt} type="button" disabled={sending || historyBusy || initialLoadError} onClick={() => { setInput(prompt); textarea.current?.focus(); }}><span>{prompt}</span><ArrowUp size={15} aria-hidden="true" /></button>)}</div>
@@ -176,23 +179,25 @@ export function AssistantChat({ initialThreadId, initialMessages, initialLoadErr
               const messageLanguage = selectResponseLanguage(message.content, recentLanguage).language;
               const sources = [...new Set(message.source_labels)].map((label) => sourceDisplayLabel(label, messageLanguage)).filter((label): label is string => Boolean(label));
               return <article key={message.id} data-role={message.role} className={`assistant-message flex min-w-0 gap-2 ${message.role === "user" ? "justify-end" : "justify-start"}`}>
-                {message.role === "assistant" ? <Sparkles aria-hidden="true" className="assistant-avatar" /> : null}
+                {message.role === "assistant" ? <span className="assistant-avatar" aria-label="Wedding Assistant"><Sparkles aria-hidden="true" size={19} /></span> : null}
                 <div data-bubble>
                   <MessageContent text={message.content} />
+                  {Number.isFinite(Date.parse(message.created_at)) ? <time className="assistant-message-time" dateTime={message.created_at}>{new Date(message.created_at).toLocaleTimeString(messageLanguage, { hour: "2-digit", minute: "2-digit" })}</time> : null}
                   {sources.length ? <ul aria-label={assistantCopy[messageLanguage].sources} className="assistant-sources">{sources.map((source, index) => <li key={source} dir="auto" style={{ "--chip-delay": `${index * 100}ms` } as CSSProperties}>{source}</li>)}</ul> : null}
                   {message.clarificationIntent ? <Clarification intent={message.clarificationIntent} language={messageLanguage} /> : null}
-                </div>{message.role === "user" ? <UserRound aria-hidden="true" className="assistant-avatar" /> : null}
+                </div>{message.role === "user" ? <CoupleAvatar choice={coupleAvatar?.choice ?? "heart"} photoUrl={coupleAvatar?.photoUrl} className="assistant-couple-avatar" sizes="36px" /> : null}
               </article>;
             })}
-            {sending ? <div role="status" dir="auto" className="assistant-pending"><div aria-hidden="true" className="assistant-pending-ornament"><span>✦</span><span>❦</span><span>✦</span></div><p>{pendingLabel}</p></div> : null}
+            {sending ? <div role="status" dir="auto" className="assistant-pending"><span className="assistant-avatar" aria-hidden="true"><Sparkles size={19} /></span><div aria-hidden="true" className="assistant-pending-ornament"><span /><span /><span /></div><p>{pendingLabel}</p></div> : null}
             {initialLoadError ? <p role="alert" dir="auto" className="assistant-error">{copy.thread}</p> : null}
             {failure ? <div dir="auto" className="assistant-error"><p role="alert">{failure.text}</p>{failure.intent ? <Clarification intent={failure.intent} language={failure.language} /> : null}{retryMessage ? <button type="button" disabled={sending} className="ea-text-action assistant-more" onClick={() => send(undefined, retryMessage)}>{assistantCopy[failure.language].retry}</button> : null}</div> : null}
             <div ref={bottom} />
           </div>
         </div>
         <form onSubmit={send} className="assistant-composer">
+          {messages.length > 0 ? <div className="assistant-followups">{copy.prompts.slice(0, 3).map(prompt => <button type="button" key={prompt} disabled={sending || historyBusy || initialLoadError} onClick={() => { setInput(prompt); textarea.current?.focus(); }}>{prompt}</button>)}</div> : null}
           <div className="assistant-composer-field"><label className="sr-only" htmlFor="assistant-message">{copy.inputLabel}</label><textarea ref={textarea} id="assistant-message" dir="auto" value={input} onChange={(event) => setInput(event.target.value)} onKeyDown={(event) => { if ((event.ctrlKey || event.metaKey) && event.key === "Enter" && !event.nativeEvent.isComposing) { event.preventDefault(); void send(); } }} maxLength={3000} rows={2} placeholder={copy.placeholder} disabled={sending || historyBusy || initialLoadError} /><button disabled={!input.trim() || sending || historyBusy || initialLoadError} className="ea-button ea-button--primary assistant-send" aria-label={copy.send}><ArrowUp aria-hidden="true" size={19} /></button></div>
-          <p className="assistant-composer-note" dir="auto">{english ? "Local planning summaries · Live AI and research are not connected." : copy.note}</p>
+          <p className="assistant-composer-note" dir="auto">{english ? "Answers can use your wedding profile, tasks, vendors, and budget." : "התשובות יכולות להיעזר בפרטי החתונה, במשימות, בספקים ובתקציב שלכם."}</p>
         </form>
       </section>
     </div>
