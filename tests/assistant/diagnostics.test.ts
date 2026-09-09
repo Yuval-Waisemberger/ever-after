@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import http from "node:http";
 import https from "node:https";
 import net from "node:net";
+import { formatConsoleArgs } from "next/dist/client/lib/console";
 import { withAssistantDiagnostics, identifyAssistantDiagnostic, logAssistantDiagnostic } from "@/lib/assistant/diagnostics";
 import { OpenAIWeddingAssistantProvider } from "@/lib/assistant/openai-provider";
 import { runWeddingAgent } from "@/lib/assistant/agent";
@@ -15,15 +16,20 @@ const mocks = vi.hoisted(() => ({ client: vi.fn() }));
 vi.mock("next/headers", () => ({}));
 vi.mock("@/lib/supabase/server", () => ({ createClient: mocks.client }));
 const requestId = uuid(990), secret = "PRIVATE_PAYLOAD_SENTINEL";
-let db: ReturnType<typeof database>, events: Record<string, unknown>[], network: number;
+let db: ReturnType<typeof database>, events: Record<string, unknown>[], retained: string[], network: number;
 beforeEach(() => {
-  events = []; network = 0; db = database(); mocks.client.mockReset().mockResolvedValue(db.client);
-  vi.spyOn(console, "info").mockImplementation((_tag, event) => { events.push(event); });
+  events = []; retained = []; network = 0; db = database(); mocks.client.mockReset().mockResolvedValue(db.client);
+  vi.spyOn(console, "info").mockImplementation((...args) => {
+    expect(args).toHaveLength(1); expect(typeof args[0]).toBe("string");
+    // Exercise the exact formatter used by Next.js console-file.js, then its JSONL record.
+    const line = JSON.parse(JSON.stringify({ message: formatConsoleArgs(args) })).message as string;
+    retained.push(line); events.push(JSON.parse(line.slice("assistant_diagnostic ".length)));
+  });
   const blocked = () => { network++; throw new Error("Network forbidden"); };
   vi.stubGlobal("fetch", blocked); vi.spyOn(http, "request").mockImplementation(blocked);
   vi.spyOn(https, "request").mockImplementation(blocked); vi.spyOn(net.Socket.prototype, "connect").mockImplementation(blocked);
 });
-afterEach(() => { expect(network).toBe(0); expect(JSON.stringify(events)).not.toContain(secret); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
+afterEach(() => { expect(network).toBe(0); expect(JSON.stringify(events)).not.toContain(secret); expect(retained.join("\n")).not.toContain(secret); vi.useRealTimers(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 function scope<T>(run: () => T) { return withAssistantDiagnostics(() => { identifyAssistantDiagnostic(requestId, "openai"); return run(); }); }
 const final = () => ({ status: "completed", output: [{ type: "message", role: "assistant", status: "completed", content: [{ type: "output_text", text: "Wedding guidance", annotations: [] }] }], usage: { input_tokens: 21, output_tokens: 7 } });
 const tool = (search = secret) => ({ status: "completed", output: [{ type: "function_call", call_id: "private_call_id", name: "search_marketplace_vendors", arguments: JSON.stringify({ search }) }] });
@@ -37,6 +43,34 @@ function provider(...responses: unknown[]) {
 }
 const has = (stage: string, outcome: string, extra = {}) => expect(events).toContainEqual(expect.objectContaining({ stage, outcome, ...extra }));
 describe("safe Assistant diagnostic stages", () => {
+  it("reproduces Next.js object metadata loss and retains sanitized JSON string metadata", () => {
+    const event = { stage: "route" as const, outcome: "failure" as const, code: "AUTH_REQUIRED" as const };
+    expect(formatConsoleArgs(["assistant_diagnostic", event])).toBe("assistant_diagnostic {}");
+    scope(() => logAssistantDiagnostic(event));
+    expect(events[0]).toEqual({ ...event, requestId, provider: "openai", elapsedMs: expect.any(Number) });
+    expect(retained[0]).toContain('"code":"AUTH_REQUIRED"');
+  });
+  it("retains approved tool/count metadata while stripping every private payload from the serialized output", () => {
+    scope(() => logAssistantDiagnostic({ stage: "tool_execution", outcome: "success", tool: "search_marketplace_vendors",
+      status: "success", round: 2, toolCount: 1, responseCharacters: 120, evidenceCount: 3, inputTokens: 80, outputTokens: 20,
+      prompt: secret, history: secret, arguments: secret, results: secret, vendorName: secret, guest: secret, task: secret,
+      budget: secret, coupleId: uuid(701), weddingId: uuid(702), userId: uuid(703), profileId: uuid(704), email: secret,
+      cookies: secret, authorization: secret, apiKey: secret, rawError: new Error(secret),
+      toJSON: () => { throw new Error("Unsafe input must never be stringified"); },
+    } as Parameters<typeof logAssistantDiagnostic>[0]));
+    expect(events[0]).toEqual({ stage: "tool_execution", outcome: "success", tool: "search_marketplace_vendors",
+      status: "success", round: 2, toolCount: 1, responseCharacters: 120, evidenceCount: 3, inputTokens: 80, outputTokens: 20,
+      requestId, provider: "openai", elapsedMs: expect.any(Number) });
+    for (const id of [701, 702, 703, 704]) expect(retained.join()).not.toContain(uuid(id));
+  });
+  it("swallows serialization failure without replacing or replaying the response", async () => {
+    const stringify = vi.spyOn(JSON, "stringify").mockImplementation(() => { throw new Error(secret); });
+    const answer = { status: "ok", text: "Unchanged" };
+    const run = vi.fn(async () => { logAssistantDiagnostic({ stage: "route", outcome: "success" }); return answer; });
+    let result;
+    try { result = await scope(run); } finally { stringify.mockRestore(); }
+    expect(result).toBe(answer); expect(run).toHaveBeenCalledOnce(); expect(console.info).not.toHaveBeenCalled();
+  });
   it("records ordered general-response stages and safe usage only", async () => {
     expect((await provider(final()).ask()).status).toBe("ok");
     expect(events.map(e => e.stage)).toEqual(["provider", "model_round", "model_round", "model_response_validation", "tool_requested", "final_model_response", "provider_normalization", "attestation", "provider", "response_validation", "response_validation"]);

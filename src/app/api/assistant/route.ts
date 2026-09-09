@@ -36,7 +36,10 @@ async function handleAssistantRequest(request: Request) {
     if (parsed.success) language = selectResponseLanguage(parsed.data.message, parsed.data.recentLanguage, parsed.data.requestedLanguage).language;
     const copy = assistantCopy[language];
     const profile = await getCurrentProfile();
-    if (!profile || profile.role !== "couple") return NextResponse.json({ error: copy.auth, errorCode: "AUTH_REQUIRED" }, { status: 401 });
+    if (!profile || profile.role !== "couple") {
+      diagnostic({ stage: "route", outcome: "failure", code: "AUTH_REQUIRED" });
+      return NextResponse.json({ error: copy.auth, errorCode: "AUTH_REQUIRED" }, { status: 401 });
+    }
     if (!parsed.success) return NextResponse.json({ error: copy.invalid, errorCode: "INVALID_INPUT" }, { status: 400 });
     // Resolve configuration before creating a conversation or persisting a message.
     const provider = getWeddingAssistantProvider();

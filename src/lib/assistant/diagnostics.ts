@@ -10,7 +10,7 @@ export type DiagnosticStage = z.infer<typeof stages>;
 const count = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER);
 const eventSchema = z.object({
   stage: stages, outcome: z.enum(["start", "success", "failure"]),
-  code: z.union([guardrailCode, z.enum(["INVALID_PROVIDER_RESULT", "PROVIDER_UNAVAILABLE", "TIMEOUT", "REQUEST_FAILED", "ANSWER_NOT_SAVED",
+  code: z.union([guardrailCode, z.enum(["AUTH_REQUIRED", "INVALID_PROVIDER_RESULT", "PROVIDER_UNAVAILABLE", "TIMEOUT", "REQUEST_FAILED", "ANSWER_NOT_SAVED",
     "UNKNOWN_TOOL", "SOURCE_UNAVAILABLE", "INVALID_SOURCE_DATA", "READ_LIMIT_EXCEEDED"])]).optional(),
   round: z.number().int().min(1).max(4).optional(), toolCount: count.optional(),
   tool: z.enum(["get_wedding_summary", "list_tasks", "get_timeline_summary", "get_budget_summary", "get_upcoming_payments",
@@ -30,8 +30,10 @@ export function logAssistantDiagnostic(event: Event): void {
     if (!current) return;
     const parsed = eventSchema.safeParse(event);
     if (!parsed.success) return;
-    console.info("assistant_diagnostic", { ...parsed.data, requestId: current.requestId, provider: current.provider,
-      elapsedMs: Math.max(0, Math.round(performance.now() - current.started)) });
+    // One string bypasses Next.js dev file logging's lossy object formatter.
+    // Serialize only validated metadata, inside the best-effort boundary.
+    console.info(`assistant_diagnostic ${JSON.stringify({ ...parsed.data, requestId: current.requestId, provider: current.provider,
+      elapsedMs: Math.max(0, Math.round(performance.now() - current.started)) })}`);
   } catch { /* Best effort, including a throwing console sink. */ }
 }
 export function identifyAssistantDiagnostic(requestId: unknown, provider?: unknown): void {

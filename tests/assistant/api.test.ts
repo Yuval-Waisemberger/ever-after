@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { readFileSync, readdirSync } from "node:fs";
+import { formatConsoleArgs } from "next/dist/client/lib/console";
+import { assistantCopy } from "@/lib/assistant/language";
 import { assistantContext } from "./fixtures";
 const mocks = vi.hoisted(() => ({ profile: vi.fn(), wedding: vi.fn(), context: vi.fn(), from: vi.fn(), history: vi.fn() }));
 vi.mock("@/lib/assistant/planning/history-server", () => ({ readConversationWindow: mocks.history }));
@@ -56,7 +58,7 @@ afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 describe("Assistant API persistence and permissions", () => {
   it("records answer persistence failure separately without logging saved content", async () => {
     const events: Record<string, unknown>[] = [];
-    vi.spyOn(console, "info").mockImplementation((_tag, event) => { events.push(event); });
+    vi.spyOn(console, "info").mockImplementation((...args) => { events.push(JSON.parse(formatConsoleArgs(args).slice("assistant_diagnostic ".length))); });
     assistantInsertFails = true;
     const response = await POST(request());
     expect(response.status).toBe(500);
@@ -72,7 +74,7 @@ describe("Assistant API persistence and permissions", () => {
   it("distinguishes answer persistence failure after successful OpenAI validation and admission finalization", async () => {
     const requestId = "00000000-0000-4000-8000-000000000090";
     const events: Record<string, unknown>[] = [];
-    vi.spyOn(console, "info").mockImplementation((_tag, event) => { events.push(event); });
+    vi.spyOn(console, "info").mockImplementation((...args) => { events.push(JSON.parse(formatConsoleArgs(args).slice("assistant_diagnostic ".length))); });
     vi.stubEnv("AI_PROVIDER", "openai"); vi.stubEnv("OPENAI_API_KEY", "test-placeholder"); vi.stubEnv("OPENAI_MODEL", "test-model");
     mocks.profile.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000091", role: "couple" });
     mocks.wedding.mockResolvedValue({ id: "00000000-0000-4000-8000-000000000092" });
@@ -152,9 +154,21 @@ describe("Assistant API persistence and permissions", () => {
     expect(body.message.source_labels).toEqual(["Couple data"]);
     expect(scopes).toContainEqual(["wedding_id", "owned-wedding"]);
   });
-  it.each([null, { role: "vendor" }])("rejects unauthorized users before database calls", async (profile) => {
+  it.each([null, { role: "vendor", id: "private-profile", email: "private-email" }])("retains safe AUTH_REQUIRED diagnostics with unchanged rejection", async (profile) => {
+    const requestId = "00000000-0000-4000-8000-000000000099";
+    const lines: string[] = [];
+    vi.spyOn(console, "info").mockImplementation((...args) => { lines.push(formatConsoleArgs(args)); });
     mocks.profile.mockResolvedValue(profile);
-    expect((await POST(request())).status).toBe(401); expect(mocks.from).not.toHaveBeenCalled();
+    const response = await POST(new Request("http://localhost/api/assistant", { method: "POST",
+      headers: { cookie: "private-cookie", authorization: "private-auth" },
+      body: JSON.stringify({ requestId, message: "private-prompt", threadId }) }));
+    expect(response.status).toBe(401);
+    expect(await response.json()).toEqual({ error: assistantCopy.en.auth, errorCode: "AUTH_REQUIRED" });
+    const events = lines.map(line => JSON.parse(line.slice("assistant_diagnostic ".length)));
+    expect(events[0]).toEqual({ requestId, stage: "route", outcome: "failure", code: "AUTH_REQUIRED", elapsedMs: expect.any(Number) });
+    expect(lines.join()).not.toMatch(/private-|couple|wedding|cookie|authorization|profile|email/);
+    expect(mocks.from).not.toHaveBeenCalled(); expect(mocks.wedding).not.toHaveBeenCalled();
+    expect(admissionChannel).not.toHaveBeenCalled(); expect(writes).toEqual([]);
   });
   it("rejects invalid input before writes", async () => {
     expect((await POST(request(""))).status).toBe(400); expect(writes).toEqual([]);
