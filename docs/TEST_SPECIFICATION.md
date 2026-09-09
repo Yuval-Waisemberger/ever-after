@@ -1,3 +1,23 @@
+## Current AI status — Phase 7
+
+This current-status section supersedes historical phase snapshots below that describe Local-only operation, inactive research, unconfigured admission or pending live QA. Those snapshots record what was true at their named phase, not current execution switches. OpenAI is explicitly selectable; Local remains the credential-free default. Exactly ten internal READ tools and two separate research tools are executable. Product writes are not exposed. Phase 5 live QA and the final official-research revalidation are complete; known admitted usage is 15. The final research turn returned a qualified partial result with three validated government sources. Market benchmark completeness is not established by that procedural live test.
+
+The current adapter requests strict `text.format` JSON Schema and included `web_search_call.action.sources`. Findings bind to exact returned action-source/citation URLs and server-issued source IDs. Server policy controls HTTPS safety and authority; retrieval does not prove publication freshness. Missing source package context prevents verified benchmark ranges. Partial/insufficient evidence is a safe result, not a promise of a complete current answer. Mocked tool-selection tests establish policy delivery and execution plumbing, not guaranteed model compliance.
+
+Limits remain: 500 global/150 per-Couple admitted turns, no short-window throttle, one active request per Couple, no quota refund or redispatch for terminal uncertain results; four main rounds with answer-only round four, six custom calls, 30 seconds, zero retries, 1,200 output tokens per model response, 10,000 final characters; one research adapter request/search and min(15 seconds, remaining deadline). Local bypasses admission. Research shares the logical turn's admission. Server secrets remain private and are not required for offline tests. Assistant color/surface refinement remains deferred; no UX redesign is part of final AI validation.
+
+Historical phase records follow. Current implementation details and the focused structured-output correction take precedence over their earlier capability statements.
+
+## Phase 7 final offline validation
+
+- Complete Assistant suite: 18 files / 632 tests, including 38 research-adapter and 54 research contract/policy/provenance tests, 116 internal READ-tool tests, 100 tool-loop tests, 49 OpenAI provider tests and 23 Local provider tests.
+- Guardrail unit/RPC/execution coverage: 68 tests. Disposable PostgreSQL runner: 3,442 assertions, including 500/150 boundaries, concurrent admission, idempotency, terminal uncertainty, no short-window throttle, browser denial and service-role-only RPC access. The disposable container/volume is removed; no Frankfurt connection is used.
+- Assistant UI components: 4 files / 17 tests. Isolated Playwright host: 22 tests, including Hebrew/English, safe errors, pending state, conversation switching, reduced motion and responsive sweeps from 320 to 1440 pixels. All Assistant API responses are mocked and external browser requests blocked.
+- TypeScript and whole-repository ESLint pass. Production webpack build and diff checks pass. Build validation blocks outbound HTTP/fetch; no live AI/research request is part of this run.
+- Client import-graph and production browser-bundle checks exclude privileged configuration. No credential values are read or emitted by the checks.
+
+Known admitted usage remains 15. The final prior live procedural research turn used one adapter invocation and one processed search, returned partial evidence with three validated sources, and passed attestation, admission completion and persistence. No additional live QA is claimed. Complete/verified market benchmark ranges remain limited by source comparability and reviewed publisher availability; instruction tests do not guarantee every live model choice or factual sentence.
+
 ## Phase 6B mocked research validation
 
 Validation: 18 Assistant test files / 624 tests passed, TypeScript passed, whole-repository ESLint passed, and git diff --check passed. The production webpack build passed with external HTTP/fetch requests blocked and telemetry disabled; the default Turbopack attempt stalled and was stopped. No application source workaround or dependency change was needed. The network guard is an ignored local validation artifact.

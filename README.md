@@ -10,9 +10,7 @@ The Dashboard summarizes these sources; its date area celebrates the final week 
 Next.js 16 App Router, React 19, TypeScript, Supabase PostgreSQL/Auth/Storage/RLS, Zod, Tailwind CSS,
 Vitest and Playwright. Vercel deployment is **pending**. Frankfurt Supabase is the existing live
 backend: wedding-planner-project-eu, eu-central-1. Do not recreate or reseed it for local QA.
-The Assistant currently uses a deterministic Local provider. Real external AI and live research
-are pending; a server-only OpenAI foundation is tested with mocks only. No AI key, paid provider or
-executable Agent product-write tool is required for Local operation.
+The Assistant supports the deterministic Local provider (default) and explicitly configured server-only OpenAI Responses with ten internal READ tools and two bounded research tools. Owner-approved live QA has verified wedding guidance, internal data, Marketplace and safely qualified partial official research. No executable product-WRITE tool exists. Local operation requires no AI or privileged admission credential.
 
 The fictional Marketplace contains **496 vendors, 8 categories, 27 subcategories and 2,727 reviews**.
 Its 291 tracked WebPs comprise 227 pooled images and 64 dedicated newer-vendor primary images.
@@ -34,9 +32,10 @@ Requirements: Node.js 22+ and pnpm 11. Use the package-manager version declared 
 | NEXT_PUBLIC_SUPABASE_URL | Browser-safe project URL |
 | NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY | Browser-safe publishable key |
 | NEXT_PUBLIC_SITE_URL | Canonical application origin for Auth callbacks; localhost during development |
-| AI_PROVIDER | Keep local; omission selects Local. Explicit openai requires future configuration and fails closed otherwise |
-| OPENAI_API_KEY | Future server-only API credential; leave empty in this phase |
-| OPENAI_MODEL | Future server-only model selection; planned example in .env.example |
+| AI_PROVIDER | Omission/local selects Local; explicit openai requires server configuration and fails closed otherwise |
+| OPENAI_API_KEY | Server-only OpenAI credential; never commit its value |
+| OPENAI_MODEL | Validated server-only model selection; no model is silently substituted |
+| SUPABASE_SERVICE_ROLE_KEY | Server-only secret for the dedicated three-RPC admission channel; unnecessary for Local |
 
 The normal app needs no database password, service-role key or AI key. Configure Supabase Auth's
 Site URL and allowed callback/recovery URLs for the intended application origin. Vercel will require
@@ -44,11 +43,16 @@ its own environment settings when deployment is approved. Source specification/c
 local coding-agent guidance are not install/build dependencies. The final Product Specification
 is submitted separately.
 
-Live OpenAI remains unconfigured and blocked by the unconfigured privileged admission channel.
-The SDK foundation uses Responses API plain text only, no tools/research, zero retries, a 30-second
-timeout and 1,200 output-token cap. No billing/prepaid settings are configured; Auto Reload must
-remain OFF if the owner later approves prepaid setup. Run isolated provider coverage with
-`pnpm exec vitest run tests/assistant/openai-provider.test.ts` (no key/network required).
+The OpenAI path is protected by persistent admission limits: 500 global turns, 150 per Couple,
+one active request per Couple, stable request identity and a server-derived digest. There is no
+short-window AI throttle. Terminal uncertain outcomes retain quota and cannot redispatch.
+The main loop has four rounds (round four answer-only), six custom calls, a 30-second deadline,
+zero retries, 1,200 output tokens per response and a 10,000-character final text cap. Research has
+one adapter invocation per turn, one built-in search and a 15-second/remaining-turn timeout.
+Sources are server-validated; partial/insufficient findings are expected when currentness or
+comparability cannot be established. Live validation does not certify universal current facts.
+Billing is owner-managed; Auto Reload must remain OFF. Tests need no real credentials:
+`pnpm exec vitest run tests/assistant tests/ui/assistant*`.
 
 ## Database setup
 
