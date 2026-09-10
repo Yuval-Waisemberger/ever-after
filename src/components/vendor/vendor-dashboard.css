@@ -1,0 +1,43 @@
+/* Internal Dashboard geometry only; existing surface, button and motion rules remain owners. */
+.vendor-dashboard .vendor-dashboard-header { display:flex; justify-content:space-between; align-items:center; gap:1.5rem; }
+.vendor-dashboard .vendor-dashboard-header > div:first-child { min-width:0; }
+.vendor-dashboard .vendor-dashboard-header h1 { font-size:clamp(2.25rem, 3.4vw, 3.5rem); line-height:1.15; margin:.65rem 0; overflow-wrap:anywhere; text-align:start; }
+.vendor-dashboard .vendor-dashboard-actions { display:flex; flex-wrap:wrap; gap:1rem; flex-shrink:0; }
+.vendor-dashboard .vendor-publication-summary { border-top:1px solid var(--line); padding-top:.5rem; margin-top:1rem; }
+.vendor-dashboard .vendor-dashboard-grid { display:grid; grid-template-columns:minmax(0,1.9fr) minmax(0,1fr); gap:1.5rem; margin-top:1.25rem; }
+.vendor-dashboard .vendor-dashboard-side { display:grid; gap:1.25rem; min-width:0; }
+.vendor-dashboard .vendor-dashboard-side .vendor-panel { padding:1.25rem; }
+.vendor-dashboard .vendor-completion { height:100%; }
+.vendor-dashboard .vendor-completion h2 { font-size:3rem; }
+.vendor-dashboard .vendor-completion h2 > span:last-child { font-size:2rem; }
+.vendor-dashboard .vendor-checklist { gap:.75rem; }
+.vendor-dashboard .vendor-checklist a { font-size:.8125rem; padding:.8rem .65rem; }
+.vendor-dashboard .vendor-checklist [data-next=true] a { background:var(--surface-blush); }
+.vendor-dashboard .vendor-dashboard-next { font-size:.625rem; color:var(--wine); }
+.vendor-dashboard .vendor-dashboard-photos { display:flex; gap:.5rem; margin-top:1rem; }
+.vendor-dashboard .vendor-dashboard-photos > div { position:relative; width:calc((100% - 1rem)/3); aspect-ratio:4/3; border-radius:var(--control-radius); overflow:hidden; }
+.vendor-dashboard #recent-reviews > .vendor-panel { padding:1.25rem; }
+.vendor-dashboard .vendor-empty-rating { padding:.5rem 0; gap:.65rem; }
+.vendor-dashboard .vendor-empty-rating h2 { font-size:1.65rem; }
+@media (max-width:1199px) {
+  .vendor-dashboard .vendor-dashboard-header { align-items:flex-start; flex-wrap:wrap; }
+  .vendor-dashboard .vendor-dashboard-grid { grid-template-columns:1fr; }
+  .vendor-dashboard .vendor-dashboard-side { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media (max-width:639px) {
+  .vendor-dashboard .vendor-dashboard-side { grid-template-columns:1fr; }
+  .vendor-dashboard .vendor-dashboard-actions { gap:.5rem; flex-shrink:1; }
+  .vendor-dashboard .vendor-dashboard-header h1 { font-size:2.25rem; }
+}
+
+.vendor-dashboard .vendor-dashboard-identity { display: flex; direction: ltr; align-items: center; gap: 1rem; min-width: 0; }
+.vendor-dashboard .vendor-dashboard-identity h1 { min-width: 0; }
+
+.vendor-dashboard .vendor-dashboard-avatar { width:64px; height:64px; border:1px solid var(--line); box-shadow:var(--shadow-soft); overflow:hidden; }
+.vendor-dashboard .vendor-dashboard-avatar img { width:100%; height:100%; object-fit:cover; object-position:center; }
+.vendor-dashboard .vendor-dashboard-avatar svg { width:50%; height:50%; }
+@media (max-width:1199px) { .vendor-dashboard .vendor-dashboard-avatar { width:56px; height:56px; } }
+@media (max-width:639px) {
+  .vendor-dashboard .vendor-dashboard-avatar { width:48px; height:48px; }
+  .vendor-dashboard .vendor-dashboard-identity { gap:.75rem; }
+}

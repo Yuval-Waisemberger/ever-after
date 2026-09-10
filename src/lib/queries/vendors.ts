@@ -1,5 +1,5 @@
 import { cache } from "react";
-import { getCurrentProfile } from "@/lib/auth/user";
+import { requireRole, getCurrentProfile } from "@/lib/auth/user";
 import { calculateRecommendation } from "@/lib/domain/recommendation";
 import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { isSupabaseConfigured } from "@/lib/supabase/config";
@@ -187,12 +187,13 @@ export async function getMarketplace(filters: VendorFilters) {
   const supabase = await createClient();
   // A left-joined filter only filters the embedded record, not its parent vendor.
   // Keep vendors without a subcategory visible unless a subcategory is requested.
+  const categoryJoin = filters.category ? "vendor_categories!inner(slug, name)" : "vendor_categories(slug, name)";
   const subcategoryJoin = filters.subcategory
     ? "vendor_subcategories!inner(slug, name)"
     : "vendor_subcategories(slug, name)";
   let query = supabase
     .from("vendor_profiles")
-    .select(`*, vendor_categories!inner(slug, name), ${subcategoryJoin}, vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)`, { count: "exact" })
+    .select(`*, ${categoryJoin}, ${subcategoryJoin}, vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)`, { count: "exact" })
     .eq("is_public", true);
   if (filters.search) query = query.or(`business_name.ilike.%${filters.search.replaceAll(",", "")}%,location_city.ilike.%${filters.search.replaceAll(",", "")}%,description.ilike.%${filters.search.replaceAll(",", "")}%`);
   if (filters.category) query = query.eq("vendor_categories.slug", filters.category);
@@ -249,10 +250,23 @@ export const getVendorBySlug = cache(async (slug: string): Promise<MarketplaceVe
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("vendor_profiles")
-    .select("*, vendor_categories!inner(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
+    .select("*, vendor_categories(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
     .eq("slug", slug)
     .eq("is_public", true)
     .maybeSingle();
   if (error || !data) return null;
   return mapVendor(data as VendorRow, process.env.NEXT_PUBLIC_SUPABASE_URL!);
 });
+
+// No client-supplied owner or slug: this route can only preview the signed-in Vendor's row.
+export async function getOwnedVendorPreview(): Promise<MarketplaceVendor | null> {
+  const account = await requireRole("vendor");
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("vendor_profiles")
+    .select("*, vendor_categories(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
+    .eq("owner_user_id", account.id)
+    .maybeSingle();
+  if (error || !data || data.owner_user_id !== account.id) return null;
+  return mapVendor(data as VendorRow, process.env.NEXT_PUBLIC_SUPABASE_URL!);
+}

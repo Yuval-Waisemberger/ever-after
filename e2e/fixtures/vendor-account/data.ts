@@ -4,6 +4,7 @@ import { calculateVendorProfileCompletion } from "@/lib/domain/vendor-profile";
 const empty = new URLSearchParams(location.search).has("empty");
 export const profile: OwnedVendorProfile = {
   id: "isolated-vendor", slug: "willow-studio", business_name: "Willow Studio", contact_name: "Dana", description: null,
+  profile_image_storage_path: null,
   location_city: "Tel Aviv", category_id: "photo", subcategory_id: "stills", service_areas: ["central_israel"], min_price_minor: null, max_price_minor: null,
   services: [], styles: ["Elegant"], event_types: ["friday_afternoon"], min_guest_capacity: null, max_guest_capacity: null, friday_available: true,
   indoor_available: false, outdoor_available: true, phone: null, email: "studio@example.test", website_url: "", instagram_url: "", is_public: false,
@@ -37,3 +38,6 @@ export async function signOut() { throw new Error("Authentication disabled in fi
 export function createClient(): never { throw new Error("Storage/network disabled in fixture"); }
 export async function registerVendorImage() { throw new Error("Uploads disabled in fixture"); }
 export async function deleteVendorImage() { throw new Error("Deletes disabled in fixture"); }
+
+export async function saveVendorProfileImage():Promise<ActionState> { return {status:"error",message:"Uploads disabled in fixture"}; }
+export async function removeVendorProfileImage():Promise<ActionState> { return {status:"error",message:"Removal disabled in fixture"}; }

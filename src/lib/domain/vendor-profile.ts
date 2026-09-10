@@ -21,7 +21,7 @@ export function calculateVendorProfileCompletion(profile: VendorProfileCompleten
     { label: "Add a price range", complete: profile.minPriceMinor != null && profile.maxPriceMinor != null },
     { label: "List your services", complete: Boolean(profile.services?.length) },
     { label: "Add contact details", complete: Boolean(profile.phone || profile.email) },
-    { label: "Add at least 3 photos", complete: (profile.imageCount ?? 0) >= 3 },
+    { label: "Add at least 2 photos", complete: (profile.imageCount ?? 0) >= 2 },
   ];
   const completed = checks.filter((check) => check.complete).length;
   return {

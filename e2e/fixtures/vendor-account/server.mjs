@@ -10,7 +10,7 @@ const server = await createServer({
   define: { "process.env.NEXT_PUBLIC_SUPABASE_URL": JSON.stringify("") },
   resolve: { alias: {
     "next/link": file("./link.tsx"), "next/image": file("../discovery/image.tsx"),
-    "@/lib/actions/vendor-profile": file("./data.ts"), "@/lib/queries/vendor-dashboard": file("./data.ts"),
+    "@/lib/actions/vendor-profile": file("./data.ts"), "@/lib/actions/vendor-identity": file("./data.ts"), "@/lib/queries/vendor-dashboard": file("./data.ts"),
     "@/lib/actions/auth": file("./data.ts"), "@/lib/supabase/client": file("./data.ts"),
     "@": file("../../../src"),
   } }, esbuild: { jsx: "automatic" }, css: { postcss: { plugins: [tailwind()] } },

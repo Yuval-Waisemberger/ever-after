@@ -9,6 +9,8 @@ vi.mock("@/components/layout/app-shell", () => ({ AppShell: ({ role, children }:
 vi.mock("@/lib/queries/wedding", () => ({getOwnedWedding: vi.fn(async () => ({setup_status: "completed"}))}));
 vi.mock("@/lib/queries/couple-identity", () => ({getCoupleIdentity: vi.fn(async () => ({avatarChoice: "heart", photoUrl: null}))}));
 
+vi.mock("@/lib/queries/vendor-dashboard", () => ({getVendorIdentity: vi.fn(async () => ({displayName: "Canonical business", photoUrl: null}))}));
+
 describe("Marketplace server shell selection", () => {
   it.each(["couple", "vendor"] as const)("renders only the %s shell before hydration", async role => {
     const profile: CurrentProfile = {id: "test", role, displayName: "Test", avatarChoice: "heart", avatarStoragePath: null};

@@ -55,7 +55,7 @@ test("pending and failed publication never claim live; saved publication does",a
   await expect(page.getByText("Couples can now find and contact you")).toBeVisible();
   await page.screenshot({path:`${artifacts}/published-success.png`,fullPage:true});
   await page.getByRole("link",{name:"Dashboard",exact:true}).first().click();
-  await expect(page.getByText("Public · Live",{exact:true})).toBeVisible();
+  await expect(page.locator(".vendor-publication-summary").getByText("Public · Live",{exact:true})).toBeVisible();
   await expect(page.locator(".vendor-publish-success")).toHaveCount(0);
 });
 test("empty ratings, accurate fractional stars, finite reveals and reduced motion",async ({page})=>{
@@ -104,4 +104,17 @@ test("record finite Vendor motion and real save/publication feedback",async ({br
 test("final design intermediate-width sweep", async ({ page }) => {
   test.setTimeout(240000);
   await designSweep(page, { "vendor-dashboard": "/vendor", "business-profile": "/vendor/profile" });
+});
+
+
+test("identity selection validates and previews without writing gallery records", async ({page}) => {
+  await page.goto("/vendor/profile");
+  const input = page.getByLabel("Choose profile image",{exact:true});
+  await input.setInputFiles({name:"bad.txt",mimeType:"text/plain",buffer:Buffer.from("invalid")});
+  await expect(page.getByText("Use a JPG, PNG, or WebP image.",{exact:true})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Upload profile image",exact:true})).toBeDisabled();
+  await input.setInputFiles({name:"profile.png",mimeType:"image/png",buffer:Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ5kAAAAASUVORK5CYII=","base64")});
+  await expect(page.getByRole("img",{name:"Selected profile image preview"})).toBeVisible();
+  await expect(page.getByRole("button",{name:"Upload profile image",exact:true})).toBeEnabled();
+  await expect(page.getByText("Isolated fixture · writes: 0",{exact:true})).toBeVisible();
 });

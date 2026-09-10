@@ -1,0 +1,3 @@
+/* The new owner preview uses the existing authenticated canvas, not the public page wash. */
+.vendor-profile-page.vendor-owner-preview.vendor-owner-preview { background: transparent; }
+.vendor-profile-page.vendor-owner-preview::before { content: none; }

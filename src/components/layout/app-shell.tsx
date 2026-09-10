@@ -77,12 +77,13 @@ const vendorNavigation: NavigationItem[] = [
   { label: "Settings", href: "/vendor/settings", icon: Settings },
 ];
 
-export function AppShell({ role, displayName, showSetup = false, avatarChoice, avatarPhotoUrl, activeHref, children }: {
+export function AppShell({ role, displayName, showSetup = false, avatarChoice, avatarPhotoUrl, vendorPhotoUrl, activeHref, children }: {
   role: "couple" | "vendor";
   displayName: string;
   showSetup?: boolean;
   avatarChoice?: CoupleAvatarChoice;
   avatarPhotoUrl?: string | null;
+  vendorPhotoUrl?: string | null;
   activeHref?: string;
   children: ReactNode;
 }) {
@@ -135,7 +136,7 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
 
         <div className="mt-6 border-t pt-5">
           <div className="flex items-center gap-3">
-            {role === "couple" ? <CoupleAvatar choice={avatarChoice ?? "heart"} photoUrl={avatarPhotoUrl} className="size-10" sizes="40px" /> : <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wine/10 text-wine"><Building2 className="size-4" /></span>}
+            {role === "couple" ? <CoupleAvatar choice={avatarChoice ?? "heart"} photoUrl={avatarPhotoUrl} className="size-10" sizes="40px" /> : <span className="grid size-9 shrink-0 place-items-center rounded-full bg-wine/10 text-wine">{vendorPhotoUrl ? <Image src={vendorPhotoUrl} alt={`${displayName} profile image`} width={36} height={36} className="size-9 rounded-full object-cover" /> : <Building2 className="size-4" />}</span>}
             {!sidebarCollapsed ? <div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold">{displayName}</p><p className="text-xs capitalize text-ink-soft">{role} account</p></div> : null}
           </div>
           <form action={signOut} className="mt-3"><button className="min-h-9 w-full rounded-lg text-left text-xs font-semibold text-ink-soft hover:text-wine" aria-label={sidebarCollapsed ? "Sign out" : undefined}>{sidebarCollapsed ? "↪" : "Sign out"}</button></form>

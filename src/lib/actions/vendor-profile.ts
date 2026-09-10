@@ -5,6 +5,8 @@ import { requireRole } from "@/lib/auth/user";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedVendorProfile } from "@/lib/queries/vendor-dashboard";
 import { vendorProfileSchema } from "@/lib/validation/vendor-profile";
+import { isVendorImagePath, MAX_VENDOR_IMAGES, vendorImageError } from "@/lib/domain/vendor-media";
+import { withVendorMediaLock } from "./vendor-media-lock";
 import type { ActionState } from "./state";
 
 const nullable = (value: FormDataEntryValue | null) =>
@@ -90,21 +92,32 @@ export async function saveVendorProfile(
       });
   const { error } = result;
   if (error) return { status: "error", message: "The business profile could not be saved." };
-  revalidatePath("/vendor");
+  revalidatePath("/(vendor)", "layout");
   revalidatePath("/vendor/profile");
   revalidatePath("/vendors");
-  if (profile) revalidatePath(`/vendors/${profile.slug}`);
+  revalidatePath(`/vendors/${profile?.slug ?? createVendorSlug(parsed.data.businessName, account.id)}`);
   return { status: "success", message: profile ? "Business profile updated." : "Business profile created." };
 }
 
 export async function registerVendorImage(vendorId: string, storagePath: string, altText: string) {
-  const profile = await getOwnedVendorProfile();
-  if (!profile || profile.id !== vendorId || !storagePath.startsWith(`${vendorId}/`)) throw new Error("Invalid image path.");
-  const supabase = await createClient();
-  const { error } = await supabase.from("vendor_images").insert({ vendor_id: vendorId, storage_path: storagePath, alt_text: altText.trim().slice(0, 240), sort_order: profile.vendor_images?.length ?? 0, is_primary: (profile.vendor_images?.length ?? 0) === 0 });
-  if (error) throw new Error("Image metadata could not be saved.");
-  revalidatePath("/vendor");
-  revalidatePath("/vendor/profile");
+  const owned = await getOwnedVendorProfile();
+  if (!owned || owned.id !== vendorId || !isVendorImagePath(storagePath, vendorId, false)) throw new Error("Invalid image path.");
+  return withVendorMediaLock(vendorId, async () => {
+    const profile = await getOwnedVendorProfile();
+    if (!profile || profile.id !== vendorId) throw new Error("Vendor profile unavailable.");
+    const images = profile.vendor_images ?? [];
+    if (images.some(image => image.storage_path === storagePath)) return;
+    if (images.length >= MAX_VENDOR_IMAGES) throw new Error("A maximum of 3 business photos is allowed.");
+    const supabase = await createClient();
+    const { data: file, error: fileError } = await supabase.storage.from("vendor-media").download(storagePath);
+    if (fileError || !file || vendorImageError(file)) throw new Error("The uploaded image could not be verified.");
+    const { error } = await supabase.from("vendor_images").insert({ vendor_id: vendorId, storage_path: storagePath, alt_text: altText.trim().slice(0, 240), sort_order: images.length ? Math.max(...images.map(image => image.sort_order)) + 1 : 0, is_primary: images.length === 0 });
+    if (error) throw new Error("Image metadata could not be saved.");
+    revalidatePath("/(vendor)", "layout");
+    revalidatePath("/vendor/profile");
+    revalidatePath("/vendors");
+    revalidatePath(`/vendors/${profile.slug}`);
+  });
 }
 
 export async function deleteVendorImage(formData: FormData) {
@@ -116,6 +129,8 @@ export async function deleteVendorImage(formData: FormData) {
   const supabase = await createClient();
   if (image.storage_path) await supabase.storage.from("vendor-media").remove([image.storage_path]);
   await supabase.from("vendor_images").delete().eq("id", imageId).eq("vendor_id", profile.id);
-  revalidatePath("/vendor");
+  revalidatePath("/(vendor)", "layout");
   revalidatePath("/vendor/profile");
+  revalidatePath("/vendors");
+  revalidatePath(`/vendors/${profile.slug}`);
 }

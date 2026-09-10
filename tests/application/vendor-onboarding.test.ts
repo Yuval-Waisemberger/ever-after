@@ -18,6 +18,7 @@ vi.mock("@/lib/supabase/server", () => ({
 import {
   getOwnedVendorProfile,
   getVendorDashboard,
+  getVendorIdentity,
 } from "@/lib/queries/vendor-dashboard";
 
 const ownedProfile = {
@@ -151,5 +152,14 @@ describe("Vendor onboarding and role boundaries", () => {
     expect(rls).toContain('create policy "vendors_owner_delete"');
     expect(rls.match(/\(select auth\.uid\(\)\) = owner_user_id/g)?.length).toBeGreaterThanOrEqual(4);
     expect(rls).toContain("for select to anon, authenticated using (is_public)");
+  });
+});
+
+
+describe("Vendor canonical navigation identity", () => {
+  it("reads the saved business name, falling back only for blank names", async () => {
+    expect((await getVendorIdentity("Old account name")).displayName).toBe("Vendor Studio");
+    mocks.maybeSingle.mockResolvedValue({data:{...ownedProfile,business_name:"   "},error:null});
+    expect((await getVendorIdentity("Old account name")).displayName).toBe("Old account name");
   });
 });

@@ -27,6 +27,7 @@ export type OwnedVendorProfile = {
   id: string;
   slug: string;
   business_name: string;
+  profile_image_storage_path: string | null;
   contact_name: string | null;
   description: string | null;
   location_city: string | null;
@@ -100,4 +101,14 @@ export async function getVendorTaxonomy(): Promise<VendorTaxonomy> {
   const { data, error } = await supabase.from("vendor_categories").select("id, name, slug, vendor_subcategories(id, name, slug)").order("sort_order");
   if (error) throw new Error("Vendor categories could not be loaded.");
   return (data ?? []) as VendorTaxonomy;
+}
+
+export async function getVendorIdentity(fallbackName: string) {
+  const profile = await getOwnedVendorProfile();
+  return {
+    displayName: profile?.business_name?.trim() || fallbackName,
+    photoUrl: profile?.profile_image_storage_path
+      ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/vendor-media/${profile.profile_image_storage_path}`
+      : null,
+  };
 }

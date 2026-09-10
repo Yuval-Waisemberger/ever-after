@@ -1,22 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Upload } from "lucide-react";
 import { registerVendorImage } from "@/lib/actions/vendor-profile";
 import { createClient } from "@/lib/supabase/client";
 
-const allowedTypes = new Set(["image/jpeg", "image/png", "image/webp"]);
+import { MAX_VENDOR_IMAGES, vendorImageError } from "@/lib/domain/vendor-media";
 
-export function VendorImageUpload({ vendorId }: { vendorId: string }) {
+export function VendorImageUpload({ vendorId, imageCount }: { vendorId: string; imageCount: number }) {
+  const busy = useRef(false);
   const [message, setMessage] = useState<string>();
   const [uploading, setUploading] = useState(false);
 
   async function upload(formData: FormData) {
+    if (busy.current || imageCount >= MAX_VENDOR_IMAGES) return;
     const file = formData.get("image");
     const alt = String(formData.get("alt") ?? "");
     if (!(file instanceof File) || file.size === 0) return setMessage("Choose an image first.");
-    if (!allowedTypes.has(file.type)) return setMessage("Use a JPG, PNG, or WebP image.");
-    if (file.size > 5 * 1024 * 1024) return setMessage("Keep images under 5 MB.");
+    const validation = vendorImageError(file);
+    if (validation) return setMessage(validation);
+    busy.current = true;
 
     setUploading(true);
     setMessage(undefined);
@@ -25,19 +28,23 @@ export function VendorImageUpload({ vendorId }: { vendorId: string }) {
     const supabase = createClient();
     const { error } = await supabase.storage.from("vendor-media").upload(storagePath, file, { contentType: file.type, upsert: false });
     if (error) {
+      busy.current = false;
       setUploading(false);
       return setMessage("The image could not be uploaded.");
     }
     try {
       await registerVendorImage(vendorId, storagePath, alt);
       setMessage("Image uploaded.");
-    } catch {
+    } catch (error) {
       await supabase.storage.from("vendor-media").remove([storagePath]);
-      setMessage("The upload could not be completed. Please try again.");
+      setMessage(error instanceof Error ? error.message : "The upload could not be completed. Please try again.");
     } finally {
+      busy.current = false;
       setUploading(false);
     }
   }
+
+  if (imageCount >= MAX_VENDOR_IMAGES) return <p className="text-sm text-ink-soft" role="status">{imageCount > MAX_VENDOR_IMAGES ? `This gallery has ${imageCount} existing photos. No photos were removed. ` : ""}Maximum of 3 business photos reached. Remove a photo before uploading another.</p>;
 
   return (
     <form action={upload} className="grid gap-4 rounded-xl border border-dashed bg-canvas/60 p-4">
