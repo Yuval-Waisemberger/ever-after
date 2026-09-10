@@ -2,7 +2,7 @@ import "@/app/marketplace-polish.css";
 import { VendorResults } from "@/components/vendors/vendor-results";
 import type { Metadata } from "next";
 import Link from "next/link";
-import { PublicHeader } from "@/components/layout/public-header";
+import { MarketplaceShell } from "@/components/layout/marketplace-shell";
 import { VendorCard } from "@/components/vendors/vendor-card";
 import { VendorFiltersForm } from "@/components/vendors/vendor-filters";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -37,8 +37,7 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
   const currentHref = `/vendors${currentQuery.size ? `?${currentQuery}` : ""}`;
 
   return (
-    <div className="public-theme directory-page min-h-screen">
-      <PublicHeader />
+    <MarketplaceShell profile={profile}>
       <main id="main-content" className="mx-auto max-w-7xl px-5 pb-14 sm:px-8 lg:px-12">
         <section className="directory-intro" aria-labelledby="directory-title">
           <Sprout className="section-flourish" size={31} strokeWidth={1} aria-hidden="true" />
@@ -67,6 +66,6 @@ export default async function VendorsPage({ searchParams }: PageProps<"/vendors"
         ) : null}
         </section>
       </main>
-    </div>
+    </MarketplaceShell>
   );
 }

@@ -77,12 +77,13 @@ const vendorNavigation: NavigationItem[] = [
   { label: "Settings", href: "/vendor/settings", icon: Settings },
 ];
 
-export function AppShell({ role, displayName, showSetup = false, avatarChoice, avatarPhotoUrl, children }: {
+export function AppShell({ role, displayName, showSetup = false, avatarChoice, avatarPhotoUrl, activeHref, children }: {
   role: "couple" | "vendor";
   displayName: string;
   showSetup?: boolean;
   avatarChoice?: CoupleAvatarChoice;
   avatarPhotoUrl?: string | null;
+  activeHref?: string;
   children: ReactNode;
 }) {
   const brand = role === "couple" ? <Link href="/wedding" className="couple-canonical-logo" aria-label="Ever After home"><Image src="/brand/ever-after-logo-black.webp" alt="Ever After" width={2172} height={724} sizes="170px" /></Link> : <Wordmark href="/vendor" />;
@@ -112,7 +113,7 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
             return (
               <div key={item.href} className="workspace-nav-group">
                 <div className="flex items-center">
-                  <Link href={item.href} className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-ink transition hover:bg-paper-muted hover:text-wine" aria-label={sidebarCollapsed ? item.label : undefined}>
+                  <Link href={item.href} aria-current={activeHref === item.href || (role === "vendor" && activeHref === "/vendors" && item.href === "/vendor/explore") ? "page" : undefined} className="flex min-h-11 min-w-0 flex-1 items-center gap-3 rounded-xl px-3 text-sm font-semibold text-ink transition hover:bg-paper-muted hover:text-wine" aria-label={sidebarCollapsed ? item.label : undefined}>
                     <Icon className="size-4.5 shrink-0 text-wine" aria-hidden="true" />
                     {!sidebarCollapsed ? <span>{item.label}</span> : null}
                   </Link>

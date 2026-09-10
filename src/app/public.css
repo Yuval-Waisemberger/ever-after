@@ -36,7 +36,7 @@
 .public-header--authenticated .public-desktop-nav a { font-size: 11px; letter-spacing: .09em; }
 .public-button { display: inline-flex; justify-content: center; align-items: center; min-height: 50px; border: 1px solid; border-radius: var(--control-radius); padding: 13px 28px; font-size: 14px; font-weight: 500; letter-spacing: .15em; text-transform: uppercase; text-decoration: none; }
 .public-desktop-nav .header-signup { min-height: 38px; padding: 9px 18px; border-color: var(--public-wine); color: var(--public-wine); }
-.public-desktop-nav .header-signup:hover { background: var(--public-blush); }
+.public-desktop-nav .header-signup:hover { background: transparent; }
 .public-mobile-menu { display: none; }
 .public-skip-link { position: absolute; left: 16px; top: -90px; padding: 12px 20px; background: var(--public-ivory); z-index: 30; }
 .public-skip-link:focus { top: 12px; }
@@ -160,4 +160,18 @@
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .public-theme *, .public-theme *::before, .public-theme *::after { transition: none !important; }
+}
+
+/* Public navigation only: retain each header's geometry, logo and surface. */
+.public-header.public-header.public-header :is(.public-desktop-nav, .public-mobile-menu) nav a,
+.public-header.public-header.public-header .public-desktop-nav a {
+  font-family: "Segoe UI", Arial, sans-serif;
+  font-size: 14px; font-weight: 600; line-height: 21px;
+  letter-spacing: normal; text-transform: none;
+}
+.public-header.public-header.public-header :is(.public-desktop-nav a, .public-mobile-menu nav a):hover {
+  background: transparent; color: #733343;
+}
+.public-header.public-header.public-header :is(.public-desktop-nav a, .public-mobile-menu nav a):focus-visible {
+  outline: 2px solid #733343; outline-offset: 3px;
 }
