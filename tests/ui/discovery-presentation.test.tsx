@@ -2,7 +2,7 @@ import {describe,it,expect,vi} from "vitest";
 import {renderToStaticMarkup} from "react-dom/server";
 vi.mock("@/lib/actions/vendors",()=>({setVendorStatus:vi.fn(),setMarketplaceVendorSaved:vi.fn(),setRelationshipSaved:vi.fn(),saveExternalVendor:vi.fn(),deleteExternalVendor:vi.fn()}));
 import {BookingFeedback,BookingCelebration} from "@/components/vendors/booking-celebration";
-import {RecommendationDetail} from "@/components/vendors/recommendation-detail";
+import {RecommendationBadge} from "@/components/vendors/recommendation-detail";
 import {VendorStatusActions} from "@/components/vendors/vendor-status-actions";
 import {VendorFiltersForm} from "@/components/vendors/vendor-filters";
 import {parseVendorFilters} from "@/lib/vendors/filters";
@@ -18,11 +18,13 @@ describe("discovery presentation boundaries",()=>{
     expect(doc.querySelectorAll(".booking-confetti[aria-hidden=true] > span")).toHaveLength(16);
     expect(doc.querySelector('a[href="/vendors/my"]')).not.toBeNull();
   });
-  it("does not fabricate a recommendation or reasons",()=>{
-    expect(renderToStaticMarkup(<RecommendationDetail/>)).toBe("");
-    expect(renderToStaticMarkup(<RecommendationDetail recommendation={{isRecommended:false,score:90,applicableDimensions:[],reasons:[]}}/>)).toBe("");
-    const doc=parse(renderToStaticMarkup(<RecommendationDetail recommendation={{isRecommended:true,score:80,applicableDimensions:["area","budget"],reasons:[{dimension:"area",label:"Serves your area",earnedWeight:25,availableWeight:25},{dimension:"budget",label:"Not supported",earnedWeight:0,availableWeight:20}]}}/>));
-    expect(doc.querySelectorAll("li")).toHaveLength(1);expect(doc.querySelector("li")?.textContent).toBe("Serves your area");expect(doc.querySelector("summary")).not.toBeNull();
+  it("shows only the eligible recommendation badge and never exposes reasons",()=>{
+    expect(renderToStaticMarkup(<RecommendationBadge/>)).toBe("");
+    expect(renderToStaticMarkup(<RecommendationBadge recommendation={{isRecommended:false,score:90,applicableDimensions:[],reasons:[]}}/>)).toBe("");
+    const doc=parse(renderToStaticMarkup(<RecommendationBadge recommendation={{isRecommended:true,score:80,applicableDimensions:["area","budget"],reasons:[{dimension:"area",label:"Serves your area",earnedWeight:25,availableWeight:25},{dimension:"budget",label:"Not supported",earnedWeight:0,availableWeight:20}]}}/>));
+    expect(doc.body.textContent?.trim()).toBe("Recommended for you");
+    expect(doc.querySelector(".recommendation-badge")).not.toBeNull();
+    expect(doc.querySelector("details, summary, li, .recommendation-reasons")).toBeNull();
   });
   it("keeps bookmark and lifecycle forms independent, without changing quick-action inputs",()=>{
     const doc=parse(renderToStaticMarkup(<VendorStatusActions vendorId="vendor-id" currentStatus="considering" isSaved returnTo="/vendors/studio"/>));
@@ -36,7 +38,10 @@ describe("discovery presentation boundaries",()=>{
     expect(parseVendorFilters({sort:"price_desc"}).sort).toBeUndefined();
     expect(parseVendorFilters({sort:"invented",category:"venues"}).sort).toBeUndefined();
     const doc=parse(renderToStaticMarkup(<VendorFiltersForm filters={{page:1}} subcategories={[]}/>));
-    expect(doc.querySelectorAll('select[name="sort"] option')).toHaveLength(1);
+    expect(doc.querySelector('select[name="sort"]')).toBeNull();
+    expect(doc.body.textContent).not.toContain("Display by");
     expect(doc.querySelector('select[name="category"]')).toBeNull();
+    const preserved=parse(renderToStaticMarkup(<VendorFiltersForm filters={{page:1,category:"venues",sort:"price_asc"}} subcategories={[]}/>));
+    expect(preserved.querySelector<HTMLInputElement>('input[type="hidden"][name="sort"]')?.value).toBe("price_asc");
   });
 });

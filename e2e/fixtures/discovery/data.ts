@@ -5,6 +5,7 @@ export const vendor: import("@/lib/vendors/types").MarketplaceVendor = {...base,
 export const taxonomy = [{ id:"category", name:"Photography & Content", slug:"photography-content", vendor_subcategories:[{id:"subcategory",name:"Wedding photographers",slug:"wedding-photographers"}] }];
 export const refresh = () => window.dispatchEvent(new Event("fixture-refresh"));
 export async function getCurrentProfile(){return new URLSearchParams(location.search).has("guest") ? null : {role:"couple",displayName:"Fixture Couple"};}
+export async function requireRole(){return {id:"fixture-user",role:"couple",displayName:"Fixture Couple"};}
 export async function getMarketplace(){return {vendors:[0,1,2,3].map(i=>({...vendor,id:vendor.id+i,businessName:i===0?vendor.businessName:`Willow Studio ${i+1}`})),total:4,pageSize:12,isPreview:true};}
 export async function getMarketplaceSubcategories(){return [{slug:"wedding-photographers",name:"Wedding photographers",categorySlug:"photography-content"}];}
 export async function getVendorBySlug(){return vendor;}

@@ -25,7 +25,8 @@ describe("Public/Auth visual boundaries", () => {
     const doc = parse(renderToStaticMarkup(<LandingNavigation />));
     expect(doc.querySelector("img, .public-brand")).toBeNull();
     expect(doc.querySelectorAll('a[href="#how-it-works"]')).toHaveLength(2);
-    expect(doc.querySelectorAll('a[href="#about-us"]')).toHaveLength(2);
+    expect(doc.querySelectorAll('button[aria-haspopup="dialog"]')).toHaveLength(2);
+    expect(doc.querySelector(".about-us-dialog")?.textContent).toContain("We are Yuval and Liat, second-year B.Sc. Computer Science students.");
     expect(doc.querySelector(".landing-assistant-link")?.getAttribute("href")).toBe("/auth/couple");
     expect(doc.querySelector("dialog")?.hasAttribute("open")).toBe(false);
   });

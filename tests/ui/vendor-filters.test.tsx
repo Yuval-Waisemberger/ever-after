@@ -25,6 +25,11 @@ describe("subcategory filter control", () => {
     expect(document.querySelector<HTMLSelectElement>('[name="minRating"]')?.value).toBe("4");
     expect(document.querySelector('[name="page"]')).toBeNull(); // Applying new filters starts at page one.
     expect(document.querySelector("form")?.method).toBe("get");
+    expect(document.body.textContent).not.toContain("Display by");
+    expect(document.querySelector('select[name="sort"]')).toBeNull();
+    const apply = document.querySelector("button")!;
+    expect(select.compareDocumentPosition(apply) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(document.querySelector("form")?.lastElementChild).toBe(apply);
   });
 
   it("offers all real subcategories when no parent category is selected", () => {

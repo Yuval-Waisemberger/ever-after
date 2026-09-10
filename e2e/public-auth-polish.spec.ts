@@ -200,12 +200,38 @@ test("desktop and mobile Assistant gate keeps auth links, traps focus and closes
   }
 });
 
-test("landing anchors and Vendors navigate through existing public routes", async ({ page }) => {
+test("About Us opens from desktop and mobile navigation with modal focus behavior", async ({ page }) => {
+  const copy = "We are Yuval and Liat, second-year B.Sc. Computer Science students. Ever After was created as our final project for the Full-Stack Development course, combining thoughtful design and technology to make wedding planning simpler, clearer, and more enjoyable ♡";
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/");
+    if (width === 390) await page.getByLabel("Navigation menu", { exact: true }).click();
+    const nav = page.getByRole("navigation", { name: width === 390 ? "Mobile navigation" : "Public navigation", exact: true });
+    const trigger = nav.getByRole("button", { name: "About us", exact: true });
+    await trigger.click();
+    const dialog = page.getByRole("dialog", { name: "About Us" });
+    await expect(dialog).toBeVisible();
+    await expect(dialog.getByText(copy, { exact: true })).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Close About Us" })).toBeFocused();
+    await expect(page.locator("body")).toHaveCSS("overflow", "hidden");
+    await page.keyboard.press("Tab");
+    await expect(dialog.getByRole("button", { name: "Close About Us" })).toBeFocused();
+    await page.keyboard.press("Escape");
+    await expect(dialog).not.toBeVisible();
+    await expect(page.locator("body")).not.toHaveCSS("overflow", "hidden");
+    if (width === 390) await expect(page.getByLabel("Navigation menu", { exact: true })).toBeFocused();
+    else await expect(trigger).toBeFocused();
+
+    if (width === 390) await page.getByLabel("Navigation menu", { exact: true }).click();
+    await nav.getByRole("button", { name: "About us", exact: true }).click();
+    await dialog.getByRole("button", { name: "Close About Us" }).click();
+    await expect(dialog).not.toBeVisible();
+  }
+});
+
+test("landing How it works and Vendors retain their existing routes", async ({ page }) => {
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Public navigation", exact: true });
-  await nav.getByRole("link", { name: "About us", exact: true }).click();
-  await expect(page).toHaveURL(/\/#about-us$/);
-  await expect(page.locator("#about-title")).toBeInViewport();
   await nav.getByRole("link", { name: "How it works", exact: true }).click();
   await expect(page).toHaveURL(/\/#how-it-works$/);
   await nav.getByRole("link", { name: "Vendors", exact: true }).click();

@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { demoVendors } from "@/lib/vendors/demo";
+import type { MarketplaceVendor } from "@/lib/vendors/types";
 
 vi.mock("@/lib/auth/user", () => ({ getCurrentProfile: vi.fn().mockResolvedValue(null) }));
 vi.mock("@/lib/queries/couple-vendors", () => ({ getVendorRelationship: vi.fn() }));
@@ -18,6 +19,20 @@ describe("Vendor location presentation", () => {
     const document = parse(renderToStaticMarkup(<VendorCard vendor={fixed} />));
     expect(document.body.textContent).toContain(`${fixed.locationCity}, Israel`);
     expect(document.body.textContent).not.toContain("Serves:");
+  });
+
+  it("derives fixed presentation from the real subcategory when an adapter omits or corrupts location mode", async () => {
+    for (const locationMode of [undefined, "mobile"] as const) {
+      const intermediate = { ...fixed, locationMode } as unknown as MarketplaceVendor;
+      const card = parse(renderToStaticMarkup(<VendorCard vendor={intermediate} />));
+      expect(card.body.textContent).toContain(`${fixed.locationCity}, Israel`);
+      expect(card.body.textContent).not.toContain("Serves:");
+
+      const profile = parse(renderToStaticMarkup(await VendorProfilePresentation({ vendor: intermediate, ownerPreview: true })));
+      expect(profile.body.textContent).toContain("Physical city:");
+      expect(profile.body.textContent).toContain("Physical area:");
+      expect(profile.body.textContent).not.toContain("Serves:");
+    }
   });
 
   it("renders a mobile card with separate city and labeled service rows", () => {

@@ -50,6 +50,8 @@
 .workspace-shell table { width: 100%; border-collapse: collapse; font-size: 14px; font-variant-numeric: tabular-nums; }
 .workspace-shell :is(th, td) { padding: 14px; border-bottom: 1px solid var(--line); text-align: left; }
 .workspace-mobile-header { position: relative; z-index: 30; background: var(--canvas); }
+.couple-canonical-logo { display: inline-flex; width: 170px; max-width: calc(100% - 56px); flex-shrink: 1; align-items: center; }
+.couple-canonical-logo img { width: 100%; height: 58px; object-fit: contain; }
 .workspace-menu summary { list-style: none; display: grid; place-items: center; width: 44px; border: 1px solid var(--line); border-radius: 4px; }
 .workspace-menu summary::-webkit-details-marker { display: none; }
 .workspace-menu[open] > div { position: absolute; top: calc(100% + 8px); right: 16px; width: min(360px, calc(100vw - 32px)); max-height: calc(100dvh - 150px); overflow-y: auto; padding: 20px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--surface-radius); box-shadow: 0 16px 38px rgb(73 62 56 / 12%); }
@@ -169,6 +171,7 @@
   .auth-page--couple .auth-image { aspect-ratio: 4 / 3; }
   .workspace-shell main { padding-top: 28px; padding-inline: 20px; }
   .workspace-mobile-header { padding-top: max(12px, env(safe-area-inset-top)); }
+  .couple-canonical-logo { width: 158px; }
   .task-summary-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .budget-metrics > div { flex-wrap: wrap; }
   .ea-page-header h1 { font-size: 36px; }

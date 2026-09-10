@@ -27,18 +27,11 @@ export function VendorFiltersForm({ filters, subcategories }: { filters: VendorF
         <option value="4">4.0+</option>
         <option value="4.5">4.5+</option>
       </select>
-      <button className="min-h-11 rounded-xl bg-wine px-4 text-sm font-bold text-white hover:bg-wine-dark lg:col-span-1">Apply</button>
-
       <select aria-label="Subcategory" name="subcategory" value={subcategory} onChange={(event) => setSubcategory(event.target.value)} className={`${inputClass} lg:col-span-6`}>
         <option value="">All subcategories</option>
         {choices.map((choice) => <option key={choice.slug} value={choice.slug}>{choice.name}</option>)}
       </select>
-      <label className="grid gap-2 text-xs text-ink-soft lg:col-span-6">Display by
-        <select aria-label="Display by" name="sort" defaultValue={filters.sort ?? "name"} className={inputClass}>
-          <option value="name">Directory order</option>
-          {category ? <><option value="price_asc">Starting price: low to high</option><option value="price_desc">Starting price: high to low</option></> : null}
-        </select>
-      </label>
+      {filters.sort && filters.sort !== "name" ? <input type="hidden" name="sort" value={filters.sort} /> : null}
 
       {category === "venues" ? (
         <div className="grid gap-3 border-t pt-4 sm:grid-cols-3 lg:col-span-12">
@@ -52,6 +45,7 @@ export function VendorFiltersForm({ filters, subcategories }: { filters: VendorF
           <input name="maxPrice" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Maximum package price (₪)" aria-label="Maximum package price" className={inputClass} />
         </div>
       ) : null}
+      <button className="marketplace-filter-submit min-h-11 rounded-xl bg-wine px-4 text-sm font-bold text-white hover:bg-wine-dark lg:col-span-2 lg:col-start-11">Apply</button>
     </form>
   );
 }

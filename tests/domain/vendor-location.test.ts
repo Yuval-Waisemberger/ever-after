@@ -5,6 +5,7 @@ import {
   formatVendorArea,
   hasExclusiveFlexibleArea,
   locationModeForSubcategory,
+  resolveVendorLocationMode,
   vendorMatchesArea,
 } from "@/lib/vendors/location";
 
@@ -15,6 +16,9 @@ describe("Vendor location semantics", () => {
     expect(locationModeForSubcategory("preparation-hotels")).toBe("fixed");
     expect(locationModeForSubcategory("wedding-photographers")).toBe("mobile");
     expect(locationModeForSubcategory(null)).toBe("mobile");
+    expect(resolveVendorLocationMode({ subcategorySlug: "wedding-venues" })).toBe("fixed");
+    expect(resolveVendorLocationMode({ subcategorySlug: "preparation-hotels", locationMode: "mobile" })).toBe("fixed");
+    expect(resolveVendorLocationMode({ subcategorySlug: "wedding-photographers", locationMode: "fixed" })).toBe("mobile");
   });
 
   it("matches fixed physical areas and mobile service coverage independently", () => {

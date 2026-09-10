@@ -7,7 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { demoVendors } from "@/lib/vendors/demo";
 import type { MarketplaceSubcategory, MarketplaceVendor, VendorFilters, VendorReview } from "@/lib/vendors/types";
 import { lifecycleFromStoredStatus } from "@/lib/domain/couple-vendors";
-import { vendorMatchesArea, type VendorArea } from "@/lib/vendors/location";
+import { resolveVendorLocationMode, vendorMatchesArea, type VendorArea } from "@/lib/vendors/location";
 
 const PAGE_SIZE = 12;
 
@@ -85,7 +85,10 @@ function mapVendor(row: VendorRow, supabaseUrl: string): MarketplaceVendor {
     subcategorySlug: subcategory?.slug ?? null,
     subcategoryName: subcategory?.name ?? null,
     locationCity: row.location_city == null ? null : String(row.location_city),
-    locationMode: row.location_mode === "fixed" ? "fixed" : "mobile",
+    locationMode: resolveVendorLocationMode({
+      subcategorySlug: subcategory?.slug,
+      locationMode: row.location_mode === "fixed" || row.location_mode === "mobile" ? row.location_mode : null,
+    }),
     physicalArea: row.physical_area == null ? null : String(row.physical_area) as VendorArea,
     serviceAreas: Array.isArray(row.service_areas) ? row.service_areas.map(String) as VendorArea[] : [],
     minPriceMinor: row.min_price_minor == null ? null : Number(row.min_price_minor),

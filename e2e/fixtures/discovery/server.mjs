@@ -21,6 +21,7 @@ const server = await createServer({
     "@":fileURLToPath(new URL("../../../src",import.meta.url)),
   }},
   esbuild: { jsx: "automatic" }, css: { postcss: { plugins: [tailwind()] } },
+  define: { "process.env": {} },
   server: { host: "127.0.0.1", port: 3109, strictPort: true },
 });
 await server.listen();

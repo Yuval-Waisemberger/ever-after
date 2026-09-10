@@ -221,10 +221,13 @@ test("venue feedback appears with current versioned covers and calculated rating
     expect(decodeURIComponent((await image.getAttribute("src")) ?? "")).toContain(vendor.imageUrl);
     await expectImageDecoded(image);
     await expect(card).toContainText(vendor.locationCity!);
+    await expect(card.getByText(/Serves:/)).toHaveCount(0);
     if (vendor.ratingAverage != null) await expect(card.getByText(vendor.ratingAverage.toFixed(1), { exact: true })).toBeVisible();
   }
   await page.goto("/vendors/south-estate-house-21");
   await expect(page.getByText("4.2 · 3 reviews", { exact: true })).toBeVisible();
+  await expect(page.getByText(/Serves:/)).toHaveCount(0);
+  await expect(page.getByText(/Physical area:/)).toBeVisible();
   await expect(page.locator("article")).toHaveCount(3);
 });
 

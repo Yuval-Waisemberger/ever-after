@@ -125,8 +125,12 @@ test("mobile selector fits and remains usable", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/vendors?category=photography-content");
   const selector = page.getByRole("combobox", { name: "Subcategory", exact: true });
+  const form = page.locator(".marketplace-filters");
+  const apply = form.getByRole("button", { name: "Apply", exact: true });
+  expect(await form.locator("input:not([type=hidden]), select, button").evaluateAll(controls => controls.at(-1)?.textContent?.trim())).toBe("Apply");
+  expect((await selector.boundingBox())!.y).toBeLessThan((await apply.boundingBox())!.y);
   await selector.selectOption("videographers");
-  await page.getByRole("button", { name: "Apply", exact: true }).click();
+  await apply.click();
   await expectListing(page, 22, "Videographers");
   await expect.poll(() => page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
   expect((await selector.boundingBox())!.height).toBeGreaterThanOrEqual(44);

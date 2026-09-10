@@ -15,31 +15,68 @@ test("record the successful booking burst in the closed fixture", async ({ brows
 });
 test.beforeEach(async({page})=>{await page.route("**/*",route=>new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());});
 
+test("marketplace AppShell keeps the shared compact header without Couple route CSS",async({page})=>{
+  for(const width of [1023,768,390]){
+    await page.setViewportSize({width,height:844});await page.goto("/?shell");
+    const header=page.locator(".workspace-mobile-header"),logo=header.locator(".couple-canonical-logo img");
+    await expect(header).toBeVisible();await expect(page.getByLabel("Workspace menu")).toBeVisible();
+    const [headerBox,logoBox]=await Promise.all([header.boundingBox(),logo.boundingBox()]);
+    expect(headerBox!.height).toBeLessThanOrEqual(84);
+    expect(logoBox!.width).toBeLessThanOrEqual(width<=640?158:170);
+    expect(logoBox!.x+logoBox!.width).toBeLessThan((await page.getByLabel("Workspace menu").boundingBox())!.x);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+  await page.setViewportSize({width:1440,height:900});await page.goto("/?shell");
+  await expect(page.locator(".workspace-mobile-header")).toBeHidden();await expect(page.locator(".workspace-sidebar")).toBeVisible();
+});
+
+test("fixed subcategory survives a missing adapter mode without rendering service coverage",async({page})=>{
+  await page.goto("/?view=fixed");
+  const card=page.locator(".vendor-card").first();
+  await expect(card.getByText(/, Israel$/).first()).toBeVisible();
+  await expect(card.getByText(/Serves:/)).toHaveCount(0);
+});
+
+test("layout icons remain accessible and Apply is the final mobile filter control",async({page})=>{
+  await page.setViewportSize({width:390,height:844});await page.goto("/");
+  await expect(page.getByText("Display by",{exact:true})).toHaveCount(0);
+  await expect(page.getByRole("combobox",{name:"Display by"})).toHaveCount(0);
+  const comfortable=page.getByRole("button",{name:"Comfortable cards"}),compact=page.getByRole("button",{name:"Compact grid"});
+  await expect(comfortable).toHaveAttribute("aria-pressed","true");await compact.click();await expect(compact).toHaveAttribute("aria-pressed","true");
+  const form=page.locator(".marketplace-filters"),apply=form.getByRole("button",{name:"Apply",exact:true}),subcategory=form.getByRole("combobox",{name:"Subcategory",exact:true});
+  expect(await form.locator("input:not([type=hidden]), select, button").evaluateAll(nodes=>nodes.at(-1)?.textContent?.trim())).toBe("Apply");
+  expect((await subcategory.boundingBox())!.y).toBeLessThan((await apply.boundingBox())!.y);
+});
+
 for(const width of [1440,768,390,360]) test(`discovery, profile and Our Vendors at ${width}`,async({page})=>{
   test.setTimeout(90000);await page.setViewportSize({width,height:900});
   for(const view of ["directory","profile","my"]){await page.goto(`/?view=${view}`);await expect(page.locator("h1")).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`.codex-tmp/phase2c/${view}-${width}.png`,fullPage:true});}
   await page.getByRole("button",{name:"Add external vendor",exact:true}).click();await expect(page.getByRole("dialog")).toBeVisible();await expect(page.getByRole("textbox",{name:"Business name"})).toBeFocused();await expect(page.getByRole("dialog")).toHaveCSS("opacity","1");await page.screenshot({path:`.codex-tmp/phase2c/dialog-${width}.png`,fullPage:true});await page.keyboard.press("Escape");await expect(page.getByRole("dialog")).not.toBeVisible();await expect(page.getByRole("button",{name:"Add external vendor",exact:true})).toBeFocused();
 });
 
-test("compact mobile cards fit and recommendation reasons work by keyboard",async({page})=>{
+test("compact mobile cards keep the minimal recommendation badge clear of the favorite control",async({page})=>{
   for (const width of [390,360]) {
     await page.setViewportSize({width,height:900});await page.goto("/");
     await page.getByRole("button",{name:"Compact grid"}).click();
-    const summary=page.locator(".recommendation-badge");await summary.focus();await page.keyboard.press("Enter");
-    await expect(page.getByText("Serves your area",{exact:true})).toBeVisible();
-    await expect(page.locator(".recommendation-reasons")).toHaveCSS("opacity","1");
+    const badge=page.locator(".recommendation-badge");
+    await expect(badge).toHaveText(/Recommended for you/);
+    await expect(page.locator(".recommendation-reasons, details.recommendation-detail")).toHaveCount(0);
     expect(await page.locator(".vendor-card").evaluateAll(cards=>cards.every(card=>{
       const rating=card.querySelector(".vendor-card-rating")?.getBoundingClientRect();
       return !rating || rating.right<=card.getBoundingClientRect().right;
     }))).toBe(true);
+    const [badgeBox,heartBox,imageBox]=await Promise.all([badge.boundingBox(),page.getByRole("link",{name:"Sign in to save vendor"}).first().boundingBox(),page.locator(".vendor-card > a > div:first-child").first().boundingBox()]);
+    expect(badgeBox!.x).toBeLessThan(heartBox!.x);
+    expect(badgeBox!.x).toBeGreaterThanOrEqual(imageBox!.x);
+    expect(badgeBox!.y).toBeGreaterThanOrEqual(imageBox!.y);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await page.screenshot({path:`.codex-tmp/phase2c/compact-${width}.png`,fullPage:true});
   }
 });
-test("card/category hover, real reasons, density and logged-out save",async({page})=>{
+test("card/category hover, minimal recommendation badge, density and logged-out save",async({page})=>{
   await page.goto("/");const category=page.locator(".category-link").first();await category.hover();await expect.poll(()=>category.evaluate(el=>getComputedStyle(el).transform)).not.toBe("none");
   const card=page.locator(".vendor-card").first();await card.hover();await expect.poll(()=>card.evaluate(el=>getComputedStyle(el).transform)).not.toBe("none");
-  await page.getByText("Recommended for you",{exact:true}).click();await expect(page.getByText("Serves your area",{exact:true})).toBeVisible();await expect(page.getByText("Matches your style",{exact:true})).toBeVisible();await expect(page.getByText("Fits your priorities",{exact:true})).toHaveCount(0);await page.screenshot({path:".codex-tmp/phase2c/recommendation.png",fullPage:true});
+  await expect(page.getByText("Recommended for you",{exact:true})).toBeVisible();await expect(page.getByText("Serves your area",{exact:true})).toHaveCount(0);await expect(page.getByText("Matches your style",{exact:true})).toHaveCount(0);await expect(page.locator(".recommendation-reasons")).toHaveCount(0);await page.screenshot({path:".codex-tmp/phase2c/recommendation.png",fullPage:true});
   await expect(page.getByRole("link",{name:"Sign in to save vendor"})).toHaveAttribute("href","/auth/couple?mode=login");await page.getByRole("button",{name:"Compact grid"}).click();await expect(page.locator(".marketplace-grid")).toHaveAttribute("data-density","compact");
 });
 test("save particles require confirmed change; failures and pending do not celebrate",async({page})=>{

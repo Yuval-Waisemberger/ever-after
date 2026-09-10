@@ -9,11 +9,12 @@ import { getCurrentProfile } from "@/lib/auth/user";
 import { formatIls } from "@/lib/domain/budget";
 import { getVendorRelationship } from "@/lib/queries/couple-vendors";
 import type { MarketplaceVendor } from "@/lib/vendors/types";
-import { formatVendorArea } from "@/lib/vendors/location";
+import { formatVendorArea, resolveVendorLocationMode } from "@/lib/vendors/location";
 
 
 // Shared presentation: owner preview changes access and shell, not public profile content.
 export async function VendorProfilePresentation({ vendor, query = {}, ownerPreview = false }: { vendor: MarketplaceVendor; query?: Record<string, string | string[] | undefined>; ownerPreview?: boolean }) {
+  const locationMode = resolveVendorLocationMode(vendor);
   const profile = await getCurrentProfile();
   const relationship = profile?.role === "couple" ? await getVendorRelationship(vendor.id) : null;
   const serviceAreas = vendor.serviceAreas.map(formatVendorArea).join(" · ");
@@ -34,9 +35,9 @@ export async function VendorProfilePresentation({ vendor, query = {}, ownerPrevi
             <p className="eyebrow">{vendor.subcategoryName ?? vendor.categoryName}</p>
             <h1 className="font-display mt-3 text-5xl leading-[0.98] tracking-tight sm:text-6xl">{vendor.businessName}</h1>
             <div className="mt-5 grid gap-2 text-sm text-ink-soft">
-              {vendor.locationCity ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 shrink-0 text-wine" /><span><strong className="font-semibold text-ink">{vendor.locationMode === "fixed" ? "Physical city:" : "Home/base city:"}</strong> {vendor.locationCity}, Israel</span></span> : null}
-              {vendor.locationMode === "fixed" && vendor.physicalArea ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 shrink-0 text-wine" />Physical area: {formatVendorArea(vendor.physicalArea)}</span> : null}
-              {vendor.locationMode === "mobile" && serviceAreas ? <span className="inline-flex items-start gap-1.5"><Car className="mt-0.5 size-4 shrink-0 text-wine" /><span><strong className="font-semibold text-ink">Serves:</strong> {serviceAreas}</span></span> : null}
+              {vendor.locationCity ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 shrink-0 text-wine" /><span><strong className="font-semibold text-ink">{locationMode === "fixed" ? "Physical city:" : "Home/base city:"}</strong> {vendor.locationCity}, Israel</span></span> : null}
+              {locationMode === "fixed" && vendor.physicalArea ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 shrink-0 text-wine" />Physical area: {formatVendorArea(vendor.physicalArea)}</span> : null}
+              {locationMode === "mobile" && serviceAreas ? <span className="inline-flex items-start gap-1.5"><Car className="mt-0.5 size-4 shrink-0 text-wine" /><span><strong className="font-semibold text-ink">Serves:</strong> {serviceAreas}</span></span> : null}
               {vendor.ratingAverage != null ? <span className="inline-flex items-center gap-1.5"><Star className="size-4 fill-gold text-gold" />{vendor.ratingAverage.toFixed(1)} · {vendor.reviewCount} reviews</span> : <span>No reviews yet</span>}
             </div>
             <p className="mt-6 text-lg leading-8 text-ink-soft">{vendor.description}</p>

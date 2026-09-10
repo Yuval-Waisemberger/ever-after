@@ -5,7 +5,10 @@
 .landing-navigation .public-desktop-nav { justify-content: center; gap: clamp(28px, 4vw, 60px); }
 .landing-navigation .public-nav-pages { flex: none; margin: 0; padding: 0; gap: clamp(24px, 3vw, 44px); }
 .landing-navigation .public-nav-account { gap: 26px; }
-.landing-navigation .public-desktop-nav a { font-size: 11px; letter-spacing: .12em; }
+.landing-navigation .public-desktop-nav :is(a, .landing-nav-trigger) { font-size: 11px; letter-spacing: .12em; }
+.landing-nav-trigger { display: inline-flex; min-height: 44px; align-items: center; border: 0; background: transparent; color: inherit; font: inherit; cursor: pointer; }
+.landing-navigation .public-desktop-nav .landing-nav-trigger { text-transform: uppercase; }
+.landing-navigation .public-mobile-menu .landing-nav-trigger { width: 100%; min-height: 46px; padding: 10px 12px; font-size: 14px; text-align: left; }
 .landing-navigation .landing-assistant-link { display: flex; flex-direction: column; justify-content: center; gap: 3px; padding-inline: 30px; border-inline: 1px solid var(--line); }
 .landing-assistant-link > span { display: flex; align-items: center; gap: 8px; }
 .landing-navigation .landing-assistant-link small { font-size: 10px; line-height: 1.2; color: var(--ink-soft); text-transform: none; letter-spacing: .015em; }
@@ -16,6 +19,8 @@
 .landing-assistant-dialog h2 { font-size: 30px; line-height: 1.2; }
 .landing-assistant-dialog p { margin-block: 16px 24px; color: var(--ink-soft); line-height: 1.7; }
 .landing-assistant-dialog > a { display: flex; width: fit-content; margin-top: 16px; font-size: 14px; }
+.about-us-dialog { width: min(520px, calc(100% - 36px)); border-color: var(--line); border-radius: 18px; background: linear-gradient(145deg, var(--paper), var(--blush)); box-shadow: var(--shadow-raised); }
+.about-us-dialog p { margin-bottom: 0; }
 
 .landing-page { position: relative; isolation: isolate; }
 /* Content owns height at every width; reserve the curved media boundary below controls. */

@@ -31,6 +31,14 @@ export function locationModeForSubcategory(subcategorySlug: string | null | unde
   return subcategorySlug && fixedLocationSubcategories.has(subcategorySlug) ? "fixed" : "mobile";
 }
 
+export function resolveVendorLocationMode(vendor: {
+  subcategorySlug?: string | null;
+  locationMode?: VendorLocationMode | null;
+}): VendorLocationMode {
+  if (vendor.subcategorySlug) return locationModeForSubcategory(vendor.subcategorySlug);
+  return vendor.locationMode === "fixed" ? "fixed" : "mobile";
+}
+
 export function isVendorArea(value: string | null | undefined): value is VendorArea {
   return value != null && vendorAreas.has(value);
 }
@@ -50,9 +58,9 @@ export function hasExclusiveFlexibleArea(values: readonly VendorArea[]): boolean
 }
 
 export function vendorMatchesArea(
-  vendor: { locationMode: VendorLocationMode; physicalArea?: string | null; serviceAreas?: string[] | null },
+  vendor: { subcategorySlug?: string | null; locationMode?: VendorLocationMode | null; physicalArea?: string | null; serviceAreas?: string[] | null },
   area: VendorArea,
 ): boolean {
-  if (vendor.locationMode === "fixed") return vendor.physicalArea === area;
+  if (resolveVendorLocationMode(vendor) === "fixed") return vendor.physicalArea === area;
   return Boolean(vendor.serviceAreas?.includes(area) || vendor.serviceAreas?.includes("flexible"));
 }

@@ -1,14 +1,15 @@
 import "@/app/marketplace-polish.css";
-import { RecommendationDetail } from "./recommendation-detail";
+import { RecommendationBadge } from "./recommendation-detail";
 import Image from "next/image";
 import Link from "next/link";
 import { Car, Heart, MapPin, Star } from "lucide-react";
 import { formatIls } from "@/lib/domain/budget";
 import type { MarketplaceVendor } from "@/lib/vendors/types";
 import { SavedVendorButton } from "@/components/vendors/saved-vendor-button";
-import { formatVendorArea } from "@/lib/vendors/location";
+import { formatVendorArea, resolveVendorLocationMode } from "@/lib/vendors/location";
 
 export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: { vendor: MarketplaceVendor; canSave?: boolean; returnTo?: string }) {
+  const locationMode = resolveVendorLocationMode(vendor);
   return (
     <article className="vendor-card group relative overflow-hidden rounded-2xl border bg-paper">
       {canSave ? <div className="absolute right-3 top-3 z-10"><SavedVendorButton vendorId={vendor.id} isSaved={vendor.isSaved === true} returnTo={returnTo} compact /></div> : <Link href="/auth/couple?mode=login" className="vendor-save-button absolute right-3 top-3 z-10 grid size-11 place-items-center rounded-full border bg-paper/90 text-wine" aria-label="Sign in to save vendor"><Heart size={17} aria-hidden="true" /></Link>}
@@ -19,7 +20,7 @@ export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: {
           ) : (
             <div className="grid h-full place-items-center font-display text-2xl text-ink-soft">{vendor.businessName}</div>
           )}
-
+          <RecommendationBadge recommendation={vendor.recommendation} />
         </div>
         <div className="p-5">
           <div className="vendor-card-heading flex items-start justify-between gap-3">
@@ -33,7 +34,7 @@ export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: {
           </div>
           <div className="mt-3 grid gap-1.5 text-xs text-ink-soft">
             {vendor.locationCity ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-3.5 shrink-0" />{vendor.locationCity}, Israel</span> : null}
-            {vendor.locationMode === "mobile" && vendor.serviceAreas.length ? <span className="inline-flex items-start gap-1.5"><Car className="mt-0.5 size-3.5 shrink-0" /><span><strong className="font-semibold text-ink">Serves:</strong> {vendor.serviceAreas.map(formatVendorArea).join(" · ")}</span></span> : null}
+            {locationMode === "mobile" && vendor.serviceAreas.length ? <span className="inline-flex items-start gap-1.5"><Car className="mt-0.5 size-3.5 shrink-0" /><span><strong className="font-semibold text-ink">Serves:</strong> {vendor.serviceAreas.map(formatVendorArea).join(" · ")}</span></span> : null}
           </div>
           <p className="mt-3 line-clamp-2 text-sm leading-6 text-ink-soft">{vendor.description}</p>
           <div className="mt-4 flex flex-wrap items-center justify-end gap-2 border-t pt-4 text-xs text-ink-soft">
@@ -41,7 +42,6 @@ export function VendorCard({ vendor, canSave = false, returnTo = "/vendors" }: {
           </div>
         </div>
       </Link>
-      <RecommendationDetail recommendation={vendor.recommendation} />
     </article>
   );
 }
