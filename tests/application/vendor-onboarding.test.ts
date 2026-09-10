@@ -139,7 +139,8 @@ describe("Vendor onboarding and role boundaries", () => {
   it("renders clean setup affordances if an owned profile is exceptionally absent", () => {
     expect(dashboardPage).toContain("Set up your business profile");
     expect(dashboardPage).toContain('href="/vendor/profile"');
-    expect(profilePage).toContain("Vendor Profile Setup");
+    expect(profilePage).toContain("VendorProfileForm");
+    expect(profileForm).toContain("Vendor Profile Setup");
     expect(profileForm).toContain("Create business profile");
     expect(profileAction).toContain("owner_user_id: account.id");
     expect(profileAction).toContain("Business profile created.");

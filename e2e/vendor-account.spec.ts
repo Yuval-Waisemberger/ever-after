@@ -28,9 +28,9 @@ test("checklist navigates/focuses; only saved completion changes animate",async 
   await page.getByRole("link",{name:"Write a description — add details"}).click();
   await expect(page.getByLabel("Description",{exact:true})).toBeFocused();
   await page.getByLabel("Description",{exact:true}).fill("A thoughtful photographic perspective.");
-  await page.getByRole("button",{name:"Save business profile",exact:true}).click();
+  await page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true}).click();
   await expect(page.getByText("Business profile saved",{exact:true})).toBeVisible();
-  await expect(page.getByRole("button",{name:"Saved ✓",exact:true})).toBeVisible();
+  await expect(page.locator(".business-profile-savebar").getByRole("button",{name:"Saved ✓",exact:true})).toBeVisible();
   await page.getByRole("link",{name:"Dashboard",exact:true}).first().click();
   await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuenow","63");
   await expect(page.locator('[data-step="Write a description"]')).toHaveAttribute("data-just-completed","true");
@@ -41,15 +41,15 @@ test("pending and failed publication never claim live; saved publication does",a
   await page.getByRole("switch",{name:/Publish my Vendor Profile/}).check();
   await page.getByRole("button",{name:"Toggle pending",exact:true}).click();
   await page.getByRole("button",{name:"Toggle failure",exact:true}).click();
-  await page.getByRole("button",{name:"Save business profile",exact:true}).click();
-  await expect(page.getByRole("button",{name:"Saving…",exact:true})).toBeDisabled();
+  await page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true}).click();
+  await expect(page.locator(".business-profile-savebar").getByRole("button",{name:"Saving…",exact:true})).toBeDisabled();
   await expect(page.getByText("Your profile is live",{exact:true})).toHaveCount(0);
   await page.getByRole("button",{name:"Resolve request",exact:true}).click();
   await expect(page.getByRole("alert")).toContainText("could not be saved");
   await expect(page.getByText("Your profile is live",{exact:true})).toHaveCount(0);
   await page.getByRole("button",{name:"Toggle failure",exact:true}).click();
   await page.getByRole("switch",{name:/Publish my Vendor Profile/}).check();
-  await page.getByRole("button",{name:"Save business profile",exact:true}).click();
+  await page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true}).click();
   await page.getByRole("button",{name:"Resolve request",exact:true}).click();
   await expect(page.getByText("Your profile is live",{exact:true})).toBeVisible();
   await expect(page.getByText("Couples can now find and contact you")).toBeVisible();
@@ -83,19 +83,19 @@ test("record finite Vendor motion and real save/publication feedback",async ({br
   await expect(page.getByLabel("Description",{exact:true})).toBeFocused();
   await page.waitForTimeout(300);
   expect(await page.getByLabel("Description",{exact:true}).evaluate(e=>getComputedStyle(e).backgroundSize)).toBe("100% 2px");
-  await page.getByRole("button",{name:"Save business profile",exact:true}).click();
+  await page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true}).click();
   await expect(page.getByText("Business profile saved",{exact:true})).toBeVisible(); await page.waitForTimeout(1000);
   await page.getByRole("link",{name:"Dashboard",exact:true}).first().click();
   await expect(page.getByRole("progressbar")).toHaveAttribute("aria-valuenow","63"); await page.waitForTimeout(1800);
   await page.getByRole("link",{name:"Manage visibility"}).click();
   await page.getByRole("switch",{name:/Publish my Vendor Profile/}).check();
   await page.getByRole("button",{name:"Toggle pending",exact:true}).click();
-  await page.getByRole("button",{name:"Save business profile",exact:true}).click();
-  await expect(page.getByRole("button",{name:"Saving…",exact:true})).toBeVisible(); await page.waitForTimeout(1000);
+  await page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true}).click();
+  await expect(page.locator(".business-profile-savebar").getByRole("button",{name:"Saving…",exact:true})).toBeVisible(); await page.waitForTimeout(1000);
   await page.getByRole("button",{name:"Resolve request",exact:true}).click();
   await expect(page.getByText("Your profile is live",{exact:true})).toBeVisible(); await page.waitForTimeout(1500);
   await page.getByLabel("Business name",{exact:true}).fill("Willow Studio Updated");
-  await expect(page.getByRole("button",{name:"Save business profile",exact:true})).toBeVisible();
+  await expect(page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true})).toBeVisible();
   await context.close();
   await page.video()!.saveAs(`${artifacts}/vendor-motion.webm`);
 });
@@ -117,4 +117,58 @@ test("identity selection validates and previews without writing gallery records"
   await expect(page.getByRole("img",{name:"Selected profile image preview"})).toBeVisible();
   await expect(page.getByRole("button",{name:"Upload profile image",exact:true})).toBeEnabled();
   await expect(page.getByText("Isolated fixture · writes: 0",{exact:true})).toBeVisible();
+});
+
+
+test("Business Profile external save controls share all fields and submit once", async ({page}) => {
+  await page.goto("/vendor/profile");
+  await page.getByLabel("Business name",{exact:true}).fill("Updated fixture studio");
+  await page.getByLabel("Contact person",{exact:true}).fill("Contact fixture");
+  const fields = await page.locator("#vendor-business-profile-form").evaluate(form => [...new FormData(form as HTMLFormElement).entries()].map(([key,value])=>[key, String(value)]));
+  expect(fields).toContainEqual(["businessName","Updated fixture studio"]);
+  expect(fields).toContainEqual(["contactName","Contact fixture"]);
+  expect(fields).toContainEqual(["serviceAreas","central_israel"]);
+  expect(fields).toContainEqual(["eventTypes","friday_afternoon"]);
+  expect(fields.map(([key])=>key)).not.toContain("image");
+  expect(fields.map(([key])=>key)).not.toContain("imageId");
+  expect(await page.locator("form form").count()).toBe(0);
+  await page.getByRole("button",{name:"Toggle pending",exact:true}).click();
+  await page.locator(".ea-page-header").getByRole("button",{name:"Save changes",exact:true}).click();
+  await expect.poll(() => page.evaluate(async () => (await import(/* @vite-ignore */ String("/data.ts"))).fixture.writes)).toBe(1);
+  await expect(page.getByRole("button",{name:"Saving…",exact:true})).toHaveCount(2);
+  for (const button of await page.getByRole("button",{name:"Saving…",exact:true}).all()) await expect(button).toBeDisabled();
+  await page.getByRole("button",{name:"Resolve request",exact:true}).click();
+  await expect(page.locator(".business-profile-savebar").getByRole("button",{name:"Saved ✓",exact:true})).toBeVisible();
+  await page.getByRole("button",{name:"Toggle pending",exact:true}).click();
+  await page.getByLabel("Business name",{exact:true}).fill("Second fixture name");
+  await page.locator(".business-profile-savebar").getByRole("button",{name:"Save changes",exact:true}).click();
+  await expect(page.getByText("Isolated fixture · writes: 2",{exact:true})).toBeVisible();
+  await expect(page.getByLabel("Business name",{exact:true})).toHaveValue("Second fixture name");
+  await page.getByRole("link",{name:/Add photo/}).first().click();
+  await expect(page.locator("#gallery-upload input[type=file]")).toBeFocused();
+});
+
+
+test("Business Profile option states and identity padding remain accessible", async ({page}) => {
+  await page.goto("/vendor/profile");
+  const options=page.locator(".vendor-choice input,.business-profile-option input");
+  for(const input of await options.all()) {
+    await input.check();
+    await expect(input).toBeChecked();
+    await expect(input.locator("..")).toHaveCSS("border-top-color","rgb(115, 51, 67)");
+    await input.focus();
+    await page.keyboard.press("Space");
+    await expect(input).not.toBeChecked();
+    await expect(input).toBeFocused();
+  }
+  const panel=page.locator("#profile-image");
+  await expect(panel.getByLabel("No profile image")).toBeVisible();
+  await expect(panel.getByRole("button",{name:"Upload profile image",exact:true})).toBeDisabled();
+  for(const width of [1672,960,390]) {
+    await page.setViewportSize({width,height:940});
+    await panel.locator('input[type=file]').setInputFiles({name:"very-long-invalid-file-name-".repeat(12)+".txt",mimeType:"text/plain",buffer:Buffer.from("invalid")});
+    await expect(panel.getByRole("status")).toBeVisible();
+    expect(await panel.evaluate(el=>{const r=el.getBoundingClientRect();return [...el.querySelectorAll("input,button,p,img")].every(c=>{const b=c.getBoundingClientRect();return b.left>=r.left+12&&b.right<=r.right-12&&b.bottom<=r.bottom-12;});})).toBe(true);
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
 });

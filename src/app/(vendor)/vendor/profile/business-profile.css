@@ -1,0 +1,60 @@
+/* Business Profile geometry only. Existing colors, controls and motion remain owners. */
+.business-profile-page .business-profile-content { display:grid; gap:1rem; min-width:0; }
+.business-profile-page #vendor-business-profile-form:empty { display:none; }
+.business-profile-page .business-profile-actions { display:flex; flex-wrap:wrap; gap:.75rem; align-items:center; }
+.business-profile-page .business-profile-completion { display:flex; align-items:center; flex-wrap:wrap; gap:1rem 1.5rem; padding:1rem 1.25rem; }
+.business-profile-page .business-profile-completion .font-display { font-size:1.75rem; white-space:nowrap; }
+.business-profile-page .business-profile-completion .vendor-progress { flex:1 1 180px; margin:0; }
+.business-profile-page .vendor-panel { padding:1.25rem; }
+.business-profile-page .vendor-panel > h2, .business-profile-page #publication h2 { border-inline-start:2px solid var(--wine); padding-inline-start:.65rem; }
+.business-profile-page .vendor-choice { padding:.6rem .75rem; min-height:44px; }
+.business-profile-page .business-profile-contact-row { display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:1rem; }
+.business-profile-page .business-profile-contact-row .vendor-panel { height:100%; }
+.business-profile-page .business-profile-identity { margin-top:1rem; border-bottom:1px solid var(--line); padding-bottom:1rem; }
+.business-profile-page .business-profile-identity #profile-image { margin:0; padding:1.25rem; border:0; background:transparent; box-shadow:none; }
+.business-profile-page .business-profile-identity #profile-image > h2 { font-size:1.25rem; border:0; padding:0; }
+.business-profile-page .business-profile-identity #profile-image > div { margin-top:1.25rem; gap:1.25rem; }
+.business-profile-page .business-profile-identity #profile-image img, .business-profile-page .business-profile-identity #profile-image > div > span { width:80px; height:80px; }
+.business-profile-page .business-profile-gallery-upload { margin-top:1rem; }
+.business-profile-page .business-profile-savebar { position:sticky; bottom:0; z-index:20; display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1rem 1.25rem max(1rem,env(safe-area-inset-bottom)); border:1px solid var(--line); border-radius:var(--control-radius); background:var(--paper); box-shadow:var(--shadow-soft); }
+.business-profile-page .business-profile-savebar > p { max-width:40rem; }
+.business-profile-page .business-profile-savebar .business-profile-actions { flex-shrink:0; }
+.business-profile-page #gallery { scroll-margin-bottom:10rem; }
+.business-profile-page .vendor-save-toast { bottom:7rem; }
+@media (max-width:1199px) {
+ .business-profile-page .business-profile-contact-row { grid-template-columns:1fr; }
+ .business-profile-page .vendor-choices-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+ .business-profile-page .business-profile-savebar { flex-wrap:wrap; }
+}
+@media (max-width:639px) {
+ .business-profile-page .vendor-panel { padding:1rem; }
+ .business-profile-page .vendor-choices-grid { grid-template-columns:1fr; }
+ .business-profile-page .business-profile-completion { align-items:flex-start; }
+ .business-profile-page .business-profile-completion .vendor-progress { flex-basis:100%; }
+ .business-profile-page .business-profile-savebar { padding:.75rem; padding-bottom:max(.75rem,env(safe-area-inset-bottom)); }
+ .business-profile-page .business-profile-savebar .business-profile-actions { flex-shrink:1; width:100%; }
+ .business-profile-page .business-profile-savebar .ea-button { flex:1; }
+}
+
+.business-profile-page .business-profile-gallery-slots figure { display:flex; align-items:center; min-width:0; }
+.business-profile-page .business-profile-gallery-slots figure > div { width:120px; flex-shrink:0; }
+.business-profile-page .business-profile-gallery-slots figcaption { flex:1; min-width:0; flex-wrap:wrap; }
+.business-profile-page .business-profile-add-photo { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; min-height:90px; border:1px dashed var(--line); border-radius:var(--control-radius); color:var(--wine); font-size:.875rem; }
+
+/* Local option states; native checkbox interaction remains intact. */
+.business-profile-page .business-profile-option { min-height:44px; padding:.6rem .75rem; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--surface-blush); }
+.business-profile-page :is(.vendor-choice,.business-profile-option):has(input:checked) { border-color:var(--wine); background:var(--blush); }
+.business-profile-page :is(.vendor-choice,.business-profile-option) input[type=checkbox] { appearance:auto; width:18px; height:18px; margin:0; accent-color:var(--wine); }
+.business-profile-page :is(.vendor-choice,.business-profile-option):has(input:focus-visible) { outline:2px solid var(--wine); outline-offset:2px; }
+.business-profile-page .business-profile-identity #profile-image > p { margin-top:.75rem; }
+.business-profile-page .business-profile-identity #profile-image form { min-width:0; gap:1.25rem; }
+.business-profile-page .business-profile-identity #profile-image :is(label,p) { min-width:0; overflow-wrap:anywhere; }
+.business-profile-page .business-profile-identity #profile-image input[type=file] { max-width:100%; }
+.business-profile-page .business-profile-identity #profile-image > div > :is(img,span) { flex-shrink:0; }
+@media (max-width:639px) {
+ .business-profile-page .business-profile-identity #profile-image { padding:1rem; }
+ .business-profile-page .business-profile-identity #profile-image > div { flex-direction:column; }
+ .business-profile-page .business-profile-identity #profile-image form { width:100%; }
+ .business-profile-page .business-profile-identity #profile-image form > div { flex-direction:column; align-items:stretch; }
+ .business-profile-page .business-profile-identity #profile-image button { min-width:0; white-space:normal; }
+}
