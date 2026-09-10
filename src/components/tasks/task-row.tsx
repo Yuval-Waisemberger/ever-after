@@ -7,11 +7,13 @@ import type { TaskStatus } from "@/lib/domain/task-status";
 import { TaskForm } from "./task-form";
 import { TaskStatusPill } from "./task-status-pill";
 import { formatCalendarDate } from "@/lib/domain/date-status";
-import { taskCategory } from "@/lib/domain/tasks";
+import { taskCategory, taskAssigneeLabel, type TaskAssignee, type TaskPartnerNames } from "@/lib/domain/tasks";
 
 type TaskRowProps = {
+  partnerNames?: TaskPartnerNames;
   task: {
     id: string;
+    assignee?: TaskAssignee | null;
     title: string;
     notes: string | null;
     category: string | null;
@@ -21,7 +23,7 @@ type TaskRowProps = {
   };
 };
 
-export function TaskRow({ task, defaultOpen = false }: TaskRowProps & { defaultOpen?: boolean }) {
+export function TaskRow({ task, partnerNames, defaultOpen = false }: TaskRowProps & { defaultOpen?: boolean }) {
   // Only changed, server-confirmed props earn motion. Pending/failed writes do not.
   const [previousStatus, setPreviousStatus] = useState(task.status);
   const [motion, setMotion] = useState<"complete" | "reopen" | undefined>();
@@ -41,7 +43,7 @@ export function TaskRow({ task, defaultOpen = false }: TaskRowProps & { defaultO
             <TaskStatusPill status={task.status} dueDate={task.due_date} />
           </div>
           <p className="mt-1 text-xs text-ink-soft">
-            {[taskCategory(task.category), task.due_date ? formatCalendarDate(task.due_date) : "No due date"].join(" · ")}
+            {[taskCategory(task.category), task.due_date ? formatCalendarDate(task.due_date) : "No due date" ].join(" · ")} · Assigned to: <bdi>{taskAssigneeLabel(task.assignee, partnerNames)}</bdi>
           </p>
           {task.notes ? <p className="mt-3 text-sm leading-6 text-ink-soft">{task.notes}</p> : null}
         </div>
@@ -53,8 +55,9 @@ export function TaskRow({ task, defaultOpen = false }: TaskRowProps & { defaultO
         </summary>
         <div className="mt-4">
           <TaskForm
-            key={[task.title, task.notes, task.category, task.due_date, task.priority, task.status].join("|")}
-            initial={{ id: task.id, title: task.title, notes: task.notes, category: task.category, dueDate: task.due_date, priority: task.priority, status: task.status }}
+            key={[task.title, task.notes, task.category, task.due_date, task.priority, task.status, task.assignee].join("|")}
+            partnerNames={partnerNames}
+            initial={{ assignee: task.assignee, id: task.id, title: task.title, notes: task.notes, category: task.category, dueDate: task.due_date, priority: task.priority, status: task.status }}
           />
         </div>
       </details>

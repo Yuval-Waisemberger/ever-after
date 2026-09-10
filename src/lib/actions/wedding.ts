@@ -105,7 +105,7 @@ export async function saveWeddingDetails(
 }
 
 function refreshWeddingViews(preferences = false, budget = false) {
-  const paths = ["/wedding", "/wedding/setup", "/wedding/details"];
+  const paths = ["/wedding", "/wedding/setup", "/wedding/details", "/tasks"];
   if (preferences) paths.push("/wedding/timeline", "/vendors", "/assistant");
   if (budget) paths.push("/budget");
   for (const path of paths) revalidatePath(path);

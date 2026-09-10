@@ -3,6 +3,12 @@ import { calendarDayDifference, deadlineLabel } from "./date-status";
 import { TASK_STATUS_LABELS, type TaskStatus } from "./task-status";
 export { TASK_STATUSES, TASK_STATUS_LABELS, type TaskStatus } from "./task-status";
 export type TaskPriority = "low" | "medium" | "high";
+export const TASK_ASSIGNEES = ["partner_one", "partner_two", "other"] as const;
+export type TaskAssignee = typeof TASK_ASSIGNEES[number];
+export type TaskPartnerNames = { partnerOne: string; partnerTwo: string };
+export function taskAssigneeLabel(value: TaskAssignee | null | undefined, names?: TaskPartnerNames): string {
+  return value === "partner_one" ? names?.partnerOne || "Partner one" : value === "partner_two" ? names?.partnerTwo || "Partner two" : "Other";
+}
 
 export function taskCategory(category: string | null | undefined): string {
   return category?.trim() || "Other";

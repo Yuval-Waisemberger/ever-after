@@ -32,6 +32,7 @@ export async function saveTask(
     due_date: parsed.data.dueDate,
     priority: parsed.data.priority,
     status: parsed.data.status,
+    ...(parsed.data.assignee !== undefined ? { assignee: parsed.data.assignee } : parsed.data.id ? {} : { assignee: "other" }),
   };
 
   const result = parsed.data.id

@@ -104,7 +104,7 @@ describe("Setup / Details saves", () => {
     await expect(action({ status: "idle" }, form())).rejects.toThrow("REDIRECT:");
     expect(writes("weddings")[0].args[0]).toMatchObject({ setup_status: "completed", total_budget_minor: 17000000 });
     for (const field of ["booked_categories", "venue_status", "venue_name"]) expect(writes("weddings")[0].args[0]).not.toHaveProperty(field);
-    for (const path of ["/budget", "/wedding/setup", "/wedding/details", "/vendors", "/assistant"]) expect(mocks.refresh).toHaveBeenCalledWith(path);
+    for (const path of ["/tasks", "/budget", "/wedding/setup", "/wedding/details", "/vendors", "/assistant"]) expect(mocks.refresh).toHaveBeenCalledWith(path);
   });
   it.each([completeWeddingSetup, saveWeddingDetails])("blocks stale whole-form overwrites and missing revision", async action => {
     const f = form(); f.set("revision", "old");

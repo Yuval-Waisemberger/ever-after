@@ -1,16 +1,18 @@
 "use client";
 
-import { useActionState, useState, useId } from "react";
+import { useActionState, useState, useId, useEffect, useRef } from "react";
 import { saveTask } from "@/lib/actions/tasks";
 import { initialActionState } from "@/lib/actions/state";
 import { FormField } from "@/components/ui/form-field";
 import { SubmitButton } from "@/components/ui/submit-button";
+import { TASK_ASSIGNEES, taskAssigneeLabel, type TaskAssignee, type TaskPartnerNames } from "@/lib/domain/tasks";
 import { TASK_CATEGORIES } from "@/lib/validation/task";
 import { TASK_STATUSES, TASK_STATUS_LABELS, type TaskStatus } from "@/lib/domain/task-status";
 import { isPastCalendarDate } from "@/lib/domain/date-status";
 
 export type TaskFormValues = {
   id?: string;
+  assignee?: TaskAssignee | null;
   title?: string;
   notes?: string | null;
   category?: string | null;
@@ -19,11 +21,14 @@ export type TaskFormValues = {
   status?: TaskStatus;
 };
 
-export function TaskForm({ initial = {} }: { initial?: TaskFormValues }) {
+export function TaskForm({ initial = {}, partnerNames }: { initial?: TaskFormValues; partnerNames?: TaskPartnerNames }) {
   const formId = useId();
   const [state, action] = useActionState(saveTask, initialActionState);
-  const [draft, setDraft] = useState({ title: initial.title ?? "", notes: initial.notes ?? "", category: initial.category?.trim() || "Other", dueDate: initial.dueDate ?? "", priority: initial.priority ?? "medium", status: initial.status ?? "open" });
+  const [draft, setDraft] = useState({ assignee: initial.assignee ?? "other", title: initial.title ?? "", notes: initial.notes ?? "", category: initial.category?.trim() || "Other", dueDate: initial.dueDate ?? "", priority: initial.priority ?? "medium", status: initial.status ?? "open" });
   const field = (name: keyof typeof draft) => ({ value: draft[name], onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setDraft(current => ({ ...current, [name]: event.target.value })) });
+  const assigneeControl = useRef<HTMLSelectElement>(null);
+  // React form-action resets can reset a select DOM value even when its draft is unchanged.
+  useEffect(() => { if (assigneeControl.current) assigneeControl.current.value = draft.assignee; }, [state, draft.assignee]);
   const dueDate = draft.dueDate;
   const error = (name: string) => state.errors?.[name]?.[0];
 
@@ -52,6 +57,7 @@ export function TaskForm({ initial = {} }: { initial?: TaskFormValues }) {
           {error("priority") ? <span id={`${formId}-priority-error`} role="alert" className="ea-field-error text-xs">{error("priority")}</span> : null}
         </label>
       </div>
+      <label className="grid gap-2 text-sm font-semibold">Assigned to<select name="assignee" ref={assigneeControl} value={draft.assignee} onChange={event => { const assignee = event.currentTarget.value as TaskAssignee; setDraft(current => ({ ...current, assignee })); }} aria-invalid={Boolean(error("assignee"))} aria-describedby={error("assignee") ? `${formId}-assignee-error` : undefined} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal">{TASK_ASSIGNEES.map(value => <option key={value} value={value}>{taskAssigneeLabel(value, partnerNames)}</option>)}</select>{error("assignee") ? <span id={`${formId}-assignee-error`} className="ea-field-error text-xs font-normal" role="alert">{error("assignee")}</span> : null}</label>
       <label className="grid gap-2 text-sm font-semibold">
         Notes (optional)
         <textarea name="notes" aria-invalid={Boolean(error("notes"))} aria-describedby={error("notes") ? `${formId}-notes-error` : undefined} {...field("notes")} rows={3} className="rounded-xl border bg-paper px-3.5 py-3 text-base font-normal" />

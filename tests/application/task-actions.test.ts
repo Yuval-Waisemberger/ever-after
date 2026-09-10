@@ -13,9 +13,25 @@ const id = "11111111-1111-4111-8111-111111111111";
 const idle = { status: "idle" as const };
 const form = (extra = {}) => { const f = new FormData(); Object.entries({ title: "Contract", notes: "Private", category: "Venue", dueDate: "2026-09-07", priority: "high", status: "waiting_on_vendor", ...extra }).forEach(([k,v]) => f.set(k, String(v))); return f; };
 beforeEach(() => { vi.clearAllMocks(); mocks.calls.length = 0; mocks.owned.mockResolvedValue({ id: "owned" }); mocks.result = { data: { id }, error: null }; });
+it.each(["partner_one", "partner_two", "other"])("creates and edits with stable assignment %s", async assignee => {
+  await saveTask(idle, form({assignee}));
+  await saveTask(idle, form({id,assignee}));
+  for (const operation of ["insert","update"]) expect(mocks.calls.find(c => c[0] === operation)?.[1]).toMatchObject({assignee});
+});
+it("omitted edit assignment is not written; status actions preserve it", async () => {
+  await saveTask(idle, form({id}));
+  expect(mocks.calls.find(c => c[0] === "update")?.[1]).not.toHaveProperty("assignee");
+  mocks.calls.length = 0;
+  for(const status of ["completed","open"]) await changeTaskStatus(idle,form({id,status}));
+  expect(mocks.calls.filter(c=>c[0]==="update").map(c=>c[1])).toEqual([{status:"completed"},{status:"open"}]);
+});
+it.each(["", "Partner name", "PARTNER_ONE", "null"])("rejects supplied invalid assignment %s", async assignee => {
+  expect(await saveTask(idle,form({id,assignee}))).toMatchObject({status:"error",errors:{assignee:expect.any(Array)}});
+  expect(mocks.calls).toEqual([]);
+});
 it("creates waiting without vendor linkage and ignores forged wedding ownership", async () => {
   expect(await saveTask(idle, form({ wedding_id: "forged" }))).toMatchObject({ status: "success" });
-  expect(mocks.calls).toContainEqual(["insert", { wedding_id: "owned", title: "Contract", notes: "Private", category: "Venue", due_date: "2026-09-07", priority: "high", status: "waiting_on_vendor" }]);
+  expect(mocks.calls).toContainEqual(["insert", { wedding_id: "owned", title: "Contract", notes: "Private", category: "Venue", due_date: "2026-09-07", priority: "high", status: "waiting_on_vendor", assignee: "other" }]);
   expect(mocks.calls.filter(c => c[0] === "from")).toEqual([["from", "tasks"]]);
 });
 it.each(["open", "in_progress", "waiting_on_vendor", "completed"])("edits and changes workflow freely to %s", async status => {

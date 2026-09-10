@@ -4,6 +4,35 @@ test.beforeEach(async ({ page }) => {
   await page.route("**/*", route => new URL(route.request().url()).hostname === "127.0.0.1" ? route.continue() : route.abort());
   await page.clock.setFixedTime(new Date("2026-09-07T12:00:00Z"));
 });
+test("assignment saves stable values and survives failed edits and completion", async ({page}) => {
+ await page.goto("/");
+ const form=page.getByRole("region",{name:"Add task",exact:true});
+ await expect(form.getByLabel("Assigned to")).toHaveValue("other");
+ await form.getByLabel("Task",{exact:true}).fill("Assigned fixture task");
+ await form.getByLabel("Assigned to").selectOption("partner_one");
+ await form.getByRole("button",{name:"Add task",exact:true}).click();
+ const row=page.locator("article").filter({has:page.getByRole("heading",{name:"Assigned fixture task",exact:true})});
+ await expect(row.locator("bdi")).toHaveText("Fixture One");
+ await row.getByText("Edit task",{exact:true}).click();
+ for(const value of ["partner_two","other","partner_one"]){
+  await row.getByLabel("Assigned to").selectOption(value);
+  await row.getByRole("button",{name:"Save changes"}).click();
+  await expect(row.locator("bdi")).toHaveText(value==="other"?"Other":value==="partner_one"?"Fixture One":"Fixture Two");
+  await expect(row.getByRole("button",{name:"Save changes"})).toBeEnabled();
+ }
+ await page.getByRole("button",{name:"Toggle simulated failure"}).click();
+ await row.getByLabel("Assigned to").selectOption("partner_two");
+ await expect(row.getByLabel("Assigned to")).toHaveValue("partner_two");
+ await row.getByRole("button",{name:"Save changes"}).click();
+ await expect(row.getByRole("status")).toContainText("could not be changed");
+ await expect(row.getByLabel("Assigned to")).toHaveValue("partner_two");
+ await expect(row.locator("bdi")).toHaveText("Fixture One");
+ await page.getByRole("button",{name:"Toggle simulated failure"}).click();
+ await row.getByRole("button",{name:"Complete Assigned fixture task"}).click();
+ await expect(row.locator("bdi")).toHaveText("Fixture One");
+ await row.getByRole("button",{name:"Reopen Assigned fixture task"}).click();
+ await expect(row.locator("bdi")).toHaveText("Fixture One");
+});
 for (const width of [1440, 768, 390, 360]) test(`workflow and deadline, forms and timeline at ${width}`, async ({ page }) => {
   const errors: string[] = []; page.on("pageerror", e => errors.push(e.message));
   await page.setViewportSize({ width, height: 1000 }); await page.goto("/");

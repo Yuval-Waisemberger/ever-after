@@ -6,7 +6,7 @@ export async function getTasks() {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, title, notes, category, due_date, priority, status, created_at")
+    .select("id, title, notes, category, due_date, priority, status, created_at, assignee")
     .eq("wedding_id", wedding.id)
     .order("status", { ascending: true })
     .order("due_date", { ascending: true, nullsFirst: false })

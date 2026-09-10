@@ -4,7 +4,7 @@ import { Fragment, useRef, useState, type ComponentProps, type CSSProperties } f
 import { ChevronLeft, ChevronRight, Plus, Search, X } from "lucide-react";
 import { TaskRow } from "@/components/tasks/task-row";
 import { TaskForm } from "@/components/tasks/task-form";
-import { filterTasks, taskCategory, compareTaskPriorityDate } from "@/lib/domain/tasks";
+import { filterTasks, taskCategory, compareTaskPriorityDate, type TaskPartnerNames } from "@/lib/domain/tasks";
 import { TASK_STATUSES, TASK_STATUS_LABELS, type TaskStatus } from "@/lib/domain/task-status";
 import { TASK_CATEGORIES } from "@/lib/validation/task";
 import styles from "./tasks-workspace.module.css";
@@ -21,7 +21,7 @@ export function monthDays(month: string) {
   return Array.from({ length: Math.ceil((offset + count) / 7) * 7 }, (_, index) => new Date(Date.UTC(year, number - 1, 1 - offset + index)).toISOString().slice(0, 10));
 }
 
-export function TasksWorkspace({ tasks, today, initialCategory, initialStatus, editTaskId }: { tasks: Task[]; today: string; initialCategory: string; initialStatus: TaskStatus | "all"; editTaskId: string }) {
+export function TasksWorkspace({ tasks, partnerNames, today, initialCategory, initialStatus, editTaskId }: { tasks: Task[]; partnerNames?: TaskPartnerNames; today: string; initialCategory: string; initialStatus: TaskStatus | "all"; editTaskId: string }) {
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState(initialCategory);
   const [status, setStatus] = useState(initialStatus);
@@ -60,7 +60,7 @@ export function TasksWorkspace({ tasks, today, initialCategory, initialStatus, e
       <div className={`tasks-scroll-region ${styles.list}`} role="region" aria-label="Task list" tabIndex={0}>
         {ordered.map((task, index) => <Fragment key={task.id}>
           {index === 0 || group(ordered[index - 1]) !== group(task) ? <h3 className={styles.group}>{labels[group(task)]}<span>{visible.filter(item => group(item) === group(task)).length} {visible.filter(item => group(item) === group(task)).length === 1 ? "task" : "tasks"}</span></h3> : null}
-          <div id={`task-${task.id}`}><TaskRow task={task} defaultOpen={task.id === editTaskId} /></div>
+          <div id={`task-${task.id}`}><TaskRow partnerNames={partnerNames} task={task} defaultOpen={task.id === editTaskId} /></div>
         </Fragment>)}
         {!visible.length ? <p className={styles.empty}>No tasks match these filters.</p> : null}
       </div>
@@ -77,15 +77,15 @@ export function TasksWorkspace({ tasks, today, initialCategory, initialStatus, e
           <div className={styles.legend}>{TASK_STATUSES.map(value => <span key={value}><i data-status={value} />{TASK_STATUS_LABELS[value]}</span>)}</div>
         </div>
         <div className={styles.selected} aria-live="polite"><p className={styles.eyebrow}>Selected date</p><h3>{dateLabel(selected, { day: "numeric", month: "long", year: "numeric" })}</h3><p>{selectedTasks.length} {selectedTasks.length === 1 ? "task" : "tasks"}</p>
-          <div className={`tasks-scroll-region ${styles.dateRows}`}>{selectedTasks.map(task => <TaskRow key={task.id} task={task} />)}{!selectedTasks.length ? <p className={styles.empty}>No tasks planned for this date.</p> : null}</div>
+          <div className={`tasks-scroll-region ${styles.dateRows}`}>{selectedTasks.map(task => <TaskRow partnerNames={partnerNames} key={task.id} task={task} />)}{!selectedTasks.length ? <p className={styles.empty}>No tasks planned for this date.</p> : null}</div>
           <button type="button" className={styles.outline} onClick={() => openForm(selected)}><Plus size={19} /> Add task on this date</button>
         </div>
       </div>
-      <section className={`${styles.panel} ${styles.undated}`} aria-label="Undated tasks"><h3 className={styles.group}>No date yet <span>{undated.length} {undated.length === 1 ? "task" : "tasks"}</span></h3><p>Use Edit task to assign a date.</p><div className={`tasks-scroll-region ${styles.dateRows}`}>{undated.map(task => <TaskRow key={task.id} task={task} />)}{!undated.length ? <p>Every task has a date.</p> : null}</div></section>
+      <section className={`${styles.panel} ${styles.undated}`} aria-label="Undated tasks"><h3 className={styles.group}>No date yet <span>{undated.length} {undated.length === 1 ? "task" : "tasks"}</span></h3><p>Use Edit task to assign a date.</p><div className={`tasks-scroll-region ${styles.dateRows}`}>{undated.map(task => <TaskRow partnerNames={partnerNames} key={task.id} task={task} />)}{!undated.length ? <p>Every task has a date.</p> : null}</div></section>
     </section>
     <dialog ref={dialog} className={styles.drawer} style={{ "--tasks-canvas-left": `${canvasBounds.left}px`, "--tasks-canvas-top": `${canvasBounds.top}px` } as CSSProperties} aria-labelledby="tasks-add-title">
       <button type="button" className={styles.close} aria-label="Close add task" onClick={() => dialog.current?.close()}><X /></button><p className={styles.eyebrow}>Plan together</p><h2 id="tasks-add-title">Add a task</h2><p>Add the details now — you can always refine them later.</p>
-      <div className={styles.form}><TaskForm key={draft.version} initial={{ dueDate: draft.dueDate }} /></div><button type="button" className={styles.outline} onClick={() => dialog.current?.close()}>Cancel</button>
+      <div className={styles.form}><TaskForm partnerNames={partnerNames} key={draft.version} initial={{ dueDate: draft.dueDate }} /></div><button type="button" className={styles.outline} onClick={() => dialog.current?.close()}>Cancel</button>
     </dialog>
   </div>;
 }

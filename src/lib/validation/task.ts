@@ -1,5 +1,6 @@
 import { TASK_STATUSES } from "@/lib/domain/task-status";
 import { z } from "zod";
+import { TASK_ASSIGNEES } from "@/lib/domain/tasks";
 
 export const TASK_CATEGORIES = [
   "Planning & Admin",
@@ -23,6 +24,7 @@ export const taskSchema = z.object({
   title: z.string().trim().min(1, "Enter a task title").max(160, "Keep the title to 160 characters or fewer"),
   notes: optionalText(3000, "Notes"),
   category: optionalText(80, "Category"),
+  assignee: z.enum(TASK_ASSIGNEES, { error: "Choose a valid assignment" }).optional(),
   dueDate: z
     .union([z.literal(""), z.iso.date("Enter a valid date")])
     .transform((value) => value || null),

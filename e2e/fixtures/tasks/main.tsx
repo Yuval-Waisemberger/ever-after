@@ -24,9 +24,9 @@ function Fixture() {
     <p>Open: {summary.open} · Due this week: {summary.dueThisWeek} · Completed: {summary.completed}</p>
     <button onClick={() => { fixture.fail = !fixture.fail; }}>Toggle simulated failure</button>
     <TaskListPanel count={filterTasks(fixture.tasks, status, category).length} filters={<TaskFilters category={category} status={status} />}>
-      {filterTasks(fixture.tasks, status, category).map(task => <TaskRow key={task.id} task={task} />)}
+      {filterTasks(fixture.tasks, status, category).map(task => <TaskRow partnerNames={{partnerOne:"Fixture One",partnerTwo:"Fixture Two"}} key={task.id} task={task} />)}
     </TaskListPanel>
-    <section aria-label="Add task" className="tasks-create-panel paper-panel my-6 p-5"><h2 className="mb-5 font-display text-2xl">Add a task</h2><TaskForm /></section>
+    <section aria-label="Add task" className="tasks-create-panel paper-panel my-6 p-5"><h2 className="mb-5 font-display text-2xl">Add a task</h2><TaskForm partnerNames={{partnerOne:"Fixture One",partnerTwo:"Fixture Two"}} /></section>
     <section aria-label="Timeline">{timeline}</section>
   </main>;
   return params.has("shell") ? <AppShell role="couple" displayName="Alex & Sam">{content}</AppShell> : content;
