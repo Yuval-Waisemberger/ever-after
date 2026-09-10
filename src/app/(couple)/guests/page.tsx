@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, UserPlus } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
+import { GuestFormToggle } from "./guest-form-toggle";
+import styles from "./guest-layout.module.css";
 import { GuestForm } from "@/components/guests/guest-form";
 import { GuestSummary } from "@/components/guests/guest-summary";
 import { GuestList } from "@/components/guests/guest-list";
@@ -49,8 +51,8 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
   const estimate = wedding.guest_count == null ? null : Number(wedding.guest_count);
 
   return (
-    <main className="ea-consistent-page guest-planning-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
-      <PageHeader eyebrow="Plan your invitations" title="Your Guest List" description="Keep invitation parties, household counts, and replies together." action={<Link href="/guests?add=1#guest-form" className="ea-button ea-button--primary"><UserPlus className="size-4" aria-hidden="true" />Add guest / household</Link>} />
+    <main className={`ea-consistent-page guest-planning-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12 ${styles.guestLayout}`}>
+      <PageHeader eyebrow="Plan your invitations" title="Your Guest List" description="Keep invitation parties, household counts, and replies together." action={<GuestFormToggle initialOpen={Boolean(editGuest) || adding || summary.invitationParties === 0} />} />
       {one(raw.guest) === "added" ? <p className="ea-feedback ea-feedback--success mt-5" role="status">Guest added.</p> : one(raw.guest) === "updated" ? <p className="ea-feedback ea-feedback--success mt-5" role="status">Guest updated.</p> : null}
 
       <GuestSummary summary={summary} estimate={estimate} />
@@ -61,10 +63,10 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
         {editGuest ? <Link href="/guests" className="mt-5 inline-flex text-sm font-semibold text-ink-soft hover:text-wine">Cancel editing</Link> : null}
       </details>
 
-      <section className="mt-8" aria-labelledby="guest-list-heading">
-        <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-end">
+      <section className={`mt-8 ${styles.parties}`} aria-labelledby="guest-list-heading">
+        <div className={styles.partyHeader}>
           <div><h2 id="guest-list-heading" className="font-display text-3xl">Invitation parties</h2><p className="mt-1 text-sm text-ink-soft">{total} {total === 1 ? "result" : "results"}{hasFilters ? " for these filters" : ""}</p></div>
-          <form method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Search and filter guests">
+          <form key={activeFilters.toString()} method="get" className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4" aria-label="Search and filter guests">
             <label className="grid gap-1 text-xs font-semibold">Search<input type="search" name="search" defaultValue={search} placeholder="Guest or household" maxLength={120} className="min-h-11 rounded-xl border bg-paper px-3 text-sm font-normal" /></label>
             <label className="grid gap-1 text-xs font-semibold">RSVP<select name="rsvp" defaultValue={rsvp ?? ""} className="min-h-11 rounded-xl border bg-paper px-3 text-sm font-normal"><option value="">All replies</option>{GUEST_RSVP_STATUSES.map((status) => <option key={status} value={status}>{GUEST_RSVP_LABELS[status]}</option>)}</select></label>
             <label className="grid gap-1 text-xs font-semibold">Group<select name="group" defaultValue={group} className="min-h-11 rounded-xl border bg-paper px-3 text-sm font-normal"><option value="">All groups</option>{groups.map((value) => <option key={value} value={value}>{value}</option>)}</select></label>
@@ -73,9 +75,10 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
           </form>
         </div>
 
-        <div className="mt-6">
+        <div className={`mt-6 ${styles.rows}`} role="region" aria-label="Invitation party rows" tabIndex={0}>
           {guests.length ? <GuestList guests={guests} partnerOneName={wedding.partner_one_name} partnerTwoName={wedding.partner_two_name} /> : <EmptyState title={hasFilters ? "No guests match these filters" : "Start your guest list"} description={hasFilters ? "Try a different search, group, side, or RSVP filter." : "Add an individual, couple, family, or household when you are ready."} action={hasFilters ? <Link href="/guests" className="ea-button border bg-paper text-ink">Clear filters</Link> : <Link href="/guests?add=1#guest-form" className="ea-button ea-button--primary">Add your first guest</Link>} />}
         </div>
+        <p className={styles.resultCount}>Showing {guests.length} of {total} {total === 1 ? "invitation party" : "invitation parties"}{hasFilters ? " matching these filters" : ""}.</p>
 
         {pageCount > 1 ? <nav className="mt-6 flex items-center justify-between gap-4" aria-label="Guest List pagination"><Link href={pageHref(activeFilters, currentPage - 1)} aria-disabled={currentPage <= 1} className={`ea-button border bg-paper text-ink ${currentPage <= 1 ? "pointer-events-none opacity-45" : ""}`}><ArrowLeft className="size-4" aria-hidden="true" />Previous</Link><span className="text-sm text-ink-soft">Page {currentPage} of {pageCount}</span><Link href={pageHref(activeFilters, currentPage + 1)} aria-disabled={currentPage >= pageCount} className={`ea-button border bg-paper text-ink ${currentPage >= pageCount ? "pointer-events-none opacity-45" : ""}`}>Next<ArrowRight className="size-4" aria-hidden="true" /></Link></nav> : null}
       </section>

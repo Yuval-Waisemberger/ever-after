@@ -28,15 +28,17 @@ export function GuestForm({ initial = {}, sideLabels }: {
   initial?: GuestFormValue;
   sideLabels: Record<GuestSide, string>;
 }) {
-  const [state, action] = useActionState(saveGuest, initialActionState);
+  const [state, action, pending] = useActionState(saveGuest, initialActionState);
+  const [clearedState, setClearedState] = useState<typeof state | null>(null);
   const [rsvpStatus, setRsvpStatus] = useState<GuestRsvpStatus>(initial.rsvpStatus ?? "not_invited");
   const [invitedCount, setInvitedCount] = useState(initial.invitedCount ?? 1);
-  const error = (name: string) => state.errors?.[name]?.[0];
+  const feedback = state === clearedState ? initialActionState : state;
+  const error = (name: string) => feedback.errors?.[name]?.[0];
 
   return (
     <form action={action} className="guest-form grid gap-6">
       {initial.id ? <input type="hidden" name="id" value={initial.id} /> : null}
-      {state.message ? <p className={`ea-feedback ${state.status === "error" ? "ea-feedback--error" : "ea-feedback--success"}`} role="status">{state.message}</p> : null}
+      {feedback.message ? <p className={`ea-feedback ${feedback.status === "error" ? "ea-feedback--error" : "ea-feedback--success"}`} role="status">{feedback.message}</p> : null}
 
       <div className="grid gap-5 sm:grid-cols-2">
         <FormField name="fullName" label="Guest / primary contact name" required maxLength={160} defaultValue={initial.fullName ?? ""} error={error("fullName")} />
@@ -91,7 +93,15 @@ export function GuestForm({ initial = {}, sideLabels }: {
         </label>
       </div>
 
-      <SubmitButton className="justify-self-start" pendingLabel="Saving guest…"><Save className="size-4" />{initial.id ? "Save changes" : "Add guest"}</SubmitButton>
+      <div className="guest-form-actions">
+        <button type="button" className="guest-form-clear" disabled={pending} onClick={(event) => {
+          event.currentTarget.form?.reset();
+          setRsvpStatus(initial.rsvpStatus ?? "not_invited");
+          setInvitedCount(initial.invitedCount ?? 1);
+          setClearedState(state);
+        }}>Clear</button>
+        <SubmitButton className="justify-self-start" pendingLabel="Saving guest…"><Save className="size-4" />{initial.id ? "Save changes" : "Add guest"}</SubmitButton>
+      </div>
     </form>
   );
 }
