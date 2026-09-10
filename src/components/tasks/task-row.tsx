@@ -7,6 +7,7 @@ import type { TaskStatus } from "@/lib/domain/task-status";
 import { TaskForm } from "./task-form";
 import { TaskStatusPill } from "./task-status-pill";
 import { formatCalendarDate } from "@/lib/domain/date-status";
+import { taskCategory } from "@/lib/domain/tasks";
 
 type TaskRowProps = {
   task: {
@@ -40,7 +41,7 @@ export function TaskRow({ task, defaultOpen = false }: TaskRowProps & { defaultO
             <TaskStatusPill status={task.status} dueDate={task.due_date} />
           </div>
           <p className="mt-1 text-xs text-ink-soft">
-            {[task.category, task.due_date ? formatCalendarDate(task.due_date) : "No due date"].filter(Boolean).join(" · ")}
+            {[taskCategory(task.category), task.due_date ? formatCalendarDate(task.due_date) : "No due date"].join(" · ")}
           </p>
           {task.notes ? <p className="mt-3 text-sm leading-6 text-ink-soft">{task.notes}</p> : null}
         </div>

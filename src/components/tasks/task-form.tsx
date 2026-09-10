@@ -22,7 +22,7 @@ export type TaskFormValues = {
 export function TaskForm({ initial = {} }: { initial?: TaskFormValues }) {
   const formId = useId();
   const [state, action] = useActionState(saveTask, initialActionState);
-  const [draft, setDraft] = useState({ title: initial.title ?? "", notes: initial.notes ?? "", category: initial.category ?? "", dueDate: initial.dueDate ?? "", priority: initial.priority ?? "medium", status: initial.status ?? "open" });
+  const [draft, setDraft] = useState({ title: initial.title ?? "", notes: initial.notes ?? "", category: initial.category?.trim() || "Other", dueDate: initial.dueDate ?? "", priority: initial.priority ?? "medium", status: initial.status ?? "open" });
   const field = (name: keyof typeof draft) => ({ value: draft[name], onChange: (event: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setDraft(current => ({ ...current, [name]: event.target.value })) });
   const dueDate = draft.dueDate;
   const error = (name: string) => state.errors?.[name]?.[0];
@@ -37,7 +37,7 @@ export function TaskForm({ initial = {} }: { initial?: TaskFormValues }) {
       ) : null}
       <FormField id={`${formId}-title`} name="title" label="Task" {...field("title")} error={error("title")} placeholder="Call the DJ" required />
       <div className="grid gap-4 sm:grid-cols-3">
-        <label className="grid gap-2 text-sm font-semibold">Category (optional)<select name="category" aria-invalid={Boolean(error("category"))} aria-describedby={error("category") ? `${formId}-category-error` : undefined} {...field("category")} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal"><option value="">No category</option>{initial.category && !TASK_CATEGORIES.includes(initial.category as typeof TASK_CATEGORIES[number]) ? <option value={initial.category}>{initial.category}</option> : null}{TASK_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}</select>{error("category") ? <span id={`${formId}-category-error`} className="ea-field-error text-xs font-normal" role="alert">{error("category")}</span> : null}</label>
+        <label className="grid gap-2 text-sm font-semibold">Category (optional)<select name="category" aria-invalid={Boolean(error("category"))} aria-describedby={error("category") ? `${formId}-category-error` : undefined} {...field("category")} className="min-h-11 rounded-xl border bg-paper px-3.5 text-base font-normal">{initial.category && !TASK_CATEGORIES.includes(initial.category as typeof TASK_CATEGORIES[number]) ? <option value={initial.category}>{initial.category}</option> : null}{TASK_CATEGORIES.map((category) => <option key={category} value={category}>{category}</option>)}</select>{error("category") ? <span id={`${formId}-category-error`} className="ea-field-error text-xs font-normal" role="alert">{error("category")}</span> : null}</label>
         <div>
           <FormField id={`${formId}-date`} name="dueDate" type="date" label="Due date (optional)" {...field("dueDate")} error={error("dueDate")} />
           {isPastCalendarDate(dueDate) ? <p className="mt-2 text-xs font-medium text-[#9A611C]" role="status">This due date is in the past.</p> : null}

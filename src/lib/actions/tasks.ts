@@ -28,7 +28,7 @@ export async function saveTask(
     wedding_id: wedding.id,
     title: parsed.data.title,
     notes: parsed.data.notes,
-    category: parsed.data.category,
+    category: parsed.data.category ?? (parsed.data.id ? null : "Other"),
     due_date: parsed.data.dueDate,
     priority: parsed.data.priority,
     status: parsed.data.status,

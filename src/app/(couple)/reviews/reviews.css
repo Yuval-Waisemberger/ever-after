@@ -1,0 +1,21 @@
+.couple-reviews-page > .ea-page-header { border-bottom: 1px solid var(--line); padding-bottom: 24px; }
+.couple-reviews-page .couple-reviews-card { margin-top: 24px; padding: 24px; }
+.couple-reviews-page .couple-reviews-card-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
+.couple-reviews-page .couple-reviews-card-heading h2 { font-family: var(--font-body); font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--wine); }
+.couple-reviews-page .couple-reviews-card-heading > span { border-radius: 999px; background: var(--surface-blush); padding: 7px 18px; color: var(--ink-soft); font-size: 13px; }
+.couple-reviews-page .couple-reviews-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 20px; padding: 12px 12px 16px; }
+.couple-reviews-page .couple-reviews-star { width: 92px; height: 92px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-blush); color: var(--wine); }
+.couple-reviews-page .couple-reviews-empty h3 { font-family: var(--font-editorial); font-size: clamp(28px, 3vw, 36px); font-weight: 400; }
+.couple-reviews-page .couple-reviews-empty p, .couple-reviews-page .couple-reviews-steps p { color: var(--ink-soft); font-size: 14px; line-height: 1.7; }
+.couple-reviews-page .couple-reviews-guide { margin-top: 24px; padding: 24px; }
+.couple-reviews-page .couple-reviews-guide > h2 { border-left: 4px solid var(--wine); padding-left: 20px; font-family: var(--font-editorial); font-weight: 400; font-size: 28px; }
+.couple-reviews-page .couple-reviews-steps { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); margin-top: 32px; }
+.couple-reviews-page .couple-reviews-steps > div { text-align: center; padding: 0 18px; }
+.couple-reviews-page .couple-reviews-steps > div + div { border-left: 1px solid var(--line); }
+.couple-reviews-page .couple-reviews-steps svg { margin: 0 auto 14px; color: var(--wine); }
+.couple-reviews-page .couple-reviews-steps h3 { font-family: var(--font-editorial); font-weight: 400; font-size: 22px; margin-bottom: 8px; }
+@media (max-width: 640px) {
+ .couple-reviews-page .couple-reviews-steps { grid-template-columns: 1fr; gap: 24px; }
+ .couple-reviews-page .couple-reviews-steps > div + div { border-left: 0; border-top: 1px solid var(--line); padding-top: 24px; }
+ .couple-reviews-page .couple-reviews-card, .couple-reviews-page .couple-reviews-guide { padding: 20px; }
+}

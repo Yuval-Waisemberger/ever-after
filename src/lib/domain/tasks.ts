@@ -4,6 +4,24 @@ import { TASK_STATUS_LABELS, type TaskStatus } from "./task-status";
 export { TASK_STATUSES, TASK_STATUS_LABELS, type TaskStatus } from "./task-status";
 export type TaskPriority = "low" | "medium" | "high";
 
+export function taskCategory(category: string | null | undefined): string {
+  return category?.trim() || "Other";
+}
+
+export function compareTaskPriorityDate(a: { id: string; priority?: string | null; due_date?: string | null }, b: { id: string; priority?: string | null; due_date?: string | null }): number {
+  const rank = (value?: string | null) => {
+    const index = ["high", "medium", "low"].indexOf(value?.trim().toLowerCase() ?? "");
+    return index < 0 ? 3 : index;
+  };
+  const dateKey = (value?: string | null) => {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return "9999-99-99";
+    const date = new Date(`${value}T00:00:00Z`);
+    return Number.isFinite(date.valueOf()) && date.toISOString().slice(0, 10) === value ? value : "9999-99-99";
+  };
+  const compare = (left: string, right: string) => left < right ? -1 : left > right ? 1 : 0;
+  return rank(a.priority) - rank(b.priority) || compare(dateKey(a.due_date), dateKey(b.due_date)) || compare(a.id, b.id);
+}
+
 export type TaskSummary = {
   total: number;
   completed: number;
@@ -78,6 +96,6 @@ export function isDueWithinDays(dueDate: string | null, today: Date, days: numbe
 }
 
 export function filterTasks<T extends { status: TaskStatus; category: string | null }>(tasks: T[], status: TaskStatus | "all" | "incomplete" = "all", category = ""): T[] {
-  return tasks.filter(task => (!category || task.category === category) &&
+  return tasks.filter(task => (!category || taskCategory(task.category) === taskCategory(category)) &&
     (status === "all" || (status === "incomplete" ? task.status !== "completed" : task.status === status)));
 }

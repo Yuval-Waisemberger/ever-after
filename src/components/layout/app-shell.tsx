@@ -66,7 +66,7 @@ const coupleNavigation: NavigationItem[] = [
   },
   { label: "Budget", href: "/budget", icon: WalletCards },
   { label: "Wedding Assistant", href: "/assistant", icon: Bot },
-  { label: "My Reviews", href: "/reviews", icon: Star },
+  { label: "Our Reviews", href: "/reviews", icon: Star },
   { label: "Account & Settings", href: "/settings", icon: Settings },
 ];
 

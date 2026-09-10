@@ -145,7 +145,9 @@
 .assistant-experience .assistant-history { padding-inline: 22px; }
 .assistant-experience .assistant-history-heading { margin-inline: 0; }
 .assistant-experience .assistant-new { min-height: 46px; border-radius: 7px; border-color: #e5d7d0; background: #fbf8f5; color: #733343; font-size: 14px; }
-.assistant-experience .assistant-thread-list { gap: 8px; }
+.assistant-experience .assistant-thread-list { gap: 12px; grid-auto-rows: max-content; }
+.assistant-experience .assistant-thread-list .assistant-thread { height: auto; min-height: 44px; }
+.assistant-experience .assistant-thread-list .assistant-thread:focus-within { background: var(--surface-blush); }
 .assistant-experience .assistant-thread { padding: 14px 14px; gap: 14px; font-size: 14px; border-left-width: 3px; border-radius: 4px 9px 9px 4px; }
 .assistant-experience .assistant-thread svg { width: 19px; height: 19px; }
 .assistant-experience .assistant-thread[aria-current] { background: #f3e7e7; border-left-color: #733343; }

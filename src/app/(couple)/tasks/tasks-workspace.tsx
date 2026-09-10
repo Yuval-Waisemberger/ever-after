@@ -4,7 +4,7 @@ import { Fragment, useRef, useState, type ComponentProps, type CSSProperties } f
 import { ChevronLeft, ChevronRight, Plus, Search, X } from "lucide-react";
 import { TaskRow } from "@/components/tasks/task-row";
 import { TaskForm } from "@/components/tasks/task-form";
-import { filterTasks } from "@/lib/domain/tasks";
+import { filterTasks, taskCategory, compareTaskPriorityDate } from "@/lib/domain/tasks";
 import { TASK_STATUSES, TASK_STATUS_LABELS, type TaskStatus } from "@/lib/domain/task-status";
 import { TASK_CATEGORIES } from "@/lib/validation/task";
 import styles from "./tasks-workspace.module.css";
@@ -37,14 +37,14 @@ export function TasksWorkspace({ tasks, today, initialCategory, initialStatus, e
     setDraft(current => ({ dueDate, version: current.version + 1 }));
     dialog.current?.showModal();
   };
-  const visible = filterTasks(tasks, status, category).filter(task => `${task.title} ${task.notes ?? ""}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
+  const visible = filterTasks(tasks, status, category).filter(task => `${task.title} ${task.notes ?? ""} ${taskCategory(task.category)}`.toLocaleLowerCase().includes(search.toLocaleLowerCase()));
   const datedIncomplete = tasks.filter(task => task.due_date && task.status !== "completed").sort((a, b) => a.due_date!.localeCompare(b.due_date!));
   const nextDate = datedIncomplete.find(task => task.due_date! >= today)?.due_date ?? datedIncomplete[0]?.due_date;
   const group = (task: Task) => task.status === "completed" ? 3 : !task.due_date ? 2 : task.due_date === nextDate ? 0 : 1;
   const labels = ["Next up", "Other dated tasks", "No date yet", "Completed"];
-  const ordered = [...visible].sort((a, b) => group(a) - group(b) || (a.due_date ?? "").localeCompare(b.due_date ?? ""));
-  const selectedTasks = tasks.filter(task => task.due_date === selected);
-  const undated = tasks.filter(task => !task.due_date);
+  const ordered = [...visible].sort((a, b) => group(a) - group(b) || compareTaskPriorityDate(a, b));
+  const selectedTasks = tasks.filter(task => task.due_date === selected).sort(compareTaskPriorityDate);
+  const undated = tasks.filter(task => !task.due_date).sort(compareTaskPriorityDate);
   const changeMonth = (amount: number) => {
     const [year, number] = month.split("-").map(Number);
     setMonth(new Date(Date.UTC(year, number - 1 + amount, 1)).toISOString().slice(0, 7));
