@@ -7,6 +7,8 @@ export type WeddingForRecommendation = {
 };
 
 export type VendorForRecommendation = {
+  locationMode?: VendorLocationMode | null;
+  physicalArea?: string | null;
   serviceAreas?: string[] | null;
   minPriceMinor?: number | null;
   maxPriceMinor?: number | null;
@@ -79,13 +81,17 @@ export function calculateRecommendation(
     }
   };
 
-  if (wedding.preferredArea && (vendor.serviceAreas?.length ?? 0) > 0) {
-    const matches =
-      normalize(wedding.preferredArea) === "flexible" ||
-      includesNormalized(vendor.serviceAreas, wedding.preferredArea) ||
-      includesNormalized(vendor.serviceAreas, "flexible") ||
-      includesNormalized(vendor.serviceAreas, "All Israel");
-    add("area", matches ? 1 : 0, matches ? `Serves ${wedding.preferredArea}` : "Area mismatch");
+  const locationMode = vendor.locationMode ?? "mobile";
+  const hasLocationEvidence = locationMode === "fixed"
+    ? Boolean(vendor.physicalArea)
+    : (vendor.serviceAreas?.length ?? 0) > 0;
+  if (wedding.preferredArea && hasLocationEvidence) {
+    const flexibleWedding = normalize(wedding.preferredArea) === "flexible";
+    const matches = locationMode === "fixed"
+      ? flexibleWedding || normalize(vendor.physicalArea!) === normalize(wedding.preferredArea)
+      : flexibleWedding || includesNormalized(vendor.serviceAreas, wedding.preferredArea) || includesNormalized(vendor.serviceAreas, "flexible");
+    const locationLabel = formatVendorArea(wedding.preferredArea);
+    add("area", matches ? 1 : 0, matches ? `${locationMode === "fixed" ? "Located in" : "Serves"} ${locationLabel}` : "Area mismatch");
   }
 
   if (
@@ -137,3 +143,4 @@ export function calculateRecommendation(
       .toSorted((left, right) => right.earnedWeight - left.earnedWeight),
   };
 }
+import { formatVendorArea, type VendorLocationMode } from "@/lib/vendors/location";

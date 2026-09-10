@@ -207,6 +207,17 @@ describe("generated marketplace dataset", () => {
       expect(vendor.styles.length).toBeGreaterThanOrEqual(2);
       expect(vendor.styles.every((style) => allowedStyles.has(style))).toBe(true);
       expect(vendor.serviceAreas.every((area) => ["central_israel", "sharon", "north", "jerusalem", "south", "flexible"].includes(area))).toBe(true);
+      expect(vendor.serviceAreas.includes("flexible") ? vendor.serviceAreas : []).toHaveLength(vendor.serviceAreas.includes("flexible") ? 1 : 0);
+      const fixed = ["wedding-venues", "preparation-hotels"].includes(vendor.subcategorySlug);
+      expect(vendor.locationMode).toBe(fixed ? "fixed" : "mobile");
+      if (fixed) {
+        expect(vendor.locationCity).toBeTruthy();
+        expect(vendor.physicalArea).not.toBeNull();
+        expect(vendor.physicalArea).not.toBe("flexible");
+        expect(vendor.serviceAreas).toEqual([vendor.physicalArea]);
+      } else {
+        expect(vendor.physicalArea).toBeNull();
+      }
       if (vendor.minGuestCapacity != null) {
         expect(vendor.maxGuestCapacity).toBeGreaterThanOrEqual(vendor.minGuestCapacity);
       }
@@ -328,7 +339,8 @@ describe("generated marketplace dataset", () => {
 
   it("applies only the requested North, Terra and Golden photography corrections", () => {
     const north = vendors.find((vendor) => vendor.slug === "north-photography-workshop-15")!;
-    expect(north).toMatchObject({ id: "30000000-0000-4000-8000-000000001051", locationCity: "Central District", serviceAreas: ["central_israel", "north"], reviewCount: 1, ratingAverage: 4.75, minPriceMinor: 1132000, maxPriceMinor: 1500000 });
+    expect(north).toMatchObject({ id: "30000000-0000-4000-8000-000000001051", locationCity: null, locationMode: "mobile", physicalArea: null, serviceAreas: ["central_israel", "north"], reviewCount: 1, ratingAverage: 4.75, minPriceMinor: 1132000, maxPriceMinor: 1500000 });
+    expect(north.description).not.toMatch(/Central District|based in null|null-based/i);
     expect(north.reviews[0].id).toBe("50000000-0000-4000-8000-000000300510");
     const terra = vendors.find((vendor) => vendor.slug === "terra-photography-and-co-14")!;
     expect(terra).toMatchObject({ ratingAverage: 4, reviewCount: 8, minPriceMinor: 864000, maxPriceMinor: 1179000 });
@@ -342,6 +354,8 @@ describe("generated marketplace dataset", () => {
     expect(sql).toMatch(/^-- GENERATED FILE/);
     expect(sql).toContain("begin;");
     expect(sql).toContain("location_city");
+    expect(sql).toContain("location_mode");
+    expect(sql).toContain("physical_area");
     expect(sql.match(/on conflict/g)?.length).toBe(5);
     expect(sql.trimEnd()).toMatch(/commit;$/);
     expect(sql).not.toContain("unsplash.com");

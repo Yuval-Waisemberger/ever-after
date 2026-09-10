@@ -4,7 +4,7 @@ export function assistantVendor(overrides: Partial<AssistantVendor> = {}): Assis
   return {
     id: "vendor-id", businessName: "Vendor", source: "marketplace",
     isSaved: false, lifecycleStatus: null, agreedPriceMinor: null,
-    minPriceMinor: null, maxPriceMinor: null, services: [], styles: [], serviceAreas: [], eventTypes: [],
+    minPriceMinor: null, maxPriceMinor: null, services: [], styles: [], locationMode: "mobile", physicalArea: null, serviceAreas: [], eventTypes: [],
     minGuestCapacity: null, maxGuestCapacity: null, ratingAverage: null, ...overrides,
   };
 }

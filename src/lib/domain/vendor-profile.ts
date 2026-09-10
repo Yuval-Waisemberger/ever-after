@@ -3,6 +3,9 @@ export type VendorProfileCompletenessInput = {
   description?: string | null;
   categoryId?: string | null;
   subcategoryId?: string | null;
+  locationCity?: string | null;
+  locationMode?: "fixed" | "mobile" | null;
+  physicalArea?: string | null;
   serviceAreas?: string[] | null;
   minPriceMinor?: number | null;
   maxPriceMinor?: number | null;
@@ -17,7 +20,9 @@ export function calculateVendorProfileCompletion(profile: VendorProfileCompleten
     { label: "Add your business name", complete: Boolean(profile.businessName?.trim()) },
     { label: "Write a description", complete: Boolean(profile.description?.trim()) },
     { label: "Choose a category and subcategory", complete: Boolean(profile.categoryId && profile.subcategoryId) },
-    { label: "Add service areas", complete: Boolean(profile.serviceAreas?.length) },
+    { label: "Add location details", complete: profile.locationMode === "fixed"
+      ? Boolean(profile.locationCity?.trim() && profile.physicalArea)
+      : Boolean(profile.serviceAreas?.length) },
     { label: "Add a price range", complete: profile.minPriceMinor != null && profile.maxPriceMinor != null },
     { label: "List your services", complete: Boolean(profile.services?.length) },
     { label: "Add contact details", complete: Boolean(profile.phone || profile.email) },

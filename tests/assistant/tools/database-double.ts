@@ -12,7 +12,7 @@ export function wedding(overrides: Row = {}): Row {
   return { id: weddingId, owner_user_id: owner, wedding_date: "2026-12-01", guest_count: 250, preferred_area: "central_israel", event_type: "evening", styles: ["Romantic"], priorities: ["Photography"], total_budget_minor: 18000000, setup_status: "completed", venue_status: "booked", venue_name: "Our Venue", booked_categories: ["Venue"], partner_one_phone: "PRIVATE_SENTINEL", second_email: "PRIVATE_SENTINEL", avatar_storage_path: "PRIVATE_SENTINEL", ...overrides };
 }
 export function vendor(overrides: Row = {}): Row {
-  return { id: vendorId, business_name: "Original Studio", is_public: true, category_id: uuid(200), subcategory_id: uuid(201), location_city: "Tel Aviv", service_areas: ["central_israel"], min_price_minor: 100000, max_price_minor: 200000, services: ["Stills"], styles: ["Romantic"], event_types: ["evening"], min_guest_capacity: 100, max_guest_capacity: 500, friday_available: true, phone: "PRIVATE_SENTINEL", email: "PRIVATE_SENTINEL", website_url: "PRIVATE_SENTINEL", description: "PRIVATE_SENTINEL", ...overrides };
+  return { id: vendorId, business_name: "Original Studio", is_public: true, category_id: uuid(200), subcategory_id: uuid(201), location_city: "Tel Aviv", location_mode: "mobile", physical_area: null, service_areas: ["central_israel"], min_price_minor: 100000, max_price_minor: 200000, services: ["Stills"], styles: ["Romantic"], event_types: ["evening"], min_guest_capacity: 100, max_guest_capacity: 500, friday_available: true, phone: "PRIVATE_SENTINEL", email: "PRIVATE_SENTINEL", website_url: "PRIVATE_SENTINEL", description: "PRIVATE_SENTINEL", ...overrides };
 }
 export function task(value: number, overrides: Row = {}): Row {
   return { id: uuid(value), wedding_id: weddingId, title: `Task ${value}`, category: "Photography", due_date: "2026-09-08", status: "open", priority: "medium", notes: "PRIVATE_SENTINEL", ...overrides };
@@ -95,6 +95,17 @@ export function database() {
       ilike(column: string, value: string) { return filter("ilike", column, value, (actual) => typeof actual === "string" && actual.toLowerCase() === value.replace(/\\(.)/g, "$1").toLowerCase()); },
       or(expression: string) {
         call.operations.push(["or", expression]);
+        if (expression.includes("location_mode.eq.fixed") && expression.includes("service_areas.ov.")) {
+          const fixedArea = expression.match(/physical_area\.eq\.([^,)]+)/)?.[1];
+          const mobileAreas = expression.match(/service_areas\.ov\.\{([^}]+)\}/)?.[1].split(",") ?? [];
+          filters.push((row) => {
+            const serviceAreas = row.service_areas;
+            return row.location_mode === "fixed"
+              ? row.physical_area === fixedArea
+              : row.location_mode === "mobile" && Array.isArray(serviceAreas) && mobileAreas.some(area => serviceAreas.includes(area));
+          });
+          return chain;
+        }
         const terms = [...expression.matchAll(/(?:^|,)(business_name|location_city)\.ilike\."((?:\\.|[^"])*)"/g)];
         filters.push((row) => terms.some((term) => String(row[term[1]] ?? "").toLowerCase().includes(term[2].slice(1, -1).replace(/\\(.)/g, "$1").toLowerCase())));
         return chain;

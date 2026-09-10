@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { paymentSchema } from "@/lib/validation/budget";
 import { taskSchema } from "@/lib/validation/task";
 import { reviewSchema } from "@/lib/validation/vendor";
-import { vendorProfileSchema } from "@/lib/validation/vendor-profile";
+import { validateVendorLocationForMode, vendorProfileSchema } from "@/lib/validation/vendor-profile";
 import { weddingSetupSchema } from "@/lib/validation/wedding";
 
 const profileBase = {
@@ -10,6 +10,7 @@ const profileBase = {
   contactName: null,
   description: null,
   locationCity: null,
+  physicalArea: null,
   categoryId: null,
   subcategoryId: null,
   serviceAreas: [],
@@ -97,6 +98,21 @@ describe("server validation boundaries", () => {
       minGuestCapacity: "0",
     });
     expect(result.success).toBe(false);
+  });
+
+  it("deduplicates mobile areas and rejects flexible mixed with a specific area", () => {
+    const deduplicated = vendorProfileSchema.parse({ ...profileBase, serviceAreas: ["north", "north", "south"] });
+    expect(deduplicated.serviceAreas).toEqual(["north", "south"]);
+    expect(vendorProfileSchema.safeParse({ ...profileBase, serviceAreas: ["flexible", "north"] }).success).toBe(false);
+  });
+
+  it("enforces fixed publication fields and rejects inactive forged location fields", () => {
+    const fixed = vendorProfileSchema.parse({ ...profileBase, isPublic: true });
+    expect(validateVendorLocationForMode(fixed, "fixed")).toMatchObject({ locationCity: expect.any(Array), physicalArea: expect.any(Array) });
+    const forgedFixed = vendorProfileSchema.parse({ ...profileBase, serviceAreas: ["north"] });
+    expect(validateVendorLocationForMode(forgedFixed, "fixed").serviceAreas).toBeDefined();
+    const forgedMobile = vendorProfileSchema.parse({ ...profileBase, physicalArea: "north" });
+    expect(validateVendorLocationForMode(forgedMobile, "mobile").physicalArea).toBeDefined();
   });
 
   it("rejects negative payment amounts", () => {

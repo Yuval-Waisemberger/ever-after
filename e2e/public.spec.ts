@@ -257,7 +257,8 @@ test("North, Terra and Golden photography feedback appears on marketplace cards 
   await page.goto(`/vendors?search=${encodeURIComponent("North Photography Workshop")}`);
   const north = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: "North Photography Workshop", exact: true }) });
   await expect(north.getByText("4.8", { exact: true })).toBeVisible();
-  await expect(north.getByText("Central District", { exact: true })).toBeVisible();
+  await expect(north.getByText("Central District", { exact: true })).toHaveCount(0);
+  await expect(north.getByText(/Serves: Central Israel · North/)).toBeVisible();
   await page.goto(`/vendors?search=${encodeURIComponent("Terra Photography & Co.")}`);
   const terra = page.locator("article.vendor-card").filter({ has: page.getByRole("heading", { name: "Terra Photography & Co.", exact: true }) });
   await expect(terra.getByText("4.0", { exact: true })).toBeVisible();

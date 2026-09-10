@@ -9,6 +9,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Tel Aviv",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -107,6 +109,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Jaffa",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -220,6 +224,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Jaffa, Tel Aviv",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -348,6 +354,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Holon",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -482,6 +490,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Kibbutz Ga'ash",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -631,6 +641,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Rishon LeZion",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -735,6 +747,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Rehovot",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -797,6 +811,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Herzliya",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -922,6 +938,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Caesarea",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -1062,6 +1080,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Kfar Saba",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -1208,6 +1228,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Ra'anana",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -1285,6 +1307,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Hadera",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -1401,6 +1425,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Pardes Hanna",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -1655,6 +1681,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Haifa",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -1720,6 +1748,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Acre",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -1872,6 +1902,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -1970,6 +2002,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Rosh Pina",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -2022,6 +2056,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Tiberias",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -2150,6 +2186,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -2284,6 +2322,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Jerusalem",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -2433,6 +2473,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Ein Kerem",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -2525,6 +2567,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -2599,6 +2643,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Ein Hemed",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -2724,6 +2770,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Shoresh",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -2864,6 +2912,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Masada",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -3010,6 +3060,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Ashdod",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -3243,6 +3295,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Ashkelon",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -3359,6 +3413,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -3421,6 +3477,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Eilat",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -3558,6 +3616,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Rishon LeZion",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -3710,6 +3770,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Tel Aviv",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -3808,6 +3870,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Jaffa",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -3921,6 +3985,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Tel Aviv",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -4001,6 +4067,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Holon",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -4050,6 +4118,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Hadera",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -4115,6 +4185,8 @@
     "subcategorySlug": "wedding-venues",
     "subcategoryName": "Wedding Venues & Gardens",
     "locationCity": "Kibbutz Hulda",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -4219,6 +4291,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -4328,6 +4402,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -4452,6 +4528,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon"
@@ -4721,6 +4799,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north",
@@ -4867,6 +4947,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -4966,6 +5048,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -5032,6 +5116,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -5153,6 +5239,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -5228,6 +5316,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -5377,6 +5467,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -5473,6 +5565,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -5584,6 +5678,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -5710,6 +5806,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -5771,6 +5869,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon",
@@ -5913,12 +6013,14 @@
     "id": "30000000-0000-4000-8000-000000001051",
     "slug": "north-photography-workshop-15",
     "businessName": "North Photography Workshop",
-    "description": "North Photography Workshop pairs second photographer with family portraits for urban celebrations. Based in Central District, the team serves central israel and north and offers an extended package with documentary coverage.",
+    "description": "North Photography Workshop pairs second photographer with family portraits for urban celebrations. The team serves central israel and north and offers an extended package with documentary coverage.",
     "categorySlug": "photography-content",
     "categoryName": "Photography & Content",
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
-    "locationCity": "Central District",
+    "locationCity": null,
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -5984,6 +6086,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -6226,6 +6330,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -6349,6 +6455,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -6487,6 +6595,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -6560,6 +6670,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -6622,6 +6734,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -6735,6 +6849,8 @@
     "subcategorySlug": "wedding-photographers",
     "subcategoryName": "Wedding Photographers",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -6857,6 +6973,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -6990,6 +7108,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -7138,6 +7258,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -7239,6 +7361,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north",
@@ -7349,6 +7473,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -7412,6 +7538,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -7550,6 +7678,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -7767,6 +7897,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -7842,6 +7974,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -7955,6 +8089,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -8002,6 +8138,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -8137,6 +8275,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -8202,6 +8342,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -8299,6 +8441,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -8410,6 +8554,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -8535,6 +8681,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -8669,6 +8817,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -8816,6 +8966,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -8918,6 +9070,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -8991,6 +9145,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -9245,6 +9401,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -9382,6 +9540,8 @@
     "subcategorySlug": "videographers",
     "subcategoryName": "Videographers",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -9528,6 +9688,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -9625,6 +9787,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -9736,6 +9900,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -9861,6 +10027,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -9922,6 +10090,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -9972,6 +10142,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -10073,6 +10245,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -10182,6 +10356,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -10257,6 +10433,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -10394,6 +10572,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -10538,6 +10718,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -10769,6 +10951,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -10883,6 +11067,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -11004,6 +11190,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -11139,6 +11327,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -11288,6 +11478,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -11386,6 +11578,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -11497,6 +11691,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -11563,6 +11759,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -11636,6 +11834,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -11782,6 +11982,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -11883,6 +12085,8 @@
     "subcategorySlug": "magnet-photographers",
     "subcategoryName": "Magnet Photographers",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -11932,6 +12136,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -12053,6 +12259,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -12321,6 +12529,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -12386,6 +12596,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north",
@@ -12484,6 +12696,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -12595,6 +12809,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem",
@@ -12721,6 +12937,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -12854,6 +13072,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -12929,6 +13149,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -13030,6 +13252,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -13090,6 +13314,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -13213,6 +13439,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -13351,6 +13579,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -13496,6 +13726,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon",
@@ -13596,6 +13828,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -13841,6 +14075,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -13963,6 +14199,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem"
@@ -14013,6 +14251,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -14163,6 +14403,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -14236,6 +14478,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -14346,6 +14590,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -14471,6 +14717,8 @@
     "subcategorySlug": "social-content",
     "subcategoryName": "Social Content",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -14605,6 +14853,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -14752,6 +15002,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -14818,6 +15070,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -14935,6 +15189,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -15058,6 +15314,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -15196,6 +15454,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -15421,6 +15681,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -15520,6 +15782,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -15597,6 +15861,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -15666,6 +15932,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -15800,6 +16068,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -15950,6 +16220,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -16006,6 +16278,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -16117,6 +16391,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -16243,6 +16519,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -16384,6 +16662,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -16447,6 +16727,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -16549,6 +16831,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -16667,6 +16951,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -16921,6 +17207,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -17058,6 +17346,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -17211,6 +17501,8 @@
     "subcategorySlug": "djs",
     "subcategoryName": "DJs",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -17311,6 +17603,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -17374,6 +17668,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -17501,6 +17797,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -17642,6 +17940,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north",
@@ -17790,6 +18090,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -17892,6 +18194,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -18010,6 +18314,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -18060,6 +18366,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -18138,6 +18446,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -18291,6 +18601,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -18521,6 +18833,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -18635,6 +18949,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -18765,6 +19081,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -18900,6 +19218,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon",
@@ -19051,6 +19371,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -19120,6 +19442,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -19232,6 +19556,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -19358,6 +19684,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -19500,6 +19828,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -19575,6 +19905,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -19676,6 +20008,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -19793,6 +20127,8 @@
     "subcategorySlug": "attractions",
     "subcategoryName": "Attractions",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem",
@@ -19857,6 +20193,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -20124,6 +20462,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -20177,6 +20517,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -20282,6 +20624,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north",
@@ -20394,6 +20738,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -20520,6 +20866,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem",
@@ -20662,6 +21010,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -20725,6 +21075,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -20803,6 +21155,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon"
@@ -20920,6 +21274,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -21042,6 +21398,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem"
@@ -21180,6 +21538,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south",
@@ -21334,6 +21694,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -21433,6 +21795,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon",
@@ -21680,6 +22044,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -21809,6 +22175,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -21945,6 +22313,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem"
@@ -22095,6 +22465,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -22201,6 +22573,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -22251,6 +22625,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -22376,6 +22752,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -22445,6 +22823,8 @@
     "subcategorySlug": "photo-booths",
     "subcategoryName": "Photo Booths",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem",
@@ -22593,6 +22973,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -22690,6 +23072,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -22801,6 +23185,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -22926,6 +23312,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -23059,6 +23447,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -23278,6 +23668,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -23343,6 +23735,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -23452,6 +23846,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -23526,6 +23922,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -23663,6 +24061,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -23807,6 +24207,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -23906,6 +24308,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -24019,6 +24423,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -24080,6 +24486,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -24130,6 +24538,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -24279,6 +24689,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -24376,6 +24788,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -24487,6 +24901,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel",
@@ -24745,6 +25161,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -24817,6 +25235,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -24879,6 +25299,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -24980,6 +25402,8 @@
     "subcategorySlug": "wedding-dresses",
     "subcategoryName": "Wedding Dresses",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem",
@@ -25090,6 +25514,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -25211,6 +25637,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -25347,6 +25775,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -25496,6 +25926,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north",
@@ -25594,6 +26026,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -25657,6 +26091,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -25783,6 +26219,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -25916,6 +26354,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -25991,6 +26431,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon"
@@ -26043,6 +26485,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -26151,6 +26595,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -26274,6 +26720,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -26340,6 +26788,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -26485,6 +26935,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon",
@@ -26585,6 +27037,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -26698,6 +27152,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -26819,6 +27275,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -26954,6 +27412,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -27104,6 +27564,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -27177,6 +27639,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -27287,6 +27751,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -27412,6 +27878,8 @@
     "subcategorySlug": "suits",
     "subcategoryName": "Suits",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -27678,6 +28146,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -27823,6 +28293,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -27923,6 +28395,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon"
@@ -28036,6 +28510,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north",
@@ -28085,6 +28561,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -28220,6 +28698,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -28370,6 +28850,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -28467,6 +28949,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -28542,6 +29026,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -28667,6 +29153,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -28799,6 +29287,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem"
@@ -28862,6 +29352,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south",
@@ -28964,6 +29456,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -29205,6 +29699,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon",
@@ -29329,6 +29825,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -29466,6 +29964,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -29612,6 +30112,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -29711,6 +30213,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel",
@@ -29777,6 +30281,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -29850,6 +30356,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -29984,6 +30492,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -30036,6 +30546,8 @@
     "subcategorySlug": "makeup-hair",
     "subcategoryName": "Makeup & Hair",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem",
@@ -30134,6 +30646,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -30243,6 +30757,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -30366,6 +30882,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -30431,6 +30949,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -30648,6 +31168,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -30747,6 +31269,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -30860,6 +31384,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -30981,6 +31507,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -31055,6 +31583,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -31204,6 +31734,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -31264,6 +31796,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -31375,6 +31909,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -31500,6 +32036,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -31633,6 +32171,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -31780,6 +32320,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -31881,6 +32423,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -31929,6 +32473,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -32184,6 +32730,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -32322,6 +32870,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -32394,6 +32944,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -32492,6 +33044,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -32605,6 +33159,8 @@
     "subcategorySlug": "event-design",
     "subcategoryName": "Event & Chuppah Design",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -32727,6 +33283,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -32860,6 +33418,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -32924,6 +33484,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon"
@@ -33025,6 +33587,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north",
@@ -33135,6 +33699,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -33258,6 +33824,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -33396,6 +33964,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -33541,6 +34111,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -33772,6 +34344,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -33837,6 +34411,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -33957,6 +34533,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -34007,6 +34585,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -34157,6 +34737,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -34254,6 +34836,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon",
@@ -34366,6 +34950,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -34491,6 +35077,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -34553,6 +35141,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -34700,6 +35290,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -34802,6 +35394,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -34875,6 +35469,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -34997,6 +35593,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -35266,6 +35864,8 @@
     "subcategorySlug": "flowers",
     "subcategoryName": "Flowers",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -35412,6 +36012,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -35473,6 +36075,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -35585,6 +36189,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -35710,6 +36316,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north",
@@ -35844,6 +36452,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -35991,6 +36601,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -36044,6 +36656,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -36153,6 +36767,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -36228,6 +36844,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -36365,6 +36983,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -36509,6 +37129,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -36608,6 +37230,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -36853,6 +37477,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -36974,6 +37600,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -37109,6 +37737,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -37174,6 +37804,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -37272,6 +37904,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -37383,6 +38017,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -37509,6 +38145,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -37582,6 +38220,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -37728,6 +38368,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -37829,6 +38471,8 @@
     "subcategorySlug": "invitations",
     "subcategoryName": "Invitations",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -37891,6 +38535,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -37939,6 +38585,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -38074,6 +38722,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -38295,6 +38945,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -38392,6 +39044,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -38503,6 +39157,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -38628,6 +39284,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -38689,6 +39347,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -38764,6 +39424,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -38865,6 +39527,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -38973,6 +39637,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -39096,6 +39762,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -39234,6 +39902,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -39379,6 +40049,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -39442,6 +40114,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -39555,6 +40229,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -39809,6 +40485,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -39944,6 +40622,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -39997,6 +40677,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -40070,6 +40752,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -40180,6 +40864,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -40245,6 +40931,8 @@
     "subcategorySlug": "guest-gifts",
     "subcategoryName": "Guest Gifts",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -40379,6 +41067,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south"
@@ -40526,6 +41216,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -40629,6 +41321,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -40746,6 +41440,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north",
@@ -40870,6 +41566,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -41008,6 +41706,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem",
@@ -41078,6 +41778,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -41309,6 +42011,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -41387,6 +42091,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon"
@@ -41516,6 +42222,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -41650,6 +42358,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -41800,6 +42510,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -41906,6 +42618,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -41956,6 +42670,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon",
@@ -42083,6 +42799,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -42224,6 +42942,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -42372,6 +43092,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem"
@@ -42474,6 +43196,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -42592,6 +43316,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -42667,6 +43393,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -42936,6 +43664,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -43089,6 +43819,8 @@
     "subcategorySlug": "transportation",
     "subcategoryName": "Transportation",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -43189,6 +43921,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -43298,6 +44032,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -43421,6 +44157,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -43558,6 +44296,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -43703,6 +44443,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -43766,6 +44508,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -43879,6 +44623,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -44000,6 +44746,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -44049,6 +44797,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -44198,6 +44948,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -44294,6 +45046,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -44537,6 +45291,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -44602,6 +45358,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -44735,6 +45493,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -44882,6 +45642,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -44983,6 +45745,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -45092,6 +45856,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -45215,6 +45981,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -45353,6 +46121,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -45425,6 +46195,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -45523,6 +46295,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -45636,6 +46410,8 @@
     "subcategorySlug": "officiants",
     "subcategoryName": "Rabbis & Officiants",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -45758,6 +46534,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -45893,6 +46671,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -46116,6 +46896,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -46172,6 +46954,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north",
@@ -46236,6 +47020,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -46362,6 +47148,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem",
@@ -46504,6 +47292,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -46651,6 +47441,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -46729,6 +47521,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -46846,6 +47640,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -46968,6 +47764,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -47034,6 +47832,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -47188,6 +47988,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -47287,6 +48089,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon",
@@ -47402,6 +48206,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -47663,6 +48469,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south",
@@ -47799,6 +48607,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -47949,6 +48759,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -48019,6 +48831,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -48094,6 +48908,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "flexible"
     ],
@@ -48146,6 +48962,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -48287,6 +49105,8 @@
     "subcategorySlug": "event-managers",
     "subcategoryName": "Event Managers",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem",
@@ -48435,6 +49255,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Rosh Pina",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -48533,6 +49355,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Beersheba",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -48646,6 +49470,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -48714,6 +49540,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Tel Aviv",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -48848,6 +49676,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Holon",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -48997,6 +49827,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Herzliya",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -49233,6 +50065,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Rosh Pina",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -49343,6 +50177,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -49420,6 +50256,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -49560,6 +50398,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Petah Tikva",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -49622,6 +50462,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Ra'anana",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -49723,6 +50565,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Haifa",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -49839,6 +50683,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -49961,6 +50807,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Jerusalem",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -50098,6 +50946,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Rishon LeZion",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -50153,6 +51003,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Jaffa",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -50251,6 +51103,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Ra'anana",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -50316,6 +51170,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Haifa",
+    "locationMode": "fixed",
+    "physicalArea": "north",
     "serviceAreas": [
       "north"
     ],
@@ -50444,6 +51300,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Jerusalem",
+    "locationMode": "fixed",
+    "physicalArea": "jerusalem",
     "serviceAreas": [
       "jerusalem"
     ],
@@ -50710,6 +51568,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Beersheba",
+    "locationMode": "fixed",
+    "physicalArea": "south",
     "serviceAreas": [
       "south"
     ],
@@ -50859,6 +51719,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Ramat Gan",
+    "locationMode": "fixed",
+    "physicalArea": "central_israel",
     "serviceAreas": [
       "central_israel"
     ],
@@ -50963,6 +51825,8 @@
     "subcategorySlug": "preparation-hotels",
     "subcategoryName": "Hotels & Preparation Locations",
     "locationCity": "Herzliya",
+    "locationMode": "fixed",
+    "physicalArea": "sharon",
     "serviceAreas": [
       "sharon"
     ],
@@ -51073,6 +51937,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -51194,6 +52060,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -51257,6 +52125,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -51406,6 +52276,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -51503,6 +52375,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -51614,6 +52488,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -51739,6 +52615,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -51872,6 +52750,8 @@
     "subcategorySlug": "wedding-cakes",
     "subcategoryName": "Wedding Cakes",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -51946,6 +52826,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon"
@@ -52007,6 +52889,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north",
@@ -52058,6 +52942,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -52183,6 +53069,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Ramat Gan",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -52317,6 +53205,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -52464,6 +53354,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon",
@@ -52566,6 +53458,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -52675,6 +53569,8 @@
     "subcategorySlug": "dessert-tables",
     "subcategoryName": "Dessert Tables",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -52738,6 +53634,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem"
@@ -52871,6 +53769,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Ashkelon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel",
@@ -53019,6 +53919,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel"
@@ -53096,6 +53998,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -53205,6 +54109,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Rehovot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north"
@@ -53328,6 +54234,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Kfar Saba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem",
@@ -53466,6 +54374,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Kiryat Tiv'on",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "south"
@@ -53683,6 +54593,8 @@
     "subcategorySlug": "pastry-patisserie",
     "subcategoryName": "Pastry & Patisserie",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -53783,6 +54695,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -53892,6 +54806,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -54015,6 +54931,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Ashdod",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -54067,6 +54985,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -54212,6 +55132,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -54311,6 +55233,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel"
     ],
@@ -54387,6 +55311,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Netanya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -54508,6 +55434,8 @@
     "subcategorySlug": "custom-sweets",
     "subcategoryName": "Custom Sweets & Confectionery",
     "locationCity": "Tiberias",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -54643,6 +55571,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Holon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -54788,6 +55718,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "south",
@@ -54888,6 +55820,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -55001,6 +55935,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Beersheba",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "sharon",
@@ -55255,6 +56191,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "north"
@@ -55318,6 +56256,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -55468,6 +56408,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "jerusalem"
@@ -55565,6 +56507,8 @@
     "subcategorySlug": "dance-floor-accessories",
     "subcategoryName": "Dance Floor Accessories",
     "locationCity": "Herzliya",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel",
@@ -55677,6 +56621,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -55750,6 +56696,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Tel Aviv",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -55885,6 +56833,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Pardes Hanna",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "north"
@@ -56034,6 +56984,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Zichron Ya'akov",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "jerusalem",
@@ -56083,6 +57035,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Sderot",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -56194,6 +57148,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Beit Shemesh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "central_israel",
@@ -56320,6 +57276,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "sharon"
@@ -56453,6 +57411,8 @@
     "subcategorySlug": "glow-accessories",
     "subcategoryName": "Glow & Light-Up Accessories",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "north",
@@ -56601,6 +57561,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Ein Kerem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -56830,6 +57792,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "jerusalem"
@@ -56941,6 +57905,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Petah Tikva",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south"
@@ -57006,6 +57972,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Hadera",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "central_israel"
@@ -57079,6 +58047,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Acre",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "sharon"
@@ -57226,6 +58196,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Eilat",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north",
@@ -57328,6 +58300,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Abu Ghosh",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "south"
@@ -57437,6 +58411,8 @@
     "subcategorySlug": "guest-comfort-accessories",
     "subcategoryName": "Guest Comfort Accessories",
     "locationCity": "Rishon LeZion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -57561,6 +58537,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Rosh Pina",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel"
@@ -57694,6 +58672,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Mevaseret Zion",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon",
@@ -57758,6 +58738,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "north"
@@ -57859,6 +58841,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Jaffa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "central_israel",
       "south",
@@ -57969,6 +58953,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Ra'anana",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "sharon",
       "jerusalem"
@@ -58019,6 +59005,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Haifa",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "north",
       "central_israel",
@@ -58289,6 +59277,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Mitzpe Ramon",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "south",
       "central_israel"
@@ -58362,6 +59352,8 @@
     "subcategorySlug": "party-props-giveaways",
     "subcategoryName": "Party Props & Giveaways",
     "locationCity": "Jerusalem",
+    "locationMode": "mobile",
+    "physicalArea": null,
     "serviceAreas": [
       "jerusalem",
       "sharon",

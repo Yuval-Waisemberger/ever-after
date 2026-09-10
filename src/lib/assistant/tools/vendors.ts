@@ -7,14 +7,14 @@ import { readBudget, readWedding } from "./planning";
 
 const vendorRow = z.object({
   id: c.id, business_name: c.vendorFacts.shape.businessName, vendor_categories: c.taxonomy, vendor_subcategories: c.taxonomy,
-  location_city: c.vendorFacts.shape.locationCity, service_areas: c.vendorFacts.shape.serviceAreas,
+  location_city: c.vendorFacts.shape.locationCity, location_mode: c.locationMode, physical_area: c.area.nullable(), service_areas: c.vendorFacts.shape.serviceAreas,
   min_price_minor: c.dbMoney.nullable(), max_price_minor: c.dbMoney.nullable(), services: c.vendorFacts.shape.services,
   styles: c.vendorFacts.shape.styles, event_types: c.vendorFacts.shape.eventTypes, min_guest_capacity: c.vendorFacts.shape.minGuestCapacity,
   max_guest_capacity: c.vendorFacts.shape.maxGuestCapacity, friday_available: z.boolean().nullable(),
 });
 function vendorColumns(category?: string, subcategory?: string) {
   // Inner embeds are needed for category filters to filter parent vendors as well.
-  return `id, business_name, location_city, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, friday_available, vendor_categories${category ? "!inner" : ""}(slug, name), vendor_subcategories${subcategory ? "!inner" : ""}(slug, name)`;
+  return `id, business_name, location_city, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, friday_available, vendor_categories${category ? "!inner" : ""}(slug, name), vendor_subcategories${subcategory ? "!inner" : ""}(slug, name)`;
 }
 const rating = z.number().min(1).max(5);
 const ratingRow = z.object({ vendor_id: c.id, professionalism: rating, punctuality: rating, service_attitude: rating, value_for_money: rating });
@@ -37,7 +37,7 @@ async function vendorValues(context: ToolContext, found: z.output<typeof vendorR
   const ratings = await publicRatings(context, found.map((vendor) => vendor.id));
   return found.map((row) => c.vendorFacts.parse({
     id: row.id, businessName: row.business_name, category: row.vendor_categories, subcategory: row.vendor_subcategories,
-    locationCity: row.location_city, serviceAreas: row.service_areas, minPriceMinor: row.min_price_minor, maxPriceMinor: row.max_price_minor,
+    locationCity: row.location_city, locationMode: row.location_mode, physicalArea: row.physical_area, serviceAreas: row.service_areas, minPriceMinor: row.min_price_minor, maxPriceMinor: row.max_price_minor,
     services: row.services, styles: row.styles, eventTypes: row.event_types, minGuestCapacity: row.min_guest_capacity,
     maxGuestCapacity: row.max_guest_capacity, fridayAvailable: row.friday_available,
     ratingAverage: ratings.get(row.id)?.ratingAverage ?? null, reviewCount: ratings.get(row.id)?.reviewCount ?? 0,
@@ -60,7 +60,7 @@ export const searchMarketplaceVendors = defineReadTool("search_marketplace_vendo
     if (input.category) query = query.eq("vendor_categories.slug", input.category);
     if (input.subcategory) query = query.eq("vendor_subcategories.slug", input.subcategory);
     if (input.city) query = query.ilike("location_city", escapedPattern(input.city));
-    if (input.area && input.area !== "flexible") query = query.overlaps("service_areas", [input.area, "flexible"]);
+    if (input.area) query = query.or(`and(location_mode.eq.fixed,physical_area.eq.${input.area}),and(location_mode.eq.mobile,service_areas.ov.{${input.area},flexible})`);
     if (input.minPriceMinor != null) query = query.gte("max_price_minor", input.minPriceMinor);
     if (input.maxPriceMinor != null) query = query.lte("min_price_minor", input.maxPriceMinor);
     if (input.style) query = query.contains("styles", [input.style]);

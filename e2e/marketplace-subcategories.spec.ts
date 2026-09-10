@@ -82,6 +82,38 @@ test("subcategory composes with area, service, search and price", async ({ page 
   await expectListing(page, 1, "Wedding Photographers");
 });
 
+test("area filtering uses physical area for fixed Vendors and service coverage for mobile Vendors", async ({ page }) => {
+  for (const area of ["central_israel", "north"]) {
+    const fixed = vendors.filter(v => v.subcategorySlug === "wedding-venues" && v.physicalArea === area);
+    await page.goto(`/vendors?subcategory=wedding-venues&area=${area}`);
+    await expectListing(page, fixed.length, "Wedding Venues & Gardens");
+
+    const mixed = vendors.filter(v => v.locationMode === "fixed"
+      ? v.physicalArea === area
+      : v.serviceAreas.includes(area) || v.serviceAreas.includes("flexible"));
+    await page.goto(`/vendors?area=${area}`);
+    await expectListing(page, mixed.length);
+  }
+});
+
+test("invalid area parameters are ignored and location rows remain responsive", async ({ page }) => {
+  await page.goto("/vendors?area=not-a-region");
+  await expectListing(page, vendors.length);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  const mobile = vendors.find(v => v.locationMode === "mobile" && v.locationCity && v.serviceAreas.length > 1)!;
+  await page.goto(`/vendors?search=${encodeURIComponent(mobile.businessName)}`);
+  const mobileCard = page.locator(".vendor-card");
+  await expect(mobileCard.getByText(`${mobile.locationCity}, Israel`, { exact: true })).toBeVisible();
+  await expect(mobileCard.getByText(/Serves:/)).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+  const fixed = vendors.find(v => v.locationMode === "fixed")!;
+  await page.goto(`/vendors?search=${encodeURIComponent(fixed.businessName)}`);
+  const fixedCard = page.locator(".vendor-card").filter({ has: page.getByRole("heading", { name: fixed.businessName, exact: true }) });
+  await expect(fixedCard.getByText("Serves:")).toHaveCount(0);
+});
+
 test("unknown and incompatible subcategories do not leak other vendors", async ({ page }) => {
   for (const query of ["subcategory=not-a-subcategory", "category=venues&subcategory=wedding-photographers"]) {
     await page.goto(`/vendors?${query}`);

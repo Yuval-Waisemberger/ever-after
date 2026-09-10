@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { calculateVendorProfileCompletion } from "@/lib/domain/vendor-profile";
 import { requireRole } from "@/lib/auth/user";
+import type { VendorArea, VendorLocationMode } from "@/lib/vendors/location";
 
 export type VendorReviewRecord = {
   id: string;
@@ -31,6 +32,8 @@ export type OwnedVendorProfile = {
   contact_name: string | null;
   description: string | null;
   location_city: string | null;
+  location_mode: VendorLocationMode;
+  physical_area: VendorArea | null;
   category_id: string | null;
   subcategory_id: string | null;
   service_areas: string[];
@@ -84,6 +87,9 @@ export async function getVendorDashboard() {
     description: profile.description,
     categoryId: profile.category_id,
     subcategoryId: profile.subcategory_id,
+    locationCity: profile.location_city,
+    locationMode: profile.location_mode,
+    physicalArea: profile.physical_area,
     serviceAreas: profile.service_areas,
     minPriceMinor: profile.min_price_minor == null ? null : Number(profile.min_price_minor),
     maxPriceMinor: profile.max_price_minor == null ? null : Number(profile.max_price_minor),

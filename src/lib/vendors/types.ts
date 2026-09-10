@@ -1,5 +1,6 @@
 import type { RecommendationResult } from "@/lib/domain/recommendation";
 import type { VendorLifecycleStatus } from "@/lib/domain/couple-vendors";
+import type { VendorArea, VendorLocationMode } from "@/lib/vendors/location";
 
 export type VendorReview = {
   id: string;
@@ -23,7 +24,9 @@ export type MarketplaceVendor = {
   subcategorySlug: string | null;
   subcategoryName: string | null;
   locationCity: string | null;
-  serviceAreas: string[];
+  locationMode: VendorLocationMode;
+  physicalArea: VendorArea | null;
+  serviceAreas: VendorArea[];
   minPriceMinor: number | null;
   maxPriceMinor: number | null;
   services: string[];
@@ -52,7 +55,7 @@ export type VendorFilters = {
   search?: string;
   category?: string;
   subcategory?: string;
-  area?: string;
+  area?: VendorArea;
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;

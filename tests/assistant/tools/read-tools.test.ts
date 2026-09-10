@@ -233,7 +233,8 @@ describe("Marketplace, Couple vendors and comparison", () => {
     expect(result.vendors.map((v) => v.id)).toEqual([vendorId]); expect(result.vendors[0]).toMatchObject({ ratingAverage: 5, reviewCount: 1 }); expect(JSON.stringify(result)).not.toContain("PRIVATE_SENTINEL");
     const call = db.state.calls.find((call) => call.table === "vendor_profiles")!;
     expect(call.selection).toContain("vendor_categories!inner"); expect(call.selection).toContain("vendor_subcategories!inner");
-    for (const method of ["eq", "ilike", "overlaps", "gte", "lte", "contains", "range"]) expect(call.operations.some((op) => op[0] === method)).toBe(true);
+    for (const method of ["eq", "ilike", "or", "gte", "lte", "contains", "range"]) expect(call.operations.some((op) => op[0] === method)).toBe(true);
+    expect(call.operations.find((op) => op[0] === "or")?.[1]).toContain("physical_area.eq.central_israel");
   });
   it("never returns or selects a full 496-vendor context", async () => {
     db.state.tables.vendor_profiles = Array.from({ length: 496 }, (_, i) => vendor({ id: uuid(1000 + i), business_name: `Studio ${i}` }));
@@ -351,8 +352,13 @@ describe("Marketplace, Couple vendors and comparison", () => {
     expect(spy).toHaveBeenCalledTimes(2);
     expect(result.vendors[0].recommendation).toEqual(scoring.calculateRecommendation(result.matchContext, result.vendors[0].vendor));
     expect(result.vendors[0].recommendation.score).toBe(100); expect(result.vendors[0].scoreStatus).toBe("calculated");
-    expect(result.vendors[0].recommendation.reasons).toContainEqual(expect.objectContaining({ dimension: "area", label: "Serves central_israel" }));
+    expect(result.vendors[0].recommendation.reasons).toContainEqual(expect.objectContaining({ dimension: "area", label: "Serves Central Israel" }));
     expect(result.vendors[1].missingEvidence).toContain("rating");
+  });
+  it("describes fixed Assistant matches as physical locations and ignores legacy service coverage", async () => {
+    Object.assign(db.state.tables.vendor_profiles[0], { location_mode: "fixed", physical_area: "central_israel", service_areas: ["south"] });
+    const result = await data("compare_vendors", c.comparisonData, { vendorIds: [vendorId, vendorTwo] });
+    expect(result.vendors[0].recommendation.reasons).toContainEqual(expect.objectContaining({ dimension: "area", label: "Located in Central Israel" }));
   });
   it("withholds unfair scores without inventing missing evidence or vendors", async () => {
     Object.assign(db.state.tables.weddings[0], { preferred_area: null, total_budget_minor: null, styles: [], guest_count: null, event_type: null });

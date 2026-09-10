@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { requireRole } from "@/lib/auth/user";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedVendorProfile } from "@/lib/queries/vendor-dashboard";
-import { vendorProfileSchema } from "@/lib/validation/vendor-profile";
+import { validateVendorLocationForMode, vendorProfileSchema } from "@/lib/validation/vendor-profile";
+import { locationModeForSubcategory } from "@/lib/vendors/location";
 import { isVendorImagePath, MAX_VENDOR_IMAGES, vendorImageError } from "@/lib/domain/vendor-media";
 import { withVendorMediaLock } from "./vendor-media-lock";
 import type { ActionState } from "./state";
@@ -32,6 +33,7 @@ export async function saveVendorProfile(
     contactName: nullable(formData.get("contactName")),
     description: nullable(formData.get("description")),
     locationCity: nullable(formData.get("locationCity")),
+    physicalArea: formData.get("physicalArea"),
     categoryId,
     subcategoryId,
     serviceAreas: formData.getAll("serviceAreas"),
@@ -55,14 +57,31 @@ export async function saveVendorProfile(
   const account = await requireRole("vendor");
   const profile = await getOwnedVendorProfile();
   const supabase = await createClient();
+  let subcategorySlug: string | null = null;
+  if (parsed.data.subcategoryId) {
+    const { data: subcategory, error: subcategoryError } = await supabase
+      .from("vendor_subcategories")
+      .select("slug, category_id")
+      .eq("id", parsed.data.subcategoryId)
+      .maybeSingle();
+    if (subcategoryError || !subcategory || subcategory.category_id !== parsed.data.categoryId) {
+      return { status: "error", errors: { categoryId: ["Choose a valid category and subcategory"] } };
+    }
+    subcategorySlug = subcategory.slug;
+  }
+  const locationMode = locationModeForSubcategory(subcategorySlug);
+  const locationErrors = validateVendorLocationForMode(parsed.data, locationMode);
+  if (Object.keys(locationErrors).length) return { status: "error", errors: locationErrors };
   const values = {
     business_name: parsed.data.businessName,
     contact_name: parsed.data.contactName,
     description: parsed.data.description,
     location_city: parsed.data.locationCity,
+    location_mode: locationMode,
+    physical_area: locationMode === "fixed" ? parsed.data.physicalArea : null,
     category_id: parsed.data.categoryId,
     subcategory_id: parsed.data.subcategoryId,
-    service_areas: parsed.data.serviceAreas,
+    service_areas: locationMode === "fixed" && parsed.data.physicalArea ? [parsed.data.physicalArea] : parsed.data.serviceAreas,
     min_price_minor: parsed.data.minPriceShekels == null ? null : parsed.data.minPriceShekels * 100,
     max_price_minor: parsed.data.maxPriceShekels == null ? null : parsed.data.maxPriceShekels * 100,
     services: parsed.data.services,

@@ -52,4 +52,34 @@ describe("calculateRecommendation", () => {
     expect(result.score).toBe(100);
     expect(result.isRecommended).toBe(true);
   });
+
+  it("matches a fixed Vendor through physical area and uses accurate wording", () => {
+    const result = calculateRecommendation(
+      { preferredArea: "central_israel", styles: ["Romantic"] },
+      { locationMode: "fixed", physicalArea: "central_israel", serviceAreas: ["south"], styles: ["Romantic"] },
+    );
+    expect(result.score).toBe(100);
+    expect(result.reasons[0]?.label).toBe("Located in Central Israel");
+  });
+
+  it("matches a mobile Vendor only through service coverage", () => {
+    const result = calculateRecommendation(
+      { preferredArea: "jerusalem", styles: ["Romantic"] },
+      { locationMode: "mobile", physicalArea: "south", serviceAreas: ["jerusalem"], styles: ["Romantic"] },
+    );
+    expect(result.score).toBe(100);
+    expect(result.reasons[0]?.label).toBe("Serves Jerusalem Area");
+  });
+
+  it("preserves all non-location weights and the recommendation threshold", () => {
+    const result = calculateRecommendation(
+      { availableBudgetMinor: 1_000, styles: ["Modern"], guestCount: 100, eventType: "evening" },
+      { minPriceMinor: 500, maxPriceMinor: 1_000, styles: ["Modern"], minGuestCapacity: 50, maxGuestCapacity: 150, eventTypes: ["evening"], ratingAverage: 4.5 },
+    );
+    expect(result.reasons.map(reason => [reason.dimension, reason.availableWeight])).toEqual([
+      ["budget", 20], ["style", 20], ["capacity", 15], ["eventType", 10], ["rating", 10],
+    ]);
+    expect(result.score).toBe(100);
+    expect(result.isRecommended).toBe(true);
+  });
 });

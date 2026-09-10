@@ -5,7 +5,7 @@ const empty = new URLSearchParams(location.search).has("empty");
 export const profile: OwnedVendorProfile = {
   id: "isolated-vendor", slug: "willow-studio", business_name: "Willow Studio", contact_name: "Dana", description: null,
   profile_image_storage_path: null,
-  location_city: "Tel Aviv", category_id: "photo", subcategory_id: "stills", service_areas: ["central_israel"], min_price_minor: null, max_price_minor: null,
+  location_city: "Tel Aviv", location_mode: "mobile", physical_area: null, category_id: "photo", subcategory_id: "stills", service_areas: ["central_israel"], min_price_minor: null, max_price_minor: null,
   services: [], styles: ["Elegant"], event_types: ["friday_afternoon"], min_guest_capacity: null, max_guest_capacity: null, friday_available: true,
   indoor_available: false, outdoor_available: true, phone: null, email: "studio@example.test", website_url: "", instagram_url: "", is_public: false,
   vendor_images: [{id:"image",external_url:"/images/auth/hands-and-rings.webp",storage_path:null,alt_text:"Editorial hands and rings",sort_order:0,is_primary:true}],

@@ -80,7 +80,10 @@ describe("connected marketplace subcategory query", () => {
     expect(params.has("vendor_categories.slug")).toBe(false);
     expect(params.get("vendor_subcategories.slug")).toBe("eq.videographers");
     expect(params.getAll("or").join(" ")).toContain("business_name.ilike.%Films%");
-    expect(params.getAll("or").join(" ")).toContain("service_areas.cs.{central_israel}");
+    expect(params.getAll("or").join(" ")).toContain("location_mode.eq.fixed");
+    expect(params.getAll("or").join(" ")).toContain("physical_area.eq.central_israel");
+    expect(params.getAll("or").join(" ")).toContain("location_mode.eq.mobile");
+    expect(params.getAll("or").join(" ")).toContain("service_areas.ov.{central_israel,flexible}");
     expect(params.get("min_price_minor")).toBe("lte.1000000");
     expect(params.get("max_price_minor")).toBe("gte.100000");
     expect(params.get("services")).toBe("cs.{Drone}");
@@ -127,5 +130,11 @@ describe("connected marketplace subcategory query", () => {
     expect(result.vendors).toHaveLength(10);
     expect(result.vendors.every(vendor => vendor.subcategorySlug === "wedding-photographers")).toBe(true);
     expect(mocks.fetch).not.toHaveBeenCalled();
+  });
+
+  it("does not forward an invalid area URL value to Supabase", async () => {
+    const { parseVendorFilters } = await import("@/lib/vendors/filters");
+    await getMarketplace(parseVendorFilters({ area: "not-a-region" }));
+    expect(request().searchParams.getAll("or").join(" ")).not.toContain("not-a-region");
   });
 });

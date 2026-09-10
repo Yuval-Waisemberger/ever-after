@@ -1,4 +1,10 @@
 import { z } from "zod";
+import {
+  VENDOR_AREA_VALUES,
+  deduplicateServiceAreas,
+  hasExclusiveFlexibleArea,
+  type VendorLocationMode,
+} from "@/lib/vendors/location";
 
 const optionalUrl = z.preprocess(
   (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
@@ -19,9 +25,13 @@ export const vendorProfileSchema = z
     contactName: z.string().trim().max(100).nullable(),
     description: z.string().trim().max(5000).nullable(),
     locationCity: z.string().trim().max(100).nullable(),
+    physicalArea: z.preprocess(
+      (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
+      z.enum(VENDOR_AREA_VALUES).nullable(),
+    ),
     categoryId: z.string().uuid().nullable(),
     subcategoryId: z.string().uuid().nullable(),
-    serviceAreas: z.array(z.enum(["central_israel", "sharon", "north", "jerusalem", "south", "flexible"])),
+    serviceAreas: z.array(z.enum(VENDOR_AREA_VALUES)).transform(deduplicateServiceAreas),
     minPriceShekels: optionalNumber,
     maxPriceShekels: optionalNumber,
     services: z.array(z.string().trim().min(1).max(100)).max(40),
@@ -38,5 +48,27 @@ export const vendorProfileSchema = z
     instagramUrl: optionalUrl,
     isPublic: z.boolean(),
   })
+  .refine((data) => hasExclusiveFlexibleArea(data.serviceAreas), {
+    path: ["serviceAreas"],
+    message: "Flexible cannot be combined with specific service areas",
+  })
   .refine((data) => data.minPriceShekels == null || data.maxPriceShekels == null || data.minPriceShekels <= data.maxPriceShekels, { path: ["maxPriceShekels"], message: "Maximum price must be at least the minimum" })
   .refine((data) => data.minGuestCapacity == null || data.maxGuestCapacity == null || data.minGuestCapacity <= data.maxGuestCapacity, { path: ["maxGuestCapacity"], message: "Maximum capacity must be at least the minimum" });
+
+export type VendorProfileInput = z.output<typeof vendorProfileSchema>;
+
+export function validateVendorLocationForMode(
+  data: VendorProfileInput,
+  locationMode: VendorLocationMode,
+): Record<string, string[]> {
+  const errors: Record<string, string[]> = {};
+  if (locationMode === "fixed") {
+    if (data.serviceAreas.length) errors.serviceAreas = ["Fixed-location Vendors cannot submit service areas"];
+    if (data.physicalArea === "flexible") errors.physicalArea = ["A physical area cannot be Flexible"];
+    if (data.isPublic && !data.locationCity) errors.locationCity = ["Enter the physical city before publishing"];
+    if (data.isPublic && !data.physicalArea) errors.physicalArea = ["Choose the physical area before publishing"];
+  } else if (data.physicalArea != null) {
+    errors.physicalArea = ["Mobile Vendors cannot submit a physical area"];
+  }
+  return errors;
+}

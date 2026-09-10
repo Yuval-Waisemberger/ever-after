@@ -1,7 +1,7 @@
 import "@/app/marketplace-polish.css";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Globe, Instagram, Mail, MapPin, Phone, Star } from "lucide-react";
+import { ArrowLeft, Car, Globe, Instagram, Mail, MapPin, Phone, Star } from "lucide-react";
 import { PublicHeader } from "@/components/layout/public-header";
 import { VendorStatusActions } from "@/components/vendors/vendor-status-actions";
 import { ReviewForm } from "@/components/vendors/review-form";
@@ -9,13 +9,14 @@ import { getCurrentProfile } from "@/lib/auth/user";
 import { formatIls } from "@/lib/domain/budget";
 import { getVendorRelationship } from "@/lib/queries/couple-vendors";
 import type { MarketplaceVendor } from "@/lib/vendors/types";
+import { formatVendorArea } from "@/lib/vendors/location";
 
 
 // Shared presentation: owner preview changes access and shell, not public profile content.
 export async function VendorProfilePresentation({ vendor, query = {}, ownerPreview = false }: { vendor: MarketplaceVendor; query?: Record<string, string | string[] | undefined>; ownerPreview?: boolean }) {
   const profile = await getCurrentProfile();
   const relationship = profile?.role === "couple" ? await getVendorRelationship(vendor.id) : null;
-  const area = vendor.serviceAreas.map((value) => value.replaceAll("_", " ")).join(" · ");
+  const serviceAreas = vendor.serviceAreas.map(formatVendorArea).join(" · ");
 
   return (
     <div className={ownerPreview ? "vendor-profile-page vendor-owner-preview" : "vendor-profile-page min-h-screen bg-canvas"}>
@@ -32,8 +33,10 @@ export async function VendorProfilePresentation({ vendor, query = {}, ownerPrevi
           <section className="vendor-profile-intro self-center">
             <p className="eyebrow">{vendor.subcategoryName ?? vendor.categoryName}</p>
             <h1 className="font-display mt-3 text-5xl leading-[0.98] tracking-tight sm:text-6xl">{vendor.businessName}</h1>
-            <div className="mt-5 flex flex-wrap gap-3 text-sm text-ink-soft">
-              <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 text-wine" />{[vendor.locationCity, area].filter(Boolean).join(" · ") || "Service area not set"}</span>
+            <div className="mt-5 grid gap-2 text-sm text-ink-soft">
+              {vendor.locationCity ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 shrink-0 text-wine" /><span><strong className="font-semibold text-ink">{vendor.locationMode === "fixed" ? "Physical city:" : "Home/base city:"}</strong> {vendor.locationCity}, Israel</span></span> : null}
+              {vendor.locationMode === "fixed" && vendor.physicalArea ? <span className="inline-flex items-center gap-1.5"><MapPin className="size-4 shrink-0 text-wine" />Physical area: {formatVendorArea(vendor.physicalArea)}</span> : null}
+              {vendor.locationMode === "mobile" && serviceAreas ? <span className="inline-flex items-start gap-1.5"><Car className="mt-0.5 size-4 shrink-0 text-wine" /><span><strong className="font-semibold text-ink">Serves:</strong> {serviceAreas}</span></span> : null}
               {vendor.ratingAverage != null ? <span className="inline-flex items-center gap-1.5"><Star className="size-4 fill-gold text-gold" />{vendor.ratingAverage.toFixed(1)} · {vendor.reviewCount} reviews</span> : <span>No reviews yet</span>}
             </div>
             <p className="mt-6 text-lg leading-8 text-ink-soft">{vendor.description}</p>

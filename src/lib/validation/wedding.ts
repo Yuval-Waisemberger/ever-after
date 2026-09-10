@@ -35,7 +35,7 @@ export const AREAS = [
   ["central_israel", "Central Israel"],
   ["sharon", "Sharon"],
   ["north", "North"],
-  ["jerusalem", "Jerusalem"],
+  ["jerusalem", "Jerusalem Area"],
   ["south", "South"],
   ["flexible", "Flexible"],
 ] as const;

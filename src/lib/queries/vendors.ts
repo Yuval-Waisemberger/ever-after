@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { demoVendors } from "@/lib/vendors/demo";
 import type { MarketplaceSubcategory, MarketplaceVendor, VendorFilters, VendorReview } from "@/lib/vendors/types";
 import { lifecycleFromStoredStatus } from "@/lib/domain/couple-vendors";
+import { vendorMatchesArea, type VendorArea } from "@/lib/vendors/location";
 
 const PAGE_SIZE = 12;
 
@@ -84,7 +85,9 @@ function mapVendor(row: VendorRow, supabaseUrl: string): MarketplaceVendor {
     subcategorySlug: subcategory?.slug ?? null,
     subcategoryName: subcategory?.name ?? null,
     locationCity: row.location_city == null ? null : String(row.location_city),
-    serviceAreas: Array.isArray(row.service_areas) ? row.service_areas.map(String) : [],
+    locationMode: row.location_mode === "fixed" ? "fixed" : "mobile",
+    physicalArea: row.physical_area == null ? null : String(row.physical_area) as VendorArea,
+    serviceAreas: Array.isArray(row.service_areas) ? row.service_areas.map(String) as VendorArea[] : [],
     minPriceMinor: row.min_price_minor == null ? null : Number(row.min_price_minor),
     maxPriceMinor: row.max_price_minor == null ? null : Number(row.max_price_minor),
     services: Array.isArray(row.services) ? row.services.map(String) : [],
@@ -117,7 +120,7 @@ function filterDemoVendors(filters: VendorFilters): MarketplaceVendor[] {
     if (search && !`${vendor.businessName} ${vendor.locationCity ?? ""} ${vendor.description} ${vendor.services.join(" ")}`.toLocaleLowerCase().includes(search)) return false;
     if (filters.category && vendor.categorySlug !== filters.category) return false;
     if (filters.subcategory && vendor.subcategorySlug !== filters.subcategory) return false;
-    if (filters.area && !vendor.serviceAreas.includes(filters.area) && !vendor.serviceAreas.includes("flexible")) return false;
+    if (filters.area && !vendorMatchesArea(vendor, filters.area)) return false;
     if (filters.minPrice != null && (vendor.maxPriceMinor ?? Number.POSITIVE_INFINITY) < filters.minPrice * 100) return false;
     if (filters.maxPrice != null && (vendor.minPriceMinor ?? 0) > filters.maxPrice * 100) return false;
     if (filters.minRating != null && (vendor.ratingAverage ?? 0) < filters.minRating) return false;
@@ -198,7 +201,7 @@ export async function getMarketplace(filters: VendorFilters) {
   if (filters.search) query = query.or(`business_name.ilike.%${filters.search.replaceAll(",", "")}%,location_city.ilike.%${filters.search.replaceAll(",", "")}%,description.ilike.%${filters.search.replaceAll(",", "")}%`);
   if (filters.category) query = query.eq("vendor_categories.slug", filters.category);
   if (filters.subcategory) query = query.eq("vendor_subcategories.slug", filters.subcategory);
-  if (filters.area) query = query.or(`service_areas.cs.{${filters.area}},service_areas.cs.{flexible}`);
+  if (filters.area) query = query.or(`and(location_mode.eq.fixed,physical_area.eq.${filters.area}),and(location_mode.eq.mobile,service_areas.ov.{${filters.area},flexible})`);
   if (filters.minPrice != null) query = query.gte("max_price_minor", filters.minPrice * 100);
   if (filters.maxPrice != null) query = query.lte("min_price_minor", filters.maxPrice * 100);
   if (filters.guestCount != null) query = query.lte("min_guest_capacity", filters.guestCount).gte("max_guest_capacity", filters.guestCount);
@@ -231,6 +234,8 @@ export async function getMarketplace(filters: VendorFilters) {
       isSaved: context.relationships.get(vendor.id)?.is_saved === true,
       lifecycleStatus: lifecycleFromStoredStatus(context.relationships.get(vendor.id)?.status),
       recommendation: calculateRecommendation(context, {
+        locationMode: vendor.locationMode,
+        physicalArea: vendor.physicalArea,
         serviceAreas: vendor.serviceAreas,
         minPriceMinor: vendor.minPriceMinor,
         maxPriceMinor: vendor.maxPriceMinor,

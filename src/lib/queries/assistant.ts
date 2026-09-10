@@ -10,6 +10,8 @@ import { AssistantContextUnavailableError, readAssistantSection } from "@/lib/as
 type AssistantVendorRow = {
   id: string;
   business_name: string;
+  location_mode: "fixed" | "mobile";
+  physical_area: string | null;
   service_areas: string[];
   min_price_minor: number | string | null;
   max_price_minor: number | string | null;
@@ -38,7 +40,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
   const supabase = await createClient();
   const [relationshipResult, budgetResult] = await Promise.all([
     readAssistantSection("vendors", () => supabase.from("couple_vendors")
-      .select("status, is_saved, agreed_price_minor, vendor_profiles(id, business_name, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name)")
+      .select("status, is_saved, agreed_price_minor, vendor_profiles(id, business_name, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name)")
       .eq("wedding_id", wedding.id)),
     readAssistantSection("budget", () => supabase.from("budget_items")
       .select("source, couple_vendors(status), estimated_amount_minor, committed_amount_minor, payments(amount_minor, is_paid, due_date)")
@@ -70,7 +72,8 @@ export async function getAssistantContext(): Promise<AssistantContext> {
       agreedPriceMinor: relationship.agreed_price_minor == null ? null : Number(relationship.agreed_price_minor),
       minPriceMinor: vendor?.min_price_minor == null ? null : Number(vendor.min_price_minor),
       maxPriceMinor: vendor?.max_price_minor == null ? null : Number(vendor.max_price_minor),
-      services: vendor?.services ?? [], styles: vendor?.styles ?? [], serviceAreas: vendor?.service_areas ?? [],
+      services: vendor?.services ?? [], styles: vendor?.styles ?? [], locationMode: vendor?.location_mode ?? "mobile",
+      physicalArea: vendor?.physical_area ?? null, serviceAreas: vendor?.service_areas ?? [],
       eventTypes: vendor?.event_types ?? [], minGuestCapacity: vendor?.min_guest_capacity ?? null,
       maxGuestCapacity: vendor?.max_guest_capacity ?? null, ratingAverage,
     };

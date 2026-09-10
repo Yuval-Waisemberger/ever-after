@@ -11,6 +11,7 @@ export const money = z.number().int().nonnegative().max(Number.MAX_SAFE_INTEGER)
 export const dbMoney = z.union([money, z.string().regex(/^\d+$/).transform(Number).pipe(money)]);
 export const date = z.iso.date();
 export const area = z.enum(["central_israel", "sharon", "north", "jerusalem", "south", "flexible"]);
+export const locationMode = z.enum(["fixed", "mobile"]);
 export const eventType = z.enum(["evening", "friday_afternoon", "daytime", "undecided"]);
 export const slug = z.string().min(1).max(80).regex(/^[a-z0-9-]+$/);
 export const status = z.enum(TASK_STATUSES);
@@ -60,7 +61,7 @@ export const paymentData = z.object({
 export const taxonomy = z.object({ slug, name: text }).nullable();
 export const vendorFacts = z.object({
   id, businessName: z.string().max(120), category: taxonomy, subcategory: taxonomy, locationCity: z.string().max(100).nullable(),
-  serviceAreas: z.array(text).max(20), minPriceMinor: money.nullable(), maxPriceMinor: money.nullable(),
+  locationMode, physicalArea: area.nullable(), serviceAreas: z.array(text).max(20), minPriceMinor: money.nullable(), maxPriceMinor: money.nullable(),
   services: z.array(z.string().max(100)).max(40), styles: z.array(z.string().max(100)).max(20), eventTypes: z.array(text).max(20),
   minGuestCapacity: z.number().int().positive().nullable(), maxGuestCapacity: z.number().int().positive().nullable(), fridayAvailable: z.boolean().nullable(),
   ratingAverage: z.number().min(1).max(5).nullable(), reviewCount: z.number().int().nonnegative(),
