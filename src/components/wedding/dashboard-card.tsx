@@ -16,10 +16,11 @@ export function DashboardCard({
 }) {
   return (
     <PlanningReveal className="dashboard-reveal"><section className={`ea-surface ea-dashboard-card rounded-2xl border bg-paper p-5 ${className}`}>
+      <header className="dashboard-card-heading"><div>
       {eyebrow ? <p className="eyebrow">{eyebrow}</p> : null}
       <h2 className="font-display mt-1 text-2xl">{title}</h2>
-      <div className="mt-5">{children}</div>
-      {footer ? <div className="mt-5 border-t pt-4 text-sm">{footer}</div> : null}
+      </div>{footer ? <div className="dashboard-card-action text-sm">{footer}</div> : null}</header>
+      <div className="dashboard-card-body mt-5">{children}</div>
     </section></PlanningReveal>
   );
 }

@@ -22,6 +22,15 @@ describe("Budget and guest presentation follows real data", () => {
   it("does not invent a budget ratio with no positive total", () => {
     for (const total of [null, 0]) expect(parse(renderToStaticMarkup(<BudgetMetrics summary={calculateBudgetSummary(total, [])} />)).querySelector('[role="progressbar"]')).toBeNull();
   });
+  it("shows the available ratio in a static ring and keeps the editor in the total card", () => {
+    const summary = calculateBudgetSummary(17000000, [{ committedAmountMinor: 10560000, payments: [] }]);
+    const doc = parse(renderToStaticMarkup(<BudgetMetrics summary={summary} totalBudgetEditor={<button>Save total budget</button>} />));
+    expect(doc.querySelector(".budget-summary-ring")?.getAttribute("aria-label")).toBe("38% of total budget available");
+    expect(doc.querySelector(".budget-total-card button")?.textContent).toBe("Save total budget");
+    expect(doc.querySelectorAll(".budget-summary-card .budget-metric")).toHaveLength(4);
+    expect(doc.querySelector("svg animate")).toBeNull();
+    expect(summary.availableMinor).toBe(6440000);
+  });
   it("shows real attendance ratio while keeping the wedding estimate independent", () => {
     const doc = parse(renderToStaticMarkup(<GuestSummary estimate={300} summary={{ invitationParties: 2, invited: 10, attending: 6, awaitingResponse: 3, notAttending: 1, notYetInvited: 2 }} />));
     expect(doc.querySelector('[role="img"]')?.getAttribute("aria-label")).toBe("60% attending: 6 of 10 invited guests");

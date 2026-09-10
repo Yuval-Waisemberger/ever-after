@@ -29,3 +29,52 @@
   .budget-overview .budget-metric > p:last-child { margin-top: 8px; }
 }
 @media (prefers-reduced-motion: reduce) { .budget-impact-progress[data-motion] .budget-impact-track span { transition: none; transform: scaleX(var(--budget-impact)); } }
+/* Budget-only composition. The shell canvas and navigation remain external owners. */
+#budget-page.budget-planning-page.budget-planning-page { max-width: 1400px; }
+#budget-page.budget-planning-page .ea-page-header { padding-bottom: 22px; border-bottom: 1px solid #e9e1dc; }
+#budget-page.budget-planning-page .budget-overview { display: grid; grid-template-columns: 250px minmax(0,1fr); gap: 16px; padding: 0; border: 0; background: none; box-shadow: none; margin-top: 24px; }
+#budget-page.budget-planning-page .budget-total-card, .budget-planning-page .budget-summary-card { min-width: 0; padding: 24px; background: #fbf8f5; border: 1px solid #e9e1dc; border-radius: 16px; box-shadow: 0 1px 3px rgb(79 62 55 / 5%), 0 9px 25px rgb(79 62 55 / 7%); }
+#budget-page.budget-planning-page .budget-total-card { display: flex; flex-direction: column; }
+#budget-page.budget-planning-page .budget-total-editor { margin-top: auto; padding-top: 26px; color: #733343; font-size: 14px; font-weight: 600; }
+#budget-page.budget-planning-page .budget-total-editor summary { cursor: pointer; }
+#budget-page.budget-planning-page .budget-summary-top { display: flex; align-items: center; gap: 20px; }
+#budget-page.budget-planning-page .budget-summary-ring { width: 150px; flex: 0 0 150px; position: relative; }
+#budget-page.budget-planning-page .budget-summary-ring svg { display: block; width: 100%; }
+#budget-page.budget-planning-page .budget-summary-ring > span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+#budget-page.budget-planning-page .budget-summary-ring strong { font: 600 28px/1.2 var(--font-body); }
+#budget-page.budget-planning-page .budget-summary-ring small { font-size: 14px; color: #53575b; }
+#budget-page.budget-planning-page.budget-planning-page.budget-planning-page.budget-planning-page .budget-metrics { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 0; flex: 1; min-width: 0; padding: 0; border: 0; border-radius: 0; box-shadow: none; background: none; }
+#budget-page.budget-planning-page .budget-metric { display: block; padding: 0 16px; border: 0; border-left: 1px solid #e9e1dc; border-radius: 0; background: none; grid-column: auto; }
+#budget-page.budget-planning-page .budget-total-card .budget-metric { padding: 0; border: 0; }
+#budget-page.budget-planning-page .budget-metric > p:nth-child(2) { font-size: clamp(23px,1.85vw,30px); line-height: 1.2; white-space: nowrap; }
+#budget-page.budget-planning-page .budget-total-card .budget-metric > p:nth-child(2) { font-size: 32px; }
+#budget-page.budget-planning-page .budget-metric > p:last-child { font-size: 13px; line-height: 1.5; }
+#budget-page.budget-planning-page.budget-planning-page.budget-planning-page.budget-planning-page .budget-impact-progress { padding: 18px 0 0; border: 0; border-radius: 0; box-shadow: none; background: none; }
+#budget-page.budget-planning-page .budget-impact-track { height: 10px; background: #eee7dd; }
+#budget-page.budget-planning-page .budget-impact-track span { background: linear-gradient(90deg,#733343 0%,#b77983 50%,#c8a475 100%); }
+#budget-page.budget-planning-page .budget-add-expense form { grid-template-columns: repeat(4,minmax(0,1fr)); align-items: end; }
+#budget-page.budget-planning-page .budget-add-expense form > div.grid { display: contents; }
+#budget-page.budget-planning-page .budget-add-expense form > p { grid-column: 1 / -1; grid-row: 1; }
+#budget-page.budget-planning-page .budget-add-expense form > label { grid-column: 1 / 4; }
+#budget-page.budget-planning-page .budget-add-expense textarea { height: 48px; min-height: 48px; }
+#budget-page.budget-planning-page .budget-add-expense form > button { justify-self: stretch; min-height: 48px; }
+#budget-page.budget-planning-page .budget-expense-surface h3 { font-size: 28px; line-height: 1.2; }
+#budget-page.budget-planning-page .budget-expense-surface h4 { font: 400 25px/1.2 var(--font-editorial); }
+#budget-page.budget-planning-page .budget-expense-surface > section { margin-top: 18px; padding-top: 16px; }
+#budget-page.budget-planning-page .budget-expense-surface summary { color: #733343; }
+#budget-page.budget-planning-page .budget-expense-surface > details { padding-block: 12px; margin-top: 12px; }
+@media(max-width:1250px) {
+ #budget-page.budget-planning-page .budget-overview { grid-template-columns: 210px minmax(0,1fr); }
+ #budget-page.budget-planning-page .budget-summary-ring { width: 125px; flex-basis: 125px; }
+ #budget-page.budget-planning-page.budget-planning-page.budget-planning-page.budget-planning-page .budget-metrics { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 16px 0; }
+}
+@media(max-width:700px) {
+ #budget-page.budget-planning-page .budget-overview { grid-template-columns: 1fr; }
+ #budget-page.budget-planning-page .budget-summary-top { flex-direction: column; align-items: stretch; }
+ #budget-page.budget-planning-page .budget-summary-ring { align-self: center; }
+ #budget-page.budget-planning-page .budget-metric { padding: 0 12px; }
+ #budget-page.budget-planning-page .budget-add-expense form { grid-template-columns: 1fr; }
+ #budget-page.budget-planning-page .budget-add-expense form > label { grid-column: auto; }
+ #budget-page.budget-planning-page .budget-total-card, .budget-planning-page .budget-summary-card { padding: 20px; }
+ #budget-page.budget-planning-page .budget-payment-row > .ml-auto { width: 100%; justify-content: flex-end; }
+}

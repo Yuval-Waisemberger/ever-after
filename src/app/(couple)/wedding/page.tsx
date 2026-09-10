@@ -1,9 +1,10 @@
 import "@/app/couple-planning.css";
+import "@/app/dashboard-reference.css";
 import { AnimatedValue } from "@/components/planning/animated-value";
 import { DetailsSavedToast } from "@/components/wedding/details-saved-toast";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Bot, CalendarClock, CheckCircle2, ListChecks } from "lucide-react";
+import { ArrowRight, Bot, CalendarClock, CheckCircle2, Heart, ListChecks } from "lucide-react";
 import { DashboardCard } from "@/components/wedding/dashboard-card";
 import { CoupleProfileMenu } from "@/components/couple/couple-profile-menu";
 import { GuestDashboardSummary } from "@/components/guests/guest-dashboard-summary";
@@ -50,16 +51,30 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
   const today = new Date();
   const upcomingTasks = selectUpcomingTasks(tasks, today, 5);
   const booked = relationships.filter((relationship) => relationship.status === "booked");
+  const dateLabel = wedding.wedding_date ? new Intl.DateTimeFormat("en-GB", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${wedding.wedding_date}T00:00:00Z`)) : "Wedding date not set yet";
+  // A presentation ratio of the existing available/total amounts, not a new budget calculation.
+  const availablePercent = budget.totalBudgetMinor && budget.availableMinor != null ? Math.round(budget.availableMinor / budget.totalBudgetMinor * 100) : null;
+  const ringPercent = Math.max(0, Math.min(100, availablePercent ?? 0));
 
   return (
-    <main className="planning-dashboard mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="planning-dashboard dashboard-reference mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       {params.details === "updated" ? <DetailsSavedToast /> : null}
-      <section className="wedding-dashboard-hero text-center">
-        <CoupleProfileMenu choice={identity.avatarChoice} photoUrl={identity.photoUrl} />
-        <p className="eyebrow mt-5">Our Wedding</p>
-        <h1 className="font-display mt-2 text-5xl leading-tight tracking-tight sm:text-6xl">{names}</h1>
-        <WeddingDateCountdown key={`${wedding.wedding_date}-${previewNow}`} weddingDate={wedding.wedding_date} initialNow={today.getTime()} previewNow={previewNow} />
-        <Link href="/wedding/details" className="ea-button mt-5 border border-line bg-paper text-ink hover:border-wine hover:text-wine">Edit wedding details</Link>
+      <section className="wedding-dashboard-hero">
+        <div className="dashboard-hero-composition">
+          <CoupleProfileMenu choice={identity.avatarChoice} photoUrl={identity.photoUrl} />
+          <div className="dashboard-identity">
+            <p className="eyebrow">Our Wedding</p>
+            <h1 className="font-display">{names}</h1>
+            <p className="dashboard-wedding-date">{dateLabel}</p>
+            <Link href="/wedding/details" className="dashboard-edit-link">Edit wedding details</Link>
+          </div>
+          <WeddingDateCountdown key={`${wedding.wedding_date}-${previewNow}`} weddingDate={wedding.wedding_date} initialNow={today.getTime()} previewNow={previewNow} />
+        </div>
+        {wedding.wedding_date ? <nav className="dashboard-date-strip" aria-label="Wedding date landmarks, not planning completion">
+          <span><i aria-hidden="true" />Today</span>
+          <Link href="/wedding/timeline"><i aria-hidden="true" />Wedding Timeline</Link>
+          <span><Heart size={20} aria-hidden="true" /><time dateTime={wedding.wedding_date}>{formatCalendarDate(wedding.wedding_date)}</time></span>
+        </nav> : null}
       </section>
 
       {wedding.setup_status !== "completed" ? (
@@ -93,7 +108,7 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
                 </li>
               ))}
             </ul>
-          ) : <p className="text-sm leading-6 text-ink-soft">No overdue tasks or deadlines in the next seven days.</p>}
+          ) : <div className="dashboard-upcoming-empty"><span><CalendarClock size={23} aria-hidden="true" /></span><p>No overdue tasks or deadlines<br /> in the next seven days.</p></div>}
         </DashboardCard>
 
         <DashboardCard title="Our Vendors" eyebrow="People you chose" className="dashboard-vendors-card" footer={summaryLink("/vendors/my", "Open Our Vendors")}>
@@ -108,7 +123,7 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
                 const subcategoryValue = vendor?.vendor_subcategories ?? external?.vendor_subcategories ?? null;
                 const subcategory = Array.isArray(subcategoryValue) ? subcategoryValue[0] : subcategoryValue;
                 const businessName = vendor?.business_name ?? external?.business_name ?? "Booked vendor";
-                return <li key={relationship.id} className="dashboard-vendor-row grid min-w-0 items-center gap-4 rounded-xl border bg-[#FCF9F6] p-3">{imageUrl ? <span className="dashboard-vendor-image relative size-20 overflow-hidden rounded-md bg-paper-muted"><Image src={imageUrl} alt={primary?.alt_text ?? businessName} fill sizes="80px" className="object-cover" /></span> : <span className="dashboard-vendor-image grid size-20 place-items-center rounded-md bg-paper-muted font-display text-2xl text-wine">{businessName.slice(0, 1)}</span>}<span className="dashboard-vendor-info min-w-0"><span className="dashboard-vendor-name block font-semibold">{businessName}</span><span className="dashboard-vendor-category mt-1 block text-xs text-ink-soft">{subcategory?.name ?? "Wedding vendor"}{external ? " · Added by you" : ""}</span><StatusPill tone="success" className="mt-2">Booked</StatusPill></span></li>;
+                return <li key={relationship.id} className="dashboard-vendor-row grid min-w-0 items-center gap-4 rounded-xl border bg-[#FCF9F6] p-3">{imageUrl ? <span className="dashboard-vendor-image relative size-20 overflow-hidden rounded-md bg-paper-muted"><Image src={imageUrl} alt={primary?.alt_text ?? businessName} fill sizes="80px" className="object-cover" /></span> : <span className="dashboard-vendor-image grid size-20 place-items-center rounded-md bg-paper-muted font-display text-2xl text-wine">{businessName.slice(0, 1)}</span>}<span className="dashboard-vendor-info min-w-0"><span className="dashboard-vendor-name block font-semibold">{businessName}</span><span className="dashboard-vendor-category mt-1 block text-xs text-ink-soft">{subcategory?.name ?? "Wedding vendor"}{external ? " · Added by you" : ""}</span></span><StatusPill tone="success">Booked</StatusPill></li>;
               })}
             </ul>
           ) : <p className="text-sm leading-6 text-ink-soft">Booked vendors will appear here automatically.</p>}
@@ -118,11 +133,16 @@ export default async function WeddingDashboardPage({ searchParams }: PageProps<"
           {budget.totalBudgetMinor == null ? (
             <p className="text-sm leading-6 text-ink-soft">Set a total budget when you&apos;re ready.</p>
           ) : (
+            <div className="dashboard-budget-summary">
+            <div className="dashboard-budget-ring" role="img" aria-label={availablePercent == null ? "Budget percentage unavailable" : `${availablePercent}% of total budget available`}>
+              <svg viewBox="0 0 140 140" aria-hidden="true"><defs><linearGradient id="dashboard-budget-gradient" gradientUnits="userSpaceOnUse" x1="131" y1="70" x2="9" y2="70"><stop offset="0%" stopColor="var(--wine)" /><stop offset="50%" stopColor="var(--rose)" /><stop offset="100%" stopColor="var(--champagne)" /></linearGradient></defs><circle cx="70" cy="70" r="61" fill="none" stroke="currentColor" strokeWidth="9" /><circle cx="70" cy="70" r="61" fill="none" stroke="url(#dashboard-budget-gradient)" strokeWidth="9" pathLength="100" strokeDasharray={`${ringPercent} 100`} transform="rotate(-90 70 70)" strokeLinecap="round" /></svg>
+              <span><strong>{availablePercent == null ? "—" : `${availablePercent}%`}</strong><small>Available</small></span>
+            </div>
             <dl className="space-y-3 text-sm">
               <div className="flex justify-between"><dt className="text-ink-soft">Committed</dt><dd className="font-semibold">{formatIls(budget.committedMinor)}</dd></div>
               <div className="flex justify-between"><dt className="text-ink-soft">Paid</dt><dd className="font-semibold">{formatIls(budget.paidMinor)}</dd></div>
               <div className="flex justify-between border-t pt-3"><dt className="font-semibold">Available</dt><dd className="ea-money text-xl text-wine">{budget.availableMinor == null ? formatIls(null) : <AnimatedValue value={budget.availableMinor} format="ils" />}</dd></div>
-            </dl>
+            </dl></div>
           )}
           {budgetItems.length ? <ul className="mt-5 space-y-2 border-t pt-4">{budgetItems.slice(0, 2).map((item) => { const status = deriveBudgetItemStatus(item); return <li key={item.id} className="flex flex-wrap items-center justify-between gap-2 text-sm"><span className="font-semibold">{item.label}</span><StatusPill tone={budgetStatusTone[status.kind]}>{status.label}</StatusPill></li>; })}</ul> : null}
           {budget.upcomingPayments.length ? <div className="mt-4 rounded-md bg-[#FCF9F6] p-3"><p className="text-xs font-semibold text-ink-soft">Next payment</p>{budget.upcomingPayments.slice(0, 1).map((payment, index) => { const status = derivePaymentStatus(payment, today); return <div key={`${payment.itemLabel}-${payment.label}-${index}`} className="mt-2 flex flex-wrap items-center gap-2 text-sm"><span className="min-w-0 flex-1 font-semibold">{payment.itemLabel}: {payment.label}</span><StatusPill tone={paymentStatusTone[status.kind]}>{status.label}</StatusPill></div>; })}</div> : null}

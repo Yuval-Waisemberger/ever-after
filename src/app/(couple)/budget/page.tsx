@@ -32,14 +32,11 @@ export default async function BudgetPage({ searchParams }: PageProps<"/budget">)
   const { wedding, items, summary } = await getBudgetPageData();
   const today = new Date();
   return (
-    <main className="budget-planning-page mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main id="budget-page" className="ea-consistent-page budget-planning-page mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="One financial picture" title="Budget & Payments" description="See what you expect to spend, what you have committed to, and what has actually been paid." />
       {params.error ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">{params.error === "history" ? "This expense has protected financial history. Change the vendor lifecycle instead of deleting it." : "The budget change could not be saved. Please refresh and try again."}</p> : null}
-      <BudgetMetrics summary={summary} />
-      <div className="mt-7 grid gap-5 lg:grid-cols-2">
-        <section className="budget-form-surface rounded-2xl border p-5 sm:p-6"><h2 className="font-display text-2xl">Total budget</h2><div className="mt-4"><TotalBudgetForm totalMinor={wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor)} /></div></section>
-        <section className="budget-form-surface rounded-2xl border p-5 sm:p-6"><h2 className="font-display text-2xl">Add an expense</h2><p className="mt-2 text-sm text-ink-soft">Track vendor costs and every other wedding expense. A booked vendor with an agreed price is added here automatically.</p><div className="mt-4"><BudgetItemForm /></div></section>
-      </div>
+      <BudgetMetrics summary={summary} totalBudgetEditor={<TotalBudgetForm totalMinor={wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor)} />} />
+      <section className="budget-add-expense budget-form-surface mt-5 rounded-2xl border p-5 sm:p-6"><h2 className="font-display text-2xl">Add an expense</h2><p className="mt-2 text-sm text-ink-soft">Track vendor costs and every other wedding expense. A booked vendor with an agreed price is added here automatically.</p><div className="mt-4"><BudgetItemForm /></div></section>
       <section className="budget-expenses mt-8">
         <div className="flex items-end justify-between"><div><p className="eyebrow">All expenses</p><h2 className="font-display mt-1 text-3xl">Commitments and payments</h2></div><p className="text-sm text-ink-soft">{formatIls(summary.remainingCommittedMinor)} committed but not yet paid</p></div>
         <div className="mt-5 space-y-4">

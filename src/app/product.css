@@ -200,3 +200,117 @@
   .assistant-conversation article > div { max-width: calc(100% - 40px); padding: 12px; }
 }
 @media (prefers-reduced-motion: reduce) { .ea-button, .vendor-card, .setup-wizard * { transition: none; } }
+
+
+/* Final application surfaces. Deliberately excludes Landing and Couple Auth.
+   No motion/timing selectors or global :root token changes belong in this layer. */
+:is(.workspace-shell, .directory-page, .vendor-profile-page, .auth-page:not(.auth-page--couple), .vendor-auth-presentation) {
+  --wine: #733343;
+  --wine-dark: #592735;
+  --canvas: #f8eeeb;
+  --canvas-deep: #f1e2de;
+  --paper: #fffaf3;
+  --paper-muted: #f3e9e1;
+  --line: #e3d2c9;
+  --mushroom: #e9ddd1;
+  --surface-standard: linear-gradient(135deg, #fffaf3, #fcf6ef);
+  --surface-blush: linear-gradient(135deg, #f7e8e6, #fcf3ed);
+  --surface-tonal: linear-gradient(135deg, #f6efe6, #eee3d8);
+  --surface-champagne: linear-gradient(135deg, #fcf5e8, #f2e7da);
+  --shadow-soft: 0 2px 8px rgb(92 56 46 / 3%), 0 14px 36px rgb(92 56 46 / 5%);
+  --shadow-raised: 0 5px 18px rgb(92 56 46 / 5%), 0 20px 42px rgb(92 56 46 / 7%);
+}
+.workspace-shell.workspace-shell, .directory-page.public-theme, .vendor-profile-page.vendor-profile-page,
+.auth-page.auth-page:not(.auth-page--couple), .vendor-auth-presentation {
+  background: radial-gradient(ellipse at 5% 0%, #f5e3e2, transparent 65%), linear-gradient(115deg, #f9eeeb, #f6eee5);
+}
+.workspace-shell .workspace-sidebar, .workspace-shell .workspace-mobile-header {
+  background: linear-gradient(160deg, #fffaf3, #f7eee5);
+  border-color: var(--line);
+}
+.workspace-shell .workspace-sidebar nav { color: var(--wine); }
+.workspace-shell .workspace-sidebar nav a:hover { background-color: #f0dfe0; }
+:is(.workspace-shell, .directory-page, .vendor-profile-page, .auth-page:not(.auth-page--couple)) :is(input:not([type=checkbox],[type=radio],[type=hidden],[type=file]),textarea,select) {
+  border-color: var(--line);
+  background-color: #fffcf7;
+}
+:is(.workspace-shell, .directory-page, .vendor-profile-page, .auth-page:not(.auth-page--couple)) :is(input,textarea,select):focus-visible {
+  outline: 2px solid var(--wine); outline-offset: 3px;
+}
+.workspace-shell :is(.ea-card,.ea-surface,.budget-expense-surface,.vendor-business-form > section,.vendor-business-form fieldset) {
+  border-color: var(--line); box-shadow: var(--shadow-soft);
+}
+.workspace-shell :is(.wedding-details-form,.vendor-business-form) :is(section,fieldset) {
+  border-radius: 18px;
+}
+.workspace-shell :is(.wedding-details-form,.vendor-business-form) :is(h2,legend) {
+  color: var(--wine);
+}
+.directory-page :is(.vendor-card,.vendor-filters), .vendor-profile-page :is(.ea-card,.ea-surface) {
+  background-color: var(--paper); border-color: var(--line);
+}
+.workspace-shell .planning-dashboard .wedding-dashboard-hero {
+  background: linear-gradient(120deg, #fffaf3, #f7e9e5); border-color: #e1c9c2;
+}
+.workspace-shell .planning-dashboard .wedding-date-card { background: linear-gradient(120deg, #f9eeea, #fffaf3); }
+@media(min-width:1101px) {
+  .workspace-shell .wedding-dashboard-hero { display: grid; grid-template-columns: 112px minmax(0,1fr) minmax(250px,.9fr); column-gap: 26px; text-align: start; align-items: center; }
+  .workspace-shell .wedding-dashboard-hero > :first-child { grid-column: 1; grid-row: 1 / 4; }
+  .workspace-shell .wedding-dashboard-hero > .eyebrow { grid-column: 2; grid-row: 1; margin-top: 0; align-self: end; }
+  .workspace-shell .wedding-dashboard-hero > h1 { grid-column: 2; grid-row: 2; }
+  .workspace-shell .wedding-dashboard-hero > a { grid-column: 2; grid-row: 3; justify-self: start; align-self: start; margin-top: 16px; }
+  .workspace-shell .wedding-dashboard-hero > .wedding-date-card { grid-column: 3; grid-row: 1 / 4; margin: 0; width: 100%; }
+}
+.workspace-shell .planning-dashboard :is(.dashboard-tasks-card,.dashboard-upcoming-card,.dashboard-guests-card) {
+  background: var(--surface-standard);
+}
+.workspace-shell .planning-dashboard .ea-dashboard-card h2 { color: var(--ink); }
+.workspace-shell .planning-dashboard .ea-dashboard-card a { text-decoration-color: #b7978f; }
+.workspace-shell .budget-overview { background: transparent; border: 0; padding: 0; box-shadow: none; }
+.workspace-shell .budget-overview .budget-metrics { gap: 0; background: var(--surface-standard); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; }
+.workspace-shell .budget-overview .budget-metric { background: transparent; border: 0; border-radius: 0; padding: 24px 18px; }
+.workspace-shell .budget-overview .budget-metric--total { background: var(--surface-tonal); border-inline-end: 1px solid var(--line); }
+.workspace-shell .budget-overview .budget-metric--available { background: var(--surface-blush); }
+.workspace-shell .budget-metric > p:nth-child(2) { font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.workspace-shell .budget-impact-progress { margin-top: 12px; padding: 18px 22px; background: var(--surface-standard); border: 1px solid var(--line); border-radius: 12px; }
+.workspace-shell .budget-expense-surface { background: var(--surface-standard); }
+.workspace-shell .budget-expense-surface details { border-color: var(--line); }
+.workspace-shell .planning-timeline-path { background: var(--surface-standard); border: 1px solid var(--line); }
+.workspace-shell .timeline-destination-surface { background: var(--surface-blush); border-color: var(--wine); }
+.workspace-shell .timeline-entry[data-workflow=in_progress] { background: var(--surface-blush); border-inline-start-color: var(--wine); }
+.workspace-shell .assistant-workspace { border-color: #dac3ba; box-shadow: 0 15px 42px rgb(92 56 46 / 7%); }
+.workspace-shell .assistant-history { background: linear-gradient(160deg, #fffaf3, #f2e7da); }
+.workspace-shell .assistant-chat-panel { background: linear-gradient(135deg, #fffcf7, #f8efe5); }
+.workspace-shell .assistant-chat-toolbar { background: #fbf4e9; }
+.workspace-shell .assistant-message[data-role=assistant] [data-bubble] { background: linear-gradient(135deg, #f7f0e7, #eee2d7); border-color: #dfcec1; }
+.workspace-shell .assistant-message[data-role=user] [data-bubble] { background: linear-gradient(135deg, #f5dfe2, #faeeeb); border-color: #dbb9be; }
+.workspace-shell .assistant-sources li { background: #fffaf3; border-color: #dfcec1; }
+.workspace-shell .assistant-composer { background-color: #fcf5ed; border-color: #dfcec1; }
+.workspace-shell .assistant-send { background: #733343; }
+/* Vendor-only presentation reuses the approved navigation, without editing
+   AuthPage/AuthPanel or any protected Couple-auth component. */
+.vendor-auth-presentation > .auth-page > .auth-brand-bar { display: none; }
+.vendor-auth-presentation .auth-layout { max-width: 1540px; grid-template-columns: minmax(180px,.7fr) minmax(220px,.9fr) minmax(340px,1.15fr); gap: clamp(24px,3vw,50px); padding: 40px 4% 64px; align-items: start; }
+.vendor-auth-presentation .auth-introduction { display: contents; }
+.vendor-auth-presentation .auth-introduction > .eyebrow { grid-column: 1; grid-row: 1; padding-top: 44px; }
+.vendor-auth-presentation .auth-editorial-title { grid-column: 1; grid-row: 1; margin-top: 100px; font-size: clamp(38px,3.5vw,58px); }
+.vendor-auth-presentation .auth-introduction > p:not(.eyebrow) { grid-column: 1; grid-row: 1; margin-top: 280px; }
+.vendor-auth-presentation .auth-image { grid-column: 2; grid-row: 1; margin: 0; height: clamp(560px,65vw,760px); aspect-ratio: auto; border-radius: 24px; }
+.vendor-auth-presentation .auth-image img { object-position: 59% center; filter: none; }
+.vendor-auth-presentation .auth-panel { grid-column: 3; grid-row: 1; background: var(--surface-standard); border: 1px solid var(--line); border-radius: 24px; padding: clamp(24px,2.6vw,40px); box-shadow: var(--shadow-soft); }
+@media(max-width:1100px) {
+  .vendor-auth-presentation .auth-layout { grid-template-columns: minmax(230px,.8fr) minmax(340px,1.2fr); }
+  .vendor-auth-presentation .auth-introduction { display: block; }
+  .vendor-auth-presentation .auth-introduction > .eyebrow { padding-top: 0; }
+  .vendor-auth-presentation .auth-editorial-title { margin-top: 20px; }
+  .vendor-auth-presentation .auth-introduction > p:not(.eyebrow) { margin-top: 20px; }
+  .vendor-auth-presentation .auth-image { height: 400px; margin-top: 28px; }
+  .vendor-auth-presentation .auth-panel { grid-column: 2; }
+}
+@media(max-width:700px) {
+  .vendor-auth-presentation .auth-layout { display: flex; flex-direction: column; padding: 24px 20px 44px; gap: 28px; }
+  .vendor-auth-presentation .auth-introduction { width: 100%; }
+  .vendor-auth-presentation .auth-image { height: 260px; }
+  .vendor-auth-presentation .auth-panel { width: 100%; padding: 24px 20px; }
+  .workspace-shell .budget-overview .budget-metric { padding: 18px 12px; }
+}

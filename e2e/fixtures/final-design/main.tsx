@@ -7,6 +7,7 @@ import Guests from "@/app/(couple)/guests/page";
 import Budget from "@/app/(couple)/budget/page";
 import { AppShell } from "@/components/layout/app-shell";
 import "@/app/globals.css";
+import "@/app/eligible-consistency.css";
 import "@/app/product.css";
 function Fixture() {
   const [revision, update] = useState(0), [page, setPage] = useState<ReactNode>(null);

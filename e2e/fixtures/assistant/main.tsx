@@ -2,6 +2,7 @@ import { createRoot } from "react-dom/client";
 import { AssistantChat, type AssistantMessage } from "@/components/assistant/assistant-chat";
 import { AppShell } from "@/components/layout/app-shell";
 import "@/app/globals.css";
+import "@/app/eligible-consistency.css";
 import "@/app/product.css";
 import "@/app/couple-planning.css";
 import "@/app/(couple)/assistant/assistant.css";
@@ -14,7 +15,7 @@ const blank = params.has("blank");
 const id = "00000000-0000-4000-8000-000000000001";
 const otherId = "00000000-0000-4000-8000-000000000002";
 const threads = [{ id, title: "Our wedding plans" }, { id: otherId, title: "Budget and the next steps for our celebration" }];
-const content = <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
+const content = <main className="ea-consistent-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10">
   <AssistantChat initialThreadId={blank ? null : id} initialMessages={blank ? [] : messages}
     initialLoadError={params.has("unavailable")}
     initialHistory={{ threads: params.has("empty") ? [] : threads, hasMore: false }}

@@ -1,0 +1,56 @@
+/* Internal Timeline presentation only. Canvas, navigation and motion owners are untouched. */
+#timeline-page.planning-timeline { max-width: 1300px; }
+#timeline-page .ea-page-header .ea-button { color: #733343; border: 1px solid #733343; background: #fbf8f5; }
+#timeline-page .timeline-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 20px 28px; margin-top: 24px; border: 1px solid #e9e1dc; border-radius: 12px; background: #fbf8f5; box-shadow: 0 1px 3px rgb(79 62 55 / 5%),0 9px 25px rgb(79 62 55 / 7%); }
+#timeline-page .timeline-summary-date, #timeline-page .timeline-summary-next { display: flex; align-items: center; gap: 22px; min-width: 0; }
+#timeline-page .timeline-summary-next { border-left: 1px solid #e9e1dc; padding-left: 28px; }
+#timeline-page .timeline-summary > div > svg { width: 46px; height: 46px; padding: 12px; flex-shrink: 0; border-radius: 50%; background: #f1e7e5; color: #733343; }
+#timeline-page .timeline-summary .wedding-date-card { margin: 0; padding: 0; border: 0; background: none; box-shadow: none; min-height: 0; width: auto; }
+#timeline-page .timeline-summary .wedding-date-card > div { display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
+#timeline-page .timeline-summary .countdown-day-value { order: -1; display: flex; align-items: baseline; gap: 10px; margin: 0; color: #733343; font: 400 38px/1.1 var(--font-editorial); }
+#timeline-page .timeline-summary .countdown-caption { margin: 0; font: 400 13px/1.5 var(--font-body); color: #181716; }
+#timeline-page .timeline-summary .countdown-caption > span, #timeline-page .timeline-summary .wedding-day-spark { display: none; }
+#timeline-page .timeline-summary .countdown-date-label { margin-top: 4px; font: 400 14px/1.5 var(--font-body); color: #53575b; }
+#timeline-page .timeline-summary .countdown-special-title { font-size: 28px; }
+#timeline-page .timeline-summary-next strong { color: #733343; font: 400 24px/1.25 var(--font-editorial); overflow-wrap: anywhere; }
+#timeline-page .timeline-summary-next time { display: block; margin-top: 5px; font-size: 14px; color: #53575b; }
+#timeline-page .timeline-content { margin-top: 20px; }
+#timeline-page.planning-timeline .planning-timeline-path { padding: 28px 28px 28px 18px; background: #fbf8f5; }
+#timeline-page .planning-timeline-path::before, #timeline-page .planning-timeline-path::after { left: 40px; background-color: #c8a475; }
+#timeline-page .planning-timeline-path::after { background-image: linear-gradient(#733343,#b77983,#c8a475); }
+#timeline-page .timeline-milestone > .planning-reveal > span { left: -44px; top: 4px; width: 24px; height: 24px; border-color: #b08c6b; background: #fbf8f5; }
+#timeline-page .timeline-milestone[data-state="completed"] > .planning-reveal > span { background: #648371; border-color: #648371; color: white; }
+#timeline-page .timeline-milestone[data-state="next"] > .planning-reveal > span { background: #733343; border-color: #733343; }
+/* Completed work has an already-complete sage track; the existing scroll fill continues underneath. */
+#timeline-page .timeline-milestone[data-state="completed"]::before { content: ""; position: absolute; left: 9px; top: 16px; width: 2px; height: calc(100% + 32px); background: #648371; z-index: -1; }
+#timeline-page .timeline-milestone h2 { font: 400 27px/1.2 var(--font-editorial); }
+#timeline-page .timeline-entry { border-radius: 8px; gap: 14px; min-height: 52px; font-weight: 500; }
+#timeline-page .timeline-entry > span:first-of-type { min-width: 0; overflow-wrap: anywhere; }
+#timeline-page .timeline-entry time { min-width: 100px; text-align: right; }
+#timeline-page .timeline-entry[data-next="true"] { border-color: #e5c9cf; border-left: 3px solid #733343; background: #faf4f3; }
+#timeline-page .timeline-next-label { padding: 3px 12px; border-radius: 999px; background: #f3e2e5; color: #733343; font-size: 11px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; }
+#timeline-page.planning-timeline .timeline-destination .timeline-destination-surface { padding: 24px 28px; background: #fbf8f5; border: 2px solid #733343; box-shadow: 0 2px 5px rgb(79 62 55 / 5%),0 12px 28px rgb(79 62 55 / 8%); }
+#timeline-page .timeline-destination-surface > span { left: -46px; top: 16px; width: 28px; height: 28px; }
+#timeline-page .timeline-destination-surface h2 { color: #733343; font-size: 32px; }
+#timeline-page .timeline-unscheduled { margin-top: 24px; padding-top: 20px; }
+#timeline-page .timeline-unscheduled > ul { grid-template-columns: 1fr; margin-left: 52px; }
+#timeline-page .timeline-unscheduled > ul > li { padding: 12px 16px; background: #fbf8f5; border-color: #e9e1dc; }
+#timeline-page .timeline-unscheduled .ea-button { border-color: #733343; color: #733343; }
+@media(max-width:700px) {
+ #timeline-page .timeline-summary { grid-template-columns: 1fr; padding: 20px; gap: 16px; }
+ #timeline-page .timeline-summary-next { border-left: 0; border-top: 1px solid #e9e1dc; padding: 16px 0 0; }
+ #timeline-page.planning-timeline .planning-timeline-path { padding: 22px 14px 22px 8px; }
+ #timeline-page .planning-timeline-path::before, #timeline-page .planning-timeline-path::after { left: 30px; }
+ #timeline-page .planning-timeline-path > li { padding-left: 42px; }
+ #timeline-page .timeline-entry { gap: 8px; padding: 12px; }
+ #timeline-page .timeline-entry > span:first-of-type { flex: 1; }
+ #timeline-page .timeline-entry time { min-width: 0; margin-left: auto; }
+ #timeline-page .timeline-milestone h2 { font-size: 24px; }
+ #timeline-page.planning-timeline .timeline-destination .timeline-destination-surface { padding: 20px 16px; }
+ #timeline-page .timeline-destination-surface h2 { font-size: 28px; }
+ #timeline-page .timeline-unscheduled > ul { margin-left: 0; }
+}
+#timeline-page .ea-page-header { padding-bottom: 0; border-bottom: 0; }
+@media(max-width:700px) {
+ #timeline-page .timeline-entry > span:first-of-type { min-width: calc(100% - 32px); }
+}

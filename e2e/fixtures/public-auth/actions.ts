@@ -12,3 +12,5 @@ export async function signIn(): Promise<AuthActionState> {
 export const signUpCouple = signIn;
 export const signUpVendor = signIn;
 export const resendVerification = signIn;
+export const requestPasswordReset = signIn;
+export const resetPassword = signIn;

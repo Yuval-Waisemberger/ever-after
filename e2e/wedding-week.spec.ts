@@ -51,7 +51,8 @@ for (const width of [1440, 1280, 1024, 768, 390, 375, 360]) test(`date-only cele
   await page.setViewportSize({ width, height: 1000 });
   let originalCards = "";
   for (const [query, phase, label] of states) {
-    await page.goto(`/?${query}`);
+    // Match the real route: the approved Dashboard is always inside AppShell.
+    await page.goto(`/?${query}&shell`);
     const date = page.getByLabel("Wedding date and countdown");
     await expect(date).toHaveAttribute("data-phase", phase);
     if (phase === "NORMAL") await expect(date.getByLabel(label, { exact: true })).toBeVisible();
@@ -76,7 +77,7 @@ test("no-date ignores preview; minute clock crosses wedding-day boundary without
   await page.goto("/?noDate=1&previewDaysBefore=0");
   const date = page.getByLabel("Wedding date and countdown");
   await expect(date).toHaveAttribute("data-phase", "NO_DATE");
-  await expect(date.getByText("Wedding date not set yet")).toBeVisible();
+  await expect(page.locator(".dashboard-wedding-date")).toHaveText("Wedding date not set yet");
   await expect(date.getByText(/Development preview/)).toHaveCount(0);
   await page.clock.setSystemTime(new Date("2026-09-11T20:59:00Z")); // isolated browser clock only
   await page.goto("/");
@@ -99,8 +100,12 @@ for (const width of [1440, 768, 390, 360]) test(`Timeline follows scroll at ${wi
   const start = await progress();
   expect(start).toBeLessThan(1);
   await page.locator(".timeline-destination").scrollIntoViewIfNeeded();
-  await page.clock.runFor(1400);
-  expect(await progress()).toBeGreaterThan(start);
+  // Native scroll delivery and the mocked animation clock are separate queues.
+  // Wait for observable progress, advancing frames without changing production motion.
+  await expect.poll(async () => {
+    await page.clock.runFor(100);
+    return progress();
+  }).toBeGreaterThan(start);
   await expect(page.locator(".timeline-destination .planning-reveal")).toHaveAttribute("data-reveal", "shown");
   await expect(page.getByRole("heading", { name: "Your Wedding Day", exact: true })).toHaveCount(1);
   await expect(page.getByText("Waiting on vendor").first()).toHaveCount(1);

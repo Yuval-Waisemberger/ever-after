@@ -1,0 +1,124 @@
+/* Approved Dashboard values, opted into eligible pages only. Never target :root,
+   Landing, Couple Auth, or the exact /wedding Dashboard. Motion owners stay local. */
+:is(.workspace-shell.workspace-shell:has(.ea-consistent-page, .ea-page-loading), .directory-page.directory-page.directory-page, .vendor-profile-page.vendor-profile-page.vendor-profile-page, .vendor-auth-presentation.vendor-auth-presentation.vendor-auth-presentation, .auth-page.auth-page.auth-page:not(.auth-page--couple)) {
+  --wine: #733343; --wine-dark: #592735; --rose: #b77983; --champagne: #c8a475;
+  --ink: #181716; --ink-soft: #53575b; --line: #e9e1dc;
+  --canvas: #f4ebe8; --canvas-deep: #f1e7e5; --paper: #fbf8f5; --paper-muted: #f6f2ee;
+  --mushroom: #e9ddd1; --blush: #f1e7e5; --blush-accent: #e9d6d7;
+  --font-body: "Segoe UI", Arial, sans-serif; --font-editorial: Georgia, "Palatino Linotype", serif;
+  --surface-standard: #fbf8f5; --surface-blush: #fbf8f5; --surface-tonal: #f6f2ee; --surface-champagne: #fbf8f5;
+  --surface-radius: 16px;
+  --shadow-soft: 0 1px 3px rgb(79 62 55 / 5%), 0 9px 25px rgb(79 62 55 / 7%);
+  --shadow-raised: 0 2px 5px rgb(79 62 55 / 5%), 0 12px 28px rgb(79 62 55 / 8%);
+  --consistency-wash: radial-gradient(ellipse 110% 35% at 0% 15%, #e9d6d7, transparent 85%), radial-gradient(ellipse 100% 40% at 100% 65%, #e8d9d8, transparent 85%), radial-gradient(ellipse 110% 30% at 10% 95%, #e0d8d0, transparent 90%), linear-gradient(135deg, #f8f3ed, #f2ebe5 55%, #f8f4ef);
+}
+/* Repeating the eligible root supplies intentional specificity over legacy page palettes. */
+.workspace-shell.workspace-shell:has(.ea-consistent-page, .ea-page-loading), .directory-page.directory-page.directory-page, .vendor-profile-page.vendor-profile-page.vendor-profile-page, .vendor-auth-presentation.vendor-auth-presentation, .auth-page.auth-page.auth-page:not(.auth-page--couple) {
+  background: #f4ebe8; color: var(--ink); font-family: var(--font-body);
+}
+/* The persistent shell owns navigation surfaces, including loading states. */
+.workspace-shell.workspace-shell :is(.workspace-sidebar, .workspace-mobile-header, .workspace-menu > div),
+:is(.directory-page, .vendor-profile-page) .public-header,
+.auth-page:not(.auth-page--couple) .auth-brand-bar {
+  background: #fbf8f5; border-color: #e9e1dc; opacity: 1; backdrop-filter: none;
+}
+:is(.directory-page.directory-page, .vendor-profile-page.vendor-profile-page) :is(.public-header,#public-mobile-navigation) { background: #fbf8f5; border-color: #e9e1dc; opacity: 1; backdrop-filter: none; }
+:is(.directory-page.directory-page, .vendor-profile-page.vendor-profile-page) :is(.public-desktop-nav a,.public-mobile-menu nav a) { font-family: var(--font-body); font-size: 14px; font-weight: 600; line-height: 1.5; letter-spacing: normal; text-transform: none; color: #181716; border-radius: 12px; }
+:is(.directory-page.directory-page, .vendor-profile-page.vendor-profile-page) :is(.public-desktop-nav a,.public-mobile-menu nav a):hover { color: #733343; background-color: #f0dfe0; }
+/* Navigation inherits the rendered Dashboard tokens even while route content is absent.
+   These variables stay inside navigation; page canvases and cards do not inherit them. */
+.workspace-shell.workspace-shell :is(.workspace-sidebar,.workspace-mobile-header) {
+  --wine: #733343; --ink: #181716; --ink-soft: #53575b; --line: #e9e1dc;
+  --paper: #fbf8f5; --paper-muted: #f3e9e1; --surface-radius: 8px;
+  --font-body: "Segoe UI", Arial, sans-serif;
+  --font-editorial: Georgia, "Palatino Linotype", serif;
+  font-family: var(--font-body); color: var(--ink);
+}
+.workspace-shell.workspace-shell .workspace-sidebar { padding: 24px 20px; }
+.workspace-shell.workspace-shell .workspace-sidebar nav { color: var(--wine); margin-top: 26px; }
+.workspace-shell.workspace-shell .workspace-sidebar nav > div { margin-bottom: 8px; }
+.workspace-shell.workspace-shell .workspace-sidebar nav a { font-size: 14px; font-weight: 600; letter-spacing: normal; border-radius: 12px; }
+.workspace-shell.workspace-shell .workspace-sidebar nav svg { color: var(--wine); stroke-width: 1.8; }
+.workspace-shell.workspace-shell .workspace-sidebar nav a:hover { color: var(--wine); background: #f0dfe0; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) nav a[aria-current=page] { color: var(--wine); background: #f1e7e5; }
+@media(min-width:1024px) { .workspace-shell.workspace-shell:not(.workspace-shell--collapsed) { grid-template-columns: 254px minmax(0,1fr); } }
+
+/* The full-width canvas owns the wash; centered content never owns a second
+   layer. Keep the exact Dashboard's existing background owner untouched. */
+.workspace-shell main.ea-consistent-page { padding: 26px 22px 32px; }
+.workspace-page-canvas:has(.ea-consistent-page, .ea-page-loading), .directory-page.directory-page, .vendor-profile-page.vendor-profile-page,
+.vendor-auth-presentation, .auth-page:not(.auth-page--couple):not(.vendor-auth-presentation .auth-page) { position: relative; isolation: isolate; }
+.workspace-page-canvas:has(.ea-consistent-page, .ea-page-loading)::before, .directory-page::before, .vendor-profile-page::before,
+.auth-page:not(.auth-page--couple):not(.vendor-auth-presentation .auth-page)::before {
+  content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background: var(--consistency-wash); mask-image: linear-gradient(to bottom, transparent, #000 40px);
+}
+.vendor-auth-presentation.vendor-auth-presentation .auth-page.auth-page { background: transparent; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) :is(h1,h2,h3,.font-display) { font-family: var(--font-editorial); }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page) :is(.ea-page-header h1, h1) { font-size: clamp(36px,3vw,48px); font-weight: 400; line-height: 1.12; letter-spacing: -.035em; color: var(--ink); }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page) :is(.ea-heading-section, .vendor-panel > h2, section > h2, .tasks-list-heading h2, .wedding-details-form h2, .vendor-business-form h2) { font-size: 30px; line-height: 1.15; font-weight: 400; color: var(--ink); }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) .eyebrow { font: 600 11px/16.5px var(--font-body); letter-spacing: .11em; color: #a85e57; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page) .ea-page-header p:not(.eyebrow) { font-size: 14px; line-height: 1.6; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.ea-surface,.paper-panel,.tasks-list-panel,.tasks-create-panel,.budget-form-surface,.guest-summary,#guest-form,.budget-expense-surface,.budget-metrics,.budget-impact-progress,.vendor-panel,.vendor-business-form section,.vendor-business-form fieldset,.wedding-details-form section,.setup-bookings-panel,.setup-step-panel,.planning-timeline-path,.assistant-workspace),
+:is(.directory-page.directory-page, .vendor-profile-page.vendor-profile-page) :is(.vendor-card,.marketplace-filters,.category-link,.vendor-profile-intro,.vendor-profile-details > section,.vendor-profile-details > aside,.ea-surface,.ea-card),
+.vendor-auth-presentation .auth-panel,
+.auth-page:not(.auth-page--couple) :is(.auth-panel,.paper-panel) {
+  background: #fbf8f5; border: 1px solid #e9e1dc; border-radius: 16px; box-shadow: var(--shadow-soft);
+}
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.vendor-business-form,.wedding-details-form) :is(section,fieldset) { padding: 22px; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.vendor-business-form,.wedding-details-form) :is(h2,legend) { color: var(--ink); }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .vendor-business-form section fieldset { background: #f6f2ee; border-color: #eee5df; border-radius: 10px; box-shadow: none; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .our-vendor-card { background: #fbf8f5; border-color: #e9e1dc; border-radius: 16px; box-shadow: var(--shadow-soft); }
+.directory-page.directory-page .category-link[aria-current=page] { border-color: #733343; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.budget-metric--total,.budget-metric--available,.timeline-destination-surface) { background: #f6f2ee; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .timeline-entry[data-workflow=in_progress] { background: #f6f3ef; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .budget-metric--total { border-color: var(--line); }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .budget-metrics p:last-child { font-family: var(--font-body); }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .setup-progress { background: #f6f2ee; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .setup-progress__track { background: #eee7dd; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .setup-progress__fill { background: linear-gradient(90deg,#733343 0%,#b77983 50%,#c8a475 100%); }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) :is(input:not([type=hidden],[type=checkbox],[type=radio],[type=file]),select,textarea) { background-color: #fbf8f5; border-color: #e9e1dc; color: var(--ink); font-family: var(--font-body); font-size: 16px; letter-spacing: normal; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) :is(input,select,textarea):focus-visible { outline: 2px solid #733343; outline-offset: 3px; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) .ea-button { font-family: var(--font-body); letter-spacing: normal; text-transform: none; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) .ea-button--primary { background: #733343; border-color: #733343; color: #fbf8f5; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page, .vendor-auth-presentation, .auth-page:not(.auth-page--couple)) .ea-button--primary:hover:not(:disabled) { background: #592735; }
+:is(.ea-consistent-page, .directory-page, .vendor-profile-page) :is(.ea-text-action,.ea-label) { letter-spacing: normal; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.vendor-progress,.setup-progress) { background-color: #eee7dd; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.vendor-progress > span,.setup-progress > span) { background-image: linear-gradient(90deg,#733343 0%,#b77983 50%,#c8a475 100%); }
+/* Chat retains all role/direction selectors and markup, with no semantic changes. */
+.workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.assistant-history,.assistant-chat-panel,.assistant-chat-toolbar,.assistant-composer) { background: #fbf8f5; border-color: #e9e1dc; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .assistant-message[data-role=assistant] [data-bubble] { background: #f6f2ee; border-color: #eee5df; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .assistant-message[data-role=user] [data-bubble] { background: #f1e7e5; border-color: #e9e1dc; }
+.workspace-shell.workspace-shell:has(.ea-consistent-page) .assistant-sources li { background: #fbf8f5; border-color: #e9e1dc; }
+/* Vendor authentication keeps the supplied photograph and existing form/modes. */
+.vendor-auth-presentation.vendor-auth-presentation .auth-layout { gap: 32px; padding-top: 32px; }
+.vendor-auth-presentation .auth-editorial-title { color: var(--ink); }
+.vendor-auth-presentation .auth-panel :is(input,select,textarea) { background-color: #fbf8f5; border-color: #e9e1dc; }
+.vendor-auth-presentation .auth-panel h1 { color: var(--ink); }
+@media(max-width:800px) {
+ .workspace-shell main.ea-consistent-page { padding: 22px 16px 28px; }
+ :is(.ea-consistent-page, .directory-page, .vendor-profile-page) :is(.ea-heading-section,.vendor-panel > h2,section > h2,.tasks-list-heading h2,.wedding-details-form h2,.vendor-business-form h2) { font-size: 27px; }
+ .workspace-shell.workspace-shell:has(.ea-consistent-page) :is(.vendor-business-form,.wedding-details-form) :is(section,fieldset) { padding: 18px; }
+}
+
+/* Vendor Auth keeps its content tokens. Its existing Couple-auth navigation
+   instead receives the unchanged public-auth tokens from globals.css. */
+.vendor-auth-presentation > .couple-auth-navigation {
+  --canvas: #fcf9f6; --canvas-deep: #f5ede9;
+  --ink: #493e38; --ink-soft: #6d605a; --line: #e7dad5;
+  --wine: #7a2b3f; --wine-dark: #5f1f30;
+  --paper: #ffffff; --paper-muted: #f5ede9;
+  --blush: #f5ede9; --blush-accent: #ddb3ae;
+  --font-body: "Aptos", "Segoe UI", Arial, sans-serif;
+  --font-editorial: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --surface-radius: 8px;
+  --shadow-soft: 0 2px 8px rgb(73 62 56 / 3%), 0 12px 28px rgb(73 62 56 / 3%);
+  --shadow-raised: 0 6px 14px rgb(73 62 56 / 5%), 0 18px 36px rgb(73 62 56 / 6%);
+}
+/* Reuse the root-resolved Couple Auth wash from rich-canvas.css, without the
+   former masked Vendor overlay or any change to content geometry. */
+.vendor-auth-presentation.vendor-auth-presentation.vendor-auth-presentation {
+  background: var(--rich-canvas);
+  background-size: 100% max(100%, 1000px);
+  background-repeat: no-repeat;
+}

@@ -155,7 +155,7 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
             </div>
           </details>
         </header>
-        <div className="min-h-screen">{children}</div>
+        <div className="workspace-page-canvas min-h-screen">{children}</div>
       </div>
     </div>
   );

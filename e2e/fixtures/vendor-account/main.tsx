@@ -5,6 +5,7 @@ import Profile from "@/app/(vendor)/vendor/profile/page";
 import { AppShell } from "@/components/layout/app-shell";
 import { fixture, refresh } from "./data";
 import "@/app/globals.css";
+import "@/app/eligible-consistency.css";
 import "@/app/product.css";
 import "@/app/vendor-account.css";
 function Fixture() {

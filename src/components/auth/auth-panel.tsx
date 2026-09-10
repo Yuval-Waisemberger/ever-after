@@ -2,7 +2,7 @@
 
 import { useActionState, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Sparkles, Mail, LockKeyhole } from "lucide-react";
+import { ArrowRight, Sparkles, Mail, LockKeyhole, Building2, UserRound, Phone } from "lucide-react";
 import { signIn, signUpCouple, signUpVendor } from "@/lib/actions/auth";
 import { initialAuthState } from "@/lib/actions/auth-state";
 import { FormField } from "@/components/ui/form-field";
@@ -75,24 +75,24 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
 
         {mode === "signup" && audience === "vendor" ? (
           <>
-            <FormField name="businessName" label="Business name" autoComplete="organization" error={error("businessName")} required />
-            <FormField name="contactName" label="Contact person" autoComplete="name" error={error("contactName")} required />
-            <FormField name="phone" type="tel" label="Phone (optional)" autoComplete="tel" error={error("phone")} />
+            <FormField leadingIcon={<Building2 size={19} strokeWidth={1.5} />} name="businessName" label="Business name" autoComplete="organization" error={error("businessName")} required />
+            <FormField leadingIcon={<UserRound size={19} strokeWidth={1.5} />} name="contactName" label="Contact person" autoComplete="name" error={error("contactName")} required />
+            <FormField leadingIcon={<Phone size={19} strokeWidth={1.5} />} name="phone" type="tel" label="Phone (optional)" autoComplete="tel" error={error("phone")} />
           </>
         ) : null}
 
-        <FormField leadingIcon={audience === "couple" ? <Mail size={19} strokeWidth={1.5} /> : undefined} name="email" type="email" label="Primary email" autoComplete="email" error={error("email")} required />
+        <FormField leadingIcon={<Mail size={19} strokeWidth={1.5} />} name="email" type="email" label="Primary email" autoComplete="email" error={error("email")} required />
         {mode === "signup" && audience === "couple" ? (
           <FormField leadingIcon={<Mail size={19} strokeWidth={1.5} />} name="secondEmail" type="email" label="Second email (optional)" autoComplete="email" error={error("secondEmail")} />
         ) : null}
-        <FormField leadingIcon={audience === "couple" ? <LockKeyhole size={19} strokeWidth={1.5} /> : undefined} name="password" type="password" label="Password" autoComplete={mode === "login" ? "current-password" : "new-password"} error={error("password")} hint={mode === "signup" ? "At least 8 characters" : undefined} required />
+        <FormField leadingIcon={<LockKeyhole size={19} strokeWidth={1.5} />} name="password" type="password" label="Password" autoComplete={mode === "login" ? "current-password" : "new-password"} error={error("password")} hint={mode === "signup" ? "At least 8 characters" : undefined} required />
         {mode === "login" ? (
           <Link className="-mt-3 justify-self-end text-sm text-wine underline-offset-4 hover:underline" href={`/auth/forgot-password?audience=${audience}`}>
             Forgot password?
           </Link>
         ) : null}
         {mode === "signup" ? (
-          <FormField leadingIcon={audience === "couple" ? <LockKeyhole size={19} strokeWidth={1.5} /> : undefined} name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
+          <FormField leadingIcon={<LockKeyhole size={19} strokeWidth={1.5} />} name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
         ) : null}
 
         <SubmitButton className={audience === "couple" ? "couple-auth-submit ea-brand-cta" : undefined} pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>

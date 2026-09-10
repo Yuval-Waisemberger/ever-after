@@ -49,7 +49,7 @@ export default async function GuestsPage({ searchParams }: { searchParams: Promi
   const estimate = wedding.guest_count == null ? null : Number(wedding.guest_count);
 
   return (
-    <main className="guest-planning-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="ea-consistent-page guest-planning-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Plan your invitations" title="Your Guest List" description="Keep invitation parties, household counts, and replies together." action={<Link href="/guests?add=1#guest-form" className="ea-button ea-button--primary"><UserPlus className="size-4" aria-hidden="true" />Add guest / household</Link>} />
       {one(raw.guest) === "added" ? <p className="ea-feedback ea-feedback--success mt-5" role="status">Guest added.</p> : one(raw.guest) === "updated" ? <p className="ea-feedback ea-feedback--success mt-5" role="status">Guest updated.</p> : null}
 

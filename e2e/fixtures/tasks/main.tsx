@@ -9,6 +9,7 @@ import { filterTasks, TASK_STATUSES, calculateTaskSummary } from "@/lib/domain/t
 import TimelinePage from "@/app/(couple)/wedding/timeline/page";
 import { fixture } from "./actions";
 import "@/app/globals.css";
+import "@/app/eligible-consistency.css";
 import "@/app/product.css";
 import "@/components/tasks/tasks-visual.css";
 function Fixture() {
@@ -18,7 +19,7 @@ function Fixture() {
   const params = new URLSearchParams(location.search), category = params.get("category") ?? "";
   const status = TASK_STATUSES.find(s => s === params.get("status")) ?? "all";
   const summary = calculateTaskSummary(fixture.tasks.map(t => ({ ...t, dueDate: t.due_date })), new Date());
-  const content = <main className="mx-auto max-w-6xl px-5 py-8">
+  const content = <main className="ea-consistent-page mx-auto max-w-6xl px-5 py-8">
     <h1 className="font-display text-4xl">Our Tasks</h1>
     <p>Open: {summary.open} · Due this week: {summary.dueThisWeek} · Completed: {summary.completed}</p>
     <button onClick={() => { fixture.fail = !fixture.fail; }}>Toggle simulated failure</button>

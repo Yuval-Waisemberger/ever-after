@@ -6,6 +6,7 @@ import { FormField } from "@/components/ui/form-field";
 import { ChoiceGrid } from "@/components/ui/choice-grid";
 import { StatusPill } from "@/components/ui/status-pill";
 import "@/app/globals.css";
+import "@/app/eligible-consistency.css";
 import "@/app/product.css";
 import "@/app/public.css";
 

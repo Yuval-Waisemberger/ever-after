@@ -15,7 +15,7 @@ export const profile: OwnedVendorProfile = {
 };
 export const fixture = { fail: false, hold: false, resolve: undefined as undefined | (()=>void), writes:0 };
 export const refresh = () => window.dispatchEvent(new Event("fixture-refresh"));
-export const getOwnedVendorProfile = async () => ({...profile});
+export const getOwnedVendorProfile = async () => new URLSearchParams(location.search).has("new") ? null : ({...profile});
 export const getVendorTaxonomy = async (): Promise<VendorTaxonomy> => [{id:"photo",name:"Photography & Content",slug:"photography-content",vendor_subcategories:[{id:"stills",name:"Wedding Photographers",slug:"wedding-photographers"}]}];
 export async function getVendorDashboard() {
   const reviews=profile.reviews ?? [];

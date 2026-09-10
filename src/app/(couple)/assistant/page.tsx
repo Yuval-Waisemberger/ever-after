@@ -11,7 +11,7 @@ export const metadata: Metadata = { title: "Wedding Assistant" };
 export default async function AssistantPage() {
   const [history, wedding, identity] = await Promise.all([readAssistantHistory(), getOwnedWedding().catch(() => null), getCoupleIdentity()]);
   return (
-    <main className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="ea-consistent-page mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <AssistantChat
         coupleAvatar={{ choice: identity.avatarChoice, photoUrl: identity.photoUrl }}
         initialThreadId={null}

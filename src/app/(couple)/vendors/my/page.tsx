@@ -40,7 +40,7 @@ export default async function MyVendorsPage({ searchParams }: PageProps<"/vendor
   const returnTo = selected === "all" ? "/vendors/my" : `/vendors/my?status=${selected}`;
 
   return (
-    <main className="our-vendors-page mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="ea-consistent-page our-vendors-page mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Vendors" title="Our Vendors" description="Bookmarks and relationship stages live side by side, including private vendors you add yourself." action={<div className="flex flex-wrap gap-2"><LinkButton href="/vendors" tone="secondary">Explore vendors</LinkButton><ExternalVendorDialog taxonomy={taxonomy} /></div>} />
       {params.relationship === "error" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">The vendor change and budget could not be saved. Please try again.</p> : null}
       {params.relationship === "financial-history" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">This vendor could not be deleted. If it has financial history, change its lifecycle instead; payments must be preserved.</p> : null}

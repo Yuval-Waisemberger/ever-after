@@ -7,7 +7,7 @@ import { VendorNumber, VendorReveal, VendorStars } from "./vendor-motion";
 
 export function VendorDashboardView({ dashboard }: { dashboard: NonNullable<Awaited<ReturnType<typeof getVendorDashboard>>> }) {
   const { profile, completion, rating, reviews } = dashboard;
-  return <main className="vendor-account mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+  return <main className="ea-consistent-page vendor-account mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
     <PageHeader eyebrow="Vendor Dashboard" title={profile.business_name} description="A considered profile. A lasting first impression." action={<Link href="/vendor/profile" className="ea-button ea-button--primary">Edit profile <ArrowRight className="size-4" /></Link>} />
     <div className="vendor-publication-summary"><span className="vendor-publication-pill">{profile.is_public ? <Globe2 className="size-4" /> : <LockKeyhole className="size-4" />}{profile.is_public ? "Public · Live" : "Private"}</span><p>{profile.is_public ? "Couples can discover your business in Ever After." : "Shape your profile privately, then share it when you’re ready."}</p><Link href="/vendor/profile#publication" className="ea-text-action">Manage visibility <ArrowRight className="size-3.5" /></Link></div>
     <div className="mt-7 grid gap-5 lg:grid-cols-3">

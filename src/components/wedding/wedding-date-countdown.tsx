@@ -25,10 +25,10 @@ export function WeddingDateCountdown({ weddingDate, initialNow, previewNow = nul
       {special ? <>
         {phase.key !== "POST_WEDDING" ? <p className="mb-2 text-xs font-bold uppercase tracking-[0.18em] text-wine">{finalWeek ? "Wedding Week" : "Wedding Day"}</p> : null}
         <p className="font-display countdown-special-title text-wine">{phase.key === "FINAL_WEEK" ? <><AnimatedValue value={phase.daysRemaining!} duration={2000} countdown /> days to go</> : title}</p>
-        <p className="mt-2 text-sm text-ink-soft">{dateLabel}</p>
+        <p className="countdown-date-label mt-2 text-sm text-ink-soft">{dateLabel}</p>
         {fine ? <p className="mt-2 text-sm tabular-nums text-ink-soft"><span dir="ltr">{String(fine.hours).padStart(2, "0")}h {String(fine.minutes).padStart(2, "0")}m</span> until your wedding day</p> : null}
       </> : <>
-        <p className="font-display text-2xl text-wine">{dateLabel}</p>
+        <p className="countdown-date-label font-display text-2xl text-wine">{dateLabel}</p>
         {weddingDate ? <p className="countdown-day-value" aria-label={`${phase.daysRemaining} days until your celebration`}><AnimatedValue value={phase.daysRemaining!} duration={2200} countdown /><span className="countdown-caption">days until your celebration <span aria-hidden="true">✧</span></span></p> : <p className="mt-2 text-sm text-ink-soft">Choose it whenever the moment feels right.</p>}
       </>}
       {previewNow !== null ? <p className="mt-2 text-xs text-ink-soft">Development preview · date area only</p> : null}

@@ -16,7 +16,7 @@ export const metadata: Metadata = { title: "My Reviews" };
 export default async function MyReviewsPage() {
   const reviews = await getMyReviews();
   return (
-    <main className="mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="ea-consistent-page mx-auto max-w-5xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Shared experiences" title="My Reviews" description="Revisit the feedback you have shared with the wedding professionals who helped shape your day." action={<LinkButton href="/vendors" tone="secondary">Explore vendors</LinkButton>} />
       <div className="mt-8 space-y-4">
         {reviews.map((review, index) => {

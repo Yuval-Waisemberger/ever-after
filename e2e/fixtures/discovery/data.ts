@@ -4,7 +4,9 @@ export const fixture = { saved: false, status: "considering", fail: false, hold:
 export const vendor: import("@/lib/vendors/types").MarketplaceVendor = {...base, businessName: "Willow Studio", recommendation: {isRecommended:true,score:90,applicableDimensions:["area","style"],reasons:[{dimension:"area" as const,label:"Serves your area",earnedWeight:25,availableWeight:25},{dimension:"style" as const,label:"Matches your style",earnedWeight:20,availableWeight:20}]}};
 export const taxonomy = [{ id:"category", name:"Photography & Content", slug:"photography-content", vendor_subcategories:[{id:"subcategory",name:"Wedding photographers",slug:"wedding-photographers"}] }];
 export const refresh = () => window.dispatchEvent(new Event("fixture-refresh"));
-export async function getCurrentProfile(){return {role:"couple",displayName:"Fixture Couple"};}
+export async function getCurrentProfile(){return new URLSearchParams(location.search).has("guest") ? null : {role:"couple",displayName:"Fixture Couple"};}
+export async function getMarketplace(){return {vendors:[0,1,2,3].map(i=>({...vendor,id:vendor.id+i,businessName:i===0?vendor.businessName:`Willow Studio ${i+1}`})),total:4,pageSize:12,isPreview:true};}
+export async function getMarketplaceSubcategories(){return [{slug:"wedding-photographers",name:"Wedding photographers",categorySlug:"photography-content"}];}
 export async function getVendorBySlug(){return vendor;}
 export async function getVendorRelationship(){return {status:fixture.status,is_saved:fixture.saved};}
 export async function getCoupleVendorTaxonomy(){return taxonomy;}

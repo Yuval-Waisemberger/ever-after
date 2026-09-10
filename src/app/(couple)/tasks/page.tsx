@@ -19,7 +19,7 @@ export default async function TasksPage({ searchParams }: PageProps<"/tasks">) {
   const selectedStatus = TASK_STATUSES.find(status => status === params.status) ?? "all";
   const visibleTasks = filterTasks(tasks, selectedStatus, selectedCategory);
   return (
-    <main className="mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
+    <main className="ea-consistent-page mx-auto max-w-6xl px-5 py-8 sm:px-8 lg:px-10 lg:py-12">
       <PageHeader eyebrow="Plan together" title="Our Tasks" description="Keep every shared to-do in one calm place, from the first idea to the final detail." />
       <TaskListPanel count={visibleTasks.length} filters={<TaskFilters category={selectedCategory} status={selectedStatus} />}>
         {visibleTasks.length ? visibleTasks.map((task) => <div id={`task-${task.id}`} key={task.id} className="scroll-mt-6"><TaskRow task={task} defaultOpen={task.id === editTaskId} /></div>) : <EmptyState title={selectedCategory ? `No ${selectedCategory} tasks yet` : "No tasks yet"} description="Add anything you want to remember. Your dated tasks will also join the Wedding Timeline." />}

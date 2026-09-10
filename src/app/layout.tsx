@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import "./eligible-consistency.css";
 import "./product.css";
 import "./public.css";
 
