@@ -95,9 +95,9 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
           <FormField leadingIcon={<LockKeyhole size={19} strokeWidth={1.5} />} name="confirmPassword" type="password" label="Confirm password" autoComplete="new-password" error={error("confirmPassword")} required />
         ) : null}
 
-        <SubmitButton className={audience === "couple" ? "couple-auth-submit ea-brand-cta" : undefined} pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>
+        <SubmitButton className="couple-auth-submit ea-brand-cta" pendingLabel={mode === "login" ? "Signing in…" : "Creating account…"}>
           {mode === "login" ? "Sign in" : "Create account"}
-          {audience === "couple" ? <ArrowRight size={17} aria-hidden="true" /> : null}
+          <ArrowRight size={17} aria-hidden="true" />
         </SubmitButton>
       </form>
 

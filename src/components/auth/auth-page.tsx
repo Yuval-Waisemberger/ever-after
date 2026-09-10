@@ -4,6 +4,7 @@ import { Wordmark } from "@/components/brand/wordmark";
 import { AuthPanel } from "./auth-panel";
 import { LandingNavigation } from "@/components/public/landing-navigation";
 import "@/app/public-auth.css";
+import "./vendor-auth.css";
 
 export function AuthPage({
   audience,
@@ -26,9 +27,10 @@ export function AuthPage({
   </>;
   const photograph = <div className="auth-image">
     <Image
-      src={audience === "couple" ? "/images/auth/hands-and-rings.webp" : "/demo-marketplace/event-managers/event-managers-01.webp"}
+      src={audience === "couple" ? "/images/auth/hands-and-rings.webp" : "/images/auth/vendor-auth-planner.png"}
       alt={audience === "couple" ? "Wedding rings on two hands resting together on ivory fabric" : "Wedding planner reviewing reception preparations"}
       fill
+      unoptimized={audience === "vendor"}
       sizes={audience === "couple" ? "(max-width: 600px) calc(100vw - 40px), (max-width: 900px) 230px, 410px" : "(max-width: 640px) calc(100vw - 40px), (max-width: 900px) 592px, 440px"}
       className="object-cover"
       priority={audience === "couple"}
@@ -45,7 +47,7 @@ export function AuthPage({
       </div>}
       <div className="auth-layout">
         <div className="auth-introduction">
-          {audience === "couple" ? <div className="auth-copy">{introduction}</div> : introduction}
+          {audience === "couple" ? <div className="auth-copy">{introduction}</div> : <div className="vendor-auth-copy">{introduction}</div>}
           {audience === "couple" ? <ol className="auth-editorial-list" aria-label="Planning with Ever After">
             <li>Plan with ease</li><li>Find the perfect vendors</li><li>Stay on track</li><li>A more meaningful journey together</li>
           </ol> : photograph}

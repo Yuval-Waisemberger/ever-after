@@ -63,7 +63,9 @@ describe("Public/Auth visual boundaries", () => {
   });
   it("leaves Vendor Auth outside the Couple presentation", () => {
     const doc = parse(renderToStaticMarkup(<AuthPage audience="vendor" mode="login" />));
-    expect(doc.querySelector(".auth-page--couple, .auth-support-strip, .couple-auth-submit")).toBeNull();
+    expect(doc.querySelector(".auth-page--couple, .auth-support-strip")).toBeNull();
+    expect(doc.querySelector(".couple-auth-submit .lucide-arrow-right")).not.toBeNull();
+    expect(doc.querySelector(".auth-image img")?.getAttribute("src")).toBe("/images/auth/vendor-auth-planner.png");
     expect(doc.querySelector("h2")?.textContent).toBe("Your Work. Their Perfect Day.");
   });
 });

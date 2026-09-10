@@ -1,0 +1,64 @@
+/* Vendor-only mappings to the approved Couple Auth primitives. No canvas/header rules. */
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel h1 {
+ --font-editorial: "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+ --ink: #493e38;
+ font-family: var(--font-editorial);
+ font-size: 39px;
+ font-weight: 400;
+ line-height: 1.15;
+ letter-spacing: -.025em;
+ color: var(--ink);
+}
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel :is(label, input, select, textarea, .ea-field-error, .ea-feedback) {
+ --font-body: "Aptos", "Segoe UI", Arial, sans-serif;
+ font-family: var(--font-body);
+}
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel > .eyebrow {
+ --font-body: "Aptos", "Segoe UI", Arial, sans-serif;
+ --wine: #7a2b3f;
+ font-family: var(--font-body);
+ font-size: 10px;
+ font-weight: 500;
+ line-height: 1.5;
+ letter-spacing: .15em;
+ color: var(--wine);
+ text-transform: uppercase;
+}
+@media (max-width: 600px) {
+ .vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel h1 { font-size: 30px; }
+}
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel {
+ --vendor-auth-paper:#fff; --vendor-auth-blush:#f5ede9;
+ background:linear-gradient(135deg,var(--vendor-auth-paper),color-mix(in srgb,var(--vendor-auth-blush) 28%,var(--vendor-auth-paper)));
+ border-color:#e7dad5;
+ box-shadow:0 6px 14px rgb(73 62 56 / 5%),0 18px 36px rgb(73 62 56 / 6%),inset 0 1px #fff;
+}
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel :is(input:not([type=hidden]),select,textarea) { background:#fcf9f6; border-color:#e7dad5; color:#493e38; }
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel :is(input,select,textarea):focus { border-color:#7a2b3f; }
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel :is(input,select,textarea):focus-visible { outline:2px solid #7a2b3f; outline-offset:4px; }
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel > .border-t { border-color:#e7dad5; }
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel button.couple-auth-submit {
+ --wine:#7a2b3f; --wine-dark:#5f1f30;
+ position:relative; overflow:hidden; gap:12px; min-height:49px; padding:13px 28px;
+ font-family:"Aptos","Segoe UI",Arial,sans-serif; font-size:12px; font-weight:500; line-height:1.5; letter-spacing:.13em; text-transform:uppercase;
+ background:var(--action-primary); border-color:var(--wine); color:var(--cream);
+}
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel button.couple-auth-submit:hover:not(:disabled) { background:var(--action-primary-hover); border-color:var(--wine-dark); }
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel a[href*="forgot-password"] { margin-top:-16px; font-family:"Aptos","Segoe UI",Arial,sans-serif; color:#7a2b3f; font-size:14px; font-weight:400; line-height:20px; letter-spacing:normal; }
+.vendor-auth-presentation .auth-page.auth-page.auth-page .auth-panel a[href*="forgot-password"]:focus-visible { outline:2px solid #7a2b3f; outline-offset:4px; }
+.vendor-auth-presentation .auth-image img { object-position:50% 50%; filter:none; }
+@media (prefers-reduced-motion:no-preference) {
+ .vendor-auth-presentation > .auth-page { animation:ea-page-enter var(--motion-route) var(--ease-soft); }
+ .vendor-auth-presentation .vendor-auth-copy { animation:ea-page-enter var(--motion-reveal) var(--ease-soft); }
+ .vendor-auth-presentation .couple-auth-submit:disabled::after { content:""; position:absolute; inset:0; background:linear-gradient(100deg,transparent,rgb(255 250 243 / 16%),transparent); animation:ea-skeleton-sweep var(--motion-loading) var(--ease-standard) infinite; pointer-events:none; }
+}
+
+/* Keep the pre-existing editorial grid geometry inside its entrance-motion owner. */
+.vendor-auth-presentation .vendor-auth-copy { display:grid; grid-column:1; grid-row:1; }
+.vendor-auth-presentation .vendor-auth-copy > .eyebrow { grid-column:1; grid-row:1; padding-top:44px; }
+.vendor-auth-presentation .vendor-auth-copy > p:not(.eyebrow) { grid-column:1; grid-row:1; margin-top:280px; }
+@media(max-width:1100px) {
+ .vendor-auth-presentation .vendor-auth-copy { display:block; }
+ .vendor-auth-presentation .vendor-auth-copy > .eyebrow { padding-top:0; }
+ .vendor-auth-presentation .vendor-auth-copy > p:not(.eyebrow) { margin-top:20px; }
+}
