@@ -5,7 +5,7 @@ import { LandingNavigation } from "@/components/public/landing-navigation";
 import { LandingFeatures } from "@/components/public/landing-features";
 import { AuthPage } from "@/components/auth/auth-page";
 
-vi.mock("@/lib/actions/auth", () => ({ signIn: vi.fn(), signUpCouple: vi.fn(), signUpVendor: vi.fn(), resendVerification: vi.fn() }));
+vi.mock("@/lib/actions/auth", () => ({ signInCouple: vi.fn(), signInVendor: vi.fn(), signUpCouple: vi.fn(), signUpVendor: vi.fn(), resendVerification: vi.fn() }));
 const parse = (markup: string) => new DOMParser().parseFromString(markup, "text/html");
 
 describe("Public/Auth visual boundaries", () => {

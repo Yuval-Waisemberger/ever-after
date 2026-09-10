@@ -1,7 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { isSupabaseConfigured } from "@/lib/supabase/config";
+import { getSupabaseConfig, isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
 import {
   coupleSignUpSchema,
@@ -13,7 +14,7 @@ import {
   resetPasswordSchema,
 } from "@/lib/validation/auth";
 import { passwordRecoveryCallbackUrl, signupCallbackUrl } from "@/lib/auth/redirect";
-import { getCurrentProfile, type AppRole } from "@/lib/auth/user";
+import { getCurrentProfile, resolveAuthenticatedProfile, type AppRole } from "@/lib/auth/user";
 import type { AuthActionState } from "./auth-state";
 
 function formValues(formData: FormData) {
@@ -49,22 +50,60 @@ async function signOutAfterPasswordUpdate(supabase: Awaited<ReturnType<typeof cr
   if (error) await supabase.auth.signOut({ scope: "local" });
 }
 
-export async function signIn(
-  _previous: AuthActionState,
-  formData: FormData,
-): Promise<AuthActionState> {
+const roleResolutionError: AuthActionState = { status: "error", message: "We could not verify your account type. Please try again." };
+
+async function clearRejectedLogin(supabase: Awaited<ReturnType<typeof createClient>>) {
+  try {
+    await supabase.auth.signOut({ scope: "local" });
+  } catch {
+    // Still expire the browser session if provider revocation is unavailable.
+  } finally {
+    const store = await cookies();
+    const key = `sb-${new URL(getSupabaseConfig().url).hostname.split(".")[0]}-auth-token`;
+    for (const cookie of store.getAll()) {
+      if (cookie.name === key || cookie.name.startsWith(`${key}.`)) store.delete(cookie.name);
+    }
+  }
+}
+
+async function signInForRole(expectedRole: AppRole, formData: FormData): Promise<AuthActionState> {
   if (!isSupabaseConfigured()) return missingConfig();
   const parsed = signInSchema.safeParse(formValues(formData));
-  if (!parsed.success) {
-    return { status: "error", errors: parsed.error.flatten().fieldErrors };
-  }
+  if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword(parsed.data);
+  // Do not replace or clear an unrelated session from another open Auth tab.
+  let existing;
+  try {
+    const { data, error: claimsError } = await supabase.auth.getClaims();
+    if (claimsError) return roleResolutionError;
+    if (typeof data?.claims?.sub === "string") existing = await resolveAuthenticatedProfile(supabase, data.claims.sub);
+    if (data?.claims?.sub && !existing) return roleResolutionError;
+  } catch { return roleResolutionError; }
+  if (existing) redirect(existing.role === "vendor" ? "/vendor" : "/wedding");
+
+  const { data, error } = await supabase.auth.signInWithPassword(parsed.data);
   if (error) return { status: "error", message: "Email or password is incorrect." };
 
-  const { data: profile } = await supabase.from("profiles").select("role").single();
-  redirect(profile?.role === "vendor" ? "/vendor" : "/wedding");
+  let profile;
+  try {
+    profile = data.user?.id ? await resolveAuthenticatedProfile(supabase, data.user.id) : null;
+  } catch { profile = null; }
+  if (!profile || profile.role !== expectedRole) {
+    await clearRejectedLogin(supabase);
+    if (!profile) return roleResolutionError;
+    const account = profile.role === "vendor" ? "Vendor" : "Couple";
+    return { status: "error", message: `This account is registered as a ${account}. Please use ${account} sign in.` };
+  }
+  redirect(profile.role === "vendor" ? "/vendor" : "/wedding");
+}
+
+export async function signInCouple(_previous: AuthActionState, formData: FormData): Promise<AuthActionState> {
+  return signInForRole("couple", formData);
+}
+
+export async function signInVendor(_previous: AuthActionState, formData: FormData): Promise<AuthActionState> {
+  return signInForRole("vendor", formData);
 }
 
 export async function signUpCouple(

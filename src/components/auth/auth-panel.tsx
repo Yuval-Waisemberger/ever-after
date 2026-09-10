@@ -3,7 +3,7 @@
 import { useActionState, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Sparkles, Mail, LockKeyhole, Building2, UserRound, Phone } from "lucide-react";
-import { signIn, signUpCouple, signUpVendor } from "@/lib/actions/auth";
+import { signInCouple, signInVendor, signUpCouple, signUpVendor } from "@/lib/actions/auth";
 import { initialAuthState } from "@/lib/actions/auth-state";
 import { FormField } from "@/components/ui/form-field";
 import { SubmitButton } from "@/components/ui/submit-button";
@@ -33,7 +33,7 @@ function ActionMessage({ state }: { state: typeof initialAuthState }) {
 
 export function AuthPanel({ audience, initialMode = "signup", message }: AuthPanelProps) {
   const [mode, setMode] = useState(initialMode);
-  const action = mode === "login" ? signIn : audience === "couple" ? signUpCouple : signUpVendor;
+  const action = mode === "login" ? (audience === "couple" ? signInCouple : signInVendor) : audience === "couple" ? signUpCouple : signUpVendor;
   const [state, formAction] = useActionState(action, initialAuthState);
   const error = (name: string) => state.errors?.[name]?.[0];
 

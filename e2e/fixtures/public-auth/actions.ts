@@ -14,3 +14,6 @@ export const signUpVendor = signIn;
 export const resendVerification = signIn;
 export const requestPasswordReset = signIn;
 export const resetPassword = signIn;
+
+export const signInCouple = signIn;
+export const signInVendor = signIn;
