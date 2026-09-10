@@ -97,11 +97,9 @@ export function AppShell({ role, displayName, showSetup = false, avatarChoice, a
 
   return (
     <div className={`workspace-shell min-h-screen bg-canvas lg:grid ${sidebarCollapsed ? "workspace-shell--collapsed" : ""}`}>
-      <aside className="workspace-sidebar sticky top-0 hidden h-screen border-r bg-paper px-5 py-6 lg:flex lg:flex-col">
+      <aside data-role={role} className="workspace-sidebar sticky top-0 hidden h-screen border-r bg-paper px-5 py-6 lg:flex lg:flex-col">
         <div className="workspace-sidebar-brand flex items-center justify-between gap-2">
-          {sidebarCollapsed ? (
-            <Link href={role === "couple" ? "/wedding" : "/vendor"} className="grid size-10 place-items-center text-wine" aria-label="Ever After home"><Heart className="size-5" /></Link>
-          ) : brand}
+          {!sidebarCollapsed ? brand : null}
           <button type="button" className="grid size-10 place-items-center text-ink-soft hover:text-wine" onClick={() => setSidebarCollapsed((collapsed) => !collapsed)} aria-label={sidebarCollapsed ? "Expand side navigation" : "Collapse side navigation"}>
             {sidebarCollapsed ? <PanelLeftOpen className="size-4.5" /> : <PanelLeftClose className="size-4.5" />}
           </button>

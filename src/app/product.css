@@ -29,6 +29,8 @@
 .workspace-shell--collapsed { grid-template-columns: 78px minmax(0, 1fr); }
 .workspace-sidebar { background: var(--paper); padding: 18px 20px; }
 .workspace-shell--collapsed .workspace-sidebar { padding-inline: 14px; }
+/* Include the rail border when centering the collapsed control. */
+.workspace-shell--collapsed .workspace-sidebar-brand { width:calc(100% + 1px); justify-content:center; }
 .workspace-sidebar-brand .ea-wordmark { min-width: 0; width: 176px; }
 .workspace-sidebar > nav { min-height: 0; overflow-y: auto; margin-top: 24px; scrollbar-width: thin; }
 .workspace-sidebar > nav > div { margin-bottom: 7px; }
@@ -313,4 +315,11 @@
   .vendor-auth-presentation .auth-image { height: 260px; }
   .vendor-auth-presentation .auth-panel { width: 100%; padding: 24px 20px; }
   .workspace-shell .budget-overview .budget-metric { padding: 18px 12px; }
+}
+
+/* Expanded Vendor desktop identity row only; other shell states retain their geometry. */
+@media (min-width:1024px) {
+ .workspace-shell:not(.workspace-shell--collapsed) .workspace-sidebar[data-role="vendor"] .workspace-sidebar-brand { justify-content:flex-start; }
+ .workspace-shell:not(.workspace-shell--collapsed) .workspace-sidebar[data-role="vendor"] .workspace-sidebar-brand .ea-wordmark { flex:0 0 165px; width:165px; height:auto; }
+ .workspace-shell:not(.workspace-shell--collapsed) .workspace-sidebar[data-role="vendor"] .workspace-sidebar-brand .ea-wordmark img { height:auto; }
 }
