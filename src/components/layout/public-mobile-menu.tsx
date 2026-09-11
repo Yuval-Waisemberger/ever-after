@@ -3,7 +3,19 @@
 import { Menu, X } from "lucide-react";
 import { useEffect, useRef, type ReactNode } from "react";
 
-export function PublicMobileMenu({ links, authenticated, children }: { links: Array<{ href: string; label: string }>; authenticated: boolean; children?: ReactNode }) {
+export function PublicMobileMenu({
+  links,
+  authenticated,
+  children,
+  loginHref = "/auth/couple?mode=login",
+  signupHref = "/auth/couple?mode=signup",
+}: {
+  links: Array<{ href: string; label: string }>;
+  authenticated: boolean;
+  children?: ReactNode;
+  loginHref?: string;
+  signupHref?: string;
+}) {
   const disclosure = useRef<HTMLDetailsElement>(null);
   const summary = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -27,8 +39,8 @@ export function PublicMobileMenu({ links, authenticated, children }: { links: Ar
         {links.map((link) => <a key={link.href} href={link.href}>{link.label}</a>)}
         {children}
         {!authenticated ? <>
-          <a href="/auth/couple?mode=login">Log in</a>
-          <a href="/auth/couple">Sign up</a>
+          <a href={loginHref}>Log in</a>
+          <a href={signupHref}>Sign up</a>
           <a href="/auth/vendor">Are you a vendor? Join Ever After →</a>
         </> : null}
       </nav>

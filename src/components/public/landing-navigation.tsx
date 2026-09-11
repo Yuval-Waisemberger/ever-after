@@ -14,8 +14,16 @@ const landingLinks = [
 const aboutText = "We are Yuval and Liat, second-year B.Sc. Computer Science students. Ever After was created as our final project for the Full-Stack Development course, combining thoughtful design and technology to make wedding planning simpler, clearer, and more enjoyable ♡";
 
 /** Landing-only presentation; account links use the existing auth routes. */
-export function LandingNavigation({ context = "landing" }: { context?: "landing" | "auth" }) {
+export function LandingNavigation({
+  context = "landing",
+  authAudience = "couple",
+}: {
+  context?: "landing" | "auth";
+  authAudience?: "couple" | "vendor";
+}) {
   const links = landingLinks.map(link => ({ ...link, href: context === "auth" && link.href.startsWith("#") ? `/${link.href}` : link.href }));
+  const loginHref = `/auth/${authAudience}?mode=login`;
+  const signupHref = `/auth/${authAudience}?mode=signup`;
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLElement | null>(null);
   const aboutDialog = useRef<HTMLDialogElement>(null);
@@ -62,11 +70,11 @@ export function LandingNavigation({ context = "landing" }: { context?: "landing"
         <nav className="public-desktop-nav" aria-label="Public navigation">
           <div className="public-nav-pages">{links.map(link => <Link key={link.href} href={link.href}>{link.label}</Link>)}{aboutButton("desktop")}{assistant}</div>
           <div className="public-nav-account">
-            <Link href="/auth/couple?mode=login">Log in</Link>
-            <Link href="/auth/couple" className="public-button header-signup">Sign up</Link>
+            <Link href={loginHref}>Log in</Link>
+            <Link href={signupHref} className="public-button header-signup">Sign up</Link>
           </div>
         </nav>
-        <PublicMobileMenu links={links} authenticated={false}>{aboutButton("mobile")}{assistant}</PublicMobileMenu>
+        <PublicMobileMenu links={links} authenticated={false} loginHref={loginHref} signupHref={signupHref}>{aboutButton("mobile")}{assistant}</PublicMobileMenu>
       </div>
       <dialog ref={dialog} className="landing-assistant-dialog ea-surface ea-surface--champagne" aria-labelledby="assistant-unlock-title" onKeyDown={event => {
         if (event.key !== "Tab") return;

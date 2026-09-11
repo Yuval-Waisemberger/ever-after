@@ -286,6 +286,72 @@ test("landing How it works and Vendors retain their existing routes", async ({ p
   await expect(page.locator(".vendor-card").first()).toBeVisible();
 });
 
+for (const audience of ["couple", "vendor"] as const) {
+  test(`${audience} auth navigation and form links keep URL and form mode synchronized`, async ({ page }) => {
+    const base = `/auth/${audience}`;
+    const header = () => page.getByRole("navigation", { name: "Public navigation", exact: true });
+    const expectLogin = async () => {
+      await expect(page).toHaveURL(new RegExp(`${base.replaceAll("/", "\\/")}\\?mode=login$`));
+      await expect(page.getByRole("heading", { name: "Welcome back", exact: true })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeVisible();
+    };
+    const expectSignup = async () => {
+      await expect(page).toHaveURL(new RegExp(`${base.replaceAll("/", "\\/")}\\?mode=signup$`));
+      await expect(page.getByRole("heading", { name: audience === "couple" ? "Create your shared space" : "Create your business account", exact: true })).toBeVisible();
+      await expect(page.getByRole("button", { name: "Create account", exact: true })).toBeVisible();
+    };
+
+    await page.goto(`${base}?mode=login`);
+    await expectLogin();
+    await header().getByRole("link", { name: "Sign up", exact: true }).click();
+    await expectSignup();
+    await page.reload();
+    await expectSignup();
+    await page.goto(`${base}?mode=login`);
+    await expectLogin();
+    await header().getByRole("link", { name: "Sign up", exact: true }).click();
+    await expectSignup();
+    await page.goBack();
+    await expectLogin();
+    await page.goForward();
+    await expectSignup();
+    await page.getByRole("link", { name: "Already have an account? Sign in", exact: true }).click();
+    await expectLogin();
+    await page.getByRole("link", { name: "Create an account", exact: true }).click();
+    await expectSignup();
+    await header().getByRole("link", { name: "Log in", exact: true }).click();
+    await expectLogin();
+    await header().getByRole("link", { name: "Sign up", exact: true }).click();
+    await expectSignup();
+    if (audience === "vendor") await expect(page).not.toHaveURL(/\/auth\/couple/);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`${base}?mode=login`);
+    await page.getByLabel("Navigation menu", { exact: true }).click();
+    await page.getByRole("navigation", { name: "Mobile navigation", exact: true }).getByRole("link", { name: "Sign up", exact: true }).click();
+    await expectSignup();
+    await page.getByLabel("Navigation menu", { exact: true }).click();
+    await page.getByRole("navigation", { name: "Mobile navigation", exact: true }).getByRole("link", { name: "Log in", exact: true }).click();
+    await expectLogin();
+    if (audience === "vendor") await expect(page).not.toHaveURL(/\/auth\/couple/);
+  });
+}
+
+test("landing and Guest Marketplace account links retain Couple destinations on desktop and mobile", async ({ page }) => {
+  for (const [route, width] of [["/", 1440], ["/vendors", 390]] as const) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto(route);
+    const mobile = width <= 900;
+    if (mobile) await page.getByLabel("Navigation menu", { exact: true }).click();
+    const navigation = page.getByRole("navigation", { name: mobile ? "Mobile navigation" : "Public navigation", exact: true });
+    await expect(navigation.getByRole("link", { name: "Log in", exact: true })).toHaveAttribute("href", "/auth/couple?mode=login");
+    await expect(navigation.getByRole("link", { name: "Sign up", exact: true })).toHaveAttribute("href", "/auth/couple?mode=signup");
+    await navigation.getByRole("link", { name: "Sign up", exact: true }).click();
+    await expect(page).toHaveURL(/\/auth\/couple\?mode=signup$/);
+    await expect(page.getByRole("heading", { name: "Create your shared space", exact: true })).toBeVisible();
+  }
+});
+
 test("reduced motion exposes final content, usable focus and no petals", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/");

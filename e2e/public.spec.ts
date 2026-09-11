@@ -285,5 +285,5 @@ test("private Couple route redirects to sign in when Supabase is not configured"
   await page.goto("/wedding");
   await expect(page).toHaveURL(/\/auth\/couple/);
   await expect(page.getByRole("status")).toHaveText("Please sign in to continue");
-  await expect(page.getByRole("button", { name: "Already have an account? Sign in", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Already have an account? Sign in", exact: true })).toBeVisible();
 });

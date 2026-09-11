@@ -30,6 +30,13 @@ describe("Public/Auth visual boundaries", () => {
     expect(doc.querySelector(".landing-assistant-link")?.getAttribute("href")).toBe("/auth/couple");
     expect(doc.querySelector("dialog")?.hasAttribute("open")).toBe(false);
   });
+  it.each(["couple", "vendor"] as const)("keeps desktop and mobile account links in the %s auth flow", audience => {
+    const doc = parse(renderToStaticMarkup(<LandingNavigation context="auth" authAudience={audience} />));
+    for (const navigation of [".public-desktop-nav", "#public-mobile-navigation"]) {
+      expect(doc.querySelector(`${navigation} a[href='/auth/${audience}?mode=login']`)?.textContent).toBe("Log in");
+      expect(doc.querySelector(`${navigation} a[href='/auth/${audience}?mode=signup']`)?.textContent).toBe("Sign up");
+    }
+  });
   it("server-renders all four features without depending on animation or observers", () => {
     const doc = parse(renderToStaticMarkup(<LandingFeatures />));
     expect(doc.querySelectorAll(".pillar h3")).toHaveLength(4);
@@ -55,6 +62,8 @@ describe("Public/Auth visual boundaries", () => {
     expect(doc.querySelector('[name="email"]')?.hasAttribute("required")).toBe(true);
     expect(doc.querySelectorAll(".ea-field-leading")).toHaveLength(mode === "login" ? 2 : 4);
     expect(doc.querySelector("button[type=submit]")?.classList.contains("ea-brand-cta")).toBe(true);
+    const switchLink = [...doc.querySelectorAll<HTMLAnchorElement>(".auth-panel a")].find(link => link.classList.contains("font-semibold"));
+    expect(switchLink?.getAttribute("href")).toBe(`/auth/couple?mode=${mode === "login" ? "signup" : "login"}`);
     expect(doc.querySelector(".auth-support-strip")?.textContent).toContain("Planning with Ever After AI");
     if (mode === "signup") {
       expect([...doc.querySelectorAll("input[name]")].map(el => el.getAttribute("name"))).toEqual(["partnerOneName", "partnerTwoName", "displayName", "partnerOnePhone", "partnerTwoPhone", "email", "secondEmail", "password", "confirmPassword"]);

@@ -53,7 +53,7 @@ export function AuthPage({
           </ol> : photograph}
         </div>
         {audience === "couple" ? photograph : null}
-        <AuthPanel audience={audience} initialMode={mode} message={message} />
+        <AuthPanel key={`${audience}-${mode ?? "signup"}`} audience={audience} initialMode={mode} message={message} />
       </div>
     </main>
   );

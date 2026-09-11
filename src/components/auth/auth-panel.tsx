@@ -1,7 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { ArrowRight, Sparkles, Mail, LockKeyhole, Building2, UserRound, Phone } from "lucide-react";
 import { signInCouple, signInVendor, signUpCouple, signUpVendor } from "@/lib/actions/auth";
 import { initialAuthState } from "@/lib/actions/auth-state";
@@ -32,7 +33,8 @@ function ActionMessage({ state }: { state: typeof initialAuthState }) {
 }
 
 export function AuthPanel({ audience, initialMode = "signup", message }: AuthPanelProps) {
-  const [mode, setMode] = useState(initialMode);
+  const requestedMode = useSearchParams()?.get("mode");
+  const mode = requestedMode === "login" || requestedMode === "signup" ? requestedMode : initialMode;
   const action = mode === "login" ? (audience === "couple" ? signInCouple : signInVendor) : audience === "couple" ? signUpCouple : signUpVendor;
   const [state, formAction] = useActionState(action, initialAuthState);
   const error = (name: string) => state.errors?.[name]?.[0];
@@ -102,9 +104,9 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
       </form>
 
       <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5 text-sm">
-        <button type="button" className="font-semibold text-wine underline-offset-4 hover:underline" onClick={() => setMode(mode === "login" ? "signup" : "login")}>
+        <Link className="font-semibold text-wine underline-offset-4 hover:underline" href={`/auth/${audience}?mode=${mode === "login" ? "signup" : "login"}`}>
           {mode === "login" ? "Create an account" : "Already have an account? Sign in"}
-        </button>
+        </Link>
         <Link className="text-ink-soft underline-offset-4 hover:text-wine hover:underline" href={audience === "couple" ? "/auth/vendor" : "/auth/couple"}>
           {audience === "couple" ? "I’m a vendor" : "We’re a couple"}
         </Link>

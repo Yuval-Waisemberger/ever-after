@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "Vendor sign in" };
 export default async function VendorAuthPage({ searchParams }: PageProps<"/auth/vendor">) {
   const params = await searchParams;
   return (
-    <div className="vendor-auth-presentation"><LandingNavigation context="auth" />
+    <div className="vendor-auth-presentation"><LandingNavigation context="auth" authAudience="vendor" />
     <AuthPage
       audience="vendor"
       mode={params.mode === "login" ? "login" : "signup"}
