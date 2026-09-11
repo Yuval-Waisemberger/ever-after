@@ -14,8 +14,8 @@ export function VendorFiltersForm({ filters, subcategories }: { filters: VendorF
     <form method="get" className="marketplace-filters paper-panel mt-7 grid gap-4 p-4 sm:p-5 lg:grid-cols-12">
       <label className="relative lg:col-span-5">
         <span className="sr-only">Search vendors</span>
-        <Search className="pointer-events-none absolute left-3.5 top-3.5 size-4 text-ink-soft" />
-        <input name="search" defaultValue={filters.search} placeholder="Search a vendor or service" className={`${inputClass} w-full pl-10`} />
+        <Search className="vendor-search-icon pointer-events-none absolute top-1/2 size-4 -translate-y-1/2 text-ink-soft" />
+        <input name="search" defaultValue={filters.search} placeholder="Search a vendor or service" className={`${inputClass} vendor-search-input w-full`} />
       </label>
       <input type="hidden" name="category" value={category} />
       <select aria-label="Service area" name="area" defaultValue={filters.area ?? ""} className={`${inputClass} lg:col-span-3`}>

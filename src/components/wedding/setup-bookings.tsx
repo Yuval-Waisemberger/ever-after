@@ -9,13 +9,13 @@ import { VendorTypeahead } from "./vendor-typeahead";
 import { bookSetupVendor, saveBookingDeclaration, type BookingResult } from "@/lib/actions/setup-bookings";
 
 const labels = { CONFIRMED_BOOKED: "Booked", REPORTED_ARRANGED_DETAILS_LATER: "Already arranged — vendor details not added yet", NOT_RECORDED_AS_BOOKED: "No booking added", UNKNOWN_NEEDS_REVIEW: "Review booking details" };
-export function SetupBookingsPanel({ data }: { data: SetupBookings }) {
-  return <section className="setup-bookings-panel mt-6 rounded-2xl border bg-paper p-5 sm:p-7" aria-label="Arranged vendors">
+export function SetupBookingsPanel({ data, constrained = false }: { data: SetupBookings; constrained?: boolean }) {
+  return <section className={`setup-bookings-panel mt-6 rounded-2xl border bg-paper p-5 sm:p-7${constrained ? " setup-bookings-panel--constrained" : ""}`} aria-label="Arranged vendors">
     <h2 className="font-display text-2xl">Who have you already arranged?</h2>
     <p className="mt-2 text-sm text-ink-soft">Optional — add vendors now or come back later.</p>
     {!data.complete ? <p role="alert">We couldn’t load all your bookings. Please refresh before making changes.</p> : null}
     {data.legacyVenueName ? <p className="mt-3 text-sm text-ink-soft">Previous venue: <bdi>{data.legacyVenueName}</bdi></p> : null}
-    <div className="mt-4 space-y-3">{BOOKING_CATEGORIES.map(c => <CategoryBooking key={c.key} category={c.key} data={data} />)}</div>
+    <div className={constrained ? "setup-bookings-list mt-4" : "mt-4 space-y-3"} {...(constrained ? { role: "region", "aria-label": "Arranged vendor types", tabIndex: 0 } : {})}>{BOOKING_CATEGORIES.map(c => <CategoryBooking key={c.key} category={c.key} data={data} />)}</div>
   </section>;
 }
 function CategoryBooking({ category, data }: { category: BookingCategory; data: SetupBookings }) {

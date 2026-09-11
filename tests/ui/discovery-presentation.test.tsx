@@ -5,6 +5,7 @@ import {BookingFeedback,BookingCelebration} from "@/components/vendors/booking-c
 import {RecommendationBadge} from "@/components/vendors/recommendation-detail";
 import {VendorStatusActions} from "@/components/vendors/vendor-status-actions";
 import {VendorFiltersForm} from "@/components/vendors/vendor-filters";
+import {SavedVendorButton} from "@/components/vendors/saved-vendor-button";
 import {parseVendorFilters} from "@/lib/vendors/filters";
 const parse=(html:string)=>new DOMParser().parseFromString(html,"text/html");
 
@@ -25,6 +26,18 @@ describe("discovery presentation boundaries",()=>{
     expect(doc.body.textContent?.trim()).toBe("Recommended for you");
     expect(doc.querySelector(".recommendation-badge")).not.toBeNull();
     expect(doc.querySelector("details, summary, li, .recommendation-reasons")).toBeNull();
+  });
+  it("keeps the compact favorite shell neutral and fills only the saved heart",()=>{
+    const unsaved=parse(renderToStaticMarkup(<SavedVendorButton vendorId="vendor-id" isSaved={false} returnTo="/vendors" compact/>));
+    const saved=parse(renderToStaticMarkup(<SavedVendorButton vendorId="vendor-id" isSaved returnTo="/vendors" compact/>));
+    const unsavedButton=unsaved.querySelector("button")!,savedButton=saved.querySelector("button")!;
+    expect(unsavedButton.className).toContain("bg-paper/90 text-wine");
+    expect(savedButton.className).toContain("bg-paper/90 text-wine");
+    expect(savedButton.className).not.toContain("bg-wine text-white");
+    expect(unsavedButton.querySelector("svg")?.getAttribute("class")).not.toContain("fill-current");
+    expect(savedButton.querySelector("svg")?.getAttribute("class")).toContain("fill-current");
+    expect(unsavedButton.getAttribute("aria-pressed")).toBe("false");
+    expect(savedButton.getAttribute("aria-pressed")).toBe("true");
   });
   it("keeps bookmark and lifecycle forms independent, without changing quick-action inputs",()=>{
     const doc=parse(renderToStaticMarkup(<VendorStatusActions vendorId="vendor-id" currentStatus="considering" isSaved returnTo="/vendors/studio"/>));

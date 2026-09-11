@@ -48,6 +48,19 @@ test("layout icons remain accessible and Apply is the final mobile filter contro
   expect((await subcategory.boundingBox())!.y).toBeLessThan((await apply.boundingBox())!.y);
 });
 
+test("vendor search reserves logical space for its centered non-interactive icon",async({page})=>{
+  for(const width of [1440,768,390,360]){
+    await page.setViewportSize({width,height:900});await page.goto("/");
+    const input=page.getByRole("textbox",{name:"Search vendors"}),icon=page.locator(".vendor-search-icon");
+    const [inputBox,iconBox,padding,pointerEvents]=await Promise.all([input.boundingBox(),icon.boundingBox(),input.evaluate(el=>getComputedStyle(el).paddingInlineStart),icon.evaluate(el=>getComputedStyle(el).pointerEvents)]);
+    expect(Number.parseFloat(padding)).toBeGreaterThanOrEqual(iconBox!.x+iconBox!.width-inputBox!.x+6);
+    expect(Math.abs((iconBox!.y+iconBox!.height/2)-(inputBox!.y+inputBox!.height/2))).toBeLessThanOrEqual(1);
+    expect(pointerEvents).toBe("none");
+    await input.fill("Wedding photographer");
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+  }
+});
+
 for(const width of [1440,768,390,360]) test(`discovery, profile and Our Vendors at ${width}`,async({page})=>{
   test.setTimeout(90000);await page.setViewportSize({width,height:900});
   for(const view of ["directory","profile","my"]){await page.goto(`/?view=${view}`);await expect(page.locator("h1")).toBeVisible();expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);await page.screenshot({path:`.codex-tmp/phase2c/${view}-${width}.png`,fullPage:true});}
@@ -60,6 +73,7 @@ test("compact mobile cards keep the minimal recommendation badge clear of the fa
     await page.getByRole("button",{name:"Compact grid"}).click();
     const badge=page.locator(".recommendation-badge");
     await expect(badge).toHaveText(/Recommended for you/);
+    await expect(badge).toHaveCSS("transform","none");
     await expect(page.locator(".recommendation-reasons, details.recommendation-detail")).toHaveCount(0);
     expect(await page.locator(".vendor-card").evaluateAll(cards=>cards.every(card=>{
       const rating=card.querySelector(".vendor-card-rating")?.getBoundingClientRect();
@@ -71,6 +85,29 @@ test("compact mobile cards keep the minimal recommendation badge clear of the fa
     expect(badgeBox!.y).toBeGreaterThanOrEqual(imageBox!.y);
     expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
     await page.screenshot({path:`.codex-tmp/phase2c/compact-${width}.png`,fullPage:true});
+  }
+});
+test("compact favorite keeps a neutral shell and toggles only the burgundy heart in both densities",async({page})=>{
+  for(const width of [1440,768,390]){
+    await page.setViewportSize({width,height:900});await page.goto("/");
+    for(const density of ["Comfortable cards","Compact grid"]){
+      await page.getByRole("button",{name:density}).click();
+      const badge=page.locator(".recommendation-badge").first(),recommendedCard=badge.locator("xpath=ancestor::article");
+      await expect(badge).toHaveCSS("transform","none");
+      const [badgeBox,recommendedHeartBox]=await Promise.all([badge.boundingBox(),recommendedCard.locator(".vendor-save-button").boundingBox()]);
+      expect(badgeBox!.x+badgeBox!.width).toBeLessThanOrEqual(recommendedHeartBox!.x);
+      const save=page.getByRole("button",{name:"Save vendor",exact:true}).first();
+      await expect(save).toHaveAttribute("aria-pressed","false");
+      const unsavedBackground=await save.evaluate(el=>getComputedStyle(el).backgroundColor);
+      const unsavedHeartFill=await save.locator("svg").evaluate(el=>getComputedStyle(el).fill);
+      await save.click();
+      const remove=page.getByRole("button",{name:"Remove from Saved Vendors",exact:true}).first();
+      await expect(remove).toHaveAttribute("aria-pressed","true");
+      expect(await remove.evaluate(el=>getComputedStyle(el).backgroundColor)).toBe(unsavedBackground);
+      expect(await remove.locator("svg").evaluate(el=>getComputedStyle(el).fill)).not.toBe(unsavedHeartFill);
+      await remove.click();await expect(page.getByRole("button",{name:"Save vendor",exact:true}).first()).toHaveAttribute("aria-pressed","false");
+    }
+    expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
   }
 });
 test("card/category hover, minimal recommendation badge, density and logged-out save",async({page})=>{

@@ -40,6 +40,12 @@ describe("050001 application contracts", () => {
       "Your choice appears in the sidebar and at the top of Our Wedding.",
     ]) expect(identitySettings).not.toContain(copy);
     expect(identitySettings).toContain("grid-cols-2 gap-3 sm:grid-cols-4");
+    expect(identitySettings).toContain('heart: "/images/couple-settings/heart.png"');
+    expect(identitySettings).toContain('woman_man: "/images/couple-settings/bride-and-groom.png"');
+    expect(identitySettings).toContain('woman_woman: "/images/couple-settings/bride-and-bride.png"');
+    expect(identitySettings).toContain('man_man: "/images/couple-settings/groom-and-groom.png"');
+    expect(identitySettings).toContain('className="object-contain"');
+    expect(identitySettings).toContain('rounded-md bg-white');
   });
 
   it("updates is_saved independently and preserves lifecycle rows with meaning", () => {

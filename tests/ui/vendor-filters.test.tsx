@@ -21,6 +21,8 @@ describe("subcategory filter control", () => {
     expect(document.querySelector("select[name=category]")).toBeNull();
     expect(document.querySelector<HTMLInputElement>("input[name=category]")?.value).toBe("photography-content");
     expect(document.querySelector<HTMLInputElement>('[name="search"]')?.value).toBe("Films");
+    expect(document.querySelector<HTMLInputElement>('[name="search"]')?.className).toContain("vendor-search-input");
+    expect(document.querySelector(".vendor-search-icon")?.classList.contains("pointer-events-none")).toBe(true);
     expect(document.querySelector<HTMLInputElement>('[name="service"]')?.value).toBe("Drone");
     expect(document.querySelector<HTMLSelectElement>('[name="minRating"]')?.value).toBe("4");
     expect(document.querySelector('[name="page"]')).toBeNull(); // Applying new filters starts at page one.

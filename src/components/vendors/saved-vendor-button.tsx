@@ -36,7 +36,7 @@ export function SavedVendorButton({
       {relationshipId ? <input type="hidden" name="relationshipId" value={relationshipId} /> : null}
       <input type="hidden" name="isSaved" value={String(!isSaved)} />
       <input type="hidden" name="returnTo" value={returnTo} />
-      <button aria-pressed={isSaved} aria-label={isSaved ? "Remove from Saved Vendors" : "Save vendor"} className={compact ? `vendor-save-button grid size-11 place-items-center rounded-full border backdrop-blur-sm ${isSaved ? "border-wine bg-wine text-white" : "border-white/80 bg-paper/90 text-wine hover:border-wine"}` : `inline-flex min-h-10 items-center gap-2 rounded-md border px-3.5 text-sm font-semibold ${isSaved ? "border-wine bg-wine text-white" : "bg-paper hover:border-wine hover:text-wine"}`}>
+      <button aria-pressed={isSaved} aria-label={isSaved ? "Remove from Saved Vendors" : "Save vendor"} className={compact ? "vendor-save-button grid size-11 place-items-center rounded-full border border-white/80 bg-paper/90 text-wine backdrop-blur-sm hover:border-wine" : `inline-flex min-h-10 items-center gap-2 rounded-md border px-3.5 text-sm font-semibold ${isSaved ? "border-wine bg-wine text-white" : "bg-paper hover:border-wine hover:text-wine"}`}>
         <Heart className={`size-4 ${isSaved ? "fill-current" : ""}`} />
         {motion === "save" ? <span className="save-particles" aria-hidden="true"><i /><i /><i /></span> : null}
         {!compact ? (isSaved ? "Saved" : "Save") : null}

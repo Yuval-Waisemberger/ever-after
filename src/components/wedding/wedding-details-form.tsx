@@ -7,6 +7,8 @@ import { saveWeddingDetails } from "@/lib/actions/wedding";
 import { initialActionState } from "@/lib/actions/state";
 import { WeddingInput as FormField } from "./wedding-fields";
 import { SubmitButton } from "@/components/ui/submit-button";
+import type { SetupBookings } from "@/lib/queries/setup-bookings";
+import { SetupBookingsPanel } from "./setup-bookings";
 import {
   WeddingBasicsFields,
   WeddingBudgetFields,
@@ -20,10 +22,12 @@ export function WeddingDetailsForm({
   values,
   partnerOneName,
   partnerTwoName,
+  bookings,
 }: {
   values: WeddingFieldValues;
   partnerOneName: string;
   partnerTwoName: string;
+  bookings?: SetupBookings;
 }) {
   const [revision] = useState(values.revision);
   const [state, action] = useActionState(saveWeddingDetails, initialActionState);
@@ -45,6 +49,7 @@ export function WeddingDetailsForm({
       <section className="rounded-2xl border bg-paper p-5 sm:p-7"><h2 className="font-display text-2xl">Wedding style</h2><div className="mt-5"><WeddingStyleFields values={values} errors={state.errors} /></div></section>
       <section className="rounded-2xl border bg-paper p-5 sm:p-7"><h2 className="font-display text-2xl">What matters most</h2><p className="mt-2 text-sm text-ink-soft">Choose up to four.</p><div className="mt-5"><WeddingPriorityFields values={values} errors={state.errors} /></div></section>
       <section className="rounded-2xl border bg-paper p-5 sm:p-7"><h2 className="font-display text-2xl">Total budget</h2><div className="mt-5 max-w-md"><WeddingBudgetFields values={values} errors={state.errors} /></div></section>
+      {bookings ? <SetupBookingsPanel data={bookings} constrained /> : null}
       <SubmitButton className="px-7" pendingLabel="Saving details…">Save Wedding Details</SubmitButton>
     </form></WeddingDraft>
   );

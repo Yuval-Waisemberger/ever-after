@@ -16,7 +16,9 @@
 .vendor-card.vendor-card { border: 1px solid var(--line); border-radius: 16px; background: var(--surface-standard); box-shadow: var(--shadow-soft), inset 0 1px var(--paper); transition: transform 550ms var(--ease-soft), box-shadow 550ms var(--ease-soft), border-color 550ms; }
 .vendor-card.vendor-card:is(:hover,:focus-within) { border-color: var(--rose); box-shadow: var(--shadow-raised); }
 .vendor-card > a > div:first-child img { transition: transform 550ms var(--ease-soft); }
-.vendor-card .recommendation-badge { position: absolute; left: 12px; top: 14px; z-index: 2; display: inline-flex; width: auto; min-height: 30px; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #bda386; border-radius: 999px; background: rgb(248 241 230 / 94%); color: #69513c; box-shadow: 0 5px 16px rgb(73 62 56 / 12%); font-size: 11px; font-weight: 600; line-height: 1.15; transform: rotate(-5deg); transform-origin: left center; }
+.vendor-search-icon { inset-inline-start: .875rem; }
+.vendor-search-input { padding-inline-start: 2.5rem !important; }
+.vendor-card .recommendation-badge { position: absolute; left: 12px; top: 14px; z-index: 2; display: inline-flex; width: auto; min-height: 30px; align-items: center; gap: 6px; padding: 6px 12px; border: 1px solid #bda386; border-radius: 999px; background: rgb(248 241 230 / 94%); color: #69513c; box-shadow: 0 5px 16px rgb(73 62 56 / 12%); font-size: 11px; font-weight: 600; line-height: 1.15; }
 .vendor-save-feedback button { position: relative; }
 .save-particles { pointer-events: none; position: absolute; inset: 0; }
 .save-particles i { position: absolute; left: 50%; top: 50%; width: 4px; height: 4px; border-radius: 50%; background: var(--rose); opacity: 0; --save-x: -16px; --save-y: -20px; }
@@ -81,7 +83,7 @@
 @keyframes booking-check { from { stroke-dashoffset: 60; } to { stroke-dashoffset: 0; } }
 @keyframes booking-burst { 0% { opacity: 0; transform: translate(0,0) scale(.5); } 12% { opacity: .9; } 65% { opacity: .65; } 100% { opacity: 0; transform: translate(var(--burst-x),var(--burst-y)) rotate(var(--burst-turn)) scale(.8); } }
 @media (max-width: 1000px) { .marketplace-grid, .marketplace-grid[data-density=compact] { grid-template-columns: repeat(2,minmax(0,1fr)); } }
-@media (max-width: 600px) { .marketplace-grid { grid-template-columns: minmax(0,1fr); } .marketplace-grid[data-density=compact] { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } .marketplace-grid[data-density=compact] .vendor-card > a > .p-5 { padding: 12px; } .marketplace-grid[data-density=compact] h2 { font-size: 18px; } .marketplace-grid[data-density=compact] .vendor-card .recommendation-badge { left: 8px; top: 10px; max-width: calc(100% - 62px); min-height: 26px; padding: 5px 9px; font-size: 9px; } .booking-confetti { transform: scale(.85); } }
+@media (max-width: 600px) { .marketplace-grid { grid-template-columns: minmax(0,1fr); } .marketplace-grid[data-density=compact] { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px; } .marketplace-grid[data-density=compact] .vendor-card > a > .p-5 { padding: 12px; } .marketplace-grid[data-density=compact] h2 { font-size: 18px; } .marketplace-grid[data-density=compact] .vendor-card .recommendation-badge { left: 6px; top: 10px; max-width: calc(100% - 62px); min-height: 26px; padding: 5px 9px; font-size: 9px; } .booking-confetti { transform: scale(.85); } }
 @media (prefers-reduced-motion: reduce) { .vendor-card > a > div:first-child img { transform: none !important; } .booking-confetti, .save-particles { display: none; } }
 @media (max-width: 600px) {
   .marketplace-grid[data-density=compact] .vendor-card-heading { flex-direction: column; gap: 8px; }

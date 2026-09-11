@@ -163,8 +163,8 @@
 }
 
 /* Public navigation only: retain each header's geometry, logo and surface. */
-.public-header.public-header.public-header :is(.public-desktop-nav, .public-mobile-menu) nav a,
-.public-header.public-header.public-header .public-desktop-nav a {
+.public-header.public-header.public-header :is(.public-desktop-nav, .public-mobile-menu) nav :is(a, .landing-nav-trigger),
+.public-header.public-header.public-header .public-desktop-nav :is(a, .landing-nav-trigger) {
   font-family: "Segoe UI", Arial, sans-serif;
   font-size: 14px; font-weight: 600; line-height: 21px;
   letter-spacing: normal; text-transform: none;

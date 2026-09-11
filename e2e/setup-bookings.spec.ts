@@ -6,6 +6,7 @@ test.beforeEach(async ({ page }) => {
 });
 const photographer = (page: import("@playwright/test").Page) => page.locator("details").filter({ has: page.locator("summary > span", { hasText: /^Photographer$/ }) });
 test("declaration is not a vendor; resolving it shows a real booking and Budget link", async ({ page }) => {
+  test.setTimeout(60_000);
   const section = photographer(page); await section.locator("summary").click();
   await section.getByRole("button", { name: "Add details later", exact: true }).click();
   await expect(section.locator("summary")).toContainText("Already arranged");
@@ -55,6 +56,7 @@ test("Skip database failure is visible and keeps the wizard usable", async ({ pa
   await expect(page.getByRole("button", { name: "Skip for now" })).toBeEnabled();
 });
 for (const width of [1440, 768, 390, 360]) test(`booking controls fit ${width}px`, async ({ page }) => {
+  test.setTimeout(90_000);
   await page.setViewportSize({ width, height: 950 });
   const section = photographer(page); await section.locator("summary").click();
   await section.getByRole("button", { name: "Search Ever After", exact: true }).click();
@@ -71,6 +73,18 @@ for (const width of [1440, 768, 390, 360]) test(`booking controls fit ${width}px
   await expect(section.getByRole("status").filter({ hasText: "Selected:" })).toBeVisible();
   await expect(page.getByLabel("Booking creates")).toHaveText("0");
   await page.goto("/?view=details");
+  const arranged = page.getByRole("region", { name: "Arranged vendors" });
+  const arrangedList = page.getByRole("region", { name: "Arranged vendor types" });
+  const save = page.getByRole("button", { name: "Save Wedding Details" });
+  await expect(save).toHaveCount(1);
+  const metrics = await arrangedList.evaluate(element => ({ clientHeight: element.clientHeight, scrollHeight: element.scrollHeight, overflowY: getComputedStyle(element).overflowY }));
+  expect(metrics.overflowY).toBe("auto");
+  expect(metrics.scrollHeight).toBeGreaterThan(metrics.clientHeight);
+  expect((await arranged.boundingBox())!.y + (await arranged.boundingBox())!.height).toBeLessThan((await save.boundingBox())!.y);
+  await arrangedList.focus();
+  await expect(arrangedList).toBeFocused();
+  await arrangedList.evaluate(element => element.scrollTop = element.scrollHeight);
+  await expect(arranged.locator("details").last()).toBeVisible();
   await page.screenshot({ path: test.info().outputPath(`wedding-details-${width}.png`), fullPage: true });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });

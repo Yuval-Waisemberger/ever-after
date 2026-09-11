@@ -52,6 +52,29 @@ test("settings success toast follows only a successful fixture action and remain
   await expect(page.getByText("Couple profile saved", { exact: true })).toHaveCount(0);
 });
 
+test("Couple Settings maps the supplied artwork without changing option values", async ({ page }) => {
+  await page.goto("/settings");
+  const options = [
+    ["Heart", "heart.png"],
+    ["Bride + Groom", "bride-and-groom.png"],
+    ["Bride + Bride", "bride-and-bride.png"],
+    ["Groom + Groom", "groom-and-groom.png"],
+  ] as const;
+  for (const [label, fileName] of options) {
+    const button = page.getByRole("button", { name: `Choose ${label} couple icon` });
+    const image = button.getByRole("img", { name: `${label} illustration` });
+    expect(decodeURIComponent(await image.getAttribute("src") ?? "")).toContain(`/images/couple-settings/${fileName}`);
+    await expect(image).toHaveClass(/object-contain/);
+    await expect(image.locator("..")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await button.click();
+    await expect(button).toHaveAttribute("aria-pressed", "true");
+  }
+  for (const width of [1440, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 900 });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
 test("empty reviews, guests and budget retain usable final states", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const route of ["reviews", "guests", "budget"]) {

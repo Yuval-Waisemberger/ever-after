@@ -1,6 +1,7 @@
 "use client";
 
 import { ImagePlus, Trash2 } from "lucide-react";
+import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState, useTransition } from "react";
 import { IdentitySavedToast } from "@/components/couple/identity-saved-toast";
@@ -18,6 +19,13 @@ import {
   validateAvatarFile,
   type CoupleAvatarChoice,
 } from "@/lib/domain/couple-identity";
+
+export const COUPLE_SETTINGS_ARTWORK: Record<CoupleAvatarChoice, string> = {
+  heart: "/images/couple-settings/heart.png",
+  woman_man: "/images/couple-settings/bride-and-groom.png",
+  woman_woman: "/images/couple-settings/bride-and-bride.png",
+  man_man: "/images/couple-settings/groom-and-groom.png",
+};
 
 async function canDecodeImage(file: File): Promise<boolean> {
   try {
@@ -131,7 +139,9 @@ export function CoupleAvatarSettings({
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {COUPLE_AVATAR_CHOICES.map((avatarChoice) => (
             <button key={avatarChoice} type="button" disabled={isPending || uploading} onClick={() => chooseIcon(avatarChoice)} aria-label={`Choose ${COUPLE_AVATAR_LABELS[avatarChoice]} couple icon`} aria-pressed={!storagePath && choice === avatarChoice} className={`couple-avatar-choice flex min-h-28 items-center justify-center rounded-lg border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2 ${!storagePath && choice === avatarChoice ? "border-wine bg-wine/5 text-wine shadow-sm" : "bg-paper hover:border-wine"}`}>
-              <CoupleAvatar choice={avatarChoice} className="size-16" sizes="64px" />
+              <span className="relative size-20 overflow-hidden rounded-md bg-white">
+                <NextImage src={COUPLE_SETTINGS_ARTWORK[avatarChoice]} alt={`${COUPLE_AVATAR_LABELS[avatarChoice]} illustration`} fill sizes="80px" className="object-contain" />
+              </span>
             </button>
           ))}
         </div>

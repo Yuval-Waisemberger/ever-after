@@ -66,6 +66,24 @@
   box-shadow: var(--shadow-soft);
 }
 
+.setup-bookings-list {
+  display: grid;
+  gap: .75rem;
+  max-height: 32rem;
+  padding: .25rem .5rem .75rem .25rem;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--rose) var(--cream);
+  scroll-padding-block: .75rem;
+  border-radius: .75rem;
+}
+
+.setup-bookings-list:focus-visible {
+  outline: 2px solid var(--wine);
+  outline-offset: 4px;
+}
+
 .setup-progress__track {
   height: 6px;
   overflow: hidden;
@@ -93,6 +111,7 @@
 @media (max-width: 639px) {
   .setup-step-intro,
   .setup-step-fields { animation-duration: 800ms; }
+  .setup-bookings-list { max-height: 28rem; padding-inline-end: .3rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

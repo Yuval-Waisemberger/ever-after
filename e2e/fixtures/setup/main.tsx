@@ -27,8 +27,7 @@ function Fixture() {
     <SetupWizard values={{ revision: fixture.revision }} />
     <SetupBookingsPanel data={data} />
     </> : null}
-    <WeddingDetailsForm partnerOneName="One" partnerTwoName="Two" values={{ revision: fixture.revision }} />
-    {view === "details" ? <SetupBookingsPanel data={data} /> : null}
+    <WeddingDetailsForm {...(view === "details" ? { bookings: data } : {})} partnerOneName="One" partnerTwoName="Two" values={{ revision: fixture.revision }} />
   </main>;
   return new URLSearchParams(location.search).has("shell") ? <AppShell role="couple" displayName="Alex & Sam">{content}</AppShell> : content;
 }

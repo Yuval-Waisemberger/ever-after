@@ -229,6 +229,22 @@ test("About Us opens from desktop and mobile navigation with modal focus behavio
   }
 });
 
+test("About Us uses the same navigation typography as Vendors on public and auth headers", async ({ page }) => {
+  for (const route of ["/", "/auth/couple?mode=login", "/auth/couple"]) {
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(route);
+      if (width === 390) await page.getByLabel("Navigation menu", { exact: true }).click();
+      const nav = page.getByRole("navigation", { name: width === 390 ? "Mobile navigation" : "Public navigation", exact: true });
+      const typography = async (selector: import("@playwright/test").Locator) => selector.evaluate(element => {
+        const style = getComputedStyle(element);
+        return [style.fontFamily, style.fontSize, style.fontWeight, style.letterSpacing, style.textTransform, style.lineHeight];
+      });
+      expect(await typography(nav.getByRole("button", { name: "About us", exact: true }))).toEqual(await typography(nav.getByRole("link", { name: "Vendors", exact: true })));
+    }
+  }
+});
+
 test("landing How it works and Vendors retain their existing routes", async ({ page }) => {
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Public navigation", exact: true });
