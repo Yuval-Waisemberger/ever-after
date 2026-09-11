@@ -15,9 +15,13 @@ export function createClient(): never { throw new Error("Storage disabled in vis
 export async function chooseCoupleAvatar(value: CoupleAvatarChoice) {
   if (new URLSearchParams(location.search).has("fail")) return denied();
   choice = value;
+  sessionStorage.setItem("fixture-couple-avatar", value);
   return { status: "success" as const, message: "Couple icon updated." };
 }
-export async function getCoupleIdentity() { return { profileId: "fixture", avatarChoice: choice, avatarStoragePath: null, photoUrl: null }; }
+export async function getCoupleIdentity() {
+  const savedChoice = sessionStorage.getItem("fixture-couple-avatar") as CoupleAvatarChoice | null;
+  return { profileId: "fixture", avatarChoice: savedChoice ?? choice, avatarStoragePath: null, photoUrl: null };
+}
 export async function getMyReviews() {
   return empty() ? [] : demoVendors.slice(0, 3).map((vendor, index) => ({
     id: `review-${index}`, vendor_id: vendor.id, professionalism: 4, punctuality: 5, service_attitude: 4, value_for_money: 4,

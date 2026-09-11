@@ -84,6 +84,22 @@ describe("Assistant context queries", () => {
     expect(selection).not.toMatch(/phone|email|notes|website|instagram/);
     expect(Object.keys(context.guestList).sort()).toEqual(["attending", "awaitingResponse", "invited", "notAttending", "notYetInvited"].sort());
   });
+  it("carries Marketplace category pricing semantics into the local Assistant context", async () => {
+    results.set("couple_vendors", { error: null, data: [{
+      status: "considering", is_saved: true, agreed_price_minor: null, external_vendors: null,
+      vendor_profiles: {
+        id: "venue", business_name: "Venue", location_mode: "fixed", physical_area: "central_israel", service_areas: [],
+        min_price_minor: 30_000, max_price_minor: 50_000, services: [], styles: [], event_types: [],
+        min_guest_capacity: 1, max_guest_capacity: 5000, vendor_categories: { slug: "venues" }, reviews: [],
+      },
+    }] });
+
+    const context = await getAssistantContext();
+
+    expect(context.vendors[0].categorySlug).toBe("venues");
+    const selection = queries.find((item) => item.table === "couple_vendors")!.select.mock.calls[0][0];
+    expect(selection).toContain("vendor_categories(slug)");
+  });
 });
 
 describe("Assistant history read errors", () => {

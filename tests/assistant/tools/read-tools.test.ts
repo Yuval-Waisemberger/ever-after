@@ -355,6 +355,18 @@ describe("Marketplace, Couple vendors and comparison", () => {
     expect(result.vendors[0].recommendation.reasons).toContainEqual(expect.objectContaining({ dimension: "area", label: "Serves Central Israel" }));
     expect(result.vendors[1].missingEvidence).toContain("rating");
   });
+  it("uses total per-guest Venue cost in the controlled comparison", async () => {
+    db.state.tables.vendor_categories[0].slug = "venues";
+    for (const vendor of db.state.tables.vendor_profiles) {
+      Object.assign(vendor, { min_price_minor: 100_000, max_price_minor: 100_000 });
+    }
+    const spy = vi.spyOn(scoring, "calculateRecommendation");
+
+    const result = await data("compare_vendors", c.comparisonData, { vendorIds: [vendorId, vendorTwo] });
+
+    expect(spy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ pricePerGuest: true }));
+    expect(result.vendors[0].recommendation.score).toBe(78);
+  });
   it("describes fixed Assistant matches as physical locations and ignores legacy service coverage", async () => {
     Object.assign(db.state.tables.vendor_profiles[0], { location_mode: "fixed", physical_area: "central_israel", service_areas: ["south"] });
     const result = await data("compare_vendors", c.comparisonData, { vendorIds: [vendorId, vendorTwo] });

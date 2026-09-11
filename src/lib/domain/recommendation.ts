@@ -10,6 +10,7 @@ export type VendorForRecommendation = {
   locationMode?: VendorLocationMode | null;
   physicalArea?: string | null;
   serviceAreas?: string[] | null;
+  pricePerGuest?: boolean;
   minPriceMinor?: number | null;
   maxPriceMinor?: number | null;
   styles?: string[] | null;
@@ -94,15 +95,45 @@ export function calculateRecommendation(
     add("area", matches ? 1 : 0, matches ? `${locationMode === "fixed" ? "Located in" : "Serves"} ${locationLabel}` : "Area mismatch");
   }
 
+  const hasUsableGuestCount =
+    Number.isSafeInteger(wedding.guestCount) && wedding.guestCount! > 0;
+
+  const canEvaluateBudget =
+    vendor.pricePerGuest !== true || hasUsableGuestCount;
+
   if (
     wedding.availableBudgetMinor != null &&
     wedding.availableBudgetMinor >= 0 &&
-    vendor.minPriceMinor != null
+    vendor.minPriceMinor != null &&
+    canEvaluateBudget
   ) {
-    const min = Math.max(0, vendor.minPriceMinor);
-    const max = Math.max(min, vendor.maxPriceMinor ?? min);
-    const ratio = max <= wedding.availableBudgetMinor ? 1 : min <= wedding.availableBudgetMinor ? 0.5 : 0;
-    add("budget", ratio, ratio === 1 ? "Fits the available budget" : "Partly fits the available budget");
+    const priceMultiplier = vendor.pricePerGuest
+      ? wedding.guestCount!
+      : 1;
+
+    const min =
+      Math.max(0, vendor.minPriceMinor) * priceMultiplier;
+
+    const max =
+      Math.max(
+        Math.max(0, vendor.minPriceMinor),
+        vendor.maxPriceMinor ?? vendor.minPriceMinor,
+      ) * priceMultiplier;
+
+    const ratio =
+      max <= wedding.availableBudgetMinor
+        ? 1
+        : min <= wedding.availableBudgetMinor
+          ? 0.5
+          : 0;
+
+    add(
+      "budget",
+      ratio,
+      ratio === 1
+        ? "Fits the available budget"
+        : "Partly fits the available budget",
+    );
   }
 
   if ((wedding.styles?.length ?? 0) > 0 && (vendor.styles?.length ?? 0) > 0) {

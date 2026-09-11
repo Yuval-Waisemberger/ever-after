@@ -5,6 +5,8 @@ const read = (path: string) => readFileSync(path, "utf8");
 const identityActions = read("src/lib/actions/couple-identity.ts");
 const identityQuery = read("src/lib/queries/couple-identity.ts");
 const identitySettings = read("src/components/couple/couple-avatar-settings.tsx");
+const identityDomain = read("src/lib/domain/couple-identity.ts");
+const identityAvatar = read("src/components/couple/couple-avatar.tsx");
 const profileMenu = read("src/components/couple/couple-profile-menu.tsx");
 const vendorActions = read("src/lib/actions/vendors.ts");
 const vendorQueries = read("src/lib/queries/couple-vendors.ts");
@@ -40,12 +42,14 @@ describe("050001 application contracts", () => {
       "Your choice appears in the sidebar and at the top of Our Wedding.",
     ]) expect(identitySettings).not.toContain(copy);
     expect(identitySettings).toContain("grid-cols-2 gap-3 sm:grid-cols-4");
-    expect(identitySettings).toContain('heart: "/images/couple-settings/heart.png"');
-    expect(identitySettings).toContain('woman_man: "/images/couple-settings/bride-and-groom.png"');
-    expect(identitySettings).toContain('woman_woman: "/images/couple-settings/bride-and-bride.png"');
-    expect(identitySettings).toContain('man_man: "/images/couple-settings/groom-and-groom.png"');
+    expect(identityDomain).toContain('heart: "/images/couple-settings/heart.png?v=2"');
+    expect(identityDomain).toContain('woman_man: "/images/couple-settings/bride-and-groom.png?v=2"');
+    expect(identityDomain).toContain('woman_woman: "/images/couple-settings/bride-and-bride.png?v=2"');
+    expect(identityDomain).toContain('man_man: "/images/couple-settings/groom-and-groom.png?v=2"');
+    expect(identityAvatar).toContain("COUPLE_AVATAR_ARTWORK[choice]");
+    expect(identitySettings).toContain("COUPLE_AVATAR_ARTWORK[avatarChoice]");
     expect(identitySettings).toContain('className="object-contain"');
-    expect(identitySettings).toContain('rounded-md bg-white');
+    expect(identitySettings).not.toContain('rounded-md bg-white');
   });
 
   it("updates is_saved independently and preserves lifecycle rows with meaning", () => {

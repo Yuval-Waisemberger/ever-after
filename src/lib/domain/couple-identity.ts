@@ -14,6 +14,13 @@ export const COUPLE_AVATAR_LABELS: Record<CoupleAvatarChoice, string> = {
   man_man: "Groom + Groom",
 };
 
+export const COUPLE_AVATAR_ARTWORK: Record<CoupleAvatarChoice, string> = {
+  heart: "/images/couple-settings/heart.png?v=2",
+  woman_man: "/images/couple-settings/bride-and-groom.png?v=2",
+  woman_woman: "/images/couple-settings/bride-and-bride.png?v=2",
+  man_man: "/images/couple-settings/groom-and-groom.png?v=2",
+};
+
 export const AVATAR_MAX_BYTES = 5 * 1024 * 1024;
 export const AVATAR_MIME_TYPES = ["image/jpeg", "image/png", "image/webp"] as const;
 

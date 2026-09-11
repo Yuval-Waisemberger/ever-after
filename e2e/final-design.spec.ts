@@ -55,22 +55,38 @@ test("settings success toast follows only a successful fixture action and remain
 test("Couple Settings maps the supplied artwork without changing option values", async ({ page }) => {
   await page.goto("/settings");
   const options = [
-    ["Heart", "heart.png"],
-    ["Bride + Groom", "bride-and-groom.png"],
-    ["Bride + Bride", "bride-and-bride.png"],
-    ["Groom + Groom", "groom-and-groom.png"],
+    ["Heart", "heart.png", "heart"],
+    ["Bride + Groom", "bride-and-groom.png", "woman_man"],
+    ["Bride + Bride", "bride-and-bride.png", "woman_woman"],
+    ["Groom + Groom", "groom-and-groom.png", "man_man"],
   ] as const;
-  for (const [label, fileName] of options) {
+  for (const [label, fileName, choice] of options) {
     const button = page.getByRole("button", { name: `Choose ${label} couple icon` });
     const image = button.getByRole("img", { name: `${label} illustration` });
     expect(decodeURIComponent(await image.getAttribute("src") ?? "")).toContain(`/images/couple-settings/${fileName}`);
     await expect(image).toHaveClass(/object-contain/);
-    await expect(image.locator("..")).toHaveCSS("background-color", "rgb(255, 255, 255)");
+    await expect(image.locator("..")).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    expect(await image.evaluate((element) => {
+      const imageElement = element as HTMLImageElement;
+      const canvas = document.createElement("canvas");
+      canvas.width = imageElement.naturalWidth;
+      canvas.height = imageElement.naturalHeight;
+      const context = canvas.getContext("2d");
+      context?.drawImage(imageElement, 0, 0);
+      return context?.getImageData(0, 0, 1, 1).data[3];
+    })).toBe(0);
     await button.click();
     await expect(button).toHaveAttribute("aria-pressed", "true");
+    const preview = page.locator('#couple-profile [data-avatar-source="icon"][data-avatar-choice]');
+    await expect(preview).toHaveAttribute("data-avatar-choice", choice);
+    expect(decodeURIComponent(await preview.locator("img").getAttribute("src") ?? "")).toContain(`/images/couple-settings/${fileName}`);
+    await page.reload();
+    await expect(preview).toHaveAttribute("data-avatar-choice", choice);
+    expect(decodeURIComponent(await preview.locator("img").getAttribute("src") ?? "")).toContain(`/images/couple-settings/${fileName}`);
   }
   for (const width of [1440, 768, 390, 360]) {
     await page.setViewportSize({ width, height: 900 });
+    await expect(page.getByRole("group", { name: "Choose an icon" }).getByRole("button")).toHaveCount(4);
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   }
 });

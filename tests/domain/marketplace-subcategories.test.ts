@@ -39,6 +39,33 @@ describe("connected marketplace subcategory query", () => {
     await getMarketplace({ page: 1 });
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({ availableBudgetMinor: unavailable ? null : 150000 }), expect.anything());
   });
+  it.each([
+    { categorySlug: "venues", subcategorySlug: "wedding-venues", pricePerGuest: true },
+    { categorySlug: "event-services", subcategorySlug: "preparation-hotels", pricePerGuest: false },
+  ])("classifies $subcategorySlug pricing from its canonical category", async ({ categorySlug, subcategorySlug, pricePerGuest }) => {
+    mocks.profile.mockResolvedValue({ role: "couple" });
+    const spy = vi.spyOn(scoring, "calculateRecommendation");
+    mocks.fetch.mockImplementation(async (input: string) => {
+      const table = new URL(String(input)).pathname.split("/").at(-1);
+      const rows = table === "weddings"
+        ? { id: "wedding", total_budget_minor: 12_000_000, styles: [], preferred_area: null, guest_count: 300, event_type: null }
+        : table === "budget_items" || table === "couple_vendors"
+          ? []
+          : [{
+              id: "vendor", slug: "vendor", business_name: "Vendor", is_public: true,
+              min_price_minor: 30_000, max_price_minor: 50_000,
+              vendor_categories: { slug: categorySlug, name: "Category" },
+              vendor_subcategories: { slug: subcategorySlug, name: "Subcategory" },
+              vendor_images: [], reviews: [],
+            }];
+      return new Response(JSON.stringify(rows), { status: 200, headers: { "content-type": "application/json", "content-range": "0-0/1" } });
+    });
+
+    const result = await getMarketplace({ page: 1 });
+
+    expect(spy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ pricePerGuest }));
+    expect(result.vendors[0].recommendation?.score).toBe(pricePerGuest ? 50 : 100);
+  });
   it("filters parent vendors with an inner join before count and pagination", async () => {
     const result = await getMarketplace({ category: "photography-content", subcategory: "wedding-photographers", page: 2 });
     const params = request().searchParams;

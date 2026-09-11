@@ -45,7 +45,7 @@ export function VendorFiltersForm({ filters, subcategories }: { filters: VendorF
           <input name="maxPrice" type="number" min={0} defaultValue={filters.maxPrice} placeholder="Maximum package price (₪)" aria-label="Maximum package price" className={inputClass} />
         </div>
       ) : null}
-      <button className="marketplace-filter-submit min-h-11 rounded-xl bg-wine px-4 text-sm font-bold text-white hover:bg-wine-dark lg:col-span-2 lg:col-start-11">Apply</button>
+      <button className="marketplace-filter-submit min-h-11 rounded-xl bg-wine px-4 text-sm font-bold text-white hover:bg-wine-dark lg:col-span-2">Apply</button>
     </form>
   );
 }

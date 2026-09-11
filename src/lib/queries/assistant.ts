@@ -15,6 +15,7 @@ type AssistantVendorRow = {
   service_areas: string[];
   min_price_minor: number | string | null;
   max_price_minor: number | string | null;
+  vendor_categories: { slug: string } | Array<{ slug: string }> | null;
   event_types: string[];
   min_guest_capacity: number | null;
   max_guest_capacity: number | null;
@@ -40,7 +41,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
   const supabase = await createClient();
   const [relationshipResult, budgetResult] = await Promise.all([
     readAssistantSection("vendors", () => supabase.from("couple_vendors")
-      .select("status, is_saved, agreed_price_minor, vendor_profiles(id, business_name, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name)")
+      .select("status, is_saved, agreed_price_minor, vendor_profiles(id, business_name, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, vendor_categories(slug), reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name)")
       .eq("wedding_id", wedding.id)),
     readAssistantSection("budget", () => supabase.from("budget_items")
       .select("source, couple_vendors(status), estimated_amount_minor, committed_amount_minor, payments(amount_minor, is_paid, due_date)")
@@ -65,6 +66,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
     const identity = external ?? vendor;
     if (!identity) throw new AssistantContextUnavailableError("vendors");
     const reviews = vendor?.reviews ?? [];
+    const category = Array.isArray(vendor?.vendor_categories) ? vendor.vendor_categories[0] : vendor?.vendor_categories;
     const ratingAverage = reviews.length ? reviews.reduce((sum, review) => sum + (review.professionalism + review.punctuality + review.service_attitude + review.value_for_money) / 4, 0) / reviews.length : null;
     return {
       id: identity.id, businessName: identity.business_name, source: external ? "external" : "marketplace",
@@ -72,6 +74,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
       agreedPriceMinor: relationship.agreed_price_minor == null ? null : Number(relationship.agreed_price_minor),
       minPriceMinor: vendor?.min_price_minor == null ? null : Number(vendor.min_price_minor),
       maxPriceMinor: vendor?.max_price_minor == null ? null : Number(vendor.max_price_minor),
+      categorySlug: category?.slug ?? null,
       services: vendor?.services ?? [], styles: vendor?.styles ?? [], locationMode: vendor?.location_mode ?? "mobile",
       physicalArea: vendor?.physical_area ?? null, serviceAreas: vendor?.service_areas ?? [],
       eventTypes: vendor?.event_types ?? [], minGuestCapacity: vendor?.min_guest_capacity ?? null,

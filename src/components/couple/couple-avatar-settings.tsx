@@ -3,7 +3,7 @@
 import { ImagePlus, Trash2 } from "lucide-react";
 import NextImage from "next/image";
 import { useRouter } from "next/navigation";
-import { useRef, useState, useTransition } from "react";
+import { useOptimistic, useRef, useState, useTransition } from "react";
 import { IdentitySavedToast } from "@/components/couple/identity-saved-toast";
 import { CoupleAvatar } from "@/components/couple/couple-avatar";
 import {
@@ -14,18 +14,12 @@ import {
 import { createClient } from "@/lib/supabase/client";
 import {
   avatarExtension,
+  COUPLE_AVATAR_ARTWORK,
   COUPLE_AVATAR_CHOICES,
   COUPLE_AVATAR_LABELS,
   validateAvatarFile,
   type CoupleAvatarChoice,
 } from "@/lib/domain/couple-identity";
-
-export const COUPLE_SETTINGS_ARTWORK: Record<CoupleAvatarChoice, string> = {
-  heart: "/images/couple-settings/heart.png",
-  woman_man: "/images/couple-settings/bride-and-groom.png",
-  woman_woman: "/images/couple-settings/bride-and-bride.png",
-  man_man: "/images/couple-settings/groom-and-groom.png",
-};
 
 async function canDecodeImage(file: File): Promise<boolean> {
   try {
@@ -61,11 +55,13 @@ export function CoupleAvatarSettings({
   const inputRef = useRef<HTMLInputElement>(null);
   const [saveRevision, setSaveRevision] = useState(0);
   const [message, setMessage] = useState<string>();
+  const [displayChoice, setDisplayChoice] = useOptimistic(choice);
   const [isPending, startTransition] = useTransition();
   const [uploading, setUploading] = useState(false);
 
   function chooseIcon(nextChoice: CoupleAvatarChoice) {
     startTransition(async () => {
+      setDisplayChoice(nextChoice);
       const result = await chooseCoupleAvatar(nextChoice);
       setMessage(result.message);
       if (result.status === "success") { setSaveRevision(value => value + 1); router.refresh(); }
@@ -114,7 +110,7 @@ export function CoupleAvatarSettings({
   return (
     <section id="couple-profile" className="couple-identity-panel scroll-mt-24 ea-surface ea-surface--blush p-5 sm:p-7" aria-labelledby="couple-identity-title">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <CoupleAvatar choice={choice} photoUrl={photoUrl} className="size-24 sm:size-28" sizes="112px" />
+        <CoupleAvatar choice={displayChoice} photoUrl={photoUrl} className="size-24 sm:size-28" sizes="112px" />
         <div>
           <p className="eyebrow">Couple profile</p>
           <h2 id="couple-identity-title" className="font-display mt-1 text-3xl">Your shared identity</h2>
@@ -138,9 +134,9 @@ export function CoupleAvatarSettings({
         <legend className="text-sm font-semibold">Choose an icon</legend>
         <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {COUPLE_AVATAR_CHOICES.map((avatarChoice) => (
-            <button key={avatarChoice} type="button" disabled={isPending || uploading} onClick={() => chooseIcon(avatarChoice)} aria-label={`Choose ${COUPLE_AVATAR_LABELS[avatarChoice]} couple icon`} aria-pressed={!storagePath && choice === avatarChoice} className={`couple-avatar-choice flex min-h-28 items-center justify-center rounded-lg border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2 ${!storagePath && choice === avatarChoice ? "border-wine bg-wine/5 text-wine shadow-sm" : "bg-paper hover:border-wine"}`}>
-              <span className="relative size-20 overflow-hidden rounded-md bg-white">
-                <NextImage src={COUPLE_SETTINGS_ARTWORK[avatarChoice]} alt={`${COUPLE_AVATAR_LABELS[avatarChoice]} illustration`} fill sizes="80px" className="object-contain" />
+            <button key={avatarChoice} type="button" disabled={isPending || uploading} onClick={() => chooseIcon(avatarChoice)} aria-label={`Choose ${COUPLE_AVATAR_LABELS[avatarChoice]} couple icon`} aria-pressed={!storagePath && displayChoice === avatarChoice} className={`couple-avatar-choice flex min-h-28 items-center justify-center rounded-lg border p-3 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wine focus-visible:ring-offset-2 ${!storagePath && displayChoice === avatarChoice ? "border-wine bg-wine/5 text-wine shadow-sm" : "bg-paper hover:border-wine"}`}>
+              <span className="relative size-20 overflow-hidden rounded-md">
+                <NextImage src={COUPLE_AVATAR_ARTWORK[avatarChoice]} alt={`${COUPLE_AVATAR_LABELS[avatarChoice]} illustration`} fill sizes="80px" unoptimized className="object-contain" />
               </span>
             </button>
           ))}

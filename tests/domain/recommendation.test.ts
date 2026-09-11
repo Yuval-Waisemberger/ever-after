@@ -82,4 +82,80 @@ describe("calculateRecommendation", () => {
     expect(result.score).toBe(100);
     expect(result.isRecommended).toBe(true);
   });
+
+  it("multiplies per-guest prices by the Couple guest count", () => {
+    const result = calculateRecommendation(
+      {
+        availableBudgetMinor: 12_000_000,
+        guestCount: 300,
+      },
+      {
+        pricePerGuest: true,
+        minPriceMinor: 30_000,
+        maxPriceMinor: 50_000,
+      },
+    );
+
+    expect(result.applicableDimensions).toContain("budget");
+    expect(result.score).toBe(50);
+    expect(result.isRecommended).toBe(false);
+  });
+
+  it.each([
+    { name: "fully fits", budget: 15_000_000, maximum: 50_000, score: 100 },
+    { name: "exceeds the budget", budget: 8_000_000, maximum: 50_000, score: 0 },
+    { name: "uses the minimum when the maximum is missing", budget: 9_000_000, maximum: null, score: 100 },
+  ])("calculates a per-guest range that $name", ({ budget, maximum, score }) => {
+    const result = calculateRecommendation(
+      { availableBudgetMinor: budget, guestCount: 300 },
+      { pricePerGuest: true, minPriceMinor: 30_000, maxPriceMinor: maximum },
+    );
+
+    expect(result.applicableDimensions).toContain("budget");
+    expect(result.score).toBe(score);
+  });
+
+  it("does not multiply package prices by the guest count", () => {
+    const result = calculateRecommendation(
+      {
+        availableBudgetMinor: 1_500_000,
+        guestCount: 300,
+      },
+      {
+        minPriceMinor: 900_000,
+        maxPriceMinor: 1_200_000,
+      },
+    );
+
+    expect(result.applicableDimensions).toContain("budget");
+    expect(result.score).toBe(100);
+  });
+
+  it("omits per-guest budget scoring when guest count is missing", () => {
+    const result = calculateRecommendation(
+      {
+        availableBudgetMinor: 12_000_000,
+      },
+      {
+        pricePerGuest: true,
+        minPriceMinor: 30_000,
+        maxPriceMinor: 50_000,
+      },
+    );
+
+    expect(result.applicableDimensions).not.toContain("budget");
+    expect(result.score).toBeNull();
+  });
+
+  it.each([0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY])(
+    "omits per-guest budget scoring for an invalid guest count (%s)",
+    (guestCount) => {
+      const result = calculateRecommendation(
+        { availableBudgetMinor: 12_000_000, guestCount },
+        { pricePerGuest: true, minPriceMinor: 30_000, maxPriceMinor: 50_000 },
+      );
+
+      expect(result.applicableDimensions).not.toContain("budget");
+    },
+  );
 });

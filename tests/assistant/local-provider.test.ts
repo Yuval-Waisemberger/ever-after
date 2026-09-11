@@ -53,6 +53,27 @@ describe("local assistant provider", () => {
     expect(booked.text).toContain("External Quartet");
     expect(booked.evidence).toEqual([{ kind: "COUPLE_DATA", section: "vendors" }]);
   });
+  it("uses total per-guest Venue cost in local comparisons", async () => {
+    const context = assistantContext();
+    const shared = {
+      isSaved: true,
+      physicalArea: "central_israel",
+      styles: ["Romantic"],
+      minGuestCapacity: 100,
+      maxGuestCapacity: 500,
+      minPriceMinor: 100_000,
+      maxPriceMinor: 100_000,
+    };
+    context.vendors = [
+      assistantVendor({ ...shared, id: "venue", businessName: "Per Guest Venue", categorySlug: "venues", locationMode: "fixed" }),
+      assistantVendor({ ...shared, id: "package", businessName: "Package Vendor", categorySlug: "event-services", locationMode: "fixed" }),
+    ];
+
+    const comparison = await provider.respond({ message: "Compare the vendors", context });
+
+    expect(comparison.text).toMatch(/Per Guest Venue:.*75% match/);
+    expect(comparison.text).toMatch(/Package Vendor:.*100% match/);
+  });
   it("keeps missing wedding details and budget unknown", async () => {
     const context = assistantContext();
     context.budget.availableMinor = null;

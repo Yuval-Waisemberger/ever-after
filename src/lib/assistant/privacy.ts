@@ -24,6 +24,7 @@ export const assistantContextSchema = z.object({
     id: z.string(), businessName: z.string(), source: z.enum(["marketplace", "external"]),
     isSaved: z.boolean(), lifecycleStatus: z.enum(["contacted", "considering", "booked", "rejected"]).nullable(),
     agreedPriceMinor: money.nullable(), minPriceMinor: money.nullable(), maxPriceMinor: money.nullable(),
+    categorySlug: z.string().nullable().optional(),
     services: z.array(z.string()), styles: z.array(z.string()), locationMode: z.enum(["fixed", "mobile"]),
     physicalArea: z.string().nullable(), serviceAreas: z.array(z.string()), eventTypes: z.array(z.string()),
     minGuestCapacity: z.number().int().nonnegative().nullable(), maxGuestCapacity: z.number().int().nonnegative().nullable(),

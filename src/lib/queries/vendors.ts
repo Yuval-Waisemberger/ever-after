@@ -240,6 +240,7 @@ export async function getMarketplace(filters: VendorFilters) {
         locationMode: vendor.locationMode,
         physicalArea: vendor.physicalArea,
         serviceAreas: vendor.serviceAreas,
+        pricePerGuest: vendor.categorySlug === "venues",
         minPriceMinor: vendor.minPriceMinor,
         maxPriceMinor: vendor.maxPriceMinor,
         styles: vendor.styles,

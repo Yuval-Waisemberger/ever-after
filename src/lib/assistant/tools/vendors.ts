@@ -150,7 +150,10 @@ export const compareVendors = defineReadTool("compare_vendors", "Compare 2–4 p
   const vendors = input.vendorIds.flatMap((vendorId) => {
     const vendor = found.find((item) => item.id === vendorId);
     if (!vendor) return [];
-    const calculated = calculateRecommendation(matchContext, vendor);
+    const calculated = calculateRecommendation(matchContext, {
+      ...vendor,
+      pricePerGuest: vendor.category?.slug === "venues",
+    });
     // Use the engine's existing two-substantive-dimension evidence threshold.
     // Withhold a misleading personalized score rather than turning rating alone into fit.
     const fair = calculated.applicableDimensions.filter((dimension) => dimension !== "rating").length >= 2;

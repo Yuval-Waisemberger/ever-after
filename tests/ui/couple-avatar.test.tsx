@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { renderToStaticMarkup } from "react-dom/server";
 import { CoupleAvatar } from "@/components/couple/couple-avatar";
 import { CoupleProfileMenu } from "@/components/couple/couple-profile-menu";
-import { COUPLE_AVATAR_CHOICES, COUPLE_AVATAR_LABELS } from "@/lib/domain/couple-identity";
+import { COUPLE_AVATAR_ARTWORK, COUPLE_AVATAR_CHOICES, COUPLE_AVATAR_LABELS } from "@/lib/domain/couple-identity";
 
 const parse = (markup: string) => new DOMParser().parseFromString(markup, "text/html");
 (globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
@@ -18,17 +18,17 @@ describe("Couple avatar presentation", () => {
       expect(avatar.getAttribute("data-avatar-choice")).toBe(choice);
       expect(avatar.getAttribute("aria-label")).toBe(`${COUPLE_AVATAR_LABELS[choice]} Couple icon`);
       expect(document.querySelector(`[data-illustration="${choice}"]`)).not.toBeNull();
+      expect(decodeURIComponent(document.querySelector("img")?.getAttribute("src") ?? "")).toContain(COUPLE_AVATAR_ARTWORK[choice]);
     }
   });
 
-  it("uses logo-inspired wedding details in each people icon", () => {
-    const brideAndGroom = renderToStaticMarkup(<CoupleAvatar choice="woman_man" />);
-    const twoBrides = renderToStaticMarkup(<CoupleAvatar choice="woman_woman" />);
-    const twoGrooms = renderToStaticMarkup(<CoupleAvatar choice="man_man" />);
-    expect(brideAndGroom).toContain('data-illustration="woman_man"');
-    expect(brideAndGroom).toContain('fill="currentColor"');
-    expect(twoBrides).not.toContain('fill="currentColor"');
-    expect(twoGrooms.match(/fill="currentColor"/g)).toHaveLength(2);
+  it("uses the same canonical artwork paths as the Settings chooser", () => {
+    expect(COUPLE_AVATAR_ARTWORK).toEqual({
+      heart: "/images/couple-settings/heart.png?v=2",
+      woman_man: "/images/couple-settings/bride-and-groom.png?v=2",
+      woman_woman: "/images/couple-settings/bride-and-bride.png?v=2",
+      man_man: "/images/couple-settings/groom-and-groom.png?v=2",
+    });
   });
 
   it("renders an authenticated photo URL without exposing a storage path field", () => {
@@ -48,7 +48,7 @@ describe("Couple avatar presentation", () => {
     expect(container.querySelector('[data-avatar-source="photo"]')).not.toBeNull();
     await act(async () => container.querySelector("img")?.dispatchEvent(new Event("error")));
     expect(container.querySelector('[data-avatar-source="icon"]')?.getAttribute("aria-label")).toBe("Bride + Bride Couple icon");
-    expect(container.querySelector("img")).toBeNull();
+    expect(decodeURIComponent(container.querySelector("img")?.getAttribute("src") ?? "")).toContain("/images/couple-settings/bride-and-bride.png");
     await act(async () => root.unmount());
   });
 
