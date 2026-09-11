@@ -4,11 +4,12 @@ import { getOwnedWedding } from "@/lib/queries/wedding";
 import { getCoupleIdentity } from "@/lib/queries/couple-identity";
 import { getVendorIdentity } from "@/lib/queries/vendor-dashboard";
 import { AppShell } from "./app-shell";
-import { PublicHeader } from "./public-header";
+import { LandingNavigation } from "@/components/public/landing-navigation";
+import "@/app/public-auth.css";
 
 /** Select the existing shell on the server, before emitting Marketplace content. */
 export async function MarketplaceShell({ profile, children }: { profile: CurrentProfile | null; children: ReactNode }) {
-  const content = <div className="public-theme directory-page min-h-screen">{!profile ? <PublicHeader /> : null}{children}</div>;
+  const content = <div className="public-theme directory-page min-h-screen">{!profile ? <LandingNavigation context="auth" /> : null}{children}</div>;
   if (!profile) return content;
   if (profile.role === "vendor") {
     const identity = await getVendorIdentity(profile.displayName);

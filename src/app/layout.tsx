@@ -11,7 +11,7 @@ export const metadata: Metadata = {
       : "http://localhost:3000",
   ),
   title: {
-    default: "Ever After — Wedding planning, beautifully organized",
+    default: "Ever After",
     template: "%s | Ever After",
   },
   description:

@@ -245,6 +245,37 @@ test("About Us uses the same navigation typography as Vendors on public and auth
   }
 });
 
+test("Guest Marketplace reuses the complete canonical public navigation responsively", async ({ page }) => {
+  for (const width of [1440, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/vendors");
+    const header = page.locator("header.landing-navigation.couple-auth-navigation");
+    await expect(header.getByRole("img", { name: "Ever After" })).toBeVisible();
+    const mobile = width <= 900;
+    if (mobile) await header.getByLabel("Navigation menu", { exact: true }).click();
+    const nav = header.getByRole("navigation", { name: mobile ? "Mobile navigation" : "Public navigation", exact: true });
+    for (const label of ["How it works", "Vendors", "About us", "AI Assistant Sign up to use", "Log in", "Sign up"]) {
+      await expect(nav.getByRole(label === "About us" ? "button" : "link", { name: label, exact: true })).toBeVisible();
+    }
+    await expect(nav.getByRole("link", { name: "How it works", exact: true })).toHaveAttribute("href", "/#how-it-works");
+    await expect(nav.getByRole("link", { name: "AI Assistant Sign up to use", exact: true })).toHaveAttribute("href", "/auth/couple");
+    await expect(page.locator(".vendor-card").first()).toBeVisible();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+
+    if (width === 1440 || width === 390) {
+      await nav.getByRole("button", { name: "About us", exact: true }).click();
+      const about = page.getByRole("dialog", { name: "About Us" });
+      await expect(about).toBeVisible();
+      await about.getByRole("button", { name: "Close About Us" }).click();
+      if (mobile) await header.getByLabel("Navigation menu", { exact: true }).click();
+      await nav.getByRole("link", { name: "AI Assistant Sign up to use", exact: true }).click();
+      await expect(page.getByRole("dialog", { name: "Your wedding, with a little guidance." })).toBeVisible();
+      await page.keyboard.press("Escape");
+      await expect(page).toHaveURL(/\/vendors$/);
+    }
+  }
+});
+
 test("landing How it works and Vendors retain their existing routes", async ({ page }) => {
   await page.goto("/");
   const nav = page.getByRole("navigation", { name: "Public navigation", exact: true });
