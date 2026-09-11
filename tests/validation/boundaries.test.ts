@@ -100,6 +100,16 @@ describe("server validation boundaries", () => {
     expect(result.success).toBe(false);
   });
 
+  it.each(["https://vendor.example", "http://vendor.example", "  HTTPS://vendor.example/path  "])("accepts an HTTP(S) Vendor URL: %s", (websiteUrl) => {
+    const result = vendorProfileSchema.parse({ ...profileBase, websiteUrl });
+    expect(result.websiteUrl).toBe(websiteUrl.trim());
+  });
+
+  it.each(["javascript:alert(1)", "data:text/html,test", "ftp://vendor.example"])("rejects a non-HTTP Vendor URL: %s", (websiteUrl) => {
+    expect(vendorProfileSchema.safeParse({ ...profileBase, websiteUrl }).success).toBe(false);
+    expect(vendorProfileSchema.safeParse({ ...profileBase, instagramUrl: websiteUrl }).success).toBe(false);
+  });
+
   it("deduplicates mobile areas and rejects flexible mixed with a specific area", () => {
     const deduplicated = vendorProfileSchema.parse({ ...profileBase, serviceAreas: ["north", "north", "south"] });
     expect(deduplicated.serviceAreas).toEqual(["north", "south"]);

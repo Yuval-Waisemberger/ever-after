@@ -6,9 +6,16 @@ import {
   type VendorLocationMode,
 } from "@/lib/vendors/location";
 
+const hasHttpProtocol = (value: string) => {
+  try { return ["http:", "https:"].includes(new URL(value).protocol); }
+  catch { return false; }
+};
+
 const optionalUrl = z.preprocess(
   (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
-  z.url("Enter a complete URL including https://").nullable(),
+  z.url("Enter a complete URL including https://")
+    .refine(hasHttpProtocol, "Enter a complete URL including https://")
+    .nullable(),
 );
 const optionalNumber = z.preprocess(
   (value) => (value === "" || value == null ? null : Number(value)),

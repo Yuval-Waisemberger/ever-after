@@ -7,6 +7,7 @@ const mocks = vi.hoisted(() => ({
   from: vi.fn(),
   select: vi.fn(),
   eq: vi.fn(),
+  order: vi.fn(),
   maybeSingle: vi.fn(),
 }));
 
@@ -56,10 +57,13 @@ beforeEach(() => {
     id: "11111111-1111-4111-8111-111111111111",
     role: "vendor",
   });
-  mocks.from.mockReturnValue({ select: mocks.select });
+  mocks.from.mockImplementation((table: string) => table === "vendor_owner_reviews"
+    ? { select: () => ({ eq: () => ({ order: mocks.order }) }) }
+    : { select: mocks.select });
   mocks.select.mockReturnValue({ eq: mocks.eq });
   mocks.eq.mockReturnValue({ maybeSingle: mocks.maybeSingle });
   mocks.maybeSingle.mockResolvedValue({ data: ownedProfile, error: null });
+  mocks.order.mockResolvedValue({ data: [], error: null });
 });
 
 describe("Vendor first-login profile loading", () => {
@@ -68,6 +72,7 @@ describe("Vendor first-login profile loading", () => {
 
     expect(mocks.requireRole).toHaveBeenCalledWith("vendor");
     expect(mocks.from).toHaveBeenCalledWith("vendor_profiles");
+    expect(mocks.from).toHaveBeenCalledWith("vendor_owner_reviews");
     expect(mocks.eq).toHaveBeenCalledWith(
       "owner_user_id",
       "11111111-1111-4111-8111-111111111111",
@@ -152,7 +157,7 @@ describe("Vendor onboarding and role boundaries", () => {
     expect(rls).toContain('create policy "vendors_owner_update"');
     expect(rls).toContain('create policy "vendors_owner_delete"');
     expect(rls.match(/\(select auth\.uid\(\)\) = owner_user_id/g)?.length).toBeGreaterThanOrEqual(4);
-    expect(rls).toContain("for select to anon, authenticated using (is_public)");
+    expect(rls).toContain('create policy "vendors_public_read"');
   });
 });
 

@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { calculateVendorProfileCompletion } from "@/lib/domain/vendor-profile";
 import { requireRole } from "@/lib/auth/user";
 import type { VendorArea, VendorLocationMode } from "@/lib/vendors/location";
+import { PUBLIC_VENDOR_REVIEW_COLUMNS } from "./public-vendor-data";
 
 export type VendorReviewRecord = {
   id: string;
@@ -68,11 +69,15 @@ export async function getOwnedVendorProfile(): Promise<OwnedVendorProfile | null
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("vendor_profiles")
-    .select("*, vendor_categories(name), vendor_subcategories(name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
+    .select("*, vendor_categories(name), vendor_subcategories(name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary)")
     .eq("owner_user_id", account.id)
     .maybeSingle();
   if (error) throw new Error("Vendor profile could not be loaded.");
-  return data ? (data as OwnedVendorProfile) : null;
+  if (!data) return null;
+  const { data: reviews, error: reviewError } = await supabase.from("vendor_owner_reviews")
+    .select(PUBLIC_VENDOR_REVIEW_COLUMNS).eq("vendor_id", data.id).order("created_at", { ascending: false });
+  if (reviewError || !reviews) throw new Error("Vendor reviews could not be loaded.");
+  return { ...data, reviews } as OwnedVendorProfile;
 }
 
 export async function getVendorDashboard() {

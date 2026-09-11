@@ -8,6 +8,14 @@ import { demoVendors } from "@/lib/vendors/demo";
 import type { MarketplaceSubcategory, MarketplaceVendor, VendorFilters, VendorReview } from "@/lib/vendors/types";
 import { lifecycleFromStoredStatus } from "@/lib/domain/couple-vendors";
 import { resolveVendorLocationMode, vendorMatchesArea, type VendorArea } from "@/lib/vendors/location";
+import {
+  PUBLIC_VENDOR_COLUMNS,
+  PUBLIC_VENDOR_REVIEW_COLUMNS,
+  readPublicVendorAssets,
+  type PublicVendorImageRow,
+  type PublicVendorReviewRow,
+  type PublicVendorRow,
+} from "./public-vendor-data";
 
 const PAGE_SIZE = 12;
 
@@ -37,27 +45,28 @@ function normalizeReview(review: Record<string, unknown>): VendorReview {
   };
 }
 
-type VendorImageRow = {
-  id: string;
-  storage_path: string | null;
-  external_url: string | null;
-  alt_text: string | null;
-  sort_order: number;
-  is_primary: boolean;
-};
+type VendorImageRow = Omit<PublicVendorImageRow, "vendor_id">;
 
 type VendorRelation = { slug?: string; name?: string };
 
 type VendorRow = Record<string, unknown> & {
-  vendor_categories: VendorRelation | VendorRelation[] | null;
-  vendor_subcategories: VendorRelation | VendorRelation[] | null;
+  category_slug?: string | null;
+  category_name?: string | null;
+  subcategory_slug?: string | null;
+  subcategory_name?: string | null;
+  vendor_categories?: VendorRelation | VendorRelation[] | null;
+  vendor_subcategories?: VendorRelation | VendorRelation[] | null;
   vendor_images: VendorImageRow[] | null;
-  reviews: Record<string, unknown>[] | null;
+  reviews: PublicVendorReviewRow[] | null;
 };
 
 function mapVendor(row: VendorRow, supabaseUrl: string): MarketplaceVendor {
-  const category = relationship(row.vendor_categories);
-  const subcategory = relationship(row.vendor_subcategories);
+  const category = row.category_slug != null || row.category_name != null
+    ? { slug: row.category_slug ?? undefined, name: row.category_name ?? undefined }
+    : relationship(row.vendor_categories ?? null);
+  const subcategory = row.subcategory_slug != null || row.subcategory_name != null
+    ? { slug: row.subcategory_slug ?? undefined, name: row.subcategory_name ?? undefined }
+    : relationship(row.vendor_subcategories ?? null);
   const images = (row.vendor_images ?? []).toSorted(
     (a, b) => Number(b.is_primary) - Number(a.is_primary) || a.sort_order - b.sort_order,
   );
@@ -191,19 +200,12 @@ export async function getMarketplace(filters: VendorFilters) {
   }
 
   const supabase = await createClient();
-  // A left-joined filter only filters the embedded record, not its parent vendor.
-  // Keep vendors without a subcategory visible unless a subcategory is requested.
-  const categoryJoin = filters.category ? "vendor_categories!inner(slug, name)" : "vendor_categories(slug, name)";
-  const subcategoryJoin = filters.subcategory
-    ? "vendor_subcategories!inner(slug, name)"
-    : "vendor_subcategories(slug, name)";
   let query = supabase
-    .from("vendor_profiles")
-    .select(`*, ${categoryJoin}, ${subcategoryJoin}, vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)`, { count: "exact" })
-    .eq("is_public", true);
+    .from("public_vendor_profiles")
+    .select(PUBLIC_VENDOR_COLUMNS, { count: "exact" });
   if (filters.search) query = query.or(`business_name.ilike.%${filters.search.replaceAll(",", "")}%,location_city.ilike.%${filters.search.replaceAll(",", "")}%,description.ilike.%${filters.search.replaceAll(",", "")}%`);
-  if (filters.category) query = query.eq("vendor_categories.slug", filters.category);
-  if (filters.subcategory) query = query.eq("vendor_subcategories.slug", filters.subcategory);
+  if (filters.category) query = query.eq("category_slug", filters.category);
+  if (filters.subcategory) query = query.eq("subcategory_slug", filters.subcategory);
   if (filters.area) query = query.or(`and(location_mode.eq.fixed,physical_area.eq.${filters.area}),and(location_mode.eq.mobile,service_areas.ov.{${filters.area},flexible})`);
   if (filters.minPrice != null) query = query.gte("max_price_minor", filters.minPrice * 100);
   if (filters.maxPrice != null) query = query.lte("min_price_minor", filters.maxPrice * 100);
@@ -224,7 +226,13 @@ export async function getMarketplace(filters: VendorFilters) {
   const { data, error, count } = marketplaceResult;
   if (error) throw new Error("The vendor marketplace could not be loaded.");
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
-  let vendors = (data ?? []).map((row) => mapVendor(row as VendorRow, url));
+  const publicRows = (data ?? []) as PublicVendorRow[];
+  const assets = await readPublicVendorAssets(supabase, publicRows.map((row) => row.id));
+  let vendors = publicRows.map((row) => mapVendor({
+    ...row,
+    vendor_images: assets.imagesByVendorId.get(row.id) ?? [],
+    reviews: assets.reviewsByVendorId.get(row.id) ?? [],
+  } as VendorRow, url));
   let total = count ?? vendors.length;
   if (filters.minRating != null) {
     vendors = vendors.filter((vendor) => (vendor.ratingAverage ?? 0) >= filters.minRating!);
@@ -258,13 +266,17 @@ export const getVendorBySlug = cache(async (slug: string): Promise<MarketplaceVe
   if (!isSupabaseConfigured()) return demoVendors.find((vendor) => vendor.slug === slug) ?? null;
   const supabase = await createClient();
   const { data, error } = await supabase
-    .from("vendor_profiles")
-    .select("*, vendor_categories(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
+    .from("public_vendor_profiles")
+    .select(PUBLIC_VENDOR_COLUMNS)
     .eq("slug", slug)
-    .eq("is_public", true)
     .maybeSingle();
   if (error || !data) return null;
-  return mapVendor(data as VendorRow, process.env.NEXT_PUBLIC_SUPABASE_URL!);
+  const assets = await readPublicVendorAssets(supabase, [data.id]);
+  return mapVendor({
+    ...(data as PublicVendorRow),
+    vendor_images: assets.imagesByVendorId.get(data.id) ?? [],
+    reviews: assets.reviewsByVendorId.get(data.id) ?? [],
+  } as VendorRow, process.env.NEXT_PUBLIC_SUPABASE_URL!);
 });
 
 // No client-supplied owner or slug: this route can only preview the signed-in Vendor's row.
@@ -273,9 +285,12 @@ export async function getOwnedVendorPreview(): Promise<MarketplaceVendor | null>
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("vendor_profiles")
-    .select("*, vendor_categories(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary), reviews(id, reviewer_display_name, professionalism, punctuality, service_attitude, value_for_money, would_choose_again, review_text, created_at)")
+    .select("*, vendor_categories(slug, name), vendor_subcategories(slug, name), vendor_images(id, storage_path, external_url, alt_text, sort_order, is_primary)")
     .eq("owner_user_id", account.id)
     .maybeSingle();
   if (error || !data || data.owner_user_id !== account.id) return null;
-  return mapVendor(data as VendorRow, process.env.NEXT_PUBLIC_SUPABASE_URL!);
+  const { data: reviews, error: reviewError } = await supabase.from("vendor_owner_reviews")
+    .select(PUBLIC_VENDOR_REVIEW_COLUMNS).eq("vendor_id", data.id).order("created_at", { ascending: false });
+  if (reviewError || !reviews) throw new Error("Vendor reviews could not be loaded.");
+  return mapVendor({ ...data, reviews } as VendorRow, process.env.NEXT_PUBLIC_SUPABASE_URL!);
 }

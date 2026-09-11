@@ -1,21 +1,37 @@
 import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedWedding } from "./wedding";
+import { publicVendorAsLegacyRelation, readPublicVendorsByIds } from "./public-vendor-data";
 
 export async function getBudgetPageData() {
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
   const { data: items, error } = await supabase.from("budget_items")
-    .select("id, label, category, source, couple_vendors(status, vendor_profiles(business_name), external_vendors(business_name)), estimated_amount_minor, committed_amount_minor, notes, couple_vendor_id, payments(id, label, amount_minor, due_date, is_paid, paid_at, notes)")
+    .select("id, label, category, source, couple_vendors(id, status, vendor_id, external_vendors(business_name)), estimated_amount_minor, committed_amount_minor, notes, couple_vendor_id, payments(id, label, amount_minor, due_date, is_paid, paid_at, notes)")
     .eq("wedding_id", wedding.id).order("created_at");
   if (error || !items) throw new Error("Budget could not be loaded.");
   if (items.some(item => !item.payments)) throw new Error("Payments could not be loaded.");
-  const normalizedItems = items.map((item) => ({
+  const vendorIds = items.flatMap((item) => {
+    const relationship = Array.isArray(item.couple_vendors) ? item.couple_vendors[0] : item.couple_vendors;
+    return relationship?.vendor_id ? [relationship.vendor_id] : [];
+  });
+  const publicVendors = await readPublicVendorsByIds(supabase, vendorIds);
+  const publicVendorById = new Map(publicVendors.map((vendor) => [vendor.id, vendor]));
+  const normalizedItems = items.map((item) => {
+    const relationships = (Array.isArray(item.couple_vendors) ? item.couple_vendors : [item.couple_vendors]).filter(Boolean).map((relationship) => {
+      const vendor = relationship!.vendor_id ? publicVendorById.get(relationship!.vendor_id) : null;
+      return {
+        ...relationship!,
+        vendor_profiles: vendor ? publicVendorAsLegacyRelation(vendor) : null,
+      };
+    });
+    return {
     ...item,
+    couple_vendors: Array.isArray(item.couple_vendors) ? relationships : relationships[0] ?? null,
     estimated_amount_minor: item.estimated_amount_minor == null ? null : Number(item.estimated_amount_minor),
     committed_amount_minor: item.committed_amount_minor == null ? null : Number(item.committed_amount_minor),
     payments: (item.payments ?? []).map((payment) => ({ ...payment, amount_minor: Number(payment.amount_minor) })),
-  }));
+  }; });
   const summary = calculateBudgetSummary(
     wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor),
     normalizedItems.map((item) => ({

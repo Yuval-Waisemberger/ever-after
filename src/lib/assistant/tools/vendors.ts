@@ -6,24 +6,24 @@ import { allRows, coupleEvidence, defineReadTool, marketplaceEvidence, rows, Too
 import { readBudget, readWedding } from "./planning";
 
 const vendorRow = z.object({
-  id: c.id, business_name: c.vendorFacts.shape.businessName, vendor_categories: c.taxonomy, vendor_subcategories: c.taxonomy,
+  id: c.id, business_name: c.vendorFacts.shape.businessName,
+  category_slug: c.slug.nullable(), category_name: z.string().nullable(), subcategory_slug: c.slug.nullable(), subcategory_name: z.string().nullable(),
   location_city: c.vendorFacts.shape.locationCity, location_mode: c.locationMode, physical_area: c.area.nullable(), service_areas: c.vendorFacts.shape.serviceAreas,
   min_price_minor: c.dbMoney.nullable(), max_price_minor: c.dbMoney.nullable(), services: c.vendorFacts.shape.services,
   styles: c.vendorFacts.shape.styles, event_types: c.vendorFacts.shape.eventTypes, min_guest_capacity: c.vendorFacts.shape.minGuestCapacity,
   max_guest_capacity: c.vendorFacts.shape.maxGuestCapacity, friday_available: z.boolean().nullable(),
 });
-function vendorColumns(category?: string, subcategory?: string) {
-  // Inner embeds are needed for category filters to filter parent vendors as well.
-  return `id, business_name, location_city, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, friday_available, vendor_categories${category ? "!inner" : ""}(slug, name), vendor_subcategories${subcategory ? "!inner" : ""}(slug, name)`;
+function vendorColumns() {
+  return "id, business_name, category_slug, category_name, subcategory_slug, subcategory_name, location_city, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, friday_available";
 }
 const rating = z.number().min(1).max(5);
 const ratingRow = z.object({ vendor_id: c.id, professionalism: rating, punctuality: rating, service_attitude: rating, value_for_money: rating });
 async function publicRatings(context: ToolContext, vendorIds: string[]) {
   if (!vendorIds.length) return new Map<string, { ratingAverage: number; reviewCount: number }>();
   // Numerical dimensions only. No reviewer identity, text, dates, or individual reviews leave the tool.
-  const reviews = await allRows((from, to) => context.db.from("reviews")
+  const reviews = await allRows((from, to) => context.db.from("public_vendor_reviews")
     .select("vendor_id, professionalism, punctuality, service_attitude, value_for_money")
-    .in("vendor_id", vendorIds).eq("is_public", true).order("id").range(from, to), ratingRow, c.LIMITS.reviewRows);
+    .in("vendor_id", vendorIds).order("id").range(from, to), ratingRow, c.LIMITS.reviewRows);
   const totals = new Map<string, { sum: number; count: number }>();
   for (const review of reviews) {
     const previous = totals.get(review.vendor_id) ?? { sum: 0, count: 0 };
@@ -36,7 +36,9 @@ async function publicRatings(context: ToolContext, vendorIds: string[]) {
 async function vendorValues(context: ToolContext, found: z.output<typeof vendorRow>[]) {
   const ratings = await publicRatings(context, found.map((vendor) => vendor.id));
   return found.map((row) => c.vendorFacts.parse({
-    id: row.id, businessName: row.business_name, category: row.vendor_categories, subcategory: row.vendor_subcategories,
+    id: row.id, businessName: row.business_name,
+    category: row.category_slug && row.category_name ? { slug: row.category_slug, name: row.category_name } : null,
+    subcategory: row.subcategory_slug && row.subcategory_name ? { slug: row.subcategory_slug, name: row.subcategory_name } : null,
     locationCity: row.location_city, locationMode: row.location_mode, physicalArea: row.physical_area, serviceAreas: row.service_areas, minPriceMinor: row.min_price_minor, maxPriceMinor: row.max_price_minor,
     services: row.services, styles: row.styles, eventTypes: row.event_types, minGuestCapacity: row.min_guest_capacity,
     maxGuestCapacity: row.max_guest_capacity, fridayAvailable: row.friday_available,
@@ -45,20 +47,20 @@ async function vendorValues(context: ToolContext, found: z.output<typeof vendorR
 }
 async function vendorsByIds(context: ToolContext, ids: string[]) {
   if (!ids.length) return [];
-  return vendorValues(context, await rows(context.db.from("vendor_profiles").select(vendorColumns()).eq("is_public", true).in("id", ids).order("id").limit(ids.length), vendorRow, ids.length));
+  return vendorValues(context, await rows(context.db.from("public_vendor_profiles").select(vendorColumns()).in("id", ids).order("id").limit(ids.length), vendorRow, ids.length));
 }
 function escapedPattern(value: string) {
   return value.replaceAll("\\", "\\\\").replaceAll('"', '\\"').replaceAll("%", "\\%").replaceAll("_", "\\_");
 }
 export const searchMarketplaceVendors = defineReadTool("search_marketplace_vendors", "Search a small page of the current public Ever After Marketplace. These are listing facts, not market benchmarks.", c.marketplaceInput, c.marketplaceData, async (input, context) => {
   const candidateQuery = () => {
-    let query = context.db.from("vendor_profiles").select(vendorColumns(input.category, input.subcategory)).eq("is_public", true);
+    let query = context.db.from("public_vendor_profiles").select(vendorColumns());
     if (input.search) {
       const pattern = `"%${escapedPattern(input.search)}%"`;
       query = query.or(`business_name.ilike.${pattern},location_city.ilike.${pattern}`);
     }
-    if (input.category) query = query.eq("vendor_categories.slug", input.category);
-    if (input.subcategory) query = query.eq("vendor_subcategories.slug", input.subcategory);
+    if (input.category) query = query.eq("category_slug", input.category);
+    if (input.subcategory) query = query.eq("subcategory_slug", input.subcategory);
     if (input.city) query = query.ilike("location_city", escapedPattern(input.city));
     if (input.area) query = query.or(`and(location_mode.eq.fixed,physical_area.eq.${input.area}),and(location_mode.eq.mobile,service_areas.ov.{${input.area},flexible})`);
     if (input.minPriceMinor != null) query = query.gte("max_price_minor", input.minPriceMinor);
@@ -101,16 +103,15 @@ export const searchMarketplaceVendors = defineReadTool("search_marketplace_vendo
   throw new ToolReadError("READ_LIMIT_EXCEEDED");
 });
 
-const categoryLink = z.object({ vendor_categories: z.object({ slug: c.slug }).nullable() }).nullable();
 const relationshipRow = z.object({
   id: c.id, vendor_id: c.id.nullable(), external_vendor_id: c.id.nullable(), status: z.enum(["saved", "contacted", "considering", "booked", "rejected"]),
-  is_saved: z.boolean(), agreed_price_minor: c.dbMoney.nullable(), vendor_profiles: categoryLink, external_vendors: categoryLink,
+  is_saved: z.boolean(), agreed_price_minor: c.dbMoney.nullable(), external_vendors: z.object({ vendor_categories: z.object({ slug: c.slug }).nullable() }).nullable(),
 });
 const externalRow = z.object({ id: c.id, business_name: c.externalFacts.shape.businessName, vendor_categories: c.taxonomy, vendor_subcategories: c.taxonomy });
 export const getCoupleVendors = defineReadTool("get_couple_vendors", "Read bounded Couple vendor relationships and allowed Marketplace/external-vendor facts, without contacts or notes.", c.coupleVendorsInput, c.coupleVendorData, async (input, context) => {
   const found = await allRows((from, to) => {
     let query = context.db.from("couple_vendors")
-      .select("id, vendor_id, external_vendor_id, status, is_saved, agreed_price_minor, vendor_profiles(vendor_categories(slug)), external_vendors(vendor_categories(slug))")
+      .select("id, vendor_id, external_vendor_id, status, is_saved, agreed_price_minor, external_vendors(vendor_categories(slug))")
       .eq("wedding_id", context.weddingId);
     if (input.saved != null) query = query.eq("is_saved", input.saved);
     if (input.lifecycle) query = query.eq("status", input.lifecycle);
@@ -119,19 +120,27 @@ export const getCoupleVendors = defineReadTool("get_couple_vendors", "Read bound
     return query.order("id").range(from, to);
   }, relationshipRow, c.LIMITS.relationshipRows);
   for (const row of found) {
-    if ((!row.vendor_id && !row.external_vendor_id) || (row.vendor_id && row.external_vendor_id) || (row.vendor_id && !row.vendor_profiles) || (row.external_vendor_id && !row.external_vendors)) throw new ToolReadError("INVALID_SOURCE_DATA");
+    if ((!row.vendor_id && !row.external_vendor_id) || (row.vendor_id && row.external_vendor_id) || (row.external_vendor_id && !row.external_vendors)) throw new ToolReadError("INVALID_SOURCE_DATA");
   }
+  const allMarketplaceIds = found.flatMap((row) => row.vendor_id ? [row.vendor_id] : []);
+  const allPublicVendors = await vendorsByIds(context, allMarketplaceIds);
+  const publicVendorById = new Map(allPublicVendors.map((vendor) => [vendor.id, vendor]));
   // A category can belong to either relation; filter this bounded identity set
   // before pagination instead of unsafe cross-embed OR expressions.
-  const filtered = input.category ? found.filter((row) => (row.vendor_profiles ?? row.external_vendors)?.vendor_categories?.slug === input.category) : found;
+  const filtered = input.category ? found.filter((row) => (
+    row.vendor_id ? publicVendorById.get(row.vendor_id)?.category?.slug : row.external_vendors?.vendor_categories?.slug
+  ) === input.category) : found;
   const from = (input.page - 1) * input.limit;
   const selected = filtered.slice(from, from + input.limit);
   const marketplaceIds = selected.flatMap((row) => row.vendor_id ? [row.vendor_id] : []);
   const externalIds = selected.flatMap((row) => row.external_vendor_id ? [row.external_vendor_id] : []);
-  const [publicVendors, externalVendors] = await Promise.all([
-    vendorsByIds(context, marketplaceIds),
-    externalIds.length ? rows(context.db.from("external_vendors").select("id, business_name, vendor_categories(slug, name), vendor_subcategories(slug, name)").eq("wedding_id", context.weddingId).in("id", externalIds).order("id").limit(externalIds.length), externalRow, externalIds.length) : [],
-  ]);
+  const externalVendors = externalIds.length
+    ? await rows(context.db.from("external_vendors").select("id, business_name, vendor_categories(slug, name), vendor_subcategories(slug, name)").eq("wedding_id", context.weddingId).in("id", externalIds).order("id").limit(externalIds.length), externalRow, externalIds.length)
+    : [];
+  const publicVendors = marketplaceIds.flatMap((id) => {
+    const vendor = publicVendorById.get(id);
+    return vendor ? [vendor] : [];
+  });
   const vendors = selected.map((row) => {
     const marketplace = publicVendors.find((vendor) => vendor.id === row.vendor_id);
     const external = externalVendors.find((vendor) => vendor.id === row.external_vendor_id);

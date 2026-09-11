@@ -46,4 +46,15 @@ describe("external vendor validation", () => {
     const mismatch = externalVendorSchema.safeParse({ ...base, email: "", websiteUrl: "", subcategoryId: uuid });
     expect(mismatch.success).toBe(false);
   });
+
+  it("accepts only HTTP(S) website protocols and trims optional values", () => {
+    const base = {
+      externalVendorId: "", relationshipId: "", businessName: "Vendor", categoryId: "", subcategoryId: "",
+      contactName: "", phone: "", email: "", notes: "", lifecycleStatus: "none", isSaved: "false", agreedPriceShekels: "",
+    };
+    expect(externalVendorSchema.parse({ ...base, websiteUrl: "  HTTPS://example.com/profile  " }).websiteUrl).toBe("HTTPS://example.com/profile");
+    for (const websiteUrl of ["javascript:alert(1)", "data:text/html,test", "ftp://example.com"]) {
+      expect(externalVendorSchema.safeParse({ ...base, websiteUrl }).success).toBe(false);
+    }
+  });
 });

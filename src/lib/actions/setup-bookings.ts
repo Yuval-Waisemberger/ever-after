@@ -73,8 +73,8 @@ export async function bookSetupVendor(raw: unknown): Promise<BookingResult> {
     if (tax.error || !tax.data || !parent || (map.category && parent.slug !== map.category)) return { status: "error", message: "This vendor category is unavailable." };
     if (value.mode === "marketplace") {
       if (!value.vendorId) return { status: "error", message: "Select a Marketplace vendor." };
-      const vendor = await db.from("vendor_profiles").select("id").eq("id", value.vendorId).eq("is_public", true).eq("subcategory_id", tax.data.id).eq("category_id", tax.data.category_id).single();
-      if (vendor.error || !vendor.data) return { status: "error", message: "The selected vendor is unavailable or belongs to another category." };
+      const vendor = await db.from("public_vendor_profiles").select("id, category_slug, subcategory_slug").eq("id", value.vendorId).single();
+      if (vendor.error || !vendor.data || vendor.data.category_slug !== parent.slug || vendor.data.subcategory_slug !== value.subcategory) return { status: "error", message: "The selected vendor is unavailable or belongs to another category." };
       const result = await writeMarketplaceRelationship(db, wedding.id, value.vendorId, "booked",
         value.agreedPriceShekels === undefined ? {} : { agreed_price_minor: value.agreedPriceShekels * 100 });
       confirmed = !result.error && Boolean(result.data);

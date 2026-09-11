@@ -1,7 +1,7 @@
 // @vitest-environment node
 // Real auth/ownership functions with an isolated database double; never live data.
 import { beforeEach, expect, it, vi } from "vitest";
-const state = vi.hoisted(() => ({ user: "owner" as string | null, role: "couple", calls: [] as Array<[string,string,...unknown[]]> }));
+const state = vi.hoisted(() => ({ user: "owner" as string | null, role: "couple", published: true, calls: [] as Array<[string,string,...unknown[]]> }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: () => state.user ? [{ name: "sb-local-auth-token", value: "synthetic" }] : [] }) }));
 vi.mock("next/navigation", () => ({ redirect: (path: string) => { throw new Error(`REDIRECT:${path}`); } }));
@@ -11,21 +11,23 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({
   from(table: string) {
     const filters: Record<string, unknown> = {}, chain: Record<string, unknown> = {};
     let mutation = false;
-    for (const op of ["select", "eq", "single", "maybeSingle", "update", "delete", "insert"]) chain[op] = (...args: unknown[]) => {
+    for (const op of ["select", "eq", "single", "maybeSingle", "order", "update", "delete", "insert", "upsert"]) chain[op] = (...args: unknown[]) => {
       state.calls.push([table,op,...args]); if (op === "eq") filters[String(args[0])] = args[1];
-      if (["update","delete","insert"].includes(op)) mutation = true;
+      if (["update","delete","insert","upsert"].includes(op)) mutation = true;
       return chain;
     };
     chain.then = (resolve: (result: unknown) => unknown) => Promise.resolve({ error: null, data:
       table === "profiles" ? { id: state.user, role: state.role, display_name: "Synthetic", avatar_choice: "heart", avatar_storage_path: null } :
       table === "weddings" && filters.owner_user_id === state.user ? { id: "owned-wedding", booked_categories: [], updated_at: "revision" } :
-      table === "vendor_profiles" && filters.owner_user_id === state.user && !mutation ? { id: "11111111-1111-4111-8111-111111111111", slug: "own", vendor_images: [] } : null }).then(resolve);
+      table === "vendor_profiles" && filters.owner_user_id === state.user && !mutation ? { id: "11111111-1111-4111-8111-111111111111", slug: "own", vendor_images: [] } :
+      table === "vendor_owner_reviews" ? [] :
+      table === "public_vendor_profiles" && state.published ? { id: filters.id } : null }).then(resolve);
     return chain;
   },
 }) }));
 import { saveGuest, deleteGuest } from "@/lib/actions/guests";
 import { saveBudgetItem, savePayment, deletePayment, togglePaymentPaid, setTotalBudget } from "@/lib/actions/budget";
-import { setVendorStatus, setRelationshipSaved, saveExternalVendor, deleteExternalVendor } from "@/lib/actions/vendors";
+import { setVendorStatus, setRelationshipSaved, saveExternalVendor, deleteExternalVendor, submitReview } from "@/lib/actions/vendors";
 import { bookSetupVendor, saveBookingDeclaration } from "@/lib/actions/setup-bookings";
 import { saveWeddingDetails, completeWeddingSetup, skipWeddingSetup } from "@/lib/actions/wedding";
 import { chooseCoupleAvatar, saveCouplePhoto, removeCouplePhoto } from "@/lib/actions/couple-identity";
@@ -35,7 +37,7 @@ const form = (values: Record<string,string> = {}) => { const f = new FormData();
 const guest = () => form({ id: foreign, fullName: "Synthetic", invitedCount: "1", rsvpStatus: "not_invited" });
 const external = () => form({ externalVendorId: foreign, relationshipId: foreign, businessName: "Synthetic", lifecycleStatus: "booked" });
 const payment = () => form({ id: foreign, budgetItemId: foreign, label: "Payment", amountShekels: "1", dueDate: "", notes: "" });
-beforeEach(() => { state.user = "owner"; state.role = "couple"; state.calls.length = 0; });
+beforeEach(() => { state.user = "owner"; state.role = "couple"; state.published = true; state.calls.length = 0; });
 const coupleActions = [
   ["guest save", () => saveGuest(idle, guest())], ["guest delete", () => deleteGuest(guest())],
   ["budget edit", () => saveBudgetItem(idle, form({ id: foreign }))], ["total", () => setTotalBudget(idle, form({ totalBudgetShekels: "100" }))],
@@ -89,4 +91,15 @@ it("Vendor cannot register another business's image namespace", async () => {
   await expect(registerVendorImage(foreign, `${foreign}/x.jpg`, "Photo")).rejects.toThrow("Invalid image path");
   await expect(registerVendorImage("11111111-1111-4111-8111-111111111111", `${foreign}/x.jpg`, "Photo")).rejects.toThrow("Invalid image path");
   expect(state.calls.filter(c => c[1] === "insert")).toEqual([]);
+});
+it("checks current publication before writing a review", async () => {
+  const review = form({ vendorId: foreign, vendorSlug: "vendor", reviewerDisplayName: "Couple", professionalism: "5", punctuality: "5", serviceAttitude: "5", valueForMoney: "5", wouldChooseAgain: "yes", reviewText: "Kind" });
+  expect((await submitReview(idle, review)).status).toBe("success");
+  expect(state.calls).toContainEqual(["public_vendor_profiles", "eq", "id", foreign]);
+  expect(state.calls.some((call) => call[0] === "reviews" && call[1] === "upsert")).toBe(true);
+
+  state.calls.length = 0;
+  state.published = false;
+  expect((await submitReview(idle, review)).status).toBe("error");
+  expect(state.calls.some((call) => call[0] === "reviews" && call[1] === "upsert")).toBe(false);
 });

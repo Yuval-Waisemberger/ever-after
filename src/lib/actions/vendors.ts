@@ -220,6 +220,9 @@ export async function submitReview(
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
+  const { data: publishedVendor, error: vendorError } = await supabase.from("public_vendor_profiles")
+    .select("id").eq("id", parsed.data.vendorId).maybeSingle();
+  if (vendorError || !publishedVendor) return { status: "error", message: "Your review could not be saved." };
   const { error } = await supabase.from("reviews").upsert(
     {
       wedding_id: wedding.id,

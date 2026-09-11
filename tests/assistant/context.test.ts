@@ -15,7 +15,7 @@ const queries: Array<{ table: string; select: ReturnType<typeof vi.fn>; eq: Retu
 function query(table: string) {
   const promise = Promise.resolve(results.get(table) ?? { data: [], error: null });
   const chain = {
-    select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), limit: vi.fn().mockReturnThis(),
+    select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), in: vi.fn().mockReturnThis(), order: vi.fn().mockReturnThis(), limit: vi.fn().mockReturnThis(),
     maybeSingle: () => promise, then: promise.then.bind(promise),
   };
   queries.push({ table, select: chain.select, eq: chain.eq });
@@ -71,11 +71,11 @@ describe("Assistant context queries", () => {
     await expect(getAssistantContext()).rejects.toMatchObject({ section: "budget" });
   });
   it("does not turn an unreadable vendor relationship into no bookings", async () => {
-    results.set("couple_vendors", { error: null, data: [{ status: "booked", vendor_profiles: null, external_vendors: null }] });
+    results.set("couple_vendors", { error: null, data: [{ vendor_id: "missing", external_vendor_id: null, status: "booked", is_saved: false, agreed_price_minor: null, external_vendors: null }] });
     await expect(getAssistantContext()).rejects.toMatchObject({ section: "vendors" });
   });
   it("does not select vendor contacts/notes or leak extra returned fields", async () => {
-    results.set("couple_vendors", { error: null, data: [{ status: "booked", is_saved: true, agreed_price_minor: 12000, private_notes: "private", vendor_profiles: null, external_vendors: { id: "external-1", business_name: "Original Business Name", phone: "private", notes: "private" } }] });
+    results.set("couple_vendors", { error: null, data: [{ vendor_id: null, external_vendor_id: "external-1", status: "booked", is_saved: true, agreed_price_minor: 12000, private_notes: "private", external_vendors: { id: "external-1", business_name: "Original Business Name", phone: "private", notes: "private" } }] });
     const context = await getAssistantContext();
     expect(context.vendors[0].businessName).toBe("Original Business Name");
     expect(context.vendors[0].source).toBe("external");
@@ -86,19 +86,20 @@ describe("Assistant context queries", () => {
   });
   it("carries Marketplace category pricing semantics into the local Assistant context", async () => {
     results.set("couple_vendors", { error: null, data: [{
-      status: "considering", is_saved: true, agreed_price_minor: null, external_vendors: null,
-      vendor_profiles: {
-        id: "venue", business_name: "Venue", location_mode: "fixed", physical_area: "central_israel", service_areas: [],
-        min_price_minor: 30_000, max_price_minor: 50_000, services: [], styles: [], event_types: [],
-        min_guest_capacity: 1, max_guest_capacity: 5000, vendor_categories: { slug: "venues" }, reviews: [],
-      },
+      vendor_id: "venue", external_vendor_id: null, status: "considering", is_saved: true, agreed_price_minor: null, external_vendors: null,
     }] });
+    results.set("public_vendor_profiles", { error: null, data: [{
+      id: "venue", slug: "venue", business_name: "Venue", description: null, category_slug: "venues", category_name: "Venues", subcategory_slug: "wedding-venues", subcategory_name: "Wedding venues",
+      location_city: "City", location_mode: "fixed", physical_area: "central_israel", service_areas: [], min_price_minor: 30_000, max_price_minor: 50_000,
+      services: [], styles: [], event_types: [], min_guest_capacity: 1, max_guest_capacity: 5000, friday_available: null, phone: null, email: null, website_url: null, instagram_url: null,
+    }] });
+    results.set("public_vendor_reviews", { error: null, data: [] });
 
     const context = await getAssistantContext();
 
     expect(context.vendors[0].categorySlug).toBe("venues");
-    const selection = queries.find((item) => item.table === "couple_vendors")!.select.mock.calls[0][0];
-    expect(selection).toContain("vendor_categories(slug)");
+    const selection = queries.find((item) => item.table === "public_vendor_profiles")!.select.mock.calls[0][0];
+    expect(selection).toContain("category_slug");
   });
 });
 

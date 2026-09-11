@@ -17,6 +17,8 @@ const deny = (user, statement, pattern = /row-level security|permission denied|c
 };
 const migrationPath = "supabase/migrations/202609070002_role_boundary_hardening.sql";
 const migration = readFileSync(migrationPath, "utf8");
+const locationMigration = readFileSync("supabase/migrations/202609110001_vendor_location_model.sql", "utf8");
+const publicBoundaryMigration = readFileSync("supabase/migrations/202609120001_public_vendor_security_boundaries.sql", "utf8");
 try {
   docker("run", "--pull=never", "--detach", "--name", name, "--network", "none", "--env", "POSTGRES_HOST_AUTH_METHOD=trust", "postgres:17");
   let ready = false;
@@ -52,12 +54,21 @@ try {
   equal(sql("select count(*) from pg_policies where policyname='weddings_couple_role'"), "0");
   const snapshot = () => sql(`select md5(string_agg(t::text,'' order by t::text)) from (select to_jsonb(w) t from weddings w union all select to_jsonb(v) from vendor_profiles v union all select to_jsonb(p) from profiles p) s`);
   const before = snapshot(); sql(migration); equal(snapshot(), before);
+  sql(locationMigration);
+  sql(`update vendor_profiles set website_url='javascript:legacy' where id='${va}'`);
+  const boundaryBefore = snapshot();
+  assert.throws(() => sql(publicBoundaryMigration.replace(/commit;\s*$/, "select 1/0; commit;")), error => /division by zero/.test(String(error.stderr)));
+  equal(sql("select count(*) from pg_views where schemaname='public' and viewname='public_vendor_profiles'"), "0");
+  sql(publicBoundaryMigration);
+  equal(snapshot(), boundaryBefore);
   deny(V, `insert into weddings(owner_user_id,partner_one_name,partner_two_name) values ('${V}','A','B')`);
   deny(A, `insert into vendor_profiles(owner_user_id,slug,business_name) values ('${A}','wrong-role','Wrong role')`);
   deny(A, `update profiles set role='vendor' where id='${A}'`);
   // Legitimate explicit creation and automatic signup remain possible.
   equal(as(A, `delete from weddings where id='${wa}'; insert into weddings(id,owner_user_id,partner_one_name,partner_two_name) values ('${wa}','${A}','A','B'); select count(*) from weddings`, true), "1");
-  equal(as(W, `delete from vendor_profiles where id='${vb}'; insert into vendor_profiles(id,owner_user_id,slug,business_name) values ('${vb}','${W}','new-private','Private'); select count(*) from vendor_profiles where owner_user_id='${W}'`, true), "1");
+  as(W, `delete from vendor_profiles where id='${vb}'`);
+  deny(W, `insert into vendor_profiles(id,owner_user_id,slug,business_name,website_url) values ('${vb}','${W}','new-private','Private','javascript:alert(1)')`, /vendor_profiles_website_url_http/);
+  equal(as(W, `insert into vendor_profiles(id,owner_user_id,slug,business_name,website_url) values ('${vb}','${W}','new-private','Private','https://example.invalid'); select count(*) from vendor_profiles where owner_user_id='${W}'`), "1");
   sql(`insert into auth.users(id,email) values ('${uid(5)}','new-couple@example.invalid');`);
   equal(sql(`select count(*) from weddings where owner_user_id='${uid(5)}'`), "1");
   deny(A, `insert into couple_vendors(wedding_id,vendor_id,status,agreed_price_minor) values ('${wa}','${vb}','booked',100)`);
@@ -133,10 +144,25 @@ try {
 
   // Vendor owner changes do not claim public/other private businesses.
   equal(as(V, `select count(*) from vendor_profiles where id='${vb}'`), "0");
+  equal(as(A, `select count(*) from vendor_profiles where id='${va}'`), "0");
+  equal(as(W, `select count(*) from vendor_profiles where id='${va}'`), "0");
+  equal(as(V, `select count(*) from vendor_profiles where id='${va}'`), "1");
+  equal(as(V, `select owner_user_id from vendor_profiles where id='${va}'`), V);
+  equal(as(null, `select count(*) from public_vendor_profiles where id='${va}'`), "1");
+  equal(sql("select string_agg(column_name,',' order by ordinal_position) from information_schema.columns where table_schema='public' and table_name='public_vendor_profiles'"), "id,slug,business_name,description,category_slug,category_name,subcategory_slug,subcategory_name,location_city,location_mode,physical_area,service_areas,min_price_minor,max_price_minor,services,styles,event_types,min_guest_capacity,max_guest_capacity,friday_available,phone,email,website_url,instagram_url");
+  equal(sql("select string_agg(column_name,',' order by ordinal_position) from information_schema.columns where table_schema='public' and table_name='public_vendor_images'"), "id,vendor_id,storage_path,external_url,alt_text,sort_order,is_primary");
+  equal(sql("select string_agg(column_name,',' order by ordinal_position) from information_schema.columns where table_schema='public' and table_name='public_vendor_reviews'"), "id,vendor_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again,review_text,created_at");
+  equal(sql("select string_agg(column_name,',' order by ordinal_position) from information_schema.columns where table_schema='public' and table_name='vendor_owner_reviews'"), "id,vendor_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again,review_text,created_at");
+  deny(null, `select owner_user_id from public_vendor_profiles`, /column .* does not exist/);
+  deny(A, `select contact_name from public_vendor_profiles`, /column .* does not exist/);
+  equal(as(null, `select website_url is null from public_vendor_profiles where id='${va}'`), "t");
+  equal(as(V, `select website_url from vendor_profiles where id='${va}'`), "javascript:legacy");
+  as(V, `update vendor_profiles set website_url='https://example.invalid' where id='${va}'`);
+  deny(null, `select * from vendor_profiles`);
   equal(as(W, `with changed as (update vendor_profiles set owner_user_id='${W}' where id='${va}' returning id) select count(*) from changed`), "0");
   deny(V, `update vendor_profiles set owner_user_id='${A}' where id='${va}'`);
   as(V, `update vendor_profiles set business_name='Updated by owner' where id='${va}'`);
-  equal(as(null, `select business_name from vendor_profiles`), "Updated by owner");
+  equal(as(null, `select business_name from public_vendor_profiles`), "Updated by owner");
   deny(null, `update vendor_profiles set business_name='Forged' where id='${va}'`);
   as(A, `insert into couple_vendors(wedding_id,vendor_id,status,agreed_price_minor) values ('${wa}','${va}','booked',10000)`);
   deny(V, `delete from vendor_profiles where id='${va}'`);
@@ -145,14 +171,43 @@ try {
   as(V, `update vendor_profiles set is_public=true where id='${va}'`);
   as(A, `insert into reviews(vendor_id,wedding_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again) values ('${va}','${wa}','Synthetic',5,5,5,5,true)`);
   equal(as(V, `with changed as (delete from reviews where wedding_id='${wa}' returning id) select count(*) from changed`), "0");
-  equal(as(null, "select count(*) from reviews"), "1");
+  deny(null, "select * from reviews");
+  equal(as(null, "select count(*) from public_vendor_reviews"), "1");
+  deny(null, "select wedding_id from public_vendor_reviews", /column .* does not exist/);
+  deny(V, "select wedding_id from vendor_owner_reviews", /column .* does not exist/);
+  as(V, `update vendor_profiles set is_public=false where id='${va}'`);
+  equal(as(null, "select count(*) from public_vendor_reviews"), "0");
+  equal(as(A, `select count(*) from reviews where wedding_id='${wa}' and vendor_id='${va}'`), "1");
+  equal(as(V, `select count(*) from vendor_owner_reviews where vendor_id='${va}'`), "1");
+  deny(A, `update reviews set review_text='Changed' where wedding_id='${wa}' and vendor_id='${va}'`);
+  deny(A, `insert into reviews(vendor_id,wedding_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again,review_text) values ('${va}','${wa}','Synthetic',5,5,5,5,true,'Changed') on conflict (wedding_id,vendor_id) do update set review_text=excluded.review_text`);
+  deny(B, `insert into reviews(vendor_id,wedding_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again) values ('${va}','${wb}','Blocked',5,5,5,5,true)`);
+  as(V, `update vendor_profiles set is_public=true where id='${va}'`);
+  equal(as(null, "select count(*) from public_vendor_reviews"), "1");
   // A review alone also protects its author's history from Vendor deletion.
+  deny(B, `insert into reviews(vendor_id,wedding_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again) values ('${vb}','${wb}','Blocked',5,5,5,5,true)`);
   sql(`insert into reviews(vendor_id,wedding_id,reviewer_display_name,professionalism,punctuality,service_attitude,value_for_money,would_choose_again) values ('${vb}','${wa}','Synthetic',5,5,5,5,true)`);
   deny(W, `delete from vendor_profiles where id='${vb}'`);
   as(V, `insert into vendor_images(vendor_id,storage_path) values ('${va}','${va}/image.jpg')`);
+  sql(`insert into vendor_images(vendor_id,storage_path) values ('${vb}','${vb}/private.jpg')`);
+  equal(as(null, `select count(*) from public_vendor_images where vendor_id='${va}'`), "1");
+  equal(as(null, `select count(*) from public_vendor_images where vendor_id='${vb}'`), "0");
+  equal(as(W, `select count(*) from vendor_images where vendor_id='${vb}'`), "1");
+  equal(as(A, `select count(*) from vendor_images`), "0");
+  equal(as(W, `select count(*) from vendor_images where vendor_id='${va}'`), "0");
+  equal(as(V, `select count(*) from vendor_images where vendor_id='${va}'`), "1");
+  deny(null, "select * from vendor_images");
+  deny(null, "select created_at from public_vendor_images", /column .* does not exist/);
   deny(W, `insert into vendor_images(vendor_id,storage_path) values ('${va}','${va}/forged.jpg')`);
   deny(V, `update vendor_images set vendor_id='${vb}' where vendor_id='${va}'`);
   equal(as(W, `with changed as (delete from vendor_images where vendor_id='${va}' returning id) select count(*) from changed`), "0");
+  as(V, `update vendor_profiles set website_url='HTTP://example.invalid',instagram_url='https://example.invalid/profile' where id='${va}'`);
+  equal(as(null, `select website_url from public_vendor_profiles where id='${va}'`), "HTTP://example.invalid");
+  deny(V, `update vendor_profiles set website_url='javascript:alert(1)' where id='${va}'`, /vendor_profiles_website_url_http/);
+  deny(V, `update vendor_profiles set instagram_url=' data:text/html,test' where id='${va}'`, /vendor_profiles_instagram_url_http/);
+  as(A, `update external_vendors set website_url='https://example.invalid' where id='${a.external}'`);
+  deny(A, `update external_vendors set website_url='ftp://example.invalid' where id='${a.external}'`, /external_vendors_website_url_http/);
+  deny(A, `insert into external_vendors(wedding_id,business_name,website_url) values ('${wa}','Invalid','data:text/html,test')`, /external_vendors_website_url_http/);
 
   // Storage policy semantics (not Storage API signed URL integration).
   equal(as(A, "select count(*) from storage.objects where bucket_id='couple-media'"), "1");

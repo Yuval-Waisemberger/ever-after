@@ -6,6 +6,7 @@ import type { AssistantContext, AssistantVendor } from "@/lib/assistant/types";
 import { lifecycleFromStoredStatus, type StoredVendorStatus } from "@/lib/domain/couple-vendors";
 import { getGuestSummary } from "./guests";
 import { AssistantContextUnavailableError, readAssistantSection } from "@/lib/assistant/context-error";
+import { publicVendorAsLegacyRelation, readPublicVendorAssets, readPublicVendorsByIds } from "./public-vendor-data";
 
 type AssistantVendorRow = {
   id: string;
@@ -25,10 +26,11 @@ type AssistantVendorRow = {
 };
 type AssistantExternalVendorRow = { id: string; business_name: string };
 type AssistantRelationshipRow = {
+  vendor_id: string | null;
+  external_vendor_id: string | null;
   status: StoredVendorStatus;
   is_saved: boolean;
   agreed_price_minor: number | string | null;
-  vendor_profiles: AssistantVendorRow | AssistantVendorRow[] | null;
   external_vendors: AssistantExternalVendorRow | AssistantExternalVendorRow[] | null;
 };
 
@@ -41,7 +43,7 @@ export async function getAssistantContext(): Promise<AssistantContext> {
   const supabase = await createClient();
   const [relationshipResult, budgetResult] = await Promise.all([
     readAssistantSection("vendors", () => supabase.from("couple_vendors")
-      .select("status, is_saved, agreed_price_minor, vendor_profiles(id, business_name, location_mode, physical_area, service_areas, min_price_minor, max_price_minor, services, styles, event_types, min_guest_capacity, max_guest_capacity, vendor_categories(slug), reviews(professionalism, punctuality, service_attitude, value_for_money)), external_vendors(id, business_name)")
+      .select("vendor_id, external_vendor_id, status, is_saved, agreed_price_minor, external_vendors(id, business_name)")
       .eq("wedding_id", wedding.id)),
     readAssistantSection("budget", () => supabase.from("budget_items")
       .select("source, couple_vendors(status), estimated_amount_minor, committed_amount_minor, payments(amount_minor, is_paid, due_date)")
@@ -50,6 +52,16 @@ export async function getAssistantContext(): Promise<AssistantContext> {
   // A successful empty array means no records. Failure/null data never means zero.
   if (relationshipResult.error || !relationshipResult.data) throw new AssistantContextUnavailableError("vendors");
   if (budgetResult.error || !budgetResult.data) throw new AssistantContextUnavailableError("budget");
+  const relationshipRows = relationshipResult.data as AssistantRelationshipRow[];
+  const vendorIds = relationshipRows.flatMap((relationship) => relationship.vendor_id ? [relationship.vendor_id] : []);
+  const [publicVendors, vendorAssets] = await Promise.all([
+    readPublicVendorsByIds(supabase, vendorIds),
+    readPublicVendorAssets(supabase, vendorIds, { images: false, reviews: true }),
+  ]);
+  const publicVendorById = new Map(publicVendors.map((vendor) => [
+    vendor.id,
+    publicVendorAsLegacyRelation(vendor, [], vendorAssets.reviewsByVendorId.get(vendor.id) ?? []) as AssistantVendorRow,
+  ]));
   const budget = calculateBudgetSummary(wedding.total_budget_minor == null ? null : Number(wedding.total_budget_minor), budgetResult.data.map((item) => {
     if (!item.payments) throw new AssistantContextUnavailableError("budget");
     return {
@@ -60,8 +72,8 @@ export async function getAssistantContext(): Promise<AssistantContext> {
       payments: item.payments.map((payment) => ({ amountMinor: Number(payment.amount_minor), isPaid: payment.is_paid, dueDate: payment.due_date })),
     };
   }));
-  const vendors = (relationshipResult.data as AssistantRelationshipRow[]).map<AssistantVendor>((relationship) => {
-    const vendor = Array.isArray(relationship.vendor_profiles) ? relationship.vendor_profiles[0] : relationship.vendor_profiles;
+  const vendors = relationshipRows.map<AssistantVendor>((relationship) => {
+    const vendor = relationship.vendor_id ? publicVendorById.get(relationship.vendor_id) ?? null : null;
     const external = Array.isArray(relationship.external_vendors) ? relationship.external_vendors[0] : relationship.external_vendors;
     const identity = external ?? vendor;
     if (!identity) throw new AssistantContextUnavailableError("vendors");

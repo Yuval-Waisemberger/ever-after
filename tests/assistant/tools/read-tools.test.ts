@@ -19,6 +19,27 @@ async function data<S extends z.ZodType>(name: string, schema: S, input: unknown
 beforeEach(() => {
   vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-07T09:00:00Z"));
   db = database(); mocks.client.mockResolvedValue(db.client);
+  Object.defineProperties(db.state.tables, {
+    public_vendor_profiles: {
+      configurable: true,
+      get: () => db.state.tables.vendor_profiles.filter((row) => row.is_public === true).map((row) => {
+        const category = db.state.tables.vendor_categories.find((item) => item.id === row.category_id);
+        const subcategory = db.state.tables.vendor_subcategories.find((item) => item.id === row.subcategory_id);
+        return {
+          ...row,
+          category_slug: category?.slug ?? null,
+          category_name: category?.name ?? null,
+          subcategory_slug: subcategory?.slug ?? null,
+          subcategory_name: subcategory?.name ?? null,
+        };
+      }),
+    },
+    public_vendor_reviews: {
+      configurable: true,
+      get: () => db.state.tables.reviews.filter((row) => row.is_public === true
+        && db.state.tables.vendor_profiles.some((vendorRow) => vendorRow.id === row.vendor_id && vendorRow.is_public === true)),
+    },
+  });
 });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
@@ -231,8 +252,8 @@ describe("Marketplace, Couple vendors and comparison", () => {
     db.state.tables.reviews = [review(800), review(801, { vendor_id: vendorTwo, professionalism: 1, punctuality: 1, service_attitude: 1, value_for_money: 1 }), review(802, { is_public: false, professionalism: 1 })];
     const result = await data("search_marketplace_vendors", c.marketplaceData, { category: "photography-content", subcategory: "photographers", city: "tel aviv", area: "central_israel", minPriceMinor: 100000, maxPriceMinor: 200000, style: "Romantic", eventType: "evening", guestCount: 250, minRating: 4, fridayAvailable: true });
     expect(result.vendors.map((v) => v.id)).toEqual([vendorId]); expect(result.vendors[0]).toMatchObject({ ratingAverage: 5, reviewCount: 1 }); expect(JSON.stringify(result)).not.toContain("PRIVATE_SENTINEL");
-    const call = db.state.calls.find((call) => call.table === "vendor_profiles")!;
-    expect(call.selection).toContain("vendor_categories!inner"); expect(call.selection).toContain("vendor_subcategories!inner");
+    const call = db.state.calls.find((call) => call.table === "public_vendor_profiles")!;
+    expect(call.selection).toContain("category_slug"); expect(call.selection).toContain("subcategory_slug");
     for (const method of ["eq", "ilike", "or", "gte", "lte", "contains", "range"]) expect(call.operations.some((op) => op[0] === method)).toBe(true);
     expect(call.operations.find((op) => op[0] === "or")?.[1]).toContain("physical_area.eq.central_israel");
   });
@@ -240,7 +261,7 @@ describe("Marketplace, Couple vendors and comparison", () => {
     db.state.tables.vendor_profiles = Array.from({ length: 496 }, (_, i) => vendor({ id: uuid(1000 + i), business_name: `Studio ${i}` }));
     const result = await data("search_marketplace_vendors", c.marketplaceData);
     expect(result.vendors).toHaveLength(12); expect(result.pagination.hasMore).toBe(true);
-    expect(db.state.calls.find((call) => call.table === "vendor_profiles")!.operations).toContainEqual(["range", 0, 12]);
+    expect(db.state.calls.find((call) => call.table === "public_vendor_profiles")!.operations).toContainEqual(["range", 0, 12]);
     expect(await executeAssistantReadTool("search_marketplace_vendors", { limit: 496 })).toMatchObject({ error: { code: "INVALID_INPUT" } });
     const second = await data("search_marketplace_vendors", c.marketplaceData, { page: 2 });
     expect(second.vendors.every((v) => !result.vendors.some((first) => first.id === v.id))).toBe(true);
@@ -257,7 +278,7 @@ describe("Marketplace, Couple vendors and comparison", () => {
     const result = await executeAssistantReadTool("search_marketplace_vendors", { minRating: 4, limit: 1 });
     expect(result).toMatchObject({ status: "success", data: { vendors: [{ id: uuid(2052) }], pagination: { hasMore: true }, paginationBasis: "filtered_results" }, evidence: [{ kind: "MARKETPLACE_DATA", vendorIds: [uuid(2052)], marketScope: "ever_after_marketplace_only" }] });
     expect(JSON.stringify(result)).not.toMatch(/PRIVATE_SENTINEL|review_text|reviewer_display_name|phone|email/);
-    expect(db.state.calls.filter((call) => call.table === "vendor_profiles").map((call) => call.operations.find((op) => op[0] === "range"))).toEqual([["range", 0, 50], ["range", 50, 100]]);
+    expect(db.state.calls.filter((call) => call.table === "public_vendor_profiles").map((call) => call.operations.find((op) => op[0] === "range"))).toEqual([["range", 0, 50], ["range", 50, 100]]);
   });
   it("establishes genuine empty results after exhausting all rating candidates", async () => {
     ratingCandidates(60, []);
@@ -282,10 +303,10 @@ describe("Marketplace, Couple vendors and comparison", () => {
     const result = await data("search_marketplace_vendors", c.marketplaceData, { minRating: 4, category: "photography-content", city: "Tel Aviv", limit: 2 });
     expect(result.vendors.map((vendor) => vendor.id)).toEqual([uuid(2055), uuid(2060)]);
     expect(result.pagination.hasMore).toBe(false);
-    const calls = db.state.calls.filter((call) => call.table === "vendor_profiles");
+    const calls = db.state.calls.filter((call) => call.table === "public_vendor_profiles");
     expect(calls).toHaveLength(2);
     for (const call of calls) {
-      expect(call.operations).toContainEqual(["eq", "vendor_categories.slug", "photography-content"]);
+      expect(call.operations).toContainEqual(["eq", "category_slug", "photography-content"]);
       expect(call.operations).toContainEqual(["ilike", "location_city", "Tel Aviv"]);
     }
   });
@@ -296,7 +317,7 @@ describe("Marketplace, Couple vendors and comparison", () => {
     db.state.calls = [];
     ratingCandidates(110, [0, 1]);
     expect((await data("search_marketplace_vendors", c.marketplaceData, { minRating: 4, limit: 1 })).pagination.hasMore).toBe(true);
-    expect(db.state.calls.filter((call) => call.table === "vendor_profiles")).toHaveLength(1);
+    expect(db.state.calls.filter((call) => call.table === "public_vendor_profiles")).toHaveLength(1);
   });
   it("preserves default/max output bounds for rating searches", async () => {
     ratingCandidates(60, Array.from({ length: 60 }, (_, i) => i));
@@ -310,7 +331,7 @@ describe("Marketplace, Couple vendors and comparison", () => {
     const result = await executeAssistantReadTool("search_marketplace_vendors", { minRating: 4, limit: 1 });
     expect(result).toMatchObject({ status: "unavailable", error: { code: "READ_LIMIT_EXCEEDED" }, evidence: [] });
     expect(result).not.toHaveProperty("data");
-    const calls = db.state.calls.filter((call) => call.table === "vendor_profiles");
+    const calls = db.state.calls.filter((call) => call.table === "public_vendor_profiles");
     expect(calls).toHaveLength(c.MARKETPLACE_SCAN.maxCandidates / c.MARKETPLACE_SCAN.chunk);
     expect(calls.at(-1)?.operations).toContainEqual(["range", 950, 1000]);
   });
@@ -322,8 +343,7 @@ describe("Marketplace, Couple vendors and comparison", () => {
     const input = 'Studio",is_public.eq.false,foo="';
     const result = await data("search_marketplace_vendors", c.marketplaceData, { search: input });
     expect(result.vendors).toEqual([]);
-    const call = db.state.calls.find((call) => call.table === "vendor_profiles")!;
-    expect(call.operations).toContainEqual(["eq", "is_public", true]);
+    const call = db.state.calls.find((call) => call.table === "public_vendor_profiles")!;
     expect(call.operations.find((op) => op[0] === "or")?.[1]).toContain('Studio\\"');
     expect((await data("search_marketplace_vendors", c.marketplaceData, { search: "Original" })).vendors[0].id).toBe(vendorId);
   });
@@ -381,7 +401,7 @@ describe("Marketplace, Couple vendors and comparison", () => {
     expect(await executeAssistantReadTool("compare_vendors", { vendorIds: Array.from({ length: 5 }, (_, i) => uuid(100 + i)) })).toMatchObject({ error: { code: "INVALID_INPUT" } });
   });
   it("returns UNAVAILABLE rather than fabricated ratings after a review error", async () => {
-    db.state.errors.add("reviews"); expect((await executeAssistantReadTool("search_marketplace_vendors")).status).toBe("unavailable"); expect((await executeAssistantReadTool("compare_vendors", inputFor("compare_vendors"))).status).toBe("unavailable");
+    db.state.errors.add("public_vendor_reviews"); expect((await executeAssistantReadTool("search_marketplace_vendors")).status).toBe("unavailable"); expect((await executeAssistantReadTool("compare_vendors", inputFor("compare_vendors"))).status).toBe("unavailable");
   });
   it("never calculates a partial rating when review processing reaches its cap", async () => {
     db.state.tables.reviews = Array.from({ length: 5001 }, (_, i) => review(1000 + i));

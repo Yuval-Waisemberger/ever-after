@@ -5,9 +5,16 @@ const optionalText = (maximum: number) => z.preprocess(
   z.string().max(maximum).nullable(),
 );
 
+const hasHttpProtocol = (value: string) => {
+  try { return ["http:", "https:"].includes(new URL(value).protocol); }
+  catch { return false; }
+};
+
 const optionalUrl = z.preprocess(
   (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
-  z.url("Enter a complete URL including https://").nullable(),
+  z.url("Enter a complete URL including https://")
+    .refine(hasHttpProtocol, "Enter a complete URL including https://")
+    .nullable(),
 );
 
 const optionalEmail = z.preprocess(

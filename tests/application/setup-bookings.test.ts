@@ -18,6 +18,7 @@ const id = "11111111-1111-4111-8111-111111111111";
 const ok = (data: unknown = { id }) => ({ data, error: null });
 const bad = { data: null, error: { message: "PRIVATE SQL ERROR" } };
 const tax = ok({ id: "subcategory", category_id: "parent", vendor_categories: { slug: "photography-content" } });
+const publicVendor = ok({ id, category_slug: "photography-content", subcategory_slug: "wedding-photographers" });
 const booking = { category: "photographer", mode: "marketplace", vendorId: id, subcategory: "wedding-photographers" };
 const declaration = ok({ booked_categories: ["Photographer", "DJ"], updated_at: "latest" });
 const writes = (table: string) => mocks.calls.filter(c => c.table === table && ["insert", "update", "delete"].includes(c.op));
@@ -29,7 +30,7 @@ beforeEach(() => {
 });
 describe("Setup booking operations", () => {
   it.each([undefined, 0, 1000])("reuses a Marketplace relationship, price=%s, preserving omitted fields", async price => {
-    mocks.results.push(tax, ok(), ok({ id: "existing" }), ok(), declaration, ok());
+    mocks.results.push(tax, publicVendor, ok({ id: "existing" }), ok(), declaration, ok());
     expect(await bookSetupVendor({ ...booking, ...(price == null ? {} : { agreedPriceShekels: price }) })).toMatchObject({ status: "success" });
     const write = writes("couple_vendors")[0]; expect(write.op).toBe("update");
     expect(write.args[0]).toEqual({ wedding_id: "owned", vendor_id: id, status: "booked", ...(price == null ? {} : { agreed_price_minor: price * 100 }) });
@@ -38,17 +39,17 @@ describe("Setup booking operations", () => {
     expect(mocks.calls.findIndex(c => c.table === "weddings")).toBeGreaterThan(mocks.calls.findIndex(c => c.table === "couple_vendors" && c.op === "update"));
   });
   it("creates a fresh Marketplace booking without inventing a price or bookmark", async () => {
-    mocks.results.push(tax, ok(), ok(null), ok(), declaration, ok());
+    mocks.results.push(tax, publicVendor, ok(null), ok(), declaration, ok());
     await bookSetupVendor(booking);
     expect(writes("couple_vendors")[0]).toMatchObject({ op: "insert", args: [{ wedding_id: "owned", vendor_id: id, status: "booked", is_saved: false }] });
   });
   it("reports cleanup failure as confirmed booking needing review, never a retry", async () => {
-    mocks.results.push(tax, ok(), ok({ id }), ok(), bad);
+    mocks.results.push(tax, publicVendor, ok({ id }), ok(), bad);
     expect(await bookSetupVendor(booking)).toMatchObject({ status: "review" });
     expect(writes("couple_vendors")).toHaveLength(1);
   });
   it("does not remove declarations after failed booking / trigger", async () => {
-    mocks.results.push(tax, ok(), ok({ id }), bad);
+    mocks.results.push(tax, publicVendor, ok({ id }), bad);
     const reply = await bookSetupVendor(booking);
     expect(reply.status).toBe("error"); expect(reply.message).not.toContain("PRIVATE");
     expect(writes("weddings")).toEqual([]);
@@ -71,7 +72,7 @@ describe("Setup booking operations", () => {
   it("validates the actual public vendor against selected taxonomy", async () => {
     mocks.results.push(tax, bad);
     expect(await bookSetupVendor(booking)).toMatchObject({ status: "error" });
-    expect(mocks.calls).toContainEqual({ table: "vendor_profiles", op: "eq", args: ["is_public", true] });
+    expect(mocks.calls).toContainEqual({ table: "public_vendor_profiles", op: "eq", args: ["id", id] });
     expect(writes("couple_vendors")).toEqual([]);
   });
   it.each(["public", "vendor", "other-couple"])("requires authorized owned wedding first: %s", async () => {

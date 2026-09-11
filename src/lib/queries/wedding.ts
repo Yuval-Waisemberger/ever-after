@@ -3,6 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/user";
 import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { calculateTaskSummary, type TaskStatus } from "@/lib/domain/tasks";
+import { publicVendorAsLegacyRelation, readPublicVendorAssets, readPublicVendorsByIds, type PublicVendorLegacyRelation } from "./public-vendor-data";
 
 export const getOwnedWedding = cache(async () => {
   const profile = await requireRole("couple");
@@ -19,11 +20,40 @@ export async function getWeddingDashboard() {
   const [{ data: tasks, error: taskError }, { data: relationships, error: vendorError }, { data: budgetItems, error: budgetError }] =
     await Promise.all([
       supabase.from("tasks").select("id, title, category, due_date, status, priority").eq("wedding_id", wedding.id).order("due_date", { ascending: true, nullsFirst: false }),
-      supabase.from("couple_vendors").select("id, status, is_saved, agreed_price_minor, vendor_profiles(slug, business_name, vendor_subcategories(name), vendor_images(external_url, storage_path, alt_text, is_primary, sort_order)), external_vendors(business_name, vendor_subcategories(name))").eq("wedding_id", wedding.id),
+      supabase.from("couple_vendors").select("id, vendor_id, status, is_saved, agreed_price_minor, external_vendors(business_name, vendor_subcategories(name))").eq("wedding_id", wedding.id),
       supabase.from("budget_items").select("id, label, source, couple_vendors(status), estimated_amount_minor, committed_amount_minor, payments(label, amount_minor, is_paid, due_date)").eq("wedding_id", wedding.id),
     ]);
 
   if (taskError || vendorError || budgetError || !budgetItems || budgetItems.some(item => !item.payments)) throw new Error("Dashboard summary could not be loaded.");
+  const relationshipRows = relationships ?? [];
+  const vendorIds = relationshipRows.flatMap((row) => row.vendor_id ? [row.vendor_id] : []);
+  const [publicVendors, vendorAssets] = await Promise.all([
+    readPublicVendorsByIds(supabase, vendorIds),
+    readPublicVendorAssets(supabase, vendorIds, { images: true, reviews: false }),
+  ]);
+  const publicVendorById = new Map(publicVendors.map((vendor) => [vendor.id, vendor]));
+  const safeRelationships: Array<{
+    id: string;
+    vendor_id: string | null;
+    status: string;
+    is_saved: boolean;
+    agreed_price_minor: number | string | null;
+    external_vendors: typeof relationshipRows[number]["external_vendors"];
+    vendor_profiles: PublicVendorLegacyRelation | PublicVendorLegacyRelation[] | null;
+  }> = relationshipRows.map((row) => {
+    const vendor = row.vendor_id ? publicVendorById.get(row.vendor_id) : null;
+    return {
+      id: row.id,
+      vendor_id: row.vendor_id,
+      status: row.status,
+      is_saved: row.is_saved,
+      agreed_price_minor: row.agreed_price_minor,
+      external_vendors: row.external_vendors,
+      vendor_profiles: vendor
+        ? publicVendorAsLegacyRelation(vendor, vendorAssets.imagesByVendorId.get(vendor.id) ?? [])
+        : null,
+    };
+  });
 
   const normalizedTasks = (tasks ?? []).map((task) => ({
     id: task.id,
@@ -58,7 +88,7 @@ export async function getWeddingDashboard() {
     wedding,
     tasks: normalizedTasks,
     taskSummary: calculateTaskSummary(normalizedTasks, today),
-    relationships: relationships ?? [],
+    relationships: safeRelationships,
     budget,
     budgetItems: normalizedBudgetItems,
   };

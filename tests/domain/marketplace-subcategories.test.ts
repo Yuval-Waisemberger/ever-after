@@ -66,12 +66,13 @@ describe("connected marketplace subcategory query", () => {
     expect(spy).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ pricePerGuest }));
     expect(result.vendors[0].recommendation?.score).toBe(pricePerGuest ? 50 : 100);
   });
-  it("filters parent vendors with an inner join before count and pagination", async () => {
+  it("filters the column-limited public Vendor view before count and pagination", async () => {
     const result = await getMarketplace({ category: "photography-content", subcategory: "wedding-photographers", page: 2 });
     const params = request().searchParams;
-    expect(params.get("select")).toContain("vendor_subcategories!inner(slug,name)");
-    expect(params.get("vendor_subcategories.slug")).toBe("eq.wedding-photographers");
-    expect(params.get("vendor_categories.slug")).toBe("eq.photography-content");
+    expect(params.get("select")).toContain("subcategory_slug");
+    expect(params.get("select")).not.toContain("owner_user_id");
+    expect(params.get("subcategory_slug")).toBe("eq.wedding-photographers");
+    expect(params.get("category_slug")).toBe("eq.photography-content");
     expect(params.get("offset")).toBe("12");
     expect(params.get("limit")).toBe("12");
     expect(result).toMatchObject({ total: 22, isPreview: false, pageSize: 12 });
@@ -95,17 +96,17 @@ describe("connected marketplace subcategory query", () => {
     expect(amounts).toEqual([...amounts].sort((a,b)=>a-b)); expect(mocks.fetch).not.toHaveBeenCalled();
   });
 
-  it("preserves the left join when no subcategory is selected", async () => {
+  it("does not add a subcategory predicate when none is selected", async () => {
     await getMarketplace({ category: "venues", page: 1 });
-    expect(request().searchParams.get("select")).toContain("vendor_subcategories(slug,name)");
-    expect(request().searchParams.has("vendor_subcategories.slug")).toBe(false);
+    expect(request().searchParams.get("select")).toContain("subcategory_slug");
+    expect(request().searchParams.has("subcategory_slug")).toBe(false);
   });
 
   it("supports subcategory-only URLs and composes the existing filters", async () => {
     await getMarketplace({ page: 1, subcategory: "videographers", search: "Films", area: "central_israel", minPrice: 1000, maxPrice: 10000, minRating: 4, service: "Drone", guestCount: 100, friday: true });
     const params = request().searchParams;
-    expect(params.has("vendor_categories.slug")).toBe(false);
-    expect(params.get("vendor_subcategories.slug")).toBe("eq.videographers");
+    expect(params.has("category_slug")).toBe(false);
+    expect(params.get("subcategory_slug")).toBe("eq.videographers");
     expect(params.getAll("or").join(" ")).toContain("business_name.ilike.%Films%");
     expect(params.getAll("or").join(" ")).toContain("location_mode.eq.fixed");
     expect(params.getAll("or").join(" ")).toContain("physical_area.eq.central_israel");
@@ -121,12 +122,22 @@ describe("connected marketplace subcategory query", () => {
 
   it("filters calculated ratings before pagination and reports the filtered total", async () => {
     const rows = [
-      { id: "high", slug: "high-rated", business_name: "High Rated", is_public: true, vendor_categories: { slug: "photography-content", name: "Photography & Content" }, vendor_subcategories: { slug: "wedding-photographers", name: "Wedding Photographers" }, vendor_images: [], reviews: [{ id: "review-high", reviewer_display_name: "Couple", professionalism: 5, punctuality: 5, service_attitude: 5, value_for_money: 5, would_choose_again: true, review_text: null, created_at: "2026-01-01" }] },
-      { id: "low", slug: "low-rated", business_name: "Low Rated", is_public: true, vendor_categories: { slug: "photography-content", name: "Photography & Content" }, vendor_subcategories: { slug: "wedding-photographers", name: "Wedding Photographers" }, vendor_images: [], reviews: [{ id: "review-low", reviewer_display_name: "Couple", professionalism: 3, punctuality: 3, service_attitude: 3, value_for_money: 3, would_choose_again: false, review_text: null, created_at: "2026-01-01" }] },
+      { id: "high", slug: "high-rated", business_name: "High Rated", category_slug: "photography-content", category_name: "Photography & Content", subcategory_slug: "wedding-photographers", subcategory_name: "Wedding Photographers" },
+      { id: "low", slug: "low-rated", business_name: "Low Rated", category_slug: "photography-content", category_name: "Photography & Content", subcategory_slug: "wedding-photographers", subcategory_name: "Wedding Photographers" },
     ];
-    mocks.fetch.mockResolvedValue(new Response(JSON.stringify(rows), {
-      status: 200, headers: { "content-type": "application/json", "content-range": "0-1/22" },
-    }));
+    mocks.fetch.mockImplementation(async (input: string) => {
+      const table = new URL(String(input)).pathname.split("/").at(-1);
+      const response = table === "public_vendor_profiles" ? rows
+        : table === "public_vendor_images" ? []
+        : table === "public_vendor_reviews" ? [
+            { id: "review-high", vendor_id: "high", reviewer_display_name: "Couple", professionalism: 5, punctuality: 5, service_attitude: 5, value_for_money: 5, would_choose_again: true, review_text: null, created_at: "2026-01-01" },
+            { id: "review-low", vendor_id: "low", reviewer_display_name: "Couple", professionalism: 3, punctuality: 3, service_attitude: 3, value_for_money: 3, would_choose_again: false, review_text: null, created_at: "2026-01-01" },
+          ]
+        : [];
+      return new Response(JSON.stringify(response), {
+        status: 200, headers: { "content-type": "application/json", "content-range": "0-1/22" },
+      });
+    });
 
     const result = await getMarketplace({ subcategory: "wedding-photographers", minRating: 4.5, page: 1 });
 
