@@ -8,12 +8,20 @@ test("record date-derived countdown and scroll-driven Timeline", async ({ browse
   await page.goto("/?previewDaysBefore=8&shell");
   await expect(page.locator(".countdown-day-value .planning-value > span")).toHaveText("8");
   await page.goto("/?timeline&shell");
-  await expect(page.locator(".planning-timeline-path")).toBeVisible();
+  const path = page.locator(".planning-timeline-path");
+  await expect(path).toBeVisible();
+  const progress = () => path.evaluate(element => Number((element as HTMLElement).style.getPropertyValue("--timeline-progress")));
+  const start = await progress();
+  expect(start).toBeLessThan(1);
   await page.locator(".planning-timeline-path > li").nth(4).scrollIntoViewIfNeeded();
   await page.waitForTimeout(800); // Recording dwell only, to show scroll progression.
-  await page.locator(".timeline-destination").scrollIntoViewIfNeeded();
+  const destination = page.locator(".timeline-destination");
+  await destination.scrollIntoViewIfNeeded();
   await page.waitForTimeout(1600); // Include the full heart/sparkle reveal in the review clip.
-  await expect(page.locator(".destination-heart")).toHaveCSS("stroke-dashoffset", "0px");
+  await expect.poll(progress).toBe(1);
+  await expect(destination.locator(".planning-reveal")).toHaveAttribute("data-reveal", "shown");
+  await expect(destination.locator(".timeline-destination-surface > span svg")).toHaveClass(/lucide-calendar-heart/);
+  await expect(destination.getByRole("heading", { name: "Your Wedding Day", exact: true })).toBeVisible();
   await context.close();
   await page.video()!.saveAs(".codex-tmp/final-design/motion/countdown-timeline.webm");
 });
