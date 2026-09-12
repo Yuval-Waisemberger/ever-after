@@ -63,14 +63,14 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
 
         {mode === "signup" && audience === "couple" ? (
           <>
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField name="partnerOneName" label="First Partner's Name" autoComplete="given-name" error={error("partnerOneName")} required />
-              <FormField name="partnerTwoName" label="Second Partner's Name" autoComplete="given-name" error={error("partnerTwoName")} required />
+            <div className="grid gap-5 sm:grid-cols-2 [&_label]:whitespace-nowrap">
+              <FormField name="partnerOneName" label="First partner's name" autoComplete="given-name" error={error("partnerOneName")} required />
+              <FormField name="partnerTwoName" label="Second partner's name" autoComplete="given-name" error={error("partnerTwoName")} required />
             </div>
             <FormField name="displayName" label="Couple display name" placeholder="Noa & Omer" error={error("displayName")} required />
-            <div className="grid gap-5 sm:grid-cols-2">
-              <FormField name="partnerOnePhone" type="tel" label="First Partner's Phone (optional)" autoComplete="tel" error={error("partnerOnePhone")} />
-              <FormField name="partnerTwoPhone" type="tel" label="Second Partner's Phone (optional)" autoComplete="tel" error={error("partnerTwoPhone")} />
+            <div className="grid gap-5 sm:grid-cols-2 [&_label]:whitespace-pre">
+              <FormField name="partnerOnePhone" type="tel" label={"First partner's phone\n(optional)"} autoComplete="tel" error={error("partnerOnePhone")} />
+              <FormField name="partnerTwoPhone" type="tel" label={"Second partner's phone\n(optional)"} autoComplete="tel" error={error("partnerTwoPhone")} />
             </div>
           </>
         ) : null}
@@ -85,7 +85,7 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
 
         <FormField leadingIcon={<Mail size={19} strokeWidth={1.5} />} name="email" type="email" label="Primary email" autoComplete="email" error={error("email")} required />
         {mode === "signup" && audience === "couple" ? (
-          <FormField leadingIcon={<Mail size={19} strokeWidth={1.5} />} name="secondEmail" type="email" label="Second email (optional)" autoComplete="email" error={error("secondEmail")} />
+          <FormField leadingIcon={<Mail size={19} strokeWidth={1.5} />} name="secondEmail" type="email" label="Second email (optional)" autoComplete="email" error={error("secondEmail")} hint="For contact purposes only. Account access and password recovery use the primary email" />
         ) : null}
         <FormField leadingIcon={<LockKeyhole size={19} strokeWidth={1.5} />} name="password" type="password" label="Password" autoComplete={mode === "login" ? "current-password" : "new-password"} error={error("password")} hint={mode === "signup" ? "At least 8 characters" : undefined} required />
         {mode === "login" ? (
