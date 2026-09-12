@@ -31,17 +31,17 @@
 .landing-page .hero-content { max-width: 1000px; margin-inline: auto; }
 .hero-eyebrow { margin-bottom: 7px; font-size: 10px; line-height: 1.6; letter-spacing: .25em; text-transform: uppercase; }
 .landing-page .hero-content h1 { color: var(--cream); font-size: clamp(38px, 8.5vw, 72px); line-height: 1; letter-spacing: .035em; text-shadow: none; filter: none; }
-.landing-page .hero-ornament { margin: 8px auto; opacity: .8; height: 18px; }
+.landing-page .hero-ornament { margin: 12px auto 18px; opacity: .8; height: 18px; }
 .landing-page .hero-ornament span { width: 110px; }
 .landing-page .hero-tagline { max-width: 520px; margin-inline: auto; font-size: 13px; letter-spacing: .24em; }
-.landing-page .hero-description { font-family: var(--font-editorial); font-size: 18px; line-height: 1.35; margin-top: 8px; max-width: 510px; }
-.landing-page .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: min(100%, 504px); max-width: none; margin: 16px auto 0; gap: 12px 24px; }
+.landing-page .hero-description { font-family: var(--font-editorial); font-size: 18px; line-height: 1.35; margin-top: 20px; max-width: 510px; }
+.landing-page .hero-actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: min(100%, 504px); max-width: none; margin: 28px auto 0; gap: 12px 24px; }
 .landing-page .hero-actions .public-button { min-width: 0; min-height: 50px; gap: 20px; font-size: 12px; letter-spacing: .14em; }
 .landing-page .hero-secondary { border-color: rgb(255 250 243 / 65%); background: rgb(37 30 27 / 15%); }
 .landing-page .hero-secondary:hover { background: var(--cream); color: var(--wine); }
-.landing-page .hero-vendor { margin-top: 10px; font-family: var(--font-editorial); font-size: 16px; }
+.landing-page .hero-vendor { margin-top: 22px; font-family: var(--font-editorial); font-size: 16px; }
 .landing-page .hero-vendor a { color: var(--cream); text-decoration: underline; text-decoration-color: rgb(255 250 243 / 55%); }
-.landing-page .hero-scroll { position: relative; left: auto; bottom: auto; flex-shrink: 0; margin: 12px auto 0; border: 1px solid rgb(255 250 243 / 45%); z-index: 3; }
+.landing-page .hero-scroll { position: relative; left: auto; bottom: auto; flex-shrink: 0; margin: 24px auto 0; border: 1px solid rgb(255 250 243 / 45%); z-index: 3; }
 /* Cut the existing curve out of the photo/contrast layer. The page's continuous
    tonal wash shows through, rather than an ivory SVG painted over the photo. */
 .landing-page .hero-media {
@@ -213,13 +213,14 @@
   .landing-page .hero-media::after { background: rgb(24 20 18 / 44%); }
   .hero-eyebrow { font-size: 9px; letter-spacing: .21em; }
   .landing-page .hero-content h1 { letter-spacing: .02em; }
-  .landing-page .hero-ornament { margin-block: 12px; }
+  .landing-page .hero-ornament { margin-block: 14px; }
   .landing-page .hero-ornament span { width: 64px; }
   .landing-page .hero-tagline { font-size: 11px; max-width: 440px; line-height: 1.8; letter-spacing: .18em; }
-  .landing-page .hero-description { font-size: 17px; max-width: 440px; line-height: 1.45; margin-top: 12px; }
-  .landing-page .hero-actions { margin-top: 22px; gap: 12px; }
+  .landing-page .hero-description { font-size: 17px; max-width: 440px; line-height: 1.45; margin-top: 18px; }
+  .landing-page .hero-actions { margin-top: 28px; gap: 12px; }
   .landing-page .hero-actions .public-button { min-width: 0; width: 100%; font-size: 11px; }
-  .landing-page .hero-vendor { font-size: 15px; margin-top: 18px; }
+  .landing-page .hero-vendor { font-size: 15px; margin-top: 24px; }
+  .landing-page .hero-scroll { margin-top: 20px; }
   .landing-page .landing-hero { --hero-wave-height: 36px; }
   .landing-petal { width: calc(var(--petal-size) * .7); height: calc(var(--petal-size) * .52); --petal-travel: .65; }
   .landing-petal:nth-child(n+9) { display: none; }
