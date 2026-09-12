@@ -22,5 +22,5 @@ export default async function ResetPasswordPage({ searchParams }: {
       available = false;
     }
   }
-  return <RecoveryPage><ResetPasswordPanel audience={audience} available={available} issue={issue} /></RecoveryPage>;
+  return <RecoveryPage publicNavigation authAudience={audience}><ResetPasswordPanel audience={audience} available={available} issue={issue} /></RecoveryPage>;
 }

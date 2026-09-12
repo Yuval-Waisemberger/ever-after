@@ -37,10 +37,8 @@
 .planning-dashboard.dashboard-reference .dashboard-date-strip svg { color: #733343; background: #fbf8f5; }
 .workspace-shell .planning-dashboard.dashboard-reference .wedding-overview { margin-top: 18px; gap: 16px 18px; grid-template-columns: repeat(2,minmax(0,1fr)); }
 .workspace-shell .planning-dashboard.dashboard-reference .ea-dashboard-card { min-height: 0; padding: 20px 26px 18px; border-radius: 16px; background: #fbf8f5; border-color: var(--line); box-shadow: 0 1px 3px rgb(79 62 55 / 5%), 0 9px 25px rgb(79 62 55 / 7%); }
-/* Stationary elongated washes behind feature cards only; opaque interiors and motion stay intact. */
-.workspace-shell .planning-dashboard.dashboard-reference .wedding-overview { position: relative; isolation: isolate; }
-.planning-dashboard.dashboard-reference .wedding-overview::before { content: ""; position: absolute; inset: -9px -22px -22px; z-index: -1; pointer-events: none; mask-image: linear-gradient(to bottom, transparent, #000 40px); background: radial-gradient(ellipse 110% 35% at 0% 15%, #e9d6d7, transparent 85%), radial-gradient(ellipse 100% 40% at 100% 65%, #e8d9d8, transparent 85%), radial-gradient(ellipse 110% 30% at 10% 95%, #e0d8d0, transparent 90%), linear-gradient(135deg, #f8f3ed, #f2ebe5 55%, #f8f4ef); }
-@media(max-width:800px) { .planning-dashboard.dashboard-reference .wedding-overview::before { inset-inline: -16px; } }
+/* The page canvas owns the stationary washes so they reach both short viewports and long documents. */
+.workspace-page-canvas:has(.planning-dashboard.dashboard-reference) { background: radial-gradient(ellipse 110% 35% at 0% 15%, #e9d6d7, transparent 85%), radial-gradient(ellipse 100% 40% at 100% 65%, #e8d9d8, transparent 85%), radial-gradient(ellipse 110% 30% at 10% 95%, #e0d8d0, transparent 90%), linear-gradient(135deg, #f8f3ed, #f2ebe5 55%, #f8f4ef); }
 .planning-dashboard.dashboard-reference .dashboard-card-heading { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
 .workspace-shell .planning-dashboard.dashboard-reference .dashboard-card-heading h2 { font-size: 30px; line-height: 1.15; font-weight: 400; color: #181716; margin-top: 4px; }
 .planning-dashboard.dashboard-reference .dashboard-card-action { flex-shrink: 0; padding-top: 2px; }
