@@ -107,7 +107,7 @@ export function AuthPanel({ audience, initialMode = "signup", message }: AuthPan
         <Link className="font-semibold text-wine underline-offset-4 hover:underline" href={`/auth/${audience}?mode=${mode === "login" ? "signup" : "login"}`}>
           {mode === "login" ? "Create an account" : "Already have an account? Sign in"}
         </Link>
-        <Link className="text-ink-soft underline-offset-4 hover:text-wine hover:underline" href={audience === "couple" ? "/auth/vendor" : "/auth/couple"}>
+        <Link className="text-ink-soft underline-offset-4 hover:text-wine hover:underline" href={audience === "couple" ? `/auth/vendor?mode=${mode}` : "/auth/couple"}>
           {audience === "couple" ? "I’m a vendor" : "We’re a couple"}
         </Link>
       </div>

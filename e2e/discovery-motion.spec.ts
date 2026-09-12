@@ -30,6 +30,26 @@ test("marketplace AppShell keeps the shared compact header without Couple route 
   await expect(page.locator(".workspace-mobile-header")).toBeHidden();await expect(page.locator(".workspace-sidebar")).toBeVisible();
 });
 
+test("individual Vendor profiles reuse the canonical Guest, Couple and Vendor navigation shells",async({page})=>{
+  for(const width of [1440,390]) {
+    await page.setViewportSize({width,height:900});
+    for(const [role,query] of [["guest","&guest"],["couple",""],["vendor","&vendor"]] as const) {
+      await page.goto(`/?view=profile${query}`);
+      await expect(page.getByRole("heading",{name:"Willow Studio",exact:true})).toBeVisible();
+      if(role === "guest") {
+        await expect(page.locator(".landing-navigation.couple-auth-navigation")).toBeVisible();
+        await expect(page.locator(".workspace-shell")).toHaveCount(0);
+      } else {
+        await expect(page.locator(".landing-navigation")).toHaveCount(0);
+        await expect(page.locator(`.workspace-sidebar[data-role="${role}"]`)).toHaveCount(1);
+        if(width >= 1024) await expect(page.locator(`.workspace-sidebar[data-role="${role}"]`)).toBeVisible();
+        else await expect(page.locator(".workspace-mobile-header")).toBeVisible();
+      }
+      expect(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth)).toBe(true);
+    }
+  }
+});
+
 test("fixed subcategory survives a missing adapter mode without rendering service coverage",async({page})=>{
   await page.goto("/?view=fixed");
   const card=page.locator(".vendor-card").first();

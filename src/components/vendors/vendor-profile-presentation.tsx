@@ -2,7 +2,7 @@ import "@/app/marketplace-polish.css";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Car, Globe, Instagram, Mail, MapPin, Phone, Star } from "lucide-react";
-import { PublicHeader } from "@/components/layout/public-header";
+import { MarketplaceShell } from "@/components/layout/marketplace-shell";
 import { VendorStatusActions } from "@/components/vendors/vendor-status-actions";
 import { ReviewForm } from "@/components/vendors/review-form";
 import { getCurrentProfile } from "@/lib/auth/user";
@@ -19,9 +19,8 @@ export async function VendorProfilePresentation({ vendor, query = {}, ownerPrevi
   const relationship = profile?.role === "couple" ? await getVendorRelationship(vendor.id) : null;
   const serviceAreas = vendor.serviceAreas.map(formatVendorArea).join(" · ");
 
-  return (
+  const content = (
     <div className={ownerPreview ? "vendor-profile-page vendor-owner-preview" : "vendor-profile-page min-h-screen bg-canvas"}>
-      {!ownerPreview ? <PublicHeader /> : null}
       <main id="main-content" className="mx-auto max-w-7xl px-5 py-8 sm:px-8 lg:px-12 lg:py-12">
       {query.relationship === "error" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">The vendor change and budget could not be saved. Please try again.</p> : null}
       {query.relationship === "financial-history" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">This vendor could not be deleted. If it has financial history, change its lifecycle instead; payments must be preserved.</p> : null}
@@ -73,4 +72,7 @@ export async function VendorProfilePresentation({ vendor, query = {}, ownerPrevi
       </main>
     </div>
   );
+
+  if (ownerPreview) return content;
+  return MarketplaceShell({profile, contentClassName: "public-theme min-h-screen", children: content});
 }

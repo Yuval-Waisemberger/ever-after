@@ -9,5 +9,5 @@ export default async function ForgotPasswordPage({ searchParams }: {
 }) {
   const params = await searchParams;
   const audience = params.audience === "couple" || params.audience === "vendor" ? params.audience : undefined;
-  return <RecoveryPage><ForgotPasswordPanel audience={audience} /></RecoveryPage>;
+  return <RecoveryPage publicNavigation authAudience={audience}><ForgotPasswordPanel audience={audience} /></RecoveryPage>;
 }

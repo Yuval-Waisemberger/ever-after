@@ -1,5 +1,33 @@
 import { expect, test } from "@playwright/test";
 
+test("Couple account-type navigation preserves login and signup mode", async ({ page }) => {
+  await page.goto("/");
+  const publicNavigation = page.getByRole("navigation", { name: "Public navigation", exact: true });
+  await expect(publicNavigation.getByRole("link", { name: "Log in", exact: true })).toHaveAttribute("href", "/auth/couple?mode=login");
+  await publicNavigation.getByRole("link", { name: "Log in", exact: true }).click();
+  await expect(page).toHaveURL(/\/auth\/couple\?mode=login$/);
+  await expect(page.getByRole("heading", { name: "Welcome back", exact: true })).toBeVisible();
+
+  const vendorLink = () => page.getByRole("link", { name: "I’m a vendor", exact: true });
+  await expect(vendorLink()).toHaveAttribute("href", "/auth/vendor?mode=login");
+  await vendorLink().click();
+  await expect(page).toHaveURL(/\/auth\/vendor\?mode=login$/);
+  await expect(page.getByRole("heading", { name: "Welcome back", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Create your business account", exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Welcome back", exact: true })).toBeVisible();
+
+  await page.goto("/auth/couple?mode=signup");
+  await expect(page.getByRole("heading", { name: "Create your shared space", exact: true })).toBeVisible();
+  await expect(vendorLink()).toHaveAttribute("href", "/auth/vendor?mode=signup");
+  await vendorLink().click();
+  await expect(page).toHaveURL(/\/auth\/vendor\?mode=signup$/);
+  await expect(page.getByRole("heading", { name: "Create your business account", exact: true })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Welcome back", exact: true })).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Create your business account", exact: true })).toBeVisible();
+});
+
 test("Couple and Vendor login expose the shared forgot-password flow", async ({ page }) => {
   for (const audience of ["couple", "vendor"] as const) {
     await page.goto(`/auth/${audience}?mode=login`);
@@ -8,8 +36,26 @@ test("Couple and Vendor login expose the shared forgot-password flow", async ({ 
     await link.click();
     await expect(page.getByRole("heading", { name: "Forgot your password?" })).toBeVisible();
     await expect(page.getByLabel("Email address")).toBeVisible();
+    const navigation = page.locator(".public-desktop-nav");
+    await expect(navigation.getByRole("link", { name: "How it works" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "Vendors", exact: true })).toBeVisible();
+    await expect(navigation.getByRole("button", { name: "About us" })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: /AI Assistant/ })).toBeVisible();
+    await expect(navigation.getByRole("link", { name: "Log in" })).toHaveAttribute("href", `/auth/${audience}?mode=login`);
+    await expect(navigation.getByRole("link", { name: "Sign up", exact: true })).toHaveAttribute("href", `/auth/${audience}?mode=signup`);
     await expect(page.getByRole("link", { name: "Return to Login" })).toHaveAttribute("href", `/auth/${audience}?mode=login`);
   }
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/auth/forgot-password?audience=vendor");
+  await page.getByLabel("Navigation menu", { exact: true }).click();
+  const mobileNavigation = page.getByRole("navigation", { name: "Mobile navigation" });
+  await expect(mobileNavigation.getByRole("link", { name: "How it works" })).toBeVisible();
+  await expect(mobileNavigation.getByRole("link", { name: "Vendors", exact: true })).toBeVisible();
+  await expect(mobileNavigation.getByRole("button", { name: "About us" })).toBeVisible();
+  await expect(mobileNavigation.getByRole("link", { name: /AI Assistant/ })).toBeVisible();
+  await expect(mobileNavigation.getByRole("link", { name: "Log in" })).toHaveAttribute("href", "/auth/vendor?mode=login");
+  await expect(mobileNavigation.getByRole("link", { name: "Sign up", exact: true })).toHaveAttribute("href", "/auth/vendor?mode=signup");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
 test("invalid and expired recovery links use a safe branded recovery state", async ({ page }) => {

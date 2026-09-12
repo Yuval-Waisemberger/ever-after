@@ -8,8 +8,8 @@ import { LandingNavigation } from "@/components/public/landing-navigation";
 import "@/app/public-auth.css";
 
 /** Select the existing shell on the server, before emitting Marketplace content. */
-export async function MarketplaceShell({ profile, children }: { profile: CurrentProfile | null; children: ReactNode }) {
-  const content = <div className="public-theme directory-page min-h-screen">{!profile ? <LandingNavigation context="auth" /> : null}{children}</div>;
+export async function MarketplaceShell({ profile, children, contentClassName = "public-theme directory-page min-h-screen" }: { profile: CurrentProfile | null; children: ReactNode; contentClassName?: string }) {
+  const content = <div className={contentClassName}>{!profile ? <LandingNavigation context="auth" /> : null}{children}</div>;
   if (!profile) return content;
   if (profile.role === "vendor") {
     const identity = await getVendorIdentity(profile.displayName);
