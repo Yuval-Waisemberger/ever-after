@@ -225,7 +225,7 @@
   .landing-petal { width: calc(var(--petal-size) * .7); height: calc(var(--petal-size) * .52); --petal-travel: .65; }
   .landing-petal:nth-child(n+9) { display: none; }
   .landing-page .landing-pillars { padding: 22px 18px 40px; }
-  .landing-page .landing-pillars h2 { margin-bottom: 30px; font-size: 29px; }
+  .landing-page .landing-pillars h2 { margin-inline: auto; margin-bottom: 30px; font-size: 29px; }
   .landing-page .pillar { padding: 0 12px; border-top: 0; }
   .landing-page .pillar:nth-child(even) { border-left: 1px solid var(--line); }
   .landing-page .pillar h3 { font-size: 19px; line-height: 1.25; margin-bottom: 10px; }
