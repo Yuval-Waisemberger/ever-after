@@ -106,6 +106,15 @@ describe("set-new-password recovery", () => {
     expect(mocks.signOut).toHaveBeenCalledWith({ scope: "global" });
   });
 
+  it("reaches Login after a confirmed update even if session cleanup throws", async () => {
+    mocks.signOut.mockRejectedValueOnce(new Error("temporary sign-out failure")).mockResolvedValueOnce({ error: null });
+    await expect(resetPassword(idle, form(validPasswords))).rejects.toThrow(/REDIRECT:\/auth\/couple\?mode=login/);
+    expect(mocks.updateUser).toHaveBeenCalledTimes(1);
+    expect(mocks.updateUser).toHaveBeenCalledWith({ password: validPasswords.password });
+    expect(mocks.signOut).toHaveBeenNthCalledWith(1, { scope: "global" });
+    expect(mocks.signOut).toHaveBeenNthCalledWith(2, { scope: "local" });
+  });
+
   it("rejects an invalid or expired recovery session without changing a password", async () => {
     mocks.profile.mockResolvedValue(null);
     const result = await resetPassword(idle, form(validPasswords));
@@ -118,6 +127,14 @@ describe("set-new-password recovery", () => {
     mocks.updateUser.mockResolvedValue({ error: { message: "private provider detail" } });
     const result = await resetPassword(idle, form(validPasswords));
     expect(result.message).not.toContain("private provider detail");
+    expect(mocks.signOut).not.toHaveBeenCalled();
+  });
+
+  it("settles with a controlled error if the password-update request throws", async () => {
+    mocks.updateUser.mockRejectedValue(new Error("private transport detail"));
+    const result = await resetPassword(idle, form(validPasswords));
+    expect(result).toEqual({ status: "error", message: "Your password could not be reset. Request a new reset link and try again." });
+    expect(JSON.stringify(result)).not.toContain("private transport detail");
     expect(mocks.signOut).not.toHaveBeenCalled();
   });
 });

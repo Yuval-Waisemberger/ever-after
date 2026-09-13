@@ -33,6 +33,9 @@ export function ForgotPasswordPanel({ audience }: { audience?: Audience }) {
       {audience ? <input type="hidden" name="audience" value={audience} /> : null}
       <FormField name="email" label="Email address" type="email" autoComplete="email" error={state.errors?.email?.[0]} required />
       <Feedback state={state} />
+      {state.status === "success" ? <div className="password-reset-spam-notice rounded-xl border border-wine/30 bg-paper px-4 py-3 text-base font-semibold leading-6 text-wine" role="note">
+        <p>Important: A password reset email may arrive in your Spam or Junk folder. Check those folders if needed.</p>
+      </div> : null}
       <SubmitButton pendingLabel="Requesting reset link…">{state.status === "success" ? "Send another reset link" : "Send password reset link"}</SubmitButton>
     </form>
     <LoginLinks audience={audience} />

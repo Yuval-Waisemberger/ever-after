@@ -32,6 +32,41 @@ test("reduced motion preserves pending/error feedback without shimmer", async ({
   await expect(page.getByRole("button", { name: "Sign in", exact: true })).toBeEnabled();
 });
 
+test("Forgot Password shows the Spam or Junk notice only after the generic confirmation", async ({ page }) => {
+  const confirmation = "If an account exists for this email, we’ve sent a password reset link.";
+  const spamNotice = "Important: A password reset email may arrive in your Spam or Junk folder. Check those folders if needed.";
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 768, height: 900 }, { width: 390, height: 844 }, { width: 360, height: 800 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto("/?forgot");
+    await expect(page.getByRole("note")).toHaveCount(0);
+    await page.getByLabel("Email address").fill("fixture@example.invalid");
+    await page.getByRole("button", { name: "Send password reset link" }).click();
+    await expect(page.getByRole("button", { name: "Requesting reset link…" })).toBeDisabled();
+    await page.evaluate(() => window.dispatchEvent(new Event("visual-password-reset-success")));
+    await expect(page.getByRole("status")).toHaveText(confirmation);
+    const notice = page.getByRole("note");
+    await expect(notice).toHaveText(spamNotice);
+    expect(Number(await notice.evaluate(element => getComputedStyle(element).fontWeight))).toBeGreaterThanOrEqual(600);
+    expect(parseFloat(await notice.evaluate(element => getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16);
+    await expect(page.getByRole("button", { name: "Send another reset link" })).toBeEnabled();
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
+});
+
+test("Set New Password prevents duplicate submissions and settles a controlled failure", async ({ page }) => {
+  await page.goto("/?reset");
+  await expect(page.getByRole("heading", { name: "Set a new password" })).toBeVisible();
+  await expect(page.getByText("invalid, expired or has already been used")).toHaveCount(0);
+  await page.getByLabel("New password", { exact: true }).fill("fixture-password");
+  await page.getByLabel("Confirm new password", { exact: true }).fill("fixture-password");
+  await page.getByRole("button", { name: "Set new password" }).click();
+  await expect(page.getByRole("button", { name: "Saving new password…" })).toBeDisabled();
+  await page.evaluate(() => window.dispatchEvent(new Event("visual-finish")));
+  await expect(page.getByRole("alert")).toHaveText("Please check your email and password and try again.");
+  await expect(page.getByRole("button", { name: "Set new password" })).toBeEnabled();
+  await expect(page).toHaveURL(/\?reset$/);
+});
+
 
 for(const width of [1672,960,390]) test(`Vendor Auth approved control equivalence at ${width}px`,async({browser})=>{
  const context=await browser.newContext({viewport:{width,height:940},deviceScaleFactor:2});

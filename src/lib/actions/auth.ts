@@ -266,8 +266,16 @@ export async function resetPassword(
   const profile = await getCurrentProfile();
   if (!profile) return { status: "error", message: "This reset link is invalid or has expired. Request a new reset link." };
   const supabase = await createClient();
-  const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
-  if (error) return { status: "error", message: "Your password could not be reset. Request a new reset link and try again." };
-  await signOutAfterPasswordUpdate(supabase);
+  try {
+    const { error } = await supabase.auth.updateUser({ password: parsed.data.password });
+    if (error) return { status: "error", message: "Your password could not be reset. Request a new reset link and try again." };
+  } catch {
+    return { status: "error", message: "Your password could not be reset. Request a new reset link and try again." };
+  }
+  try {
+    await signOutAfterPasswordUpdate(supabase);
+  } catch {
+    try { await supabase.auth.signOut({ scope: "local" }); } catch { /* Redirect after the confirmed update. */ }
+  }
   redirect(loginAfterPasswordUpdate(profile.role, "Your password has been reset. Please sign in with your new password."));
 }

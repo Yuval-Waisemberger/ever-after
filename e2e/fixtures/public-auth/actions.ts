@@ -6,6 +6,10 @@ export function finishAction() {
   resolveAction?.({ status: "error", message: "Please check your email and password and try again." });
   resolveAction = undefined;
 }
+export function finishPasswordResetRequest() {
+  resolveAction?.({ status: "success", message: "If an account exists for this email, we’ve sent a password reset link." });
+  resolveAction = undefined;
+}
 export async function signIn(): Promise<AuthActionState> {
   return new Promise(resolve => { resolveAction = resolve; });
 }

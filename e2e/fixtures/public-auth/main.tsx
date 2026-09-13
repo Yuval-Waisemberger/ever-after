@@ -7,7 +7,7 @@ import { RecoveryPage } from "@/components/auth/recovery-page";
 import { ForgotPasswordPanel, ResetPasswordPanel } from "@/components/auth/password-recovery-panel";
 import { createRoot } from "react-dom/client";
 import { AuthPanel } from "@/components/auth/auth-panel";
-import { finishAction } from "./actions";
+import { finishAction, finishPasswordResetRequest } from "./actions";
 import "@/app/globals.css";
 import "@/app/eligible-consistency.css";
 import "@/app/product.css";
@@ -27,7 +27,8 @@ function Fixture() {
     const navigate = (event: Event) => { const next = (event as CustomEvent<string>).detail; history.pushState({}, "", next); setSearch(next); };
     window.addEventListener("visual-navigate", navigate);
     window.addEventListener("visual-finish", finishAction);
-    return () => { window.removeEventListener("visual-navigate", navigate); window.removeEventListener("visual-finish", finishAction); };
+    window.addEventListener("visual-password-reset-success", finishPasswordResetRequest);
+    return () => { window.removeEventListener("visual-navigate", navigate); window.removeEventListener("visual-finish", finishAction); window.removeEventListener("visual-password-reset-success", finishPasswordResetRequest); };
   }, []);
   const query = new URLSearchParams(search);
   const vendor = query.has("vendor"), verification = query.has("verification"), landing = query.has("landing");
