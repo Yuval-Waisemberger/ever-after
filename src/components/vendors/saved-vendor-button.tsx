@@ -1,8 +1,20 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useFormStatus } from "react-dom";
 import { FeedbackSettlement } from "./feedback-settlement";
 import { Heart } from "lucide-react";
 import { setMarketplaceVendorSaved, setRelationshipSaved } from "@/lib/actions/vendors";
+
+function SavedVendorSubmitButton({ isSaved, compact, motion }: { isSaved: boolean; compact: boolean; motion: "save" | "unsave" | null }) {
+  const { pending } = useFormStatus();
+  return (
+    <button type="submit" disabled={pending} aria-pressed={isSaved} aria-label={isSaved ? "Remove from Saved Vendors" : "Save vendor"} className={compact ? "vendor-save-button grid size-11 place-items-center rounded-full border border-white/80 bg-paper/90 text-wine backdrop-blur-sm hover:border-wine" : `inline-flex min-h-10 items-center gap-2 rounded-md border px-3.5 text-sm font-semibold ${isSaved ? "border-wine bg-wine text-white" : "bg-paper hover:border-wine hover:text-wine"}`}>
+      <Heart className={`size-4 ${isSaved ? "fill-current" : ""}`} />
+      {motion === "save" ? <span className="save-particles" aria-hidden="true"><i /><i /><i /></span> : null}
+      {!compact ? (isSaved ? "Saved" : "Save") : null}
+    </button>
+  );
+}
 
 export function SavedVendorButton({
   isSaved,
@@ -34,13 +46,10 @@ export function SavedVendorButton({
       <FeedbackSettlement onSettled={clearIntent} />
       {vendorId ? <input type="hidden" name="vendorId" value={vendorId} /> : null}
       {relationshipId ? <input type="hidden" name="relationshipId" value={relationshipId} /> : null}
+      {compact ? <input type="hidden" name="preserveScroll" value="true" /> : null}
       <input type="hidden" name="isSaved" value={String(!isSaved)} />
       <input type="hidden" name="returnTo" value={returnTo} />
-      <button aria-pressed={isSaved} aria-label={isSaved ? "Remove from Saved Vendors" : "Save vendor"} className={compact ? "vendor-save-button grid size-11 place-items-center rounded-full border border-white/80 bg-paper/90 text-wine backdrop-blur-sm hover:border-wine" : `inline-flex min-h-10 items-center gap-2 rounded-md border px-3.5 text-sm font-semibold ${isSaved ? "border-wine bg-wine text-white" : "bg-paper hover:border-wine hover:text-wine"}`}>
-        <Heart className={`size-4 ${isSaved ? "fill-current" : ""}`} />
-        {motion === "save" ? <span className="save-particles" aria-hidden="true"><i /><i /><i /></span> : null}
-        {!compact ? (isSaved ? "Saved" : "Save") : null}
-      </button>
+      <SavedVendorSubmitButton isSaved={isSaved} compact={compact} motion={motion} />
     </form>
   );
 }

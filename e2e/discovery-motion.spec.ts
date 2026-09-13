@@ -140,6 +140,43 @@ test("save particles require confirmed change; failures and pending do not celeb
   await page.goto("/?view=actions");await page.getByRole("button",{name:"Toggle pending"}).click();await page.getByRole("button",{name:"Save vendor",exact:true}).click();await expect(page.locator(".save-particles")).toHaveCount(0);await page.getByRole("button",{name:"Resolve request"}).click();await expect(page.getByRole("button",{name:"Remove from Saved Vendors"})).toHaveAttribute("aria-pressed","true");await expect(page.locator(".save-particles i")).toHaveCount(3);await expect(page.locator(".booking-celebration")).toHaveCount(0);
   await page.getByRole("button",{name:"Toggle pending"}).click();await page.getByRole("button",{name:"Remove from Saved Vendors"}).click();await expect(page.locator("[data-save-motion=unsave]")).toBeVisible();await page.getByRole("button",{name:"Toggle failure"}).click();await page.getByRole("button",{name:"Save vendor",exact:true}).click();await expect(page.locator(".save-particles")).toHaveCount(0);
 });
+test("Marketplace quick save preserves scroll, filters and normal card navigation",async({page})=>{
+  const errors:string[]=[];
+  page.on("pageerror",error=>errors.push(error.message));
+  page.on("console",message=>{if(message.type()==="error")errors.push(message.text());});
+  await page.setViewportSize({width:1440,height:700});
+  await page.goto("/?view=quick-save-scroll&category=photography-content&page=2");
+  await page.getByRole("button",{name:"Toggle pending"}).click();
+  const card=page.locator(".vendor-card").nth(15);
+  await card.scrollIntoViewIfNeeded();
+  const originalUrl=page.url(), originalScroll=await page.evaluate(()=>scrollY);
+  expect(originalScroll).toBeGreaterThan(500);
+  const writesText=await page.getByLabel("Fixture controls").textContent();
+  const initialWrites=Number(writesText?.match(/writes:\s*(\d+)/)?.[1]);
+
+  const save=card.getByRole("button",{name:"Save vendor",exact:true});
+  await save.focus();
+  await save.press("Enter");
+  await expect(save).toBeDisabled();
+  await expect(page.getByLabel("Fixture controls")).toContainText(`writes: ${initialWrites}`);
+  await page.getByRole("button",{name:"Resolve request"}).evaluate(button=>(button as HTMLButtonElement).click());
+  const remove=card.getByRole("button",{name:"Remove from Saved Vendors",exact:true});
+  await expect(remove).toBeEnabled();
+  await expect(page.getByLabel("Fixture controls")).toContainText(`writes: ${initialWrites+1}`);
+  expect(page.url()).toBe(originalUrl);
+  expect(Math.abs((await page.evaluate(()=>scrollY))-originalScroll)).toBeLessThanOrEqual(1);
+
+  await page.getByRole("button",{name:"Toggle pending"}).evaluate(button=>(button as HTMLButtonElement).click());
+  await remove.click();
+  await expect(card.getByRole("button",{name:"Save vendor",exact:true})).toBeEnabled();
+  await expect(page.getByLabel("Fixture controls")).toContainText(`writes: ${initialWrites+2}`);
+  expect(page.url()).toBe(originalUrl);
+  expect(Math.abs((await page.evaluate(()=>scrollY))-originalScroll)).toBeLessThanOrEqual(1);
+  expect(errors).toEqual([]);
+
+  await card.locator("a").click();
+  await expect(page).toHaveURL(/\/vendors\//);
+});
 test("booking is one finite burst after real state, with no page-load or failed celebration",async({page})=>{
   await page.goto("/?view=actions");await page.getByRole("button",{name:"Toggle failure"}).click();await page.getByRole("button",{name:"Booked",exact:true}).click();await expect(page.locator(".booking-celebration")).toHaveCount(0);await page.getByRole("button",{name:"Toggle failure"}).click();await page.getByRole("button",{name:"Toggle pending"}).click();await page.getByRole("button",{name:"Booked",exact:true}).click();await expect(page.locator(".booking-celebration")).toHaveCount(0);await page.getByRole("button",{name:"Resolve request"}).click();await expect(page.getByText("Booked for your day!",{exact:true})).toBeVisible();await expect(page.locator(".booking-confetti > span")).toHaveCount(16);await expect.poll(()=>page.locator(".booking-confetti > span").evaluateAll(els=>els.every(el=>getComputedStyle(el).opacity==="0"))).toBe(true);
   await page.getByRole("button",{name:"Toggle pending"}).click();await page.getByRole("button",{name:"Booked",exact:true}).click();await expect(page.locator(".booking-celebration")).toHaveCount(0);

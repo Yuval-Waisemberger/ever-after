@@ -56,6 +56,7 @@ export async function setVendorStatus(formData: FormData) {
 export async function setMarketplaceVendorSaved(formData: FormData) {
   const parsed = savedVendorSchema.safeParse(formObject(formData));
   if (!parsed.success) return;
+  const preserveScroll = formData.get("preserveScroll") === "true";
   const wedding = await getOwnedWedding();
   const supabase = await createClient();
   const { data: relationship, error: relationshipReadError } = await supabase.from("couple_vendors")
@@ -64,7 +65,10 @@ export async function setMarketplaceVendorSaved(formData: FormData) {
     .eq("vendor_id", parsed.data.vendorId)
     .maybeSingle();
 
-  if (relationshipReadError) redirectToReturn(formData, "error");
+  if (relationshipReadError) {
+    if (preserveScroll) return;
+    redirectToReturn(formData, "error");
+  }
   if (!relationship) {
     if (!parsed.data.isSaved) return;
     const { error } = await supabase.from("couple_vendors").insert({
@@ -85,7 +89,10 @@ export async function setMarketplaceVendorSaved(formData: FormData) {
       .select("id", { count: "exact", head: true })
       .eq("wedding_id", wedding.id)
       .eq("couple_vendor_id", relationship.id);
-    if (budgetReadError || budgetItemCount == null) redirectToReturn(formData, "error");
+    if (budgetReadError || budgetItemCount == null) {
+      if (preserveScroll) return;
+      redirectToReturn(formData, "error");
+    }
     const shouldDelete = shouldDeleteAfterUnsave({
       status: relationship.status as StoredVendorStatus,
       agreedPriceMinor: relationship.agreed_price_minor == null ? null : Number(relationship.agreed_price_minor),
@@ -102,7 +109,7 @@ export async function setMarketplaceVendorSaved(formData: FormData) {
     if (error) return;
   }
   refreshVendorViews();
-  redirectToReturn(formData);
+  if (!preserveScroll) redirectToReturn(formData);
 }
 
 export async function setRelationshipSaved(formData: FormData) {

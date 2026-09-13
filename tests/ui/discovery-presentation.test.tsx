@@ -38,11 +38,13 @@ describe("discovery presentation boundaries",()=>{
     expect(savedButton.querySelector("svg")?.getAttribute("class")).toContain("fill-current");
     expect(unsavedButton.getAttribute("aria-pressed")).toBe("false");
     expect(savedButton.getAttribute("aria-pressed")).toBe("true");
+    expect(unsaved.querySelector<HTMLInputElement>('[name="preserveScroll"]')?.value).toBe("true");
   });
   it("keeps bookmark and lifecycle forms independent, without changing quick-action inputs",()=>{
     const doc=parse(renderToStaticMarkup(<VendorStatusActions vendorId="vendor-id" currentStatus="considering" isSaved returnTo="/vendors/studio"/>));
     expect(doc.querySelectorAll("form")).toHaveLength(6);
     const forms=[...doc.querySelectorAll("form")];expect(forms[0].querySelector('[name="isSaved"]')?.getAttribute("value")).toBe("false");
+    expect(forms[0].querySelector('[name="preserveScroll"]')).toBeNull();
     expect(forms.slice(1).map(f=>f.querySelector('[name="status"]')?.getAttribute("value"))).toEqual(["saved","contacted","considering","booked","rejected"]);
     expect(doc.querySelector('[name="payment"], [name="weddingId"], [name="source"]')).toBeNull();
   });

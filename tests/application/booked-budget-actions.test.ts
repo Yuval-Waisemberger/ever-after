@@ -79,6 +79,14 @@ describe("relationship writes delegate financial synchronization to PostgreSQL",
     mocks.results.push(ok({ id, status: "saved", agreed_price_minor: null }), { count: null, error: bad.error });
     await expect(setMarketplaceVendorSaved(form({ vendorId: id, isSaved: "false", returnTo: "/vendors/my" }))).rejects.toThrow("relationship=error");
     expect(writes("couple_vendors")).toHaveLength(0);
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+  it("refreshes Marketplace bookmarks in place without redirecting", async () => {
+    mocks.results.push(ok(null), ok());
+    await expect(setMarketplaceVendorSaved(form({ vendorId: id, isSaved: "true", returnTo: "/vendors?category=venues&page=2", preserveScroll: "true" }))).resolves.toBeUndefined();
+    expect(writes("couple_vendors")).toHaveLength(1);
+    expect(mocks.refresh).toHaveBeenCalled();
+    expect(mocks.redirect).not.toHaveBeenCalled();
   });
   it("surfaces External Vendor deletion protection safely", async () => {
     mocks.results.push(bad);

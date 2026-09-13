@@ -21,6 +21,7 @@ import "@/app/marketplace-polish.css";
 function Fixture() {
   const [revision, render] = useState(0), [page, setPage] = useState<ReactNode>(null);
   const view = new URLSearchParams(location.search).get("view");
+  const vendorCount = view === "quick-save-scroll" ? 24 : 4;
   const listedVendor = view === "fixed" ? { ...vendor, subcategorySlug: "wedding-venues", subcategoryName: "Wedding Venues & Gardens", locationMode: undefined } as unknown as MarketplaceVendor : vendor;
   useEffect(() => {const update=()=>render(n=>n+1);window.addEventListener("fixture-refresh",update);return()=>window.removeEventListener("fixture-refresh",update);},[]);
   useEffect(() => { if(view === "directory-page") void DirectoryPage({params:Promise.resolve({}),searchParams:Promise.resolve({category:"photography-content"})}).then(setPage); if(view === "profile") void VendorProfilePresentation({vendor,query:{}}).then(setPage); if(view === "my") void MyVendorsPage({params:Promise.resolve({}),searchParams:Promise.resolve({})}).then(setPage); },[revision,view]);
@@ -29,7 +30,7 @@ function Fixture() {
     {view === "profile" || view === "my" ? page : view === "actions" ? <main className="mx-auto max-w-xl p-6"><h1 className="mb-6 font-display text-3xl">Willow Studio</h1><VendorStatusActions businessName={vendor.businessName} vendorId={vendor.id} currentStatus={fixture.status} isSaved={fixture.saved} returnTo="/" /></main> : <main className="public-theme directory-page mx-auto max-w-7xl p-6">
       <PublicHeader /><h1 className="mb-8 text-center font-display text-4xl">Find your wedding people</h1><CategoryNavigation selected="photography-content" />
       <section className="marketplace-results"><VendorFiltersForm filters={{page:1,category:"photography-content"}} subcategories={[{slug:"wedding-photographers",name:"Wedding photographers",categorySlug:"photography-content"}]} />
-        <VendorResults>{[0,1,2,3].map(i=><VendorCard key={i} vendor={{...listedVendor,id:listedVendor.id+i,businessName:i===0?listedVendor.businessName:`Willow Studio ${i+1}`,isSaved:fixture.saved,recommendation:i===0?listedVendor.recommendation:null}} canSave={i!==3} />)}</VendorResults>
+        <VendorResults>{Array.from({ length: vendorCount }, (_, i)=><VendorCard key={i} vendor={{...listedVendor,id:listedVendor.id+i,businessName:i===0?listedVendor.businessName:`Willow Studio ${i+1}`,isSaved:fixture.saved,recommendation:i===0?listedVendor.recommendation:null}} canSave={i!==vendorCount-1} />)}</VendorResults>
       </section>
     </main>}
   </>;
