@@ -56,6 +56,10 @@ export async function saveVendorProfile(
   if (!parsed.success) return { status: "error", errors: parsed.error.flatten().fieldErrors };
   const account = await requireRole("vendor");
   const profile = await getOwnedVendorProfile();
+  const businessName = parsed.data.businessName ?? profile?.business_name;
+  if (!businessName) {
+    return { status: "error", errors: { businessName: ["Enter the business name used for this Vendor account"] } };
+  }
   const supabase = await createClient();
   let subcategorySlug: string | null = null;
   if (parsed.data.subcategoryId) {
@@ -73,7 +77,7 @@ export async function saveVendorProfile(
   const locationErrors = validateVendorLocationForMode(parsed.data, locationMode);
   if (Object.keys(locationErrors).length) return { status: "error", errors: locationErrors };
   const values = {
-    business_name: parsed.data.businessName,
+    business_name: businessName,
     contact_name: parsed.data.contactName,
     description: parsed.data.description,
     location_city: parsed.data.locationCity,
@@ -104,17 +108,19 @@ export async function saveVendorProfile(
         .update(values)
         .eq("id", profile.id)
         .eq("owner_user_id", account.id)
+        .select("id")
+        .maybeSingle()
     : await supabase.from("vendor_profiles").insert({
         ...values,
         owner_user_id: account.id,
-        slug: createVendorSlug(parsed.data.businessName, account.id),
+        slug: createVendorSlug(businessName, account.id),
       });
-  const { error } = result;
-  if (error) return { status: "error", message: "The business profile could not be saved." };
+  const { data: saved, error } = result;
+  if (error || (profile && !saved)) return { status: "error", message: "The business profile could not be saved." };
   revalidatePath("/(vendor)", "layout");
   revalidatePath("/vendor/profile");
   revalidatePath("/vendors");
-  revalidatePath(`/vendors/${profile?.slug ?? createVendorSlug(parsed.data.businessName, account.id)}`);
+  revalidatePath(`/vendors/${profile?.slug ?? createVendorSlug(businessName, account.id)}`);
   return { status: "success", message: profile ? "Business profile updated." : "Business profile created." };
 }
 
@@ -139,17 +145,32 @@ export async function registerVendorImage(vendorId: string, storagePath: string,
   });
 }
 
-export async function deleteVendorImage(formData: FormData) {
+export async function deleteVendorImage(formData: FormData): Promise<ActionState> {
   const profile = await getOwnedVendorProfile();
-  if (!profile) return;
+  if (!profile) return { status: "error", message: "The image could not be removed." };
   const imageId = String(formData.get("imageId") ?? "");
   const image = profile.vendor_images?.find((candidate) => candidate.id === imageId);
-  if (!image) return;
+  if (!image) return { status: "error", message: "The image could not be removed." };
   const supabase = await createClient();
-  if (image.storage_path) await supabase.storage.from("vendor-media").remove([image.storage_path]);
-  await supabase.from("vendor_images").delete().eq("id", imageId).eq("vendor_id", profile.id);
+  try {
+    if (image.storage_path) {
+      const { error: storageError } = await supabase.storage.from("vendor-media").remove([image.storage_path]);
+      if (storageError) return { status: "error", message: "The image could not be removed." };
+    }
+    const { data: deleted, error } = await supabase
+      .from("vendor_images")
+      .delete()
+      .eq("id", imageId)
+      .eq("vendor_id", profile.id)
+      .select("id")
+      .maybeSingle();
+    if (error || !deleted) return { status: "error", message: "The image could not be removed." };
+  } catch {
+    return { status: "error", message: "The image could not be removed." };
+  }
   revalidatePath("/(vendor)", "layout");
   revalidatePath("/vendor/profile");
   revalidatePath("/vendors");
   revalidatePath(`/vendors/${profile.slug}`);
+  return { status: "success", message: "Image removed." };
 }

@@ -17,8 +17,7 @@
 .business-profile-page .business-profile-identity #profile-image img, .business-profile-page .business-profile-identity #profile-image > div > span { width:80px; height:80px; }
 .business-profile-page .business-profile-gallery-upload { margin-top:1rem; }
 .business-profile-page .business-profile-savebar { position:sticky; bottom:0; z-index:20; display:flex; justify-content:space-between; align-items:center; gap:1rem; padding:1rem 1.25rem max(1rem,env(safe-area-inset-bottom)); border:1px solid var(--line); border-radius:var(--control-radius); background:var(--paper); box-shadow:var(--shadow-soft); }
-.business-profile-page .business-profile-savebar > p { max-width:40rem; }
-.business-profile-page .business-profile-savebar .business-profile-actions { flex-shrink:0; }
+.business-profile-page .business-profile-savebar .business-profile-actions { flex-shrink:0; margin-inline-start:auto; }
 .business-profile-page #gallery { scroll-margin-bottom:10rem; }
 .business-profile-page .vendor-save-toast { bottom:7rem; }
 @media (max-width:1199px) {
@@ -40,6 +39,8 @@
 .business-profile-page .business-profile-gallery-slots figure > div { width:120px; flex-shrink:0; }
 .business-profile-page .business-profile-gallery-slots figcaption { flex:1; min-width:0; flex-wrap:wrap; }
 .business-profile-page .business-profile-add-photo { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.5rem; min-height:90px; border:1px dashed var(--line); border-radius:var(--control-radius); color:var(--wine); font-size:.875rem; }
+.business-profile-page .business-profile-choice-group > legend { float:left; width:100%; padding:0; }
+.business-profile-page .business-profile-choice-group > .vendor-choices-grid { clear:both; }
 
 /* Local option states; native checkbox interaction remains intact. */
 .business-profile-page .business-profile-option { min-height:44px; padding:.6rem .75rem; border:1px solid var(--line); border-radius:var(--control-radius); background:var(--surface-blush); }

@@ -119,6 +119,89 @@ test("identity selection validates and previews without writing gallery records"
   await expect(page.getByText("Isolated fixture · writes: 0",{exact:true})).toBeVisible();
 });
 
+test("Save changes persists a selected profile picture and sparse details through reload and reopening", async ({page}) => {
+  await page.goto("/vendor/profile?sparse=1");
+  await page.getByLabel("Description", { exact: true }).fill("A sparse profile with a stored identity image.");
+  await page.getByLabel("Choose profile image", { exact: true }).setInputFiles({
+    name: "profile.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ5kAAAAASUVORK5CYII=", "base64"),
+  });
+  await expect(page.getByRole("img", { name: "Selected profile image preview" })).toBeVisible();
+
+  await page.getByRole("button", { name: "Toggle pending", exact: true }).click();
+  await page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true }).click();
+  await expect(page.locator(".business-profile-savebar").getByRole("button", { name: "Saving…", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Upload profile image", exact: true })).toBeDisabled();
+  const pending = await page.evaluate(async () => {
+    const data = await import(/* @vite-ignore */ String("/data.ts"));
+    return { profileWrites: data.fixture.profileWrites, uploads: data.fixture.uploads, imageWrites: data.fixture.imageWrites };
+  });
+  expect(pending).toEqual({ profileWrites: 1, uploads: 0, imageWrites: 0 });
+  await page.getByRole("button", { name: "Resolve request", exact: true }).click();
+  await expect(page.getByText("Business profile saved", { exact: true })).toBeVisible();
+  const persisted = await page.evaluate(async () => {
+    const data = await import(/* @vite-ignore */ String("/data.ts"));
+    return { fixture: data.fixture, profile: await data.getOwnedVendorProfile() };
+  });
+  expect(persisted.fixture.profileWrites).toBe(1);
+  expect(persisted.fixture.uploads).toBe(1);
+  expect(persisted.fixture.imageWrites).toBe(1);
+  expect(persisted.fixture.lastUpload.bucket).toBe("vendor-media");
+  expect(persisted.fixture.lastUpload.path).toMatch(/^isolated-vendor\/profile\/.+\.png$/);
+  expect(persisted.profile.description).toBe("A sparse profile with a stored identity image.");
+  expect(persisted.profile.profile_image_storage_path).toBe(persisted.fixture.lastUpload.path);
+  await expect(page.getByRole("img", { name: "Willow Studio profile image" })).toBeVisible();
+
+  await page.reload();
+  await expect(page.locator("#description")).toHaveValue("A sparse profile with a stored identity image.");
+  await expect(page.getByRole("img", { name: "Willow Studio profile image" })).toBeVisible();
+  await page.getByRole("link", { name: "Dashboard", exact: true }).first().click();
+  await page.getByRole("link", { name: "Edit profile", exact: true }).click();
+  await expect(page.locator("#description")).toHaveValue("A sparse profile with a stored identity image.");
+  await expect(page.getByRole("img", { name: "Willow Studio profile image" })).toBeVisible();
+});
+
+test("a profile-picture failure settles without overall false success or replacing the stored picture", async ({page}) => {
+  await page.goto("/vendor/profile");
+  await page.getByRole("button", { name: "Toggle image failure", exact: true }).click();
+  await page.getByLabel("Choose profile image", { exact: true }).setInputFiles({
+    name: "profile.png",
+    mimeType: "image/png",
+    buffer: Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aZ5kAAAAASUVORK5CYII=", "base64"),
+  });
+  await page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true }).click();
+
+  await expect(page.getByRole("alert")).toContainText("Profile image could not be saved");
+  await expect(page.getByText("Business profile saved", { exact: true })).toHaveCount(0);
+  await expect(page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true })).toBeEnabled();
+  const result = await page.evaluate(async () => {
+    const data = await import(/* @vite-ignore */ String("/data.ts"));
+    return { profile: await data.getOwnedVendorProfile(), uploads: data.fixture.uploads, imageWrites: data.fixture.imageWrites };
+  });
+  expect(result.uploads).toBe(1);
+  expect(result.imageWrites).toBe(1);
+  expect(result.profile.profile_image_storage_path).toBeNull();
+});
+
+test("an invalid selected profile picture blocks the combined save before any write", async ({page}) => {
+  await page.goto("/vendor/profile");
+  await page.getByLabel("Description", { exact: true }).fill("This draft must not be written.");
+  await page.getByLabel("Choose profile image", { exact: true }).setInputFiles({
+    name: "profile.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from("invalid"),
+  });
+  await page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true }).click();
+
+  await expect(page.getByRole("alert")).toContainText("Use a JPG, PNG, or WebP image.");
+  const result = await page.evaluate(async () => {
+    const data = await import(/* @vite-ignore */ String("/data.ts"));
+    return { profileWrites: data.fixture.profileWrites, uploads: data.fixture.uploads, imageWrites: data.fixture.imageWrites };
+  });
+  expect(result).toEqual({ profileWrites: 0, uploads: 0, imageWrites: 0 });
+});
+
 
 test("Business Profile external save controls share all fields and submit once", async ({page}) => {
   await page.goto("/vendor/profile");
@@ -146,6 +229,123 @@ test("Business Profile external save controls share all fields and submit once",
   await expect(page.getByLabel("Business name",{exact:true})).toHaveValue("Second fixture name");
   await page.getByRole("link",{name:/Add photo/}).first().click();
   await expect(page.locator("#gallery-upload input[type=file]")).toBeFocused();
+});
+
+test("Business Profile persists representative field shapes through a full reload", async ({page}) => {
+  await page.goto("/vendor/profile");
+  await expect(page.getByLabel("Business name", { exact: true })).toHaveValue("Willow Studio");
+
+  await page.getByLabel("Business name", { exact: true }).fill("Persisted Willow Studio");
+  await page.locator('select[name="categoryChoice"]').selectOption({ label: "WEDDING VIDEOGRAPHERS" });
+  await page.getByLabel("Minimum price (₪)", { exact: true }).fill("7200");
+  await page.getByLabel("Maximum guest capacity", { exact: true }).fill("420");
+  await page.getByLabel("ELEGANT", { exact: true }).uncheck();
+  await page.getByLabel("MODERN", { exact: true }).check();
+  await page.getByLabel("FRIDAY AFTERNOON", { exact: true }).uncheck();
+  await page.getByLabel("EVENING", { exact: true }).check();
+  await page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true }).click();
+
+  await expect(page.getByText("Business profile saved", { exact: true })).toBeVisible();
+  await expect(page.getByText("Isolated fixture · writes: 1", { exact: true })).toBeVisible();
+  await expect(page.getByLabel("Business name", { exact: true })).toHaveValue("Persisted Willow Studio");
+  await expect(page.getByLabel("MODERN", { exact: true })).toBeChecked();
+
+  await page.reload();
+  await expect(page.getByLabel("Business name", { exact: true })).toHaveValue("Persisted Willow Studio");
+  await expect(page.locator('select[name="categoryChoice"]')).toHaveValue("photo:video");
+  await expect(page.getByLabel("Minimum price (₪)", { exact: true })).toHaveValue("7200");
+  await expect(page.getByLabel("Maximum guest capacity", { exact: true })).toHaveValue("420");
+  await expect(page.getByLabel("MODERN", { exact: true })).toBeChecked();
+  await expect(page.getByLabel("ELEGANT", { exact: true })).not.toBeChecked();
+  await expect(page.getByLabel("EVENING", { exact: true })).toBeChecked();
+  await expect(page.getByLabel("FRIDAY AFTERNOON", { exact: true })).not.toBeChecked();
+});
+
+test("a sparse existing Business Profile saves one optional field once and reloads from fresh data", async ({page}) => {
+  await page.goto("/vendor/profile?sparse=1");
+  await expect(page.getByLabel("Business name", { exact: true })).toHaveValue("Willow Studio");
+  await expect(page.getByLabel("Contact person", { exact: true })).toHaveValue("");
+  await expect(page.locator('select[name="categoryChoice"]')).toHaveValue("");
+  await expect(page.getByLabel("Minimum price (₪)", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("ELEGANT", { exact: true })).not.toBeChecked();
+
+  await page.getByLabel("Business name", { exact: true }).fill("");
+  await page.getByLabel("Description", { exact: true }).fill("The only newly completed profile detail.");
+  await page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true }).click();
+
+  await expect(page.getByText("Business profile saved", { exact: true })).toBeVisible();
+  await expect(page.getByText("Isolated fixture · writes: 1", { exact: true })).toBeVisible();
+  const submission = await page.evaluate(async () => (await import(/* @vite-ignore */ String("/data.ts"))).fixture.lastSubmission);
+  expect(submission).toContainEqual(["description", "The only newly completed profile detail."]);
+  expect(submission).toContainEqual(["businessName", ""]);
+
+  await page.reload();
+  await expect(page.getByLabel("Business name", { exact: true })).toHaveValue("Willow Studio");
+  await expect(page.locator("#description")).toHaveValue("The only newly completed profile detail.");
+  await page.getByRole("link", { name: "Dashboard", exact: true }).first().click();
+  await page.getByRole("link", { name: "Edit profile", exact: true }).click();
+  await expect(page.getByLabel("Business name", { exact: true })).toHaveValue("Willow Studio");
+  await expect(page.locator("#description")).toHaveValue("The only newly completed profile detail.");
+});
+
+test("Gallery removal settles once, updates the current page, and survives reload", async ({page}) => {
+  await page.goto("/vendor/profile");
+  await expect(page.getByRole("img", { name: "Editorial hands and rings" })).toBeVisible();
+  await page.getByRole("button", { name: "Toggle pending", exact: true }).click();
+  await page.getByRole("button", { name: "Delete image", exact: true }).click();
+
+  await expect(page.getByRole("button", { name: "Removing image", exact: true })).toBeDisabled();
+  await expect.poll(() => page.evaluate(async () => (await import(/* @vite-ignore */ String("/data.ts"))).fixture.writes)).toBe(1);
+  await page.getByRole("button", { name: "Resolve request", exact: true }).click();
+  await expect(page.getByRole("img", { name: "Editorial hands and rings" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Add photo/ })).toHaveCount(3);
+
+  await page.reload();
+  await expect(page.getByRole("img", { name: "Editorial hands and rings" })).toHaveCount(0);
+  await expect(page.getByRole("link", { name: /Add photo/ })).toHaveCount(3);
+});
+
+test("Gallery removal failure clears pending state without false success", async ({page}) => {
+  await page.goto("/vendor/profile");
+  await page.getByRole("button", { name: "Toggle failure", exact: true }).click();
+  await page.getByRole("button", { name: "Delete image", exact: true }).click();
+
+  await expect(page.getByRole("alert")).toHaveText("The image could not be removed.");
+  await expect(page.getByRole("button", { name: "Delete image", exact: true })).toBeEnabled();
+  await expect(page.getByRole("img", { name: "Editorial hands and rings" })).toBeVisible();
+  await expect.poll(() => page.evaluate(async () => (await import(/* @vite-ignore */ String("/data.ts"))).fixture.writes)).toBe(1);
+});
+
+test("Business Profile labels stay inside their frames at target widths", async ({page}) => {
+  for (const width of [1440, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/vendor/profile");
+
+    for (const label of ["Service areas", "Styles", "Suitable event types"]) {
+      const contained = await page.getByText(label, { exact: true }).evaluate(legend => {
+        const fieldset = legend.closest("fieldset");
+        if (!fieldset) return false;
+        const outer = fieldset.getBoundingClientRect();
+        const inner = legend.getBoundingClientRect();
+        return inner.top >= outer.top + 8 && inner.left >= outer.left + 8 && inner.right <= outer.right - 8;
+      });
+      expect(contained, `${label} at ${width}px`).toBe(true);
+    }
+
+    for (const name of ["Minimum guest capacity", "Maximum guest capacity"]) {
+      const aligned = await page.getByLabel(name, { exact: true }).evaluate(input => {
+        const label = document.querySelector(`label[for="${input.id}"]`);
+        const panel = input.closest("section");
+        if (!label || !panel) return false;
+        const control = input.getBoundingClientRect();
+        const frame = panel.getBoundingClientRect();
+        return control.top > label.getBoundingClientRect().top && control.left >= frame.left && control.right <= frame.right;
+      });
+      expect(aligned, `${name} at ${width}px`).toBe(true);
+    }
+    await expect(page.getByText("Your changes are saved only when you choose Save changes. Image uploads are saved separately.", { exact: true })).toHaveCount(0);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  }
 });
 
 

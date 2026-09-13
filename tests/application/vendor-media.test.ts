@@ -6,12 +6,13 @@ vi.mock("@/lib/queries/vendor-dashboard", () => ({ getOwnedVendorProfile: m.prof
 vi.mock("@/lib/auth/user", () => ({ requireRole: vi.fn(async () => ({id: "owner"})) }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ from: m.from, storage: { from: () => ({ download: m.download, remove: m.remove }) } }) }));
 import { saveVendorProfileImage, removeVendorProfileImage } from "@/lib/actions/vendor-identity";
-import { registerVendorImage, saveVendorProfile } from "@/lib/actions/vendor-profile";
+import { deleteVendorImage, registerVendorImage, saveVendorProfile } from "@/lib/actions/vendor-profile";
 import { vendorImageError, isVendorImagePath, orderedVendorImages } from "@/lib/domain/vendor-media";
 
 let images: Array<{ id: string; storage_path: string; sort_order: number }>;
 let update: ReturnType<typeof vi.fn>;
 let insert: ReturnType<typeof vi.fn>;
+let deleteRow: ReturnType<typeof vi.fn>;
 beforeEach(() => {
   vi.clearAllMocks(); images = [];
   m.result = { data: { id: "vendor" }, error: null };
@@ -22,7 +23,8 @@ beforeEach(() => {
   chain.eq.mockReturnValue(chain); chain.is.mockReturnValue(chain); chain.select.mockReturnValue(chain);
   update = vi.fn(() => chain);
   insert = vi.fn(async (data) => { images.push({ id: data.storage_path, ...data }); return { error: null }; });
-  m.from.mockReturnValue({ update, insert });
+  deleteRow = vi.fn(() => chain);
+  m.from.mockReturnValue({ update, insert, delete: deleteRow });
 });
 
 describe("Separate Vendor identity", () => {
@@ -47,6 +49,58 @@ describe("Separate Vendor identity", () => {
     m.refresh.mockClear(); m.result = {data:null,error:{}};
     expect((await saveVendorProfile({status:"idle"}, data)).status).toBe("error");
     expect(m.refresh).not.toHaveBeenCalled();
+  });
+  it("does not report success when the owned profile update matches no row", async () => {
+    const data = new FormData(); data.set("businessName", "Updated Studio");
+    m.result = { data: null, error: null };
+
+    await expect(saveVendorProfile({status:"idle"}, data)).resolves.toEqual({
+      status: "error",
+      message: "The business profile could not be saved.",
+    });
+    expect(m.refresh).not.toHaveBeenCalled();
+  });
+  it("performs no profile write when validation rejects the submitted values", async () => {
+    const data = new FormData();
+    data.set("businessName", "Updated Studio");
+    data.set("minPriceShekels", "9000");
+    data.set("maxPriceShekels", "7000");
+
+    expect((await saveVendorProfile({status:"idle"}, data)).status).toBe("error");
+    expect(update).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
+    expect(m.refresh).not.toHaveBeenCalled();
+  });
+  it("preserves the required account identity while saving an otherwise sparse profile", async () => {
+    m.profile.mockResolvedValue({ id: "vendor", slug: "stable-slug", business_name: "Signup Studio" });
+    const data = new FormData();
+    data.set("businessName", "");
+    data.set("description", "One saved detail");
+
+    await expect(saveVendorProfile({ status: "idle" }, data)).resolves.toMatchObject({ status: "success" });
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({
+      business_name: "Signup Studio",
+      description: "One saved detail",
+      contact_name: null,
+      category_id: null,
+      service_areas: [],
+      styles: [],
+      event_types: [],
+      min_guest_capacity: null,
+    }));
+  });
+  it("requires the technical business identity only when no Vendor profile exists", async () => {
+    m.profile.mockResolvedValue(null);
+    const data = new FormData();
+    data.set("businessName", "");
+    data.set("description", "Cannot create without an identity");
+
+    await expect(saveVendorProfile({ status: "idle" }, data)).resolves.toEqual({
+      status: "error",
+      errors: { businessName: ["Enter the business name used for this Vendor account"] },
+    });
+    expect(update).not.toHaveBeenCalled();
+    expect(insert).not.toHaveBeenCalled();
   });
   it("saves only the identity field, then removes the old identity object", async () => {
     expect((await saveVendorProfileImage("vendor/profile/new.jpg")).status).toBe("success");
@@ -103,5 +157,31 @@ describe("Gallery limit and derived view", () => {
     expect(vendorImageError({ size: 5242880, type: "image/webp" })).toBeNull();
     expect(isVendorImagePath("vendor/profile/a.png", "vendor", true)).toBe(true);
     const source = [{id:"b",sort_order:2},{id:"a",sort_order:0}]; expect(orderedVendorImages(source)[0].id).toBe("a"); expect(source[0].id).toBe("b");
+  });
+  it("reports gallery removal only after Storage and the owned metadata row are removed", async () => {
+    images = [{ id: "gallery-image", storage_path: "vendor/gallery.jpg", sort_order: 0 }];
+    const data = new FormData(); data.set("imageId", "gallery-image");
+
+    await expect(deleteVendorImage(data)).resolves.toEqual({ status: "success", message: "Image removed." });
+    expect(m.remove).toHaveBeenCalledExactlyOnceWith(["vendor/gallery.jpg"]);
+    expect(deleteRow).toHaveBeenCalledOnce();
+    expect(m.refresh).toHaveBeenCalledWith("/vendor/profile");
+  });
+  it("settles with a controlled error and no metadata write when Storage removal fails", async () => {
+    images = [{ id: "gallery-image", storage_path: "vendor/gallery.jpg", sort_order: 0 }];
+    m.remove.mockResolvedValue({ error: { message: "offline" } });
+    const data = new FormData(); data.set("imageId", "gallery-image");
+
+    await expect(deleteVendorImage(data)).resolves.toEqual({ status: "error", message: "The image could not be removed." });
+    expect(deleteRow).not.toHaveBeenCalled();
+    expect(m.refresh).not.toHaveBeenCalled();
+  });
+  it("does not report success when no owned gallery metadata row is deleted", async () => {
+    images = [{ id: "gallery-image", storage_path: "vendor/gallery.jpg", sort_order: 0 }];
+    m.result = { data: null, error: null };
+    const data = new FormData(); data.set("imageId", "gallery-image");
+
+    await expect(deleteVendorImage(data)).resolves.toEqual({ status: "error", message: "The image could not be removed." });
+    expect(m.refresh).not.toHaveBeenCalled();
   });
 });

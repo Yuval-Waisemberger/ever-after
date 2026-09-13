@@ -25,10 +25,14 @@ const optionalCapacity = z.preprocess(
   (value) => (value === "" || value == null ? null : Number(value)),
   z.number().int().min(1).max(500_000).nullable(),
 );
+const optionalBusinessName = z.preprocess(
+  (value) => (typeof value === "string" && value.trim() ? value.trim() : null),
+  z.string().max(120).nullable(),
+);
 
 export const vendorProfileSchema = z
   .object({
-    businessName: z.string().trim().min(1).max(120),
+    businessName: optionalBusinessName,
     contactName: z.string().trim().max(100).nullable(),
     description: z.string().trim().max(5000).nullable(),
     locationCity: z.string().trim().max(100).nullable(),
