@@ -27,7 +27,10 @@ export function VerificationPanel({ audience, email = "", issue }: {
       <h1 id="verification-title" className="font-display mt-3 text-4xl tracking-tight">{heading}</h1>
       <p className={`ea-feedback mt-5 ${issue ? "ea-feedback--error" : "ea-feedback--success"}`} role={issue ? "alert" : "status"}>{description}</p>
       {issue !== "profile" ? <>
-        <p className="mt-5 text-sm leading-7 text-ink-soft">Check your spam folder too. Open the latest link in the same browser where you requested it.</p>
+        <div className="verification-spam-notice mt-5 rounded-xl border border-wine/30 bg-paper px-4 py-3 text-base font-semibold leading-6 text-wine" role="note">
+          <p>Important: The verification email may arrive in your Spam or Junk folder. Check those folders if needed.</p>
+        </div>
+        <p className="mt-4 text-sm leading-7 text-ink-soft">If you requested more than one email, use the link in the newest one. For verification to work correctly, open it in this same browser.</p>
         <form action={action} className="mt-6 grid gap-5">
           {audience ? <input type="hidden" name="audience" value={audience} /> : <label className="ea-field grid gap-2 text-sm font-medium">Account type
             <select name="audience" className="ea-input min-h-11 w-full px-3.5" required defaultValue="">

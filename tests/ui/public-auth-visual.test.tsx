@@ -4,6 +4,7 @@ import { LandingHero, LandingPetals } from "@/components/public/landing-hero";
 import { LandingNavigation } from "@/components/public/landing-navigation";
 import { LandingFeatures } from "@/components/public/landing-features";
 import { AuthPage } from "@/components/auth/auth-page";
+import { VerificationPanel } from "@/components/auth/verification-panel";
 
 vi.mock("@/lib/actions/auth", () => ({ signInCouple: vi.fn(), signInVendor: vi.fn(), signUpCouple: vi.fn(), signUpVendor: vi.fn(), resendVerification: vi.fn() }));
 const parse = (markup: string) => new DOMParser().parseFromString(markup, "text/html");
@@ -77,5 +78,19 @@ describe("Public/Auth visual boundaries", () => {
     expect(doc.querySelector(".couple-auth-submit .lucide-arrow-right")).not.toBeNull();
     expect(doc.querySelector(".auth-image img")?.getAttribute("src")).toBe("/images/auth/vendor-auth-planner.png");
     expect(doc.querySelector("h2")?.textContent).toBe("Your Work. Their Perfect Day.");
+  });
+  it.each(["couple", "vendor"] as const)("separates the %s verification notice from its browser instruction", audience => {
+    const doc = parse(renderToStaticMarkup(<VerificationPanel audience={audience} email="person@example.test" />));
+    const notice = doc.querySelector('[role="note"].verification-spam-notice');
+    expect(notice?.textContent).toBe("Important: The verification email may arrive in your Spam or Junk folder. Check those folders if needed.");
+    expect(notice?.classList.contains("text-base")).toBe(true);
+    expect(notice?.classList.contains("font-semibold")).toBe(true);
+    expect(doc.body.textContent).toContain("If you requested more than one email, use the link in the newest one. For verification to work correctly, open it in this same browser.");
+    expect(doc.body.textContent).not.toContain("Check your spam folder too. Open the latest link in the same browser where you requested it.");
+    expect(doc.querySelector('form input[name="audience"]')?.getAttribute("value")).toBe(audience);
+    expect(doc.querySelector('form input[name="email"]')?.getAttribute("value")).toBe("person@example.test");
+    expect(doc.querySelector("form button[type=submit]")?.textContent).toBe("Resend verification email");
+    expect(doc.querySelector(`nav a[href="/auth/${audience}?mode=login"]`)?.textContent).toBe("Back to log in");
+    expect(doc.querySelector(`nav a[href="/auth/${audience}"]`)?.textContent).toBe("Back to sign up");
   });
 });

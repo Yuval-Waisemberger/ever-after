@@ -16,16 +16,32 @@ test("invalid and expired links retain the known audience, with neutral recovery
 });
 
 test("verification recovery fits desktop and mobile without changing the auth design", async ({ page }, testInfo) => {
-  for (const [width, height] of [[1440, 900], [390, 844], [360, 800]]) {
+  const spamNotice = "Important: The verification email may arrive in your Spam or Junk folder. Check those folders if needed.";
+  const browserInstruction = "If you requested more than one email, use the link in the newest one. For verification to work correctly, open it in this same browser.";
+  for (const [width, height] of [[1440, 900], [768, 900], [390, 844], [360, 800]]) {
     await page.setViewportSize({ width, height });
-    await page.goto("/auth/verification?audience=couple");
-    await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
-    await expect(page.getByRole("img", { name: "Ever After", exact: true })).toBeVisible();
-    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
-    const bounds = await page.getByLabel("Email address").boundingBox();
-    expect(bounds!.width).toBeGreaterThan(200);
-    expect(bounds!.height).toBeGreaterThanOrEqual(44);
-    await page.screenshot({ path: testInfo.outputPath(`verification-${width}.png`), fullPage: true });
+    for (const audience of ["couple", "vendor"]) {
+      await page.goto(`/auth/verification?audience=${audience}`);
+      await expect(page.getByRole("heading", { name: "Check your email" })).toBeVisible();
+      await expect(page.getByRole("img", { name: "Ever After", exact: true })).toBeVisible();
+      const notice = page.getByRole("note");
+      await expect(notice).toHaveText(spamNotice);
+      await expect(page.getByText(browserInstruction, { exact: true })).toBeVisible();
+      await expect(page.getByText("Check your spam folder too. Open the latest link in the same browser where you requested it.", { exact: true })).toHaveCount(0);
+      expect(Number(await notice.evaluate(element => getComputedStyle(element).fontWeight))).toBeGreaterThanOrEqual(600);
+      expect(parseFloat(await notice.evaluate(element => getComputedStyle(element).fontSize))).toBeGreaterThanOrEqual(16);
+      await expect(page.getByRole("button", { name: "Resend verification email" })).toBeVisible();
+      await expect(page.getByRole("link", { name: "Back to log in" })).toHaveAttribute("href", `/auth/${audience}?mode=login`);
+      await expect(page.getByRole("link", { name: "Back to sign up" })).toHaveAttribute("href", `/auth/${audience}`);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+      const fieldBounds = (await page.getByLabel("Email address").boundingBox())!;
+      const buttonBounds = (await page.getByRole("button", { name: "Resend verification email" }).boundingBox())!;
+      expect(fieldBounds.width).toBeGreaterThan(200);
+      expect(fieldBounds.height).toBeGreaterThanOrEqual(44);
+      expect(Math.abs(fieldBounds.x - buttonBounds.x)).toBeLessThanOrEqual(1);
+      expect(Math.abs(fieldBounds.width - buttonBounds.width)).toBeLessThanOrEqual(1);
+      await page.screenshot({ path: testInfo.outputPath(`verification-${audience}-${width}.png`), fullPage: true });
+    }
   }
 });
 
