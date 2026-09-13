@@ -25,7 +25,7 @@ export async function VendorProfilePresentation({ vendor, query = {}, ownerPrevi
       {query.relationship === "error" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">The vendor change and budget could not be saved. Please try again.</p> : null}
       {query.relationship === "financial-history" ? <p role="alert" className="ea-feedback ea-feedback--error mt-5">This vendor could not be deleted. If it has financial history, change its lifecycle instead; payments must be preserved.</p> : null}
         {query.relationship === "updated" ? <p role="status" className="mb-5 rounded-xl border border-wine/20 bg-wine/5 px-4 py-3 text-sm text-wine">Your vendor list has been updated.</p> : null}
-        <Link href="/vendors" className="inline-flex items-center gap-2 text-sm font-semibold text-wine hover:underline"><ArrowLeft className="size-4" />Back to vendors</Link>
+        <Link href={ownerPreview ? "/vendor" : "/vendors"} className="inline-flex items-center gap-2 text-sm font-semibold text-wine hover:underline"><ArrowLeft className="size-4" />{ownerPreview ? "Back to dashboard" : "Back to vendors"}</Link>
         <div className="vendor-profile-hero mt-6 grid gap-8 lg:grid-cols-[1.15fr_0.85fr]">
           <div className="vendor-profile-image relative aspect-[4/3] overflow-hidden border bg-paper-muted">
             {vendor.imageUrl ? <Image src={vendor.imageUrl} alt={vendor.imageAlt} fill priority sizes="(max-width: 1024px) 100vw, 60vw" className="object-cover" /> : <div className="grid h-full place-items-center font-display text-4xl">{vendor.businessName}</div>}

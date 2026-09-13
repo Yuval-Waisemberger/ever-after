@@ -77,4 +77,18 @@ describe("Marketplace server shell selection", () => {
       expect(document.querySelector("[data-role]")).toBeNull();
     }
   });
+
+  it("returns the owner preview to the Vendor Dashboard without changing the public detail return link", async () => {
+    auth.profile = {id: "vendor", role: "vendor", displayName: "Studio", avatarChoice: "heart", avatarStoragePath: null};
+    const ownerDocument = new DOMParser().parseFromString(renderToStaticMarkup(await VendorProfilePresentation({vendor: demoVendors[0], ownerPreview: true})), "text/html");
+    expect(ownerDocument.querySelector('.vendor-profile-page main > a[href="/vendor"]')?.textContent).toBe("Back to dashboard");
+    expect(ownerDocument.querySelector('.vendor-profile-page main > a[href="/vendor/profile"]')).toBeNull();
+    expect(ownerDocument.querySelector('.vendor-profile-page main > a[href="/vendors"]')).toBeNull();
+
+    auth.profile = null;
+    const publicDocument = new DOMParser().parseFromString(renderToStaticMarkup(await VendorProfilePresentation({vendor: demoVendors[0]})), "text/html");
+    expect(publicDocument.querySelector('.vendor-profile-page main > a[href="/vendors"]')?.textContent).toBe("Back to vendors");
+    expect(publicDocument.querySelector('.vendor-profile-page main > a[href="/vendor"]')).toBeNull();
+    expect(publicDocument.querySelector('.vendor-profile-page main > a[href="/vendor/profile"]')).toBeNull();
+  });
 });
