@@ -92,6 +92,9 @@
  .workspace-shell .planning-dashboard.dashboard-reference .dashboard-vendor-row { grid-template-columns: 64px minmax(0,1fr); }
  .workspace-shell .planning-dashboard.dashboard-reference .dashboard-vendor-image { width: 64px; min-width: 64px; grid-row: span 2; }
 }
+@media(min-width:801px) and (max-width:1200px) {
+ .planning-dashboard.dashboard-reference .dashboard-upcoming-list > li > span:first-child { min-width: min(100%,12rem); overflow-wrap: break-word; }
+}
 @media(max-width:800px) {
  .workspace-shell .planning-dashboard.dashboard-reference { padding: 18px 16px; }
  .workspace-shell .planning-dashboard.dashboard-reference .wedding-overview { grid-template-columns: minmax(0,1fr); }

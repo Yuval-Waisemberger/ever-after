@@ -24,9 +24,9 @@ export const metadata: Metadata = {
     images: [
       {
         url: "/ever-after-social-card.png",
-        width: 1730,
-        height: 909,
-        alt: "Ever After — Your wedding. One place. Less chaos.",
+        width: 1200,
+        height: 630,
+        alt: "Ever After logo",
       },
     ],
   },

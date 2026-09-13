@@ -53,6 +53,43 @@ test.beforeEach(async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.clock.install({ time: new Date("2026-09-07T12:00:00Z") });
 });
+test("Upcoming task titles keep readable word wrapping at every dashboard width", async ({ page }) => {
+  for (const width of [1440, 1280, 1100, 1024, 900, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 900 });
+    await page.goto("/?shell");
+    const items = page.locator(".dashboard-upcoming-list > li");
+    await expect(items).toHaveCount(2);
+    for (const item of await items.all()) {
+      const title = item.locator(":scope > span:first-child");
+      const status = item.locator(":scope > span").nth(1);
+      const date = item.locator(":scope > time");
+      await expect(title).toBeVisible();
+      await expect(status).toBeVisible();
+      await expect(date).toBeVisible();
+      const words = await title.evaluate(element => {
+        const node = element.firstChild;
+        if (!node?.textContent) return [];
+        let offset = 0;
+        return node.textContent.split(" ").map(word => {
+          const range = document.createRange();
+          range.setStart(node, offset);
+          range.setEnd(node, offset + word.length);
+          offset += word.length + 1;
+          return { word, lineFragments: range.getClientRects().length };
+        });
+      });
+      if (width > 800 && width <= 1200) {
+        expect(words.filter(word => word.lineFragments !== 1)).toEqual([]);
+        await expect(title).toHaveCSS("overflow-wrap", "break-word");
+        expect((await title.boundingBox())!.width).toBeGreaterThanOrEqual(191);
+      } else {
+        await expect(title).toHaveCSS("overflow-wrap", "anywhere");
+      }
+    }
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: test.info().outputPath(`upcoming-${width}.png`), fullPage: true });
+  }
+});
 for (const width of [1440, 1280, 1024, 768, 390, 375, 360]) test(`date-only celebration at ${width}`, async ({ page }) => {
   test.setTimeout(90000); // Six complete state navigations and screenshots per viewport.
   const errors: string[] = []; page.on("pageerror", error => errors.push(error.message));
