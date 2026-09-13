@@ -316,6 +316,67 @@ test("Gallery removal failure clears pending state without false success", async
   await expect.poll(() => page.evaluate(async () => (await import(/* @vite-ignore */ String("/data.ts"))).fixture.writes)).toBe(1);
 });
 
+test("profile saving keeps image controls neutral, disabled, and geometrically stable", async ({page}) => {
+  const snapshot = () => page.evaluate(() => {
+    const profileForm = document.querySelector<HTMLElement>("#profile-image form");
+    const galleryButton = document.querySelector<HTMLButtonElement>(".business-profile-gallery-slots button");
+    const profileSection = document.querySelector<HTMLElement>("#profile-image");
+    const galleryCard = document.querySelector<HTMLElement>(".business-profile-gallery-slots figure");
+    if (!profileForm || !galleryButton || !profileSection || !galleryCard) throw new Error("Vendor image controls are missing");
+    const visual = (element: HTMLElement) => ({
+      backgroundColor: getComputedStyle(element).backgroundColor,
+      backgroundImage: getComputedStyle(element).backgroundImage,
+    });
+    const rectangle = (element: HTMLElement) => {
+      const rect = element.getBoundingClientRect();
+      return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+    };
+    return {
+      profileForm: visual(profileForm),
+      galleryButton: visual(galleryButton),
+      profileSection: rectangle(profileSection),
+      galleryCard: rectangle(galleryCard),
+    };
+  });
+  const expectStableRectangle = (before: Record<string, number>, current: Record<string, number>) => {
+    for (const key of Object.keys(before)) expect(Math.abs(before[key] - current[key]), key).toBeLessThanOrEqual(0.5);
+  };
+
+  for (const width of [1440, 768, 390, 360]) {
+    await page.setViewportSize({ width, height: 1000 });
+    await page.goto("/vendor/profile");
+    await expect(page.getByRole("heading", { name: "My Business Profile", exact: true })).toBeVisible();
+    await page.waitForTimeout(1000);
+    const before = await snapshot();
+
+    await page.getByRole("button", { name: "Toggle pending", exact: true }).click();
+    await page.locator(".business-profile-savebar").getByRole("button", { name: "Save changes", exact: true }).click();
+    await expect(page.locator(".vendor-business-form")).toHaveAttribute("aria-busy", "true");
+    await expect(page.getByLabel("Choose profile image", { exact: true })).toBeDisabled();
+    await expect(page.getByRole("button", { name: "Delete image", exact: true })).toBeDisabled();
+    const during = await snapshot();
+
+    expect(during.profileForm).toEqual(before.profileForm);
+    expect(during.galleryButton).toEqual(before.galleryButton);
+    expectStableRectangle(before.profileSection, during.profileSection);
+    expectStableRectangle(before.galleryCard, during.galleryCard);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    await page.screenshot({ path: `${artifacts}/profile-save-pending-${width}.png`, fullPage: true });
+
+    await page.getByRole("button", { name: "Resolve request", exact: true }).click();
+    await expect(page.getByText("Business profile saved", { exact: true })).toBeVisible();
+    await expect(page.getByLabel("Choose profile image", { exact: true })).toBeEnabled();
+    await expect(page.getByRole("button", { name: "Delete image", exact: true })).toBeEnabled();
+    const after = await snapshot();
+
+    expect(after.profileForm).toEqual(before.profileForm);
+    expect(after.galleryButton).toEqual(before.galleryButton);
+    expectStableRectangle(before.profileSection, after.profileSection);
+    expectStableRectangle(before.galleryCard, after.galleryCard);
+    await page.getByRole("button", { name: "Toggle pending", exact: true }).click();
+  }
+});
+
 test("Business Profile labels stay inside their frames at target widths", async ({page}) => {
   for (const width of [1440, 768, 390, 360]) {
     await page.setViewportSize({ width, height: 1000 });

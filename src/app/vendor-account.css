@@ -44,7 +44,7 @@
   .vendor-checklist [data-just-completed=true] a { animation: vendor-check-surface 750ms var(--ease-soft); }
   .vendor-checklist [data-just-completed=true] .vendor-check svg { stroke-dasharray: 30; animation: vendor-check-draw 550ms var(--ease-soft); }
   .vendor-checklist [data-just-completed=true] .vendor-check-label { animation: vendor-check-label 700ms var(--ease-soft); }
-  .vendor-business-form [aria-busy=true], .vendor-business-form[aria-busy=true] button[type=submit] { background-size: 200% 100%; background-image: linear-gradient(110deg, var(--wine) 30%, var(--rose) 50%, var(--wine) 70%); animation: vendor-saving 1500ms var(--ease-standard) infinite; }
+  .vendor-business-form[aria-busy=true] .business-profile-save-control { background-size: 200% 100%; background-image: linear-gradient(110deg, var(--wine) 30%, var(--rose) 50%, var(--wine) 70%); animation: vendor-saving 1500ms var(--ease-standard) infinite; }
   .vendor-save-toast { animation: vendor-section-enter 600ms var(--ease-soft); }
   .vendor-publish-success { animation: vendor-section-enter 800ms var(--ease-soft); }
   .vendor-publish-success .vendor-success-check svg { stroke-dasharray: 30; animation: vendor-check-draw 500ms var(--ease-soft); }
