@@ -1,6 +1,7 @@
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { requireRole } from "@/lib/auth/user";
+import { ProtectedAccessError } from "@/lib/auth/protected-access";
 import { calculateBudgetSummary } from "@/lib/domain/budget";
 import { calculateTaskSummary, type TaskStatus } from "@/lib/domain/tasks";
 import { publicVendorAsLegacyRelation, readPublicVendorAssets, readPublicVendorsByIds, type PublicVendorLegacyRelation } from "./public-vendor-data";
@@ -8,8 +9,16 @@ import { publicVendorAsLegacyRelation, readPublicVendorAssets, readPublicVendors
 export const getOwnedWedding = cache(async () => {
   const profile = await requireRole("couple");
   const supabase = await createClient();
-  const { data, error } = await supabase.from("weddings").select("*").eq("owner_user_id", profile.id).single();
-  if (error || !data) throw new Error("Wedding details could not be loaded.");
+  const weddingQuery = supabase.from("weddings").select("*").eq("owner_user_id", profile.id).maybeSingle();
+  let weddingResult: Awaited<typeof weddingQuery>;
+  try {
+    weddingResult = await weddingQuery;
+  } catch {
+    throw new ProtectedAccessError("owned_wedding_unavailable");
+  }
+  const { data, error } = weddingResult;
+  if (error) throw new ProtectedAccessError("owned_wedding_unavailable");
+  if (!data) throw new ProtectedAccessError("owned_wedding_missing");
   return data;
 });
 

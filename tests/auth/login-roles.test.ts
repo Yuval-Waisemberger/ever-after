@@ -1,10 +1,10 @@
 // @vitest-environment node
 import { beforeEach, describe, expect, it, vi } from "vitest";
-const m=vi.hoisted(()=>({jar:new Map<string,string>(),login:vi.fn(),logout:vi.fn(),lookup:vi.fn(),eq:vi.fn(),claims:vi.fn(),redirect:vi.fn()}));
+const m=vi.hoisted(()=>({jar:new Map<string,string>(),login:vi.fn(),logout:vi.fn(),lookup:vi.fn(),eq:vi.fn(),claims:vi.fn(),redirect:vi.fn(),configured:vi.fn()}));
 vi.mock("react",async importOriginal=>({...await importOriginal<typeof import("react")>(),cache:<T,>(fn:T)=>fn}));
 vi.mock("next/headers",()=>({cookies:async()=>({getAll:()=>[...m.jar].map(([name,value])=>({name,value})),delete:(name:string)=>m.jar.delete(name)})}));
 vi.mock("next/navigation",()=>({redirect:(path:string)=>{m.redirect(path);throw new Error(`REDIRECT:${path}`);}}));
-vi.mock("@/lib/supabase/config",()=>({isSupabaseConfigured:()=>true,getSupabaseConfig:()=>({url:"https://fixture.supabase.co",publishableKey:"fixture"})}));
+vi.mock("@/lib/supabase/config",()=>({isSupabaseConfigured:m.configured,getSupabaseConfig:()=>({url:"https://fixture.supabase.co",publishableKey:"fixture"})}));
 vi.mock("@/lib/supabase/server",()=>({createClient:async()=>({auth:{getClaims:m.claims,signInWithPassword:m.login,signOut:m.logout},from:(table:string)=>{expect(table).toBe("profiles");return{select:()=>({eq:m.eq})};}})}));
 import { signInCouple,signInVendor,signOut } from "@/lib/actions/auth";
 import { requireRole } from "@/lib/auth/user";
@@ -12,7 +12,7 @@ const idle={status:"idle" as const};
 const form=()=>{const f=new FormData();f.set("email","fixture@example.test");f.set("password","fixture-password");f.set("role","vendor");return f;};
 const record=(role:string)=>({id:"owned",role,display_name:"Fixture",avatar_choice:"heart",avatar_storage_path:null});
 beforeEach(()=>{
- vi.clearAllMocks();m.jar.clear();m.jar.set("unrelated-cookie","keep");
+ vi.clearAllMocks();m.jar.clear();m.jar.set("unrelated-cookie","keep");m.configured.mockReturnValue(true);
  m.claims.mockImplementation(async()=>({data:{claims:m.jar.has("sb-fixture-auth-token.0")?{sub:"owned"}:null},error:null}));
  m.eq.mockImplementation((field,id)=>{expect(field).toBe("id");expect(id).toBe("owned");return{maybeSingle:m.lookup};});
  m.lookup.mockResolvedValue({data:record("couple"),error:null});
@@ -60,6 +60,45 @@ describe("dedicated password portals using the canonical profile resolver",()=>{
  it.each(["couple","vendor"] as const)("direct %s cross-role access redirects to the owned area",async role=>{
   m.jar.set("sb-fixture-auth-token.0","existing");m.lookup.mockResolvedValue({data:record(role),error:null});
   await expect(requireRole(role==="couple"?"vendor":"couple")).rejects.toThrow(`REDIRECT:${role==="couple"?"/wedding":"/vendor"}`);
+ });
+ it.each(["couple","vendor"] as const)("direct %s access succeeds for the valid role",async role=>{
+  m.jar.set("sb-fixture-auth-token.0","existing");m.lookup.mockResolvedValue({data:record(role),error:null});
+  await expect(requireRole(role)).resolves.toMatchObject({id:"owned",role});
+  expect(m.redirect).not.toHaveBeenCalled();
+ });
+ it.each(["couple","vendor"] as const)("confirmed Guest access still redirects to the %s portal",async role=>{
+  await expect(requireRole(role)).rejects.toThrow(`REDIRECT:/auth/${role}?message=Please sign in to continue`);
+ });
+ it("claims that reliably contain no authenticated subject still redirect to Login",async()=>{
+  m.jar.set("sb-fixture-auth-token.0","expired");m.claims.mockResolvedValue({data:{claims:null},error:null});
+  await expect(requireRole("couple")).rejects.toThrow("REDIRECT:/auth/couple?message=Please sign in to continue");
+ });
+ it("missing server Auth configuration fails closed without a Login redirect",async()=>{
+  m.configured.mockReturnValue(false);
+  await expect(requireRole("couple")).rejects.toMatchObject({code:"auth_unavailable",retryable:true});
+  expect(m.redirect).not.toHaveBeenCalled();
+ });
+ it.each(["returned","thrown"])("a %s claims failure stays unauthorized without a Login redirect",async kind=>{
+  m.jar.set("sb-fixture-auth-token.0","existing");
+  if(kind==="thrown")m.claims.mockRejectedValue(new Error("private auth detail"));
+  else m.claims.mockResolvedValue({data:null,error:{message:"private auth detail"}});
+  await expect(requireRole("couple")).rejects.toMatchObject({code:"auth_unavailable",retryable:true});
+  expect(m.redirect).not.toHaveBeenCalled();expect(m.lookup).not.toHaveBeenCalled();expect(m.logout).not.toHaveBeenCalled();expect(m.jar.has("sb-fixture-auth-token.0")).toBe(true);
+ });
+ it("a profile query failure stays unauthorized without a Login redirect",async()=>{
+  m.jar.set("sb-fixture-auth-token.0","existing");m.lookup.mockResolvedValue({data:null,error:{message:"private database detail"}});
+  await expect(requireRole("couple")).rejects.toMatchObject({code:"profile_unavailable",retryable:true});
+  expect(m.redirect).not.toHaveBeenCalled();expect(m.logout).not.toHaveBeenCalled();expect(m.jar.has("sb-fixture-auth-token.0")).toBe(true);
+ });
+ it("a thrown profile query failure stays unauthorized without a Login redirect",async()=>{
+  m.jar.set("sb-fixture-auth-token.0","existing");m.lookup.mockRejectedValue(new Error("private database detail"));
+  await expect(requireRole("couple")).rejects.toMatchObject({code:"profile_unavailable",retryable:true});
+  expect(m.redirect).not.toHaveBeenCalled();
+ });
+ it.each([["missing",null],["invalid",record("admin")]] as const)("a %s profile is an integrity failure, not a dependency failure",async(_kind,data)=>{
+  m.jar.set("sb-fixture-auth-token.0","existing");m.lookup.mockResolvedValue({data,error:null});
+  await expect(requireRole("couple")).rejects.toMatchObject({code:"profile_integrity",retryable:false});
+  expect(m.redirect).not.toHaveBeenCalled();
  });
  it("does not replace a session whose claims cannot be verified",async()=>{m.claims.mockResolvedValue({data:null,error:{message:"network"}});expect((await signInCouple(idle,form())).status).toBe("error");expect(m.login).not.toHaveBeenCalled();expect(m.logout).not.toHaveBeenCalled();});
  it("existing logout behavior remains unchanged",async()=>{await expect(signOut()).rejects.toThrow("REDIRECT:/");expect(m.logout).toHaveBeenCalledWith();});

@@ -9,6 +9,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ from(tabl
   chain.then = (resolve: (value: unknown) => unknown) => Promise.resolve(mocks.result).then(resolve); return chain;
 } }) }));
 import { saveTask, changeTaskStatus, deleteTask } from "@/lib/actions/tasks";
+import { ProtectedAccessError, type ProtectedAccessFailureCode } from "@/lib/auth/protected-access";
 const id = "11111111-1111-4111-8111-111111111111";
 const idle = { status: "idle" as const };
 const form = (extra = {}) => { const f = new FormData(); Object.entries({ title: "Contract", notes: "Private", category: "Venue", dueDate: "2026-09-07", priority: "high", status: "waiting_on_vendor", ...extra }).forEach(([k,v]) => f.set(k, String(v))); return f; };
@@ -53,6 +54,22 @@ it.each(["anonymous", "vendor", "no owned wedding"])("stops every mutation when 
   mocks.owned.mockRejectedValue(new Error(reason));
   for (const action of [saveTask, changeTaskStatus, deleteTask]) await expect(action(idle, form({ id }))).rejects.toThrow(reason);
   expect(mocks.calls).toEqual([]);
+});
+it.each([
+  "auth_unavailable",
+  "profile_unavailable",
+  "profile_integrity",
+  "owned_wedding_unavailable",
+  "owned_wedding_missing",
+] as ProtectedAccessFailureCode[])("returns controlled state and performs zero writes when protected access reports %s", async code => {
+  mocks.owned.mockRejectedValue(new ProtectedAccessError(code));
+  for (const action of [saveTask, changeTaskStatus, deleteTask]) {
+    const response = await action(idle, form({ id }));
+    expect(response).toMatchObject({ status: "error", message: expect.stringContaining("try again") });
+  }
+  expect(mocks.owned).toHaveBeenCalledTimes(3);
+  expect(mocks.calls).toEqual([]);
+  expect(mocks.refresh).not.toHaveBeenCalled();
 });
 it("returns every relevant field error and rejects stored overdue", async () => {
   const response = await saveTask(idle, form({ title: "", notes: "x".repeat(3001), category: "x".repeat(81), dueDate: "invalid", priority: "invalid", status: "overdue" }));

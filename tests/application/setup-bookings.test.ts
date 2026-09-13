@@ -14,6 +14,7 @@ vi.mock("@/lib/supabase/server", () => ({ createClient: async () => ({ from(tabl
 } }) }));
 import { bookSetupVendor, saveBookingDeclaration, searchSetupVendors } from "@/lib/actions/setup-bookings";
 import { completeWeddingSetup, saveWeddingDetails, skipWeddingSetup } from "@/lib/actions/wedding";
+import { ProtectedAccessError, type ProtectedAccessFailureCode } from "@/lib/auth/protected-access";
 const id = "11111111-1111-4111-8111-111111111111";
 const ok = (data: unknown = { id }) => ({ data, error: null });
 const bad = { data: null, error: { message: "PRIVATE SQL ERROR" } };
@@ -100,6 +101,24 @@ describe("Setup booking operations", () => {
   });
 });
 describe("Setup / Details saves", () => {
+  it.each([
+    "auth_unavailable",
+    "profile_unavailable",
+    "profile_integrity",
+    "owned_wedding_unavailable",
+    "owned_wedding_missing",
+  ] as ProtectedAccessFailureCode[])("Wedding Details returns controlled state and performs zero writes for %s", async code => {
+    mocks.owned.mockRejectedValue(new ProtectedAccessError(code));
+    expect(await saveWeddingDetails({ status: "idle" }, form())).toMatchObject({ status: "error", message: expect.stringContaining("try again") });
+    expect(mocks.owned).toHaveBeenCalledOnce();
+    expect(writes("weddings")).toEqual([]);
+    expect(mocks.refresh).not.toHaveBeenCalled();
+  });
+  it("Wedding Details preserves genuine unauthenticated redirects", async () => {
+    mocks.owned.mockRejectedValue(new Error("REDIRECT:/auth/couple"));
+    await expect(saveWeddingDetails({ status: "idle" }, form())).rejects.toThrow("REDIRECT:/auth/couple");
+    expect(writes("weddings")).toEqual([]);
+  });
   it.each([completeWeddingSetup, saveWeddingDetails])("uses consistent completion and preserves independently managed booking metadata", async action => {
     mocks.results.push(ok());
     await expect(action({ status: "idle" }, form())).rejects.toThrow("REDIRECT:");

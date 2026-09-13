@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedWedding } from "@/lib/queries/wedding";
+import { resolveActionAccess } from "@/lib/auth/protected-access";
 import { formObject, type ActionState } from "./state";
 import { taskIdSchema, taskSchema, taskStatusSchema } from "@/lib/validation/task";
 
@@ -22,7 +23,9 @@ export async function saveTask(
     return { status: "error", message: "Please check the task fields below.", errors: parsed.error.flatten().fieldErrors };
   }
 
-  const wedding = await getOwnedWedding();
+  const access = await resolveActionAccess(getOwnedWedding);
+  if (!access.ok) return access.state;
+  const wedding = access.value;
   const supabase = await createClient();
   const values = {
     wedding_id: wedding.id,
@@ -49,7 +52,9 @@ export async function saveTask(
 export async function changeTaskStatus(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = taskStatusSchema.safeParse(formObject(formData));
   if (!parsed.success) return { status: "error", message: "This task action is invalid. Refresh the page and try again." };
-  const wedding = await getOwnedWedding();
+  const access = await resolveActionAccess(getOwnedWedding);
+  if (!access.ok) return access.state;
+  const wedding = access.value;
   const supabase = await createClient();
   const result = await supabase
     .from("tasks")
@@ -64,7 +69,9 @@ export async function changeTaskStatus(_previous: ActionState, formData: FormDat
 export async function deleteTask(_previous: ActionState, formData: FormData): Promise<ActionState> {
   const parsed = taskIdSchema.safeParse(formObject(formData));
   if (!parsed.success) return { status: "error", message: "This task action is invalid. Refresh the page and try again." };
-  const wedding = await getOwnedWedding();
+  const access = await resolveActionAccess(getOwnedWedding);
+  if (!access.ok) return access.state;
+  const wedding = access.value;
   const supabase = await createClient();
   const result = await supabase.from("tasks").delete().eq("id", parsed.data.id).eq("wedding_id", wedding.id).select("id").maybeSingle();
   if (result.error || !result.data) return { status: "error", message: "The task could not be changed. Refresh and try again." };

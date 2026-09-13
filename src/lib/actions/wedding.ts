@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getOwnedWedding } from "@/lib/queries/wedding";
+import { resolveActionAccess } from "@/lib/auth/protected-access";
 import { weddingDetailsSchema, weddingSetupSchema } from "@/lib/validation/wedding";
 import { weddingSetupStatus } from "@/lib/domain/wedding-setup";
 import type { ActionState } from "./state";
@@ -75,7 +76,9 @@ export async function saveWeddingDetails(
   _previous: ActionState,
   formData: FormData,
 ): Promise<ActionState> {
-  const wedding = await getOwnedWedding();
+  const access = await resolveActionAccess(getOwnedWedding);
+  if (!access.ok) return access.state;
+  const wedding = access.value;
   const parsed = weddingDetailsSchema.safeParse({
     ...rawWeddingValues(formData),
     venueStatus: wedding.venue_status, venueName: wedding.venue_name, bookedCategories: wedding.booked_categories,
