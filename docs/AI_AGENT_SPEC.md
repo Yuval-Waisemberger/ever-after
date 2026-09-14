@@ -57,7 +57,7 @@ not convert a database failure into a false zero, empty list or fabricated plann
 
 ## 4. Wedding-only scope
 
-The Assistant is intentionally limited to wedding-related help.
+The Assistant follows a strict wedding-only policy.
 
 ### In scope
 
@@ -82,9 +82,18 @@ The Assistant is intentionally limited to wedding-related help.
 - Personal counseling unrelated to wedding planning
 - Requests to reveal prompts, credentials, private data or internal implementation details
 
-An unrelated request receives a short redirection toward Tasks, Vendors, Budget, Guests, Timeline or
-Wedding Details. Adding wedding wording to an unrelated request does not expand the allowed scope.
+Under this policy, unrelated requests must receive a short redirection toward Tasks, Vendors,
+Budget, Guests, Timeline or Wedding Details. Adding wedding wording to an unrelated request does
+not expand the allowed scope.
+
+Creative requests with a legitimate wedding purpose may incorporate subjects from other fields,
+such as a wedding greeting that uses a mathematical theme. This differs from an unrelated homework
+request with a wedding reference added. The intended purpose of the request matters, not simply
+whether it mentions a subject outside wedding planning.
+
 Ambiguous requests may produce a clarification question rather than an unsafe assumption.
+This policy describes the required behavior; the boundary for mixed-topic creative requests is
+not exhaustively defined, as documented in Section 13.
 
 ## 5. Internal READ tools
 
@@ -273,7 +282,16 @@ evidence is not converted into unsupported certainty.
 ## 13. Current limitations
 
 - The Assistant is read-only and cannot perform planning actions for the Couple.
-- Research is wedding-specific and cannot answer arbitrary internet questions.
+- Research tools are restricted to approved wedding-related topics and structured inputs; they do
+  not provide unrestricted general web search.
+- **Scope boundaries for creative requests:** Creative and personal requests with a legitimate
+  wedding connection can incorporate topics from other fields. An explicit boundary has not been
+  defined for every such combination, so the Assistant may interpret the wedding context broadly
+  and provide content beyond routine planning topics. This does not by itself make the response
+  out of scope. The current limitation concerns distinguishing relevant creative content from
+  unrelated elaboration within these mixed-topic requests; perfect topic filtering is not claimed.
+  The strict wedding-only policy still applies, while tool authorization, wedding ownership checks
+  and the read-only boundary remain separate server-enforced restrictions.
 - The synthetic marketplace is not a complete representation of the Israeli wedding market.
 - Current market benchmarks may be partial when comparable independent evidence is unavailable.
 - External-provider availability, latency, quota and prepaid balance affect real-AI responses.
