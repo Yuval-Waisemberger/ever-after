@@ -116,7 +116,12 @@ describe("PKCE callback", () => {
     mocks.exchange.mockResolvedValue({ error: { code: "otp_expired" } });
     expect(await callback()).toContain("issue=expired");
     mocks.exchange.mockRejectedValue(new Error("private detail"));
-    expect(await callback()).toBe("https://app.example/auth/verification?issue=invalid");
+    expect(await callback()).toBe("https://app.example/auth/verification?issue=unavailable");
+  });
+  it("does not relabel a post-exchange profile failure as an invalid token", async () => {
+    mocks.profile.mockRejectedValue(new Error("private database detail"));
+    expect(await callback()).toBe("https://app.example/auth/verification?issue=profile");
+    expect(mocks.exchange).toHaveBeenCalledTimes(1);
   });
   it("uses safe recovery if profile or wedding cannot be resolved", async () => {
     mocks.profile.mockResolvedValue(null); expect(await callback()).toContain("issue=profile");

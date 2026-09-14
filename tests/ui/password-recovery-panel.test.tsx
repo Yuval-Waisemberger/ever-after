@@ -59,4 +59,12 @@ describe("Set New Password states", () => {
     expect(document.querySelector('[role="alert"]')?.textContent).toContain("invalid, expired or has already been used");
     expect(document.querySelector('a[href="/auth/couple?mode=login"]')?.textContent).toBe("Return to Login");
   });
+
+  it("does not mislabel a temporary recovery-session failure as an invalid link", () => {
+    const document = new DOMParser().parseFromString(renderToStaticMarkup(<ResetPasswordPanel available={false} issue="unavailable" />), "text/html");
+    expect(document.querySelector("h1")?.textContent).toBe("Password recovery is temporarily unavailable");
+    expect(document.querySelector('[role="alert"]')?.textContent).toContain("secure password-recovery session");
+    expect(document.body.textContent).not.toContain("invalid, expired or has already been used");
+    expect(document.querySelector('input[name="password"]')).toBeNull();
+  });
 });

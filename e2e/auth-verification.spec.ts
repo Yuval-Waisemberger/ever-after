@@ -51,3 +51,14 @@ test("unresolved profiles offer login recovery without pretending to create an a
   await expect(page.getByRole("link", { name: "Back to log in" })).toHaveAttribute("href", "/auth/vendor?mode=login");
   await expect(page.getByRole("button", { name: "Resend verification email" })).toHaveCount(0);
 });
+
+test("token confirmation rejects missing input and distinguishes temporary verification failure", async ({ page }) => {
+  await page.goto("/auth/confirm?type=email");
+  await expect(page).toHaveURL(/\/auth\/verification\?issue=invalid$/);
+  await expect(page.getByText("This link is invalid, expired or has already been used.", { exact: false })).toBeVisible();
+
+  await page.goto("/auth/verification?issue=unavailable");
+  await expect(page.getByRole("heading", { name: "Verification is temporarily unavailable" })).toBeVisible();
+  await expect(page.getByText("We could not verify this link right now.", { exact: false })).toBeVisible();
+  await expect(page.getByText("This link is invalid, expired or has already been used.", { exact: false })).toHaveCount(0);
+});

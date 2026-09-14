@@ -45,15 +45,20 @@ export function ForgotPasswordPanel({ audience }: { audience?: Audience }) {
 export function ResetPasswordPanel({ audience, available, issue }: {
   audience?: Audience;
   available: boolean;
-  issue?: "invalid" | "expired";
+  issue?: "invalid" | "expired" | "unavailable";
 }) {
   const [state, action] = useActionState(resetPassword, initialAuthState);
   if (!available) {
-    const heading = issue === "expired" ? "This reset link has expired" : "This reset link is not valid";
+    const unavailable = issue === "unavailable";
+    const heading = unavailable ? "Password recovery is temporarily unavailable"
+      : issue === "expired" ? "This reset link has expired" : "This reset link is not valid";
+    const description = unavailable
+      ? "We could not establish a secure password-recovery session right now. Please open the link again in a moment."
+      : "This password reset link is invalid, expired or has already been used. Request a new link to continue safely.";
     return <section className="auth-panel" aria-labelledby="reset-password-title">
       <p className="eyebrow">Account recovery</p>
       <h1 id="reset-password-title" className="font-display mt-3 text-4xl tracking-tight">{heading}</h1>
-      <p className="ea-feedback ea-feedback--error mt-5" role="alert">This password reset link is invalid, expired or has already been used. Request a new link to continue safely.</p>
+      <p className="ea-feedback ea-feedback--error mt-5" role="alert">{description}</p>
       <div className="mt-6 flex flex-wrap gap-3">
         <Link className="ea-button ea-button--primary" href={`/auth/forgot-password${audience ? `?audience=${audience}` : ""}`}>Request a new reset link</Link>
       </div>

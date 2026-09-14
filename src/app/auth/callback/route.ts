@@ -9,7 +9,7 @@ export async function GET(request: Request) {
   const code = url.searchParams.get("code");
   const audience = url.searchParams.get("audience");
   const recoveryFlow = url.searchParams.get("flow") === "recovery";
-  const failure = (issue: "invalid" | "expired" | "profile") => {
+  const failure = (issue: "invalid" | "expired" | "profile" | "unavailable") => {
     const target = new URL(recoveryFlow ? "/auth/reset-password" : "/auth/verification", url.origin);
     target.searchParams.set("issue", issue);
     if (audience === "couple" || audience === "vendor") target.searchParams.set("audience", audience);
@@ -19,6 +19,7 @@ export async function GET(request: Request) {
     return failure(url.searchParams.get("error_code") === "otp_expired" ? "expired" : "invalid");
   }
   if (!code || !isSupabaseConfigured()) return failure("invalid");
+  let exchangeSucceeded = false;
   try {
     const supabase = await createClient();
     // The installed SDK includes this hint when it stores a per-flow PKCE verifier.
@@ -27,6 +28,7 @@ export async function GET(request: Request) {
       ? await supabase.auth.exchangeCodeForSession(code, { flowId })
       : await supabase.auth.exchangeCodeForSession(code);
     if (error) return failure(error.code === "otp_expired" ? "expired" : "invalid");
+    exchangeSucceeded = true;
     if (recoveryFlow) {
       const target = new URL("/auth/reset-password", url.origin);
       if (audience === "couple" || audience === "vendor") target.searchParams.set("audience", audience);
@@ -45,6 +47,9 @@ export async function GET(request: Request) {
     const next = safeInternalPath(url.searchParams.get("next"), destination);
     return NextResponse.redirect(new URL(next, url.origin));
   } catch {
-    return failure("invalid");
+    // A missing PKCE verifier or temporary exchange failure is not proof that
+    // the provider rejected the email token. Post-exchange failures likewise
+    // must not rewrite a confirmed session as an invalid verification link.
+    return failure(exchangeSucceeded ? "profile" : "unavailable");
   }
 }

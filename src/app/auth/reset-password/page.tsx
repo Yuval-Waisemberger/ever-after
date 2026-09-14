@@ -11,7 +11,7 @@ export default async function ResetPasswordPage({ searchParams }: {
 }) {
   const params = await searchParams;
   const audience = params.audience === "couple" || params.audience === "vendor" ? params.audience : undefined;
-  const issue = params.issue === "expired" || params.issue === "invalid" ? params.issue : undefined;
+  const issue = params.issue === "expired" || params.issue === "invalid" || params.issue === "unavailable" ? params.issue : undefined;
   let available = false;
   if (!issue && isSupabaseConfigured()) {
     try {

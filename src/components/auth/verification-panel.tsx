@@ -10,14 +10,17 @@ import { SubmitButton } from "@/components/ui/submit-button";
 export function VerificationPanel({ audience, email = "", issue }: {
   audience?: "couple" | "vendor";
   email?: string;
-  issue?: "invalid" | "expired" | "profile";
+  issue?: "invalid" | "expired" | "profile" | "unavailable";
 }) {
   const [state, action] = useActionState(resendVerification, initialAuthState);
   const heading = issue === "profile" ? "Your account needs a moment"
+    : issue === "unavailable" ? "Verification is temporarily unavailable"
     : issue === "expired" ? "This verification link has expired"
     : issue ? "Let’s get you a new verification link" : "Check your email";
   const description = issue === "profile"
     ? "Your sign-in was confirmed, but we could not open your account details. Please try signing in again. If this continues, contact support."
+    : issue === "unavailable"
+      ? "We could not verify this link right now. Please try opening it again in a moment."
     : issue
       ? "This link is invalid, expired or has already been used. Request a fresh link below, or sign in if you have already verified your email."
       : "We sent a verification link to your email address. Verify your email to finish creating your Ever After account.";

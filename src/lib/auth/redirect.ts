@@ -22,7 +22,7 @@ export function safeInternalPath(value: unknown, fallback = "/"): string {
 }
 
 /** Trusted deployment configuration, never a user-supplied Host/Origin header. */
-function configuredSiteOrigin(): string {
+export function configuredSiteOrigin(): string {
   const configured = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (!configured) throw new Error("App origin is not configured.");
   const origin = new URL(configured);
