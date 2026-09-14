@@ -72,7 +72,8 @@ vi.mock("@supabase/ssr", () => ({
   }),
 }));
 
-import { GET } from "@/app/auth/confirm/route";
+import { confirmEmailToken } from "@/lib/actions/email-confirmation";
+import { initialAuthState } from "@/lib/actions/auth-state";
 import { requireRole } from "@/lib/auth/user";
 
 beforeEach(() => {
@@ -83,9 +84,8 @@ beforeEach(() => {
 
 describe("token confirmation session handoff", () => {
   it("writes the verified session cookie and the first protected read recognizes it", async () => {
-    const response = await GET(new Request("https://app.example/auth/confirm?token_hash=fixture-token&type=email"));
-
-    expect(response.headers.get("location")).toBe("https://app.example/wedding");
+    await expect(confirmEmailToken("fixture-token", "email", initialAuthState, new FormData()))
+      .rejects.toThrow("REDIRECT:/wedding");
     expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
     expect(mocks.cookieSet).toHaveBeenCalledWith(
       "sb-project-auth-token",

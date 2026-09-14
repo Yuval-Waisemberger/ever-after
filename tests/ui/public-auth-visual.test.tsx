@@ -5,7 +5,13 @@ import { LandingNavigation } from "@/components/public/landing-navigation";
 import { LandingFeatures } from "@/components/public/landing-features";
 import { AuthPage } from "@/components/auth/auth-page";
 import { VerificationPanel } from "@/components/auth/verification-panel";
+import { TokenConfirmationPanel } from "@/components/auth/token-confirmation-panel";
 
+const formStatus = vi.hoisted(() => ({ pending: false }));
+vi.mock("react-dom", async importOriginal => ({
+  ...await importOriginal<typeof import("react-dom")>(),
+  useFormStatus: () => ({ pending: formStatus.pending, data: null, method: null, action: null }),
+}));
 vi.mock("@/lib/actions/auth", () => ({ signInCouple: vi.fn(), signInVendor: vi.fn(), signUpCouple: vi.fn(), signUpVendor: vi.fn(), resendVerification: vi.fn() }));
 const parse = (markup: string) => new DOMParser().parseFromString(markup, "text/html");
 
@@ -92,5 +98,37 @@ describe("Public/Auth visual boundaries", () => {
     expect(doc.querySelector("form button[type=submit]")?.textContent).toBe("Resend verification email");
     expect(doc.querySelector(`nav a[href="/auth/${audience}?mode=login"]`)?.textContent).toBe("Back to log in");
     expect(doc.querySelector(`nav a[href="/auth/${audience}"]`)?.textContent).toBe("Back to sign up");
+  });
+  it.each(["invalid", "expired", "unavailable"] as const)("keeps the generic %s failure state free of account-type input", issue => {
+    const doc = parse(renderToStaticMarkup(<VerificationPanel issue={issue} />));
+    expect(doc.querySelector('[name="audience"], form')).toBeNull();
+    expect(doc.querySelector('a[href="/auth/couple?mode=login"]')?.textContent).toBe("Couple log in");
+    expect(doc.querySelector('a[href="/auth/vendor?mode=login"]')?.textContent).toBe("Vendor log in");
+  });
+  it("keeps the neutral generic verification state free of account-type and resend inputs", () => {
+    const doc = parse(renderToStaticMarkup(<VerificationPanel />));
+    expect(doc.querySelector('[name="audience"], [name="email"], form')).toBeNull();
+    expect(doc.body.textContent).not.toContain("Account type");
+  });
+  it.each([
+    ["email", "Verify email and continue"],
+    ["recovery", "Continue to reset password"],
+  ] as const)("renders one explicit %s confirmation control", (type, label) => {
+    const action = async () => ({ status: "idle" as const });
+    const doc = parse(renderToStaticMarkup(<TokenConfirmationPanel type={type} action={action} />));
+    expect(doc.querySelectorAll("form button[type=submit]")).toHaveLength(1);
+    expect(doc.querySelector("form button[type=submit]")?.textContent).toBe(label);
+    expect(doc.querySelector('[name="audience"], [name="email"]')).toBeNull();
+    expect(doc.querySelector('a[href="/auth/couple?mode=login"]')).not.toBeNull();
+    expect(doc.querySelector('a[href="/auth/vendor?mode=login"]')).not.toBeNull();
+  });
+  it("disables the one confirmation control while the explicit submission is pending", () => {
+    formStatus.pending = true;
+    const action = async () => ({ status: "idle" as const });
+    const doc = parse(renderToStaticMarkup(<TokenConfirmationPanel type="email" action={action} />));
+    const button = doc.querySelector("form button[type=submit]");
+    expect(button?.hasAttribute("disabled")).toBe(true);
+    expect(button?.textContent).toBe("Verifying email…");
+    formStatus.pending = false;
   });
 });

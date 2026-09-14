@@ -1,6 +1,22 @@
 import type { AppRole } from "@/lib/auth/user";
 
 export type EmailLinkIssue = "invalid" | "expired" | "unavailable";
+export type SupportedConfirmationType = "email" | "recovery";
+
+export function isSupportedConfirmationType(value: unknown): value is SupportedConfirmationType {
+  return value === "email" || value === "recovery";
+}
+
+export function parseConfirmationRequest(params: Record<string, string | string[] | undefined>): {
+  tokenHash: string;
+  type: SupportedConfirmationType;
+} | null {
+  const tokenHash = params.token_hash;
+  const type = params.type;
+  if (typeof tokenHash !== "string" || !isSupportedConfirmationType(type)) return null;
+  if (!tokenHash || tokenHash.length > 2048 || /[\s\u0000-\u001f\u007f]/u.test(tokenHash)) return null;
+  return { tokenHash, type };
+}
 
 export const verifiedEmailLoginMessage =
   "Your email has been verified successfully. We couldn’t sign you in automatically, so please log in to continue.";

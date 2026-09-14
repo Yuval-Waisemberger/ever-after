@@ -68,9 +68,13 @@ test("invalid and expired recovery links use a safe branded recovery state", asy
 });
 
 test("recovery confirmation stays fail-closed when its token or session is unavailable", async ({ page }) => {
+  await page.goto("/auth/confirm?token_hash=scanner-safe-token&type=recovery");
+  await expect(page.getByRole("heading", { name: "Continue password recovery" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Continue to reset password" })).toBeVisible();
+
   await page.goto("/auth/confirm?type=recovery");
-  await expect(page).toHaveURL(/\/auth\/reset-password\?issue=invalid$/);
-  await expect(page.getByRole("heading", { name: "This reset link is not valid" })).toBeVisible();
+  await expect(page).toHaveURL(/\/auth\/confirm\?type=recovery$/);
+  await expect(page.getByRole("heading", { name: "This confirmation link is not valid" })).toBeVisible();
 
   await page.goto("/auth/reset-password?issue=unavailable");
   await expect(page.getByRole("heading", { name: "Password recovery is temporarily unavailable" })).toBeVisible();

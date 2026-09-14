@@ -10,7 +10,8 @@ test("invalid and expired links retain the known audience, with neutral recovery
   }
   await page.goto("/auth/callback?audience=untrusted&next=//example.com");
   await expect(page).toHaveURL(/\/auth\/verification\?issue=invalid$/);
-  await expect(page.getByLabel("Account type")).toBeVisible();
+  await expect(page.getByLabel("Account type")).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Resend verification email" })).toHaveCount(0);
   await expect(page.getByRole("link", { name: "Couple log in" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Vendor log in" })).toBeVisible();
 });
@@ -52,13 +53,24 @@ test("unresolved profiles offer login recovery without pretending to create an a
   await expect(page.getByRole("button", { name: "Resend verification email" })).toHaveCount(0);
 });
 
-test("token confirmation rejects missing input and distinguishes temporary verification failure", async ({ page }) => {
+test("token confirmation GET and HEAD are prefetch-safe and malformed input stays fail-closed", async ({ page, request }) => {
+  const scannerHead = await request.head("/auth/confirm?token_hash=scanner-safe-token&type=email");
+  expect(scannerHead.ok()).toBe(true);
+
+  await page.goto("/auth/confirm?token_hash=scanner-safe-token&type=email");
+  await expect(page).toHaveURL(/\/auth\/confirm\?token_hash=scanner-safe-token&type=email$/);
+  await expect(page.getByRole("heading", { name: "Verify your email" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Verify email and continue" })).toBeVisible();
+  await expect(page.getByLabel("Account type")).toHaveCount(0);
+
   await page.goto("/auth/confirm?type=email");
-  await expect(page).toHaveURL(/\/auth\/verification\?issue=invalid$/);
-  await expect(page.getByText("This link is invalid, expired or has already been used.", { exact: false })).toBeVisible();
+  await expect(page).toHaveURL(/\/auth\/confirm\?type=email$/);
+  await expect(page.getByRole("heading", { name: "This confirmation link is not valid" })).toBeVisible();
+  await expect(page.getByLabel("Account type")).toHaveCount(0);
 
   await page.goto("/auth/verification?issue=unavailable");
   await expect(page.getByRole("heading", { name: "Verification is temporarily unavailable" })).toBeVisible();
   await expect(page.getByText("We could not verify this link right now.", { exact: false })).toBeVisible();
   await expect(page.getByText("This link is invalid, expired or has already been used.", { exact: false })).toHaveCount(0);
+  await expect(page.getByLabel("Account type")).toHaveCount(0);
 });

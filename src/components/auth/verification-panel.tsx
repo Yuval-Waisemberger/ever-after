@@ -21,26 +21,24 @@ export function VerificationPanel({ audience, email = "", issue }: {
     ? "Your sign-in was confirmed, but we could not open your account details. Please try signing in again. If this continues, contact support."
     : issue === "unavailable"
       ? "We could not verify this link right now. Please try opening it again in a moment."
-    : issue
+    : issue && audience
       ? "This link is invalid, expired or has already been used. Request a fresh link below, or sign in if you have already verified your email."
+    : issue
+      ? "This link is invalid, expired or has already been used. Use the appropriate login below, or return to signup to request a new email."
       : "We sent a verification link to your email address. Verify your email to finish creating your Ever After account.";
+  const canResend = Boolean(audience) && issue !== "profile";
   return (
     <section className="auth-panel" aria-labelledby="verification-title">
       <p className="eyebrow">{audience === "vendor" ? "For vendors" : audience === "couple" ? "For couples" : "Your Ever After account"}</p>
       <h1 id="verification-title" className="font-display mt-3 text-4xl tracking-tight">{heading}</h1>
       <p className={`ea-feedback mt-5 ${issue ? "ea-feedback--error" : "ea-feedback--success"}`} role={issue ? "alert" : "status"}>{description}</p>
-      {issue !== "profile" ? <>
+      {canResend ? <>
         <div className="verification-spam-notice mt-5 rounded-xl border border-wine/30 bg-paper px-4 py-3 text-base font-semibold leading-6 text-wine" role="note">
           <p>Important: The verification email may arrive in your Spam or Junk folder. Check those folders if needed.</p>
         </div>
         <p className="mt-4 text-sm leading-7 text-ink-soft">If you requested more than one email, use the link in the newest one. For verification to work correctly, open it in this same browser.</p>
         <form action={action} className="mt-6 grid gap-5">
-          {audience ? <input type="hidden" name="audience" value={audience} /> : <label className="ea-field grid gap-2 text-sm font-medium">Account type
-            <select name="audience" className="ea-input min-h-11 w-full px-3.5" required defaultValue="">
-              <option value="" disabled>Choose your account type</option>
-              <option value="couple">Couple</option><option value="vendor">Vendor</option>
-            </select>
-          </label>}
+          {audience ? <input type="hidden" name="audience" value={audience} /> : null}
           <FormField name="email" label="Email address" type="email" autoComplete="email" defaultValue={email} required error={state.errors?.email?.[0]} />
           {state.message ? <p className={`ea-feedback ${state.status === "error" ? "ea-feedback--error" : "ea-feedback--success"}`} role={state.status === "error" ? "alert" : "status"}>{state.message}</p> : null}
           <SubmitButton pendingLabel="Requesting your email…">Resend verification email</SubmitButton>

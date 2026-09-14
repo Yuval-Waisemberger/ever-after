@@ -1,153 +1,199 @@
 // @vitest-environment node
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   configured: vi.fn(),
   verifyOtp: vi.fn(),
   getClaims: vi.fn(),
   profile: vi.fn(),
+  cookies: [] as Array<{ name: string; value: string }>,
 }));
 
 vi.mock("@/lib/supabase/config", () => ({ isSupabaseConfigured: mocks.configured }));
-vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { verifyOtp: mocks.verifyOtp, getClaims: mocks.getClaims } }),
+vi.mock("next/headers", () => ({ cookies: async () => ({ getAll: () => mocks.cookies }) }));
+vi.mock("next/navigation", () => ({
+  redirect: (path: string) => { throw new Error(`REDIRECT:${path}`); },
 }));
-vi.mock("@/lib/auth/user", () => ({ resolveAuthenticatedProfile: mocks.profile }));
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: async () => ({
+    auth: { verifyOtp: mocks.verifyOtp, getClaims: mocks.getClaims },
+    from: () => ({ select: () => ({ eq: () => ({ maybeSingle: mocks.profile }) }) }),
+  }),
+}));
 
+import ConfirmEmailPage from "@/app/auth/confirm/page";
+import { confirmEmailToken } from "@/lib/actions/email-confirmation";
+import { initialAuthState } from "@/lib/actions/auth-state";
 import { verifiedEmailLoginMessage } from "@/lib/auth/email-confirmation";
-import { GET } from "@/app/auth/confirm/route";
-
-const request = (query: string) => GET(new Request(`https://app.example/auth/confirm?${query}`));
-const location = async (query: string) => (await request(query)).headers.get("location");
 
 function verifiedUser(role: "couple" | "vendor") {
   return { id: `${role}-id`, user_metadata: { role } };
 }
 
+async function submit(tokenHash = "signup-token", type: "email" | "recovery" = "email") {
+  return confirmEmailToken(tokenHash, type, initialAuthState, new FormData());
+}
+
+async function redirectTarget(action: () => Promise<unknown>) {
+  try {
+    await action();
+    return null;
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "";
+    if (message.startsWith("REDIRECT:")) return message.slice("REDIRECT:".length);
+    throw error;
+  }
+}
+
 beforeEach(() => {
   vi.resetAllMocks();
-  vi.stubEnv("NEXT_PUBLIC_SITE_URL", "https://app.example");
+  mocks.cookies = [];
   mocks.configured.mockReturnValue(true);
   const user = verifiedUser("couple");
   mocks.verifyOtp.mockResolvedValue({ data: { user, session: { access_token: "session" } }, error: null });
   mocks.getClaims.mockResolvedValue({ data: { claims: { sub: user.id } }, error: null });
-  mocks.profile.mockResolvedValue({ id: user.id, role: "couple" });
+  mocks.profile.mockResolvedValue({ data: { id: user.id, role: "couple" }, error: null });
 });
 
-afterEach(() => vi.unstubAllEnvs());
+describe("prefetch-safe confirmation page", () => {
+  it.each(["email", "recovery"] as const)("renders a %s confirmation without consuming the token", async type => {
+    const page = await ConfirmEmailPage({ searchParams: Promise.resolve({ token_hash: "scanner-safe-token", type }) });
+    const panel = page.props.children;
 
-describe("signup token-hash confirmation", () => {
-  it("verifies a Couple once, confirms the persisted session and enters the Couple Dashboard", async () => {
-    expect(await location("token_hash=signup-token&type=email")).toBe("https://app.example/wedding");
+    expect(panel.props.type).toBe(type);
+    expect(panel.props.action).toEqual(expect.any(Function));
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+    expect(mocks.getClaims).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    {},
+    { type: "email" },
+    { token_hash: "value" },
+    { token_hash: "value", type: "magiclink" },
+    { token_hash: "contains whitespace", type: "email" },
+  ])("renders a fail-closed page for malformed parameters without Auth activity", async searchParams => {
+    const page = await ConfirmEmailPage({ searchParams: Promise.resolve(searchParams) });
+    const panel = page.props.children;
+
+    expect(panel.props.action).toBeUndefined();
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+    expect(mocks.getClaims).not.toHaveBeenCalled();
+  });
+});
+
+describe("signup token confirmation submission", () => {
+  it("verifies a Couple exactly once and enters the Couple Dashboard", async () => {
+    expect(await redirectTarget(() => submit())).toBe("/wedding");
     expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
     expect(mocks.verifyOtp).toHaveBeenCalledWith({ token_hash: "signup-token", type: "email" });
     expect(mocks.getClaims).toHaveBeenCalledTimes(1);
-    expect(mocks.profile).toHaveBeenCalledWith(expect.anything(), "couple-id");
   });
 
-  it("uses the stored Vendor profile, not URL role or destination hints", async () => {
+  it("uses the stored Vendor profile and ignores URL-only role or destination input", async () => {
     const user = verifiedUser("vendor");
     mocks.verifyOtp.mockResolvedValue({ data: { user, session: { access_token: "session" } }, error: null });
     mocks.getClaims.mockResolvedValue({ data: { claims: { sub: user.id } }, error: null });
-    mocks.profile.mockResolvedValue({ id: user.id, role: "vendor" });
+    mocks.profile.mockResolvedValue({ data: { id: user.id, role: "vendor" }, error: null });
 
-    expect(await location("token_hash=vendor-token&type=email&role=couple&next=https%3A%2F%2Fevil.example"))
-      .toBe("https://app.example/vendor");
+    const page = await ConfirmEmailPage({
+      searchParams: Promise.resolve({ token_hash: "vendor-token", type: "email", role: "couple", next: "https://evil.example" }),
+    });
+    expect(await redirectTarget(() => page.props.children.props.action(initialAuthState, new FormData()))).toBe("/vendor");
     expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
   });
 
-  it("builds redirects from the trusted configured origin, not the request Host", async () => {
-    const response = await GET(new Request("https://untrusted.example/auth/confirm?token_hash=value&type=email"));
-    expect(response.headers.get("location")).toBe("https://app.example/wedding");
+  it("continues from an already valid session without verifying the consumed token again", async () => {
+    mocks.cookies = [{ name: "sb-project-auth-token", value: "session" }];
+    mocks.getClaims.mockResolvedValue({ data: { claims: { sub: "couple-id" } }, error: null });
+    mocks.profile.mockResolvedValue({ data: { id: "couple-id", role: "couple" }, error: null });
+
+    expect(await redirectTarget(() => submit("already-used"))).toBe("/wedding");
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
   });
 
-  it("uses the verified-email Login fallback when the provider confirms the user but no session is available", async () => {
-    const user = verifiedUser("couple");
-    mocks.verifyOtp.mockResolvedValue({ data: { user, session: null }, error: null });
+  it("returns a retryable failure before verification when an existing session cannot be resolved", async () => {
+    mocks.cookies = [{ name: "sb-project-auth-token", value: "session" }];
+    mocks.getClaims.mockResolvedValue({ data: { claims: null }, error: { status: 503 } });
 
-    const target = new URL((await location("token_hash=signup-token&type=email"))!);
+    await expect(submit()).resolves.toEqual(expect.objectContaining({ status: "error", message: expect.stringContaining("temporarily unavailable") }));
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+  });
+
+  it("uses the controlled Login fallback only after provider-confirmed verification when cookie-backed claims fail", async () => {
+    mocks.getClaims.mockResolvedValue({ data: { claims: null }, error: { status: 503 } });
+
+    const target = new URL(`https://app.example${await redirectTarget(() => submit())}`);
     expect(target.pathname).toBe("/auth/couple");
     expect(target.searchParams.get("mode")).toBe("login");
     expect(target.searchParams.get("message")).toBe(verifiedEmailLoginMessage);
-    expect(mocks.profile).not.toHaveBeenCalled();
+    expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
   });
 
-  it("uses the same controlled fallback if the newly written session is not recognized", async () => {
-    mocks.getClaims.mockResolvedValue({ data: { claims: null }, error: { status: 503 } });
-    const target = new URL((await location("token_hash=signup-token&type=email"))!);
-    expect(target.pathname).toBe("/auth/couple");
-    expect(target.searchParams.get("message")).toBe(verifiedEmailLoginMessage);
-    expect(mocks.profile).not.toHaveBeenCalled();
+  it.each([
+    [null, "profile"],
+    [{ id: "couple-id", role: "admin" }, "profile"],
+  ] as const)("keeps a missing or inconsistent profile fail-closed", async (data, issue) => {
+    mocks.profile.mockResolvedValue({ data, error: null });
+    expect(await redirectTarget(() => submit())).toBe(`/auth/verification?issue=${issue}`);
+    expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps profile resolution fail-closed without calling the token invalid", async () => {
-    mocks.profile.mockResolvedValue(null);
-    expect(await location("token_hash=signup-token&type=email")).toBe("https://app.example/auth/verification?issue=profile");
+  it("keeps profile-query failures separate from invalid-token failures", async () => {
+    mocks.profile.mockResolvedValue({ data: null, error: { message: "private database detail" } });
+    expect(await redirectTarget(() => submit())).toBe("/auth/verification?issue=profile");
+    expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
   });
 
   it.each([
     [{ code: "otp_expired", status: 403 }, "expired"],
     [{ code: "otp_invalid", status: 403 }, "invalid"],
-    [{ code: "over_request_rate_limit", status: 429 }, "unavailable"],
-    [{ code: "unexpected_failure", status: 500 }, "unavailable"],
-  ] as const)("maps provider token failures to the controlled %s state", async (error, issue) => {
+  ] as const)("routes a genuine provider %s result to the controlled state", async (error, issue) => {
     mocks.verifyOtp.mockResolvedValue({ data: { user: null, session: null }, error });
-    expect(await location("token_hash=bad&type=email")).toBe(`https://app.example/auth/verification?issue=${issue}`);
-    expect(mocks.profile).not.toHaveBeenCalled();
+    expect(await redirectTarget(() => submit("bad"))).toBe(`/auth/verification?issue=${issue}`);
+    expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
   });
 
-  it("does not expose thrown provider or transport failures as invalid tokens", async () => {
+  it("returns a controlled retryable result for provider and transport failures", async () => {
+    mocks.verifyOtp.mockResolvedValue({ data: { user: null, session: null }, error: { code: "provider_down", status: 503 } });
+    await expect(submit()).resolves.toEqual(expect.objectContaining({ status: "error", message: expect.stringContaining("temporarily unavailable") }));
     mocks.verifyOtp.mockRejectedValue(new Error("private transport detail"));
-    expect(await location("token_hash=value&type=email")).toBe("https://app.example/auth/verification?issue=unavailable");
+    await expect(submit()).resolves.toEqual(expect.objectContaining({ status: "error", message: expect.not.stringContaining("private") }));
   });
-
-  it.each(["", "type=email", "token_hash=value", "token_hash=value&type=magiclink"])(
-    "rejects missing or unsupported parameters without verifying: %s",
-    async query => {
-      expect(await location(query)).toBe("https://app.example/auth/verification?issue=invalid");
-      expect(mocks.verifyOtp).not.toHaveBeenCalled();
-    },
-  );
 });
 
-describe("password-recovery token-hash confirmation", () => {
-  it("verifies a recovery token once and opens the existing New Password form", async () => {
-    expect(await location("token_hash=recovery-token&type=recovery")).toBe("https://app.example/auth/reset-password");
+describe("recovery token confirmation submission", () => {
+  it("verifies once and opens the existing New Password form", async () => {
+    expect(await redirectTarget(() => submit("recovery-token", "recovery"))).toBe("/auth/reset-password");
     expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
     expect(mocks.verifyOtp).toHaveBeenCalledWith({ token_hash: "recovery-token", type: "recovery" });
-    expect(mocks.getClaims).toHaveBeenCalledTimes(1);
     expect(mocks.profile).not.toHaveBeenCalled();
   });
 
-  it("ignores role and destination parameters and never enters a Dashboard", async () => {
-    expect(await location("token_hash=recovery-token&type=recovery&role=vendor&next=%2Fvendor"))
-      .toBe("https://app.example/auth/reset-password");
+  it("continues an already valid recovery session without verifying again", async () => {
+    mocks.cookies = [{ name: "sb-project-auth-token", value: "session" }];
+    expect(await redirectTarget(() => submit("already-used", "recovery"))).toBe("/auth/reset-password");
+    expect(mocks.verifyOtp).not.toHaveBeenCalled();
   });
 
-  it("does not show the password form when the recovery session is missing or unrecognized", async () => {
+  it("never opens the reset form when the new recovery session is unavailable", async () => {
     const user = verifiedUser("vendor");
     mocks.verifyOtp.mockResolvedValue({ data: { user, session: null }, error: null });
-    expect(await location("token_hash=recovery-token&type=recovery"))
-      .toBe("https://app.example/auth/reset-password?issue=unavailable");
-
-    mocks.verifyOtp.mockResolvedValue({ data: { user, session: { access_token: "session" } }, error: null });
-    mocks.getClaims.mockResolvedValue({ data: { claims: { sub: "different-user" } }, error: null });
-    expect(await location("token_hash=recovery-token&type=recovery"))
-      .toBe("https://app.example/auth/reset-password?issue=unavailable");
+    expect(await redirectTarget(() => submit("recovery-token", "recovery"))).toBe("/auth/reset-password?issue=unavailable");
   });
 
   it.each([
     [{ code: "otp_expired", status: 403 }, "expired"],
     [{ code: "otp_invalid", status: 403 }, "invalid"],
-    [{ code: "over_request_rate_limit", status: 429 }, "unavailable"],
-  ] as const)("keeps recovery %s handling controlled", async (error, issue) => {
+  ] as const)("keeps genuine recovery %s handling controlled", async (error, issue) => {
     mocks.verifyOtp.mockResolvedValue({ data: { user: null, session: null }, error });
-    expect(await location("token_hash=bad&type=recovery"))
-      .toBe(`https://app.example/auth/reset-password?issue=${issue}`);
+    expect(await redirectTarget(() => submit("bad", "recovery"))).toBe(`/auth/reset-password?issue=${issue}`);
+    expect(mocks.verifyOtp).toHaveBeenCalledTimes(1);
   });
 
-  it("rejects a missing recovery token without contacting the provider", async () => {
-    expect(await location("type=recovery")).toBe("https://app.example/auth/reset-password?issue=invalid");
-    expect(mocks.verifyOtp).not.toHaveBeenCalled();
+  it("keeps a temporary recovery provider failure off the New Password form", async () => {
+    mocks.verifyOtp.mockResolvedValue({ data: { user: null, session: null }, error: { code: "provider_down", status: 503 } });
+    await expect(submit("recovery-token", "recovery"))
+      .resolves.toEqual(expect.objectContaining({ status: "error", message: expect.stringContaining("temporarily unavailable") }));
   });
 });
