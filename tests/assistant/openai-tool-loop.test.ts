@@ -167,7 +167,7 @@ describe("Phase 5.4 answer-only final round and taxonomy", () => {
   });
   it.each(["success", "empty", "unavailable"])("synthesizes a bounded round-four %s answer from prior validated results", async status => {
     db.state.tables.vendor_subcategories[0].slug = "wedding-photographers";
-    if (status === "unavailable") db.state.errors.add("vendor_profiles");
+    if (status === "unavailable") db.state.errors.add("public_vendor_profiles");
     const search = (id: string, subcategory: string) => calls(call("search_marketplace_vendors", id, { category: "photography-content", subcategory, limit: 3 }));
     const answer = status === "success" ? "Original Studio is a returned Marketplace option; confirm availability."
       : status === "empty" ? "No matching Marketplace vendors were found with the attempted filters."
@@ -264,9 +264,10 @@ describe("Phase 5 Marketplace reproduction — synthetic production-shaped bound
     const input = h.create.mock.calls[0][0].input;
     expect(JSON.stringify(input).split(prompt)).toHaveLength(2);
     expect(history().messages).toHaveLength(8); expect(history().characterCount).toBeLessThan(10000);
-    const vendorQuery = db.state.calls.find(item => item.table === "vendor_profiles")!;
-    expect(vendorQuery.operations).toContainEqual(["eq", "vendor_subcategories.slug", "wedding-photographers"]);
-    expect(vendorQuery.operations).toContainEqual(["eq", "is_public", true]);
+    const vendorQuery = db.state.calls.find(item => item.table === "public_vendor_profiles")!;
+    expect(vendorQuery.operations).toContainEqual(["eq", "category_slug", "photography-content"]);
+    expect(vendorQuery.operations).toContainEqual(["eq", "subcategory_slug", "wedding-photographers"]);
+    expect(vendorQuery.operations).not.toContainEqual(["eq", "is_public", true]);
     // The agent already validates the original attested object. Reattestation is
     // not fabricated here: runWeddingAgent's returned spread intentionally loses identity.
   });

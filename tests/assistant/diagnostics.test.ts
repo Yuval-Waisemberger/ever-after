@@ -87,7 +87,7 @@ describe("safe Assistant diagnostic stages", () => {
     expect(events.every(e => e.requestId === requestId && e.provider === "openai")).toBe(true);
   });
   it.each(["success", "empty", "unavailable"])("records tool %s without arguments/results or identity data", async status => {
-    if (status === "unavailable") db.state.errors.add("vendor_profiles");
+    if (status === "unavailable") db.state.errors.add("public_vendor_profiles");
     const h = provider(tool(status === "empty" ? secret : "Original"), final());
     expect((await h.ask()).status).toBe("ok");
     has("tool_execution", "success", { tool: "search_marketplace_vendors", status });

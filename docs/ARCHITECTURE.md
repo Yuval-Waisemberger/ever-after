@@ -194,9 +194,10 @@ Routes are divided by audience. Public pages do not require a session. Protected
 | `/auth/couple` | Couple registration and login. |
 | `/auth/vendor` | Vendor registration and login. |
 | `/auth/forgot-password` | Request a password-reset email. |
+| `/auth/confirm` | Display a non-mutating email-confirmation or recovery page and offer the explicit confirmation action. Merely loading or previewing this route does not consume the token. |
 | `/auth/reset-password` | Set and confirm a new password after a valid recovery flow. |
 | `/auth/verification` | Present account-confirmation status and next steps. |
-| `/auth/callback` | Exchange the Supabase authentication code and redirect safely. |
+| `/auth/callback` | Preserve the legacy Supabase PKCE code-exchange path and redirect safely. |
 
 The public marketplace is shared by anonymous visitors, Couples, and Vendors. Authentication changes the available relationship controls, not the visibility rules for deliberately public Vendor information.
 
@@ -330,7 +331,7 @@ The main Server Action groups are:
 
 | Action group | Required operations |
 | --- | --- |
-| Authentication | Couple/Vendor signup, login, logout, password-reset request, password update, and permitted account changes |
+| Authentication | Couple/Vendor signup, login, logout, explicit token-hash confirmation, password-reset request, password update, and permitted account changes |
 | Wedding | Save Wedding Details, save or skip Setup, and manage setup declarations |
 | Tasks | Create or edit a Task, update status, and delete an owned Task |
 | Guests | Create, update, and delete owned Guest records |
@@ -361,6 +362,8 @@ Client-supplied owner identifiers are not accepted as proof of ownership.
 | `POST` | `/api/assistant` | Authenticated Couple | Validate the chat request, verify the owned wedding, load permitted context, run the bounded Assistant flow, persist owned messages, and return safe text and source labels. |
 
 The authentication callback is a Route Handler because Supabase returns an HTTP authorization code that must be exchanged on the server. The Assistant uses a Route Handler because JSON request/response semantics, provider calls, request limits, and explicit error codes form a natural HTTP boundary.
+
+`/auth/confirm` is deliberately a render-only Server Component page rather than a mutating `GET` Route Handler. It validates the supported `email` or `recovery` request shape and binds the token to the `confirmEmailToken` Server Action. Only an explicit form submission may call `verifyOtp()`. The action verifies at most once, confirms that the resulting session persisted through the server cookie handoff, resolves the stored application role for email confirmation, and then redirects to `/wedding`, `/vendor`, or `/auth/reset-password` as appropriate. Role and destination values supplied in the URL are ignored.
 
 No ordinary Task, Guest, Budget, or Vendor-management REST endpoint is required. Those flows remain internal Server Actions.
 
@@ -418,10 +421,12 @@ The UI shows success only after persistence is confirmed. Failed forms preserve 
 2. A Server Action validates the fields and calls Supabase Auth.
 3. On signup, Supabase Auth creates the identity and a database trigger initializes the application `profiles` record and the role-specific `weddings` or `vendor_profiles` row.
 4. When email confirmation is enabled, Supabase sends the configured confirmation email through Custom SMTP.
-5. The user follows the confirmation link, `/auth/callback` exchanges the code, and the application redirects according to the verified role and onboarding state.
-6. Session cookies identify later requests, while database ownership remains enforced by RLS.
+5. The token-hash email link opens `/auth/confirm`. This initial `GET` renders the confirmation page without consuming the one-time token, so ordinary previews and `GET`-only email scanners cannot complete the verification.
+6. The user explicitly submits **Verify email and continue**. The bound Server Action verifies the token no more than once, confirms the cookie-backed session through a fresh server client, and resolves the stored application profile.
+7. A confirmed Couple continues to `/wedding`; a confirmed Vendor continues to `/vendor`. The action does not trust URL-supplied roles, `next` values, or destinations. Missing or inconsistent profiles fail closed through the controlled recovery state.
+8. Session cookies identify later requests, while database ownership remains enforced by RLS.
 
-Password recovery follows the same separation: Supabase handles the recovery token and email, while the application supplies the request and Set New Password interfaces. Password-reset and account-confirmation emails are not stored as application database records.
+Password recovery follows the same prefetch-safe separation. The recovery email opens the same non-mutating `/auth/confirm` page with `type=recovery`; only the explicit **Continue to reset password** submission verifies the token and establishes the recovery session. A recognized recovery session can continue only to `/auth/reset-password`, and the completed password update signs the account out before normal login. The legacy `/auth/callback` authorization-code route remains supported for backward compatibility. Password-reset and account-confirmation emails are not stored as application database records.
 
 ### 8.4 Couple Planning Flow
 

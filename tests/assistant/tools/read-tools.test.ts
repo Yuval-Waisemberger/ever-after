@@ -19,27 +19,6 @@ async function data<S extends z.ZodType>(name: string, schema: S, input: unknown
 beforeEach(() => {
   vi.useFakeTimers(); vi.setSystemTime(new Date("2026-09-07T09:00:00Z"));
   db = database(); mocks.client.mockResolvedValue(db.client);
-  Object.defineProperties(db.state.tables, {
-    public_vendor_profiles: {
-      configurable: true,
-      get: () => db.state.tables.vendor_profiles.filter((row) => row.is_public === true).map((row) => {
-        const category = db.state.tables.vendor_categories.find((item) => item.id === row.category_id);
-        const subcategory = db.state.tables.vendor_subcategories.find((item) => item.id === row.subcategory_id);
-        return {
-          ...row,
-          category_slug: category?.slug ?? null,
-          category_name: category?.name ?? null,
-          subcategory_slug: subcategory?.slug ?? null,
-          subcategory_name: subcategory?.name ?? null,
-        };
-      }),
-    },
-    public_vendor_reviews: {
-      configurable: true,
-      get: () => db.state.tables.reviews.filter((row) => row.is_public === true
-        && db.state.tables.vendor_profiles.some((vendorRow) => vendorRow.id === row.vendor_id && vendorRow.is_public === true)),
-    },
-  });
 });
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 

@@ -33,6 +33,16 @@ Confirmation, recovery-link processing, password update, logout and login with t
 manually validated. SMTP credentials, passwords and recovery tokens remain outside the repository
 and must never be displayed or logged.
 
+Token-hash confirmation is deliberately prefetch-safe. The email link opens `/auth/confirm`, whose
+initial `GET`/`HEAD` validates and renders the request without calling `verifyOtp()` or otherwise
+consuming the one-time token. Verification occurs only through an explicit Server Action submission.
+The action checks an existing valid session first, verifies at most once when necessary, and then uses
+a fresh server client to confirm the cookie-backed session before navigation. Email confirmation
+resolves the stored application profile and ignores URL-supplied roles or destinations; recovery can
+continue only to `/auth/reset-password` before the password is changed. This prevents ordinary link
+previews and `GET`-only email scanners from consuming the token on page load while keeping invalid,
+expired, temporary-provider, profile-integrity, and session failures in controlled states.
+
 ## 3. Authorization and permissions
 
 Server code verifies the stored role and resolves the owned wedding or Vendor. The database then

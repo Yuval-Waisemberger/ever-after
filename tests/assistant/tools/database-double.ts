@@ -43,6 +43,33 @@ export function database() {
     vendor_profiles: [vendor(), vendor({ id: vendorTwo, business_name: "Second Studio" })],
     external_vendors: [], tasks: [], budget_items: [], payments: [], reviews: [], couple_vendors: [], guests: [],
   };
+  Object.defineProperties(state.tables, {
+    public_vendor_profiles: {
+      get: () => state.tables.vendor_profiles.filter((row) => row.is_public === true).map((row) => {
+        const category = state.tables.vendor_categories.find((item) => item.id === row.category_id);
+        const subcategory = state.tables.vendor_subcategories.find((item) => item.id === row.subcategory_id);
+        return {
+          id: row.id, business_name: row.business_name,
+          category_slug: category?.slug ?? null, category_name: category?.name ?? null,
+          subcategory_slug: subcategory?.slug ?? null, subcategory_name: subcategory?.name ?? null,
+          location_city: row.location_city, location_mode: row.location_mode, physical_area: row.physical_area,
+          service_areas: row.service_areas, min_price_minor: row.min_price_minor, max_price_minor: row.max_price_minor,
+          services: row.services, styles: row.styles, event_types: row.event_types,
+          min_guest_capacity: row.min_guest_capacity, max_guest_capacity: row.max_guest_capacity,
+          friday_available: row.friday_available,
+        };
+      }),
+    },
+    public_vendor_reviews: {
+      get: () => state.tables.reviews.filter((row) => row.is_public === true
+        && state.tables.vendor_profiles.some((vendorRow) => vendorRow.id === row.vendor_id && vendorRow.is_public === true))
+        .map((row) => ({
+          id: row.id, vendor_id: row.vendor_id,
+          professionalism: row.professionalism, punctuality: row.punctuality,
+          service_attitude: row.service_attitude, value_for_money: row.value_for_money,
+        })),
+    },
+  });
   function hydrate(table: string, row: Row): Row {
     const find = (table: string, id: unknown) => state.tables[table]?.find((item) => item.id === id) ?? null;
     if (table === "vendor_profiles" || table === "external_vendors") return { ...row, vendor_categories: find("vendor_categories", row.category_id), vendor_subcategories: find("vendor_subcategories", row.subcategory_id) };

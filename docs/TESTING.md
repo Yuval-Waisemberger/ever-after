@@ -103,8 +103,8 @@ The IDs provide traceability. They do not require one physical test file per ID;
 | FEAT-04 | Couple registration | Component / Manual connected | A Couple can submit valid registration fields; the primary email creates the authentication identity and the application initializes the Couple profile and wedding. |
 | FEAT-05 | Vendor registration | Component / Manual connected | A Vendor can create an account and receives the Vendor-owned application profile. |
 | FEAT-06 | Login and logout | Browser / Manual connected | Valid credentials establish the correct role-specific session; logout removes access to protected pages. |
-| FEAT-07 | Email verification | Manual live | When Confirm Email is enabled, the confirmation email arrives, its link is accepted, the account becomes usable, and the Couple reaches Wedding Setup. |
-| FEAT-08 | Password recovery | Component / Browser / Manual live | Forgot Password sends a recovery message; a valid link reaches Set New Password; the new password works after logout. |
+| FEAT-07 | Email verification | Unit / Component / Browser / Manual live | When Confirm Email is enabled, the email arrives and its token-hash link renders `/auth/confirm` without consuming the token. Only the explicit confirmation submission verifies it. The stored role determines `/wedding` or `/vendor`, and the account becomes usable without asking the user to choose a role. |
+| FEAT-08 | Password recovery | Unit / Component / Browser / Manual live | Forgot Password sends a recovery message; opening its token-hash link does not consume the token; explicit confirmation establishes the recovery session and reaches Set New Password; the new password works after logout. |
 
 ### 3.2 Couple Planning Features
 
@@ -179,9 +179,9 @@ These tests verify complete product outcomes rather than isolated controls.
 
 | ID | Process | Main steps | Pass criteria |
 | --- | --- | --- | --- |
-| BP-01 | New Couple journey | Register → verify email when enabled → enter Setup → complete, partially save, or skip → open Our Wedding | One Auth identity, one Couple profile, and one wedding are created; the correct destination opens; no duplicate application rows are created. |
+| BP-01 | New Couple journey | Register → open the confirmation link when enabled → explicitly verify → enter Our Wedding → complete, partially save, or skip Setup when desired | One Auth identity, one Couple profile, and one wedding are created; `/wedding` opens after the confirmed session and stored role are recognized; no duplicate application rows are created. |
 | BP-02 | Returning Couple journey | Login → role resolution → Our Wedding | The existing Couple bypasses registration and receives only its owned summaries. |
-| BP-03 | Password recovery journey | Forgot Password → receive email → open recovery link → set password → logout → login | The password changes exactly once; the old password no longer grants access; normal post-reset login works. |
+| BP-03 | Password recovery journey | Forgot Password → receive email → open non-mutating recovery page → explicitly continue → set password → logout → login | The one-time token is not consumed by the initial `GET`; the recovery session never enters a Dashboard before the password change; the password changes exactly once; normal post-reset login works. |
 
 ### 5.2 Planning Synchronization Journey
 
@@ -233,6 +233,9 @@ These tests verify complete product outcomes rather than isolated controls.
 | AUTH-08 | Role-specific post-login redirect | Browser | A Couple reaches the Couple experience and a Vendor reaches the Vendor experience. |
 | AUTH-09 | Confirmed vs unconfirmed account | Manual connected | Behavior matches the current Supabase Confirm Email setting and does not bypass the provider's account state. |
 | AUTH-10 | Recovery route header and navigation | Browser | Forgot Password and Set New Password use the same shared public navigation at desktop and mobile widths without changing recovery logic. |
+| AUTH-11 | Confirmation `GET`/`HEAD` prefetch safety | Unit / Browser | Loading, previewing, or prefetching `/auth/confirm` performs zero Auth mutations and never calls `verifyOtp()`. |
+| AUTH-12 | Explicit one-time verification | Unit / Component / Browser | One enabled confirmation control submits the bound Server Action; pending state prevents ordinary repeated clicks; the action checks an existing session first and otherwise calls `verifyOtp()` no more than once. |
+| AUTH-13 | Session handoff and trusted role | Unit / Browser / Manual connected | A fresh server client recognizes the persisted cookie before protected navigation. Email confirmation resolves the stored profile and ignores URL role/destination values; recovery continues only to Set New Password. |
 
 ---
 
@@ -438,10 +441,19 @@ On 12 September 2026, Custom SMTP and the real authentication email flows were m
 - Password update succeeded.
 - Logout and login with the new password succeeded.
 - New-account confirmation email arrived.
-- The confirmation link succeeded and redirected to Wedding Setup.
+- The then-current confirmation link succeeded and redirected according to the earlier callback behavior.
 - Logout and login after verification succeeded.
 
 These checks used Supabase Auth and configured Custom SMTP. Credentials, App Passwords, recovery tokens, and secret-bearing URLs were not placed in the codebase or documentation.
+
+On 14 September 2026, commit `5431a56` replaced token consumption during `GET /auth/confirm` with an explicit prefetch-safe submission for both email confirmation and password recovery:
+
+- `GET` and `HEAD` rendered the confirmation page without calling `verifyOtp()`.
+- The explicit action called `verifyOtp()` no more than once and re-read cookie-backed claims through a fresh server client before protected navigation.
+- Email confirmation used the stored profile role and never displayed a role selector; Couples continued to `/wedding` and Vendors to `/vendor`.
+- Recovery continued only to `/auth/reset-password` before the password change.
+- The focused Auth Vitest suite passed 177 tests across 11 files; the focused confirmation/recovery Playwright suite passed 9 tests; TypeScript, focused ESLint, the production build, and `git diff --check` passed.
+- After deployment, both a fresh confirmation journey and a fresh password-recovery journey were manually verified successfully on the submitted site.
 
 ### 12.4 Recent Focused Visual and Registration Regressions
 
@@ -481,7 +493,6 @@ Recorded manual checks also include desktop/mobile responsiveness, authenticatio
 | Latest whole-repository regression | Earlier complete baseline passed; the most recent scoped changes used focused tests | Run the current full Vitest suite once from a clean state and record the exact result without changing unrelated code merely to improve the report. |
 | Full hosted JWT/PostgREST adversarial coverage | Local database/RLS and selected connected behavior are verified | Run explicit Supabase-hosted cross-user token tests only if the approved safe test environment and accounts are available. |
 | Full Storage HTTP ownership boundary | SQL/storage namespace rules and isolated behavior are covered | Verify real upload/read/delete with Vendor A and denial for Vendor B in an approved test context. |
-| Active Reset Password responsive form with a new token | Recovery behavior was manually proven previously; latest header fix used safe wrapper/expired state | Optional only: repeat one end-to-end recovery check if a fresh real email is acceptable; it is not required merely to prove a header-only change. |
 | Native pgTAP execution | SQL assertion contents were checked; plain PostgreSQL image did not include pgTAP | Run in a Supabase-compatible isolated environment if native pgTAP evidence is required. |
 | Universal live-model factual quality | Representative live and extensive mocked checks exist | Cannot be proven exhaustively. Continue to require grounding, qualified insufficiency, and source verification. |
 

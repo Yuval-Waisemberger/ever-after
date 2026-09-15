@@ -47,6 +47,7 @@ wedding-planner-project/
 │   │   │   ├── couple/page.tsx             # Couple login and registration
 │   │   │   ├── vendor/page.tsx             # Vendor login and registration
 │   │   │   ├── callback/route.ts            # Authentication code exchange
+│   │   │   ├── confirm/page.tsx             # Non-mutating token confirmation page
 │   │   │   ├── forgot-password/page.tsx
 │   │   │   ├── reset-password/page.tsx
 │   │   │   └── verification/page.tsx
@@ -255,6 +256,8 @@ Ever After does not add a redundant public REST API for ordinary internal forms.
 | `/auth/callback` | `GET`; public entry with authentication-provider parameters | PKCE authorization code and safe redirect context | Exchanges the code for the Supabase session, determines the destination, and redirects. Invalid or missing codes return a safe authentication outcome. |
 | `/api/assistant` | `POST`; authenticated Couple only | Validated JSON containing the user message and optional conversation/language context | Verifies the Couple, loads only permitted context, runs the bounded Assistant flow, stores owned messages, and returns response text, thread identity, and source labels. |
 
+`GET /auth/confirm` is a public render-only page, not a mutating Route Handler. It accepts only a non-empty bounded `token_hash` with `type=email` or `type=recovery`, renders one explicit confirmation control, and performs no Supabase Auth mutation during page loading, previewing, or prefetching. The bound `confirmEmailToken` Server Action checks an existing valid session first, calls `verifyOtp()` no more than once when verification is required, and then uses a fresh server client to confirm that the session persisted through the cookie handoff. Email confirmation resolves the stored application profile before redirecting to `/wedding` or `/vendor`; recovery can continue only to `/auth/reset-password`. URL-supplied role and destination values are ignored.
+
 Expected Assistant endpoint outcomes include:
 
 - `400` for malformed, empty, overlong, or out-of-scope input.
@@ -270,7 +273,7 @@ The detailed provider loop, internal read tools, research rules, usage controls,
 
 | Action group | Main responsibilities |
 | --- | --- |
-| Authentication | Couple/Vendor signup, login, logout, forgot-password request, password update, and account-setting mutations. |
+| Authentication | Couple/Vendor signup, login, logout, explicit token-hash confirmation, forgot-password request, password update, and account-setting mutations. |
 | Wedding | Save Wedding Details, save or skip Setup, and maintain optional booking declarations. |
 | Tasks | Save a task, update status, and delete an owned task. |
 | Guests | Create, update, and delete owned guest/household records. |
@@ -465,7 +468,7 @@ Client validation is never trusted as the only protection.
 
 | Input area | Main validation rules |
 | --- | --- |
-| Authentication | Valid normalized email; required password; confirmation must match; role-specific signup fields; safe redirect destination. The second Couple email is contact information only. |
+| Authentication | Valid normalized email; required password; confirmation must match; role-specific signup fields; safe redirect destination; supported confirmation type; and a non-empty bounded token hash without whitespace/control characters. URL-supplied role and destination values do not authorize or route confirmation. The second Couple email is contact information only. |
 | Wedding Details | Valid date-only value; non-negative guest estimate and budget; known area/event/style/priority options; conditional venue fields; bounded text; internally valid setup status. |
 | Tasks | Required bounded title; known category, status, and priority; valid optional date; bounded notes. |
 | Marketplace filters | Known category/subcategory/area/service values; bounded search text; valid positive page; coherent price and capacity ranges; valid rating threshold. |
@@ -501,6 +504,7 @@ The UX is organized around three experiences: public visitors, authenticated Cou
 | `/auth/couple` | Public | Couple login and registration in one public-auth experience. |
 | `/auth/vendor` | Public | Vendor login and registration. |
 | `/auth/forgot-password` | Public | Request a password-reset email. |
+| `/auth/confirm` | Public | Render a non-mutating email-confirmation or recovery page; verification occurs only after explicit submission. |
 | `/auth/reset-password` | Public recovery session | Set and confirm a new password using the shared public navigation. |
 | `/auth/verification` | Public | Explain email-confirmation state and next action. |
 | `/vendors` | All audiences | Searchable and filterable public Vendor marketplace. |
@@ -523,9 +527,9 @@ The UX is organized around three experiences: public visitors, authenticated Cou
 ### 10.2 Couple Journey
 
 1. Register or sign in through the Couple authentication page.
-2. Confirm the primary email when confirmation is enabled.
-3. Complete, partially complete, or skip Wedding Setup.
-4. Enter Our Wedding and review the current planning summaries.
+2. When confirmation is enabled, open the confirmation page and explicitly verify the primary email.
+3. Continue to Our Wedding after the confirmed session and stored Couple role are recognized.
+4. Complete, partially complete, or skip Wedding Setup when desired.
 5. Add and manage Tasks; view dated Tasks in the Timeline.
 6. Explore Vendors, review profiles, save options, and record relationship status.
 7. Enter agreed prices for booked Vendors and manage related payments in Budget.
